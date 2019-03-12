@@ -1,9 +1,8 @@
 /* 
- * This file is part of guenomu, a hierarchical Bayesian procedure to estimate the distribution of species trees based
- * on multi-gene families data.
- * Copyright (C) 2009  Leonardo de Oliveira Martins [ leomrtns at gmail.com;  http://www.leomartins.org ]
+ * This file is part of biomcmc-lib, a low-level library for phylogenomic analysis.
+ * Copyright (C) 2019-today  Leonardo de Oliveira Martins [ leomrtns at gmail.com;  http://www.leomartins.org ]
  *
- * Guenomu is free software; you can redistribute it and/or modify it under the terms of the GNU General Public 
+ * biomcmc is free software; you can redistribute it and/or modify it under the terms of the GNU General Public
  * License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later
  * version.
  *
@@ -409,7 +408,7 @@ finalise_spdist_matrix (spdist_matrix dist)
     dist->min[i]  /= (double)(dist->count[i]); /* reminder: min is within locus, b/c across loci is always average */
     if (max_mean < dist->mean[i]) max_mean = dist->mean[i];
     if (max_min < dist->min[i]) max_min = dist->min[i];
-    dist->count[i] = 1; /* we don't need to know it anymore, but may use when resampling/avergaring several matrices */
+    dist->count[i] = 1; /* we don't need to know it anymore, but may use when resampling/averaring several matrices */
   }
   for (i=0; i < n_pairs; i++) if (dist->count[i]) { // rescale all values to one (except missing values, which will be 1.00001)
     dist->mean[i] /= max_mean;

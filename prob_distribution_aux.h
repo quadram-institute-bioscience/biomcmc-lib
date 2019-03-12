@@ -1,9 +1,8 @@
 /* 
- * This file is part of guenomu, a hierarchical Bayesian procedure to estimate the distribution of species trees based
- * on multi-gene families data.
- * Copyright (C) 2009  Leonardo de Oliveira Martins [ leomrtns at gmail.com;  http://www.leomartins.org ]
+ * This file is part of biomcmc-lib, a low-level library for phylogenomic analysis.
+ * Copyright (C) 2019-today  Leonardo de Oliveira Martins [ leomrtns at gmail.com;  http://www.leomartins.org ]
  *
- * Guenomu is free software; you can redistribute it and/or modify it under the terms of the GNU General Public 
+ * biomcmc is free software; you can redistribute it and/or modify it under the terms of the GNU General Public
  * License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later
  * version.
  *
