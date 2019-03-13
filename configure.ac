@@ -2,7 +2,7 @@ dnl Autoconf init, autoheader output location, config and prefix directories
 AC_INIT([biomcmc-lib], [0.1], [leomrtns@gmail.com])
 AC_CONFIG_AUX_DIR([.])
 
-AC_CONFIG_HEADER([config.h])
+AC_CONFIG_HEADER([lib/config.h])
 AC_PREFIX_DEFAULT(${HOME})
 dnl libtoolize recomendation
 AC_CONFIG_MACRO_DIR([m4])
@@ -21,6 +21,7 @@ dnl Basic compiler and related tools
 AC_LANG_C
 AC_PROG_CC
 AC_PROG_INSTALL
+AC_PROG_RANLIB
 dnl directs the libc header files to provide the standard GNU system interfaces including all GNU extensions
 AC_GNU_SOURCE
 dnl Libtool (for library): in lib/Makefile.am, we include an "abstract" libfoo.la
@@ -100,7 +101,7 @@ AC_SUBST([MPI_CXXLIBS])
 AC_SUBST([MPI_CXXFLAGS])
 
 dnl generate makefiles (last recipes, after defining CFLAGS etc.)
-AC_CONFIG_FILES([Makefile])
+AC_CONFIG_FILES([Makefile lib/Makefile])
 AC_OUTPUT
 
 echo \

@@ -21,12 +21,13 @@
 #ifndef _biomcmc_h_
 #define _biomcmc_h_
 
+#include "argtable3.h"
 #include "prob_distribution.h" 
 #include "bipartition.h"  
 #include "nexus_common.h" // opaque library called by alignment.c, but should also be visible to other progs 
 
 #ifdef THESE_ARE_COMMENTS
-#include "lowlevel.h"     // called by bipartition.h, hashtable.h, random_number.h, etc
+#include "lowlevel.h"     // called by bipartition.h, hashtable.h, random_number.h, argtable3.h, etc
 #include "hashtable.h"    // called by random_number_gen.h 
 #include "random_number_gen.h" // called by random_number.h
 #include "random_number.h"   // called by prob_distribution.h 

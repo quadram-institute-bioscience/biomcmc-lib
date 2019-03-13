@@ -1,4 +1,4 @@
-/* config.h.in.  Generated from configure.ac by autoheader.  */
+/* lib/config.h.in.  Generated from configure.ac by autoheader.  */
 
 /* Debug Mode, with assert()-like error checking */
 #undef BIOMCMC_DEBUG
