@@ -46,5 +46,7 @@ binary_mrp_matrix new_binary_mrp_matrix (int n_sequences, int n_sites);
 void del_binary_mrp_matrix (binary_mrp_matrix mrp);
 mrp_parsimony new_mrp_parsimony (int n_sequences, int n_sites);
 void del_mrp_parsimony (mrp_parsimony pars);
+/*! \brief given a map[] with location in sptree of gene tree leaves, update binary matrix with splits from genetree */
+void update_binary_mrp_matrix_from_topology (binary_mrp_matrix mrp, topology t, int *map);
 
 #endif

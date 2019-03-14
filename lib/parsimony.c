@@ -13,8 +13,6 @@
 
 #include "parsimony.h"
 
-// FIXME: need a map from leaf(gene) to species name!! 
-
 binary_mrp_matrix
 new_binary_mrp_matrix (int n_sequences, int n_sites)
 {
@@ -76,16 +74,20 @@ del_mrp_parsimony (mrp_parsimony pars)
 }
 
 void
-update_binary_mrp_matrix_from_topology (binary_mrp_matrix mrp, topology t)
+update_binary_mrp_matrix_from_topology (binary_mrp_matrix mrp, topology t, int *map)
 {
-  int i;
+  int i, ones[t->nleaves];
   bipartition bp = new_bipartition (t->nleaves);
   // TODO: maybe check if bipartition exists already here?
   if (!t->traversal_updated) update_topology_traversal (t);
   for (i=0; i < t->nleaves-3; i++) { /* [n-2] is root; [n-3] is leaf or redundant */
+    for (j=0; j < mrp->ntax; j++) mrp->s[j][mrp->npat] = 3U; // all seqs are 'N' at first (a.k.a. {0,1}) -> absent from t in the end
+    for (j=0; j < t->nleaves; j++) mrp->s[map[j]][mrp->npat] = 1U; // species present in t start as {0}
     bipartition_copy (bp, t->postorder[i]->split);
-    bipartition_flip_to_smaller_set (bp);
-    // FIXME: map to species-level tax name
+    bipartition_flip_to_smaller_set (bp); // not essencial, but helps finding same split in diff trees
+    bipartition_to_int_vector (bp, ones, bp->n_ones); // n_ones=max number of ones to check (in this case, all of them)
+    for (j=0; j < bp-<n_ones; j++) mrp->s[map[ones[j]]][mrp->npat] = 2U; // these species present in t are then {1} 
+    mrp->npat++;
   }
 
   del_bipartition (bp);
