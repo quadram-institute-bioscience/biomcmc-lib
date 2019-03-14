@@ -110,28 +110,6 @@ remove_oneline_nexus_comments (char *string)
   return remove_oneline_nexus_comments (string); /* recursive, to remove other comments before */
 }
 
-char* 
-remove_oneline_nexus_comments_OLD (char *string) 
-{
-  char *s, *first, *last = string+strlen (string);
-  int count = 1; /* we only use it if we find a "[" */
-  for (s = string; (s <= last) && (*s != '['); s++);
-  if (s>last) { 
-    /*DEBUG printf ("{%s}", string);*/  /* FIXME: unbalanced "]" in multiline comments */
-    return (string); 
-  }
-  first = s++;
-  while ((count > 0) && (s <= last)) {
-    if ( *s == '[') count++;
-    else if (*s == ']') count--;
-    s++;
-  }
-  if (s < last) { *last = '\0'; memmove (first, s, last - s + 1); }
-  else return NULL;
-
-  return string;
-}
-
 char*
 lowercase_string (char *string)
 {

@@ -24,15 +24,17 @@
 #include "argtable3.h"
 #include "prob_distribution.h" 
 #include "bipartition.h"  
-#include "distance_matrix.h"
 #include "alignment.h"
+#include "parsimony.h"
 #include "nexus_common.h" // opaque library called by alignment.c, but should also be visible to other progs 
 
 #ifdef THESE_ARE_COMMENTS
-#include "lowlevel.h"     // called by bipartition.h, hashtable.h, random_number.h, argtable3.h, etc
-#include "hashtable.h"    // called by random_number_gen.h 
-#include "random_number_gen.h" // called by random_number.h
-#include "random_number.h"   // called by prob_distribution.h 
+#include "lowlevel.h"            // called by bipartition.h, hashtable.h, random_number.h, argtable3.h, etc
+#include "hashtable.h"           // called by random_number_gen.h 
+#include "random_number_gen.h"   // called by random_number.h
+#include "random_number.h"       // called by prob_distribution.h 
+#include "topology_common.h"     // called by parsimony.h
+#include "distance_matrix.h"     // called by alignment.h
 #include "empirical_frequency.h" // called by nexus_common.h  
 #endif // of THESE_ARE_COMMENTS
 

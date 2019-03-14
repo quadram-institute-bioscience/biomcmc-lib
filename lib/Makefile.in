@@ -106,7 +106,8 @@ libbiomcmc_la_LIBADD =
 am__objects_1 = hashtable.lo lowlevel.lo random_number_gen.lo \
 	random_number.lo nexus_common.lo bipartition.lo \
 	prob_distribution.lo empirical_frequency.lo argtable3.lo \
-	distance_matrix.lo alignment.lo
+	distance_matrix.lo alignment.lo topology_common.lo \
+	parsimony.lo
 am__objects_2 =
 am_libbiomcmc_la_OBJECTS = $(am__objects_1) $(am__objects_2)
 libbiomcmc_la_OBJECTS = $(am_libbiomcmc_la_OBJECTS)
@@ -304,11 +305,11 @@ AM_CPPFLAGS = $(GTKDEPS_CFLAGS)  @OPENMP_CPPFLAGS@
 LDADD = $(GTKDEPS_LIBS) $(AM_LDFLAGS)
 common_headers = hashtable.h lowlevel.h random_number_gen.h random_number.h nexus_common.h \
                  bipartition.h prob_distribution.h empirical_frequency.h biomcmc.h argtable3.h \
-								 distance_matrix.h alignment.h
+                 distance_matrix.h alignment.h topology_common.h parsimony.h
 
 common_src = hashtable.c lowlevel.c random_number_gen.c random_number.c nexus_common.c \
                  bipartition.c prob_distribution.c empirical_frequency.c argtable3.c \
-								 distance_matrix.c alignment.c
+                 distance_matrix.c alignment.c topology_common.c parsimony.c
 
 noinst_LTLIBRARIES = libbiomcmc.la # convenience lib (not installed globally)
 #lib_LTLIBRARIES = libbiomcmc.la  # libtools 
@@ -393,9 +394,11 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hashtable.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lowlevel.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/nexus_common.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/parsimony.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/prob_distribution.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/random_number.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/random_number_gen.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/topology_common.Plo@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
