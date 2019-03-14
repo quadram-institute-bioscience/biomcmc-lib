@@ -27,8 +27,6 @@
 
 typedef struct hashtable_struct* hashtable;
 typedef struct hashtable_item_struct* hashtable_item;
-typedef struct distance_matrix_struct* distance_matrix;
-typedef struct spdist_matrix_struct* spdist_matrix;
 
 /*! \brief key/value pair for hash table */
 struct hashtable_item_struct {
@@ -55,30 +53,6 @@ struct hashtable_struct
   /*! \brief Vector with key/value pairs. */
   hashtable_item* table;
   /*! \brief Counter of how many external references (structures sharing this hashtable) to avoid deletion */
-  int ref_counter;
-};
-
-struct distance_matrix_struct
-{
-  int size;   /*! \brief number of sequences to calculate distances */
-  double **d, /*! \brief pairwise distance matrix (upper) and ti/tv rate ratio (lower triangle) for K2P formula for alignments */
-         mean_K2P_dist, /*! \brief average pairwise distance from K2P model */
-         var_K2P_dist,  /*! \brief variance in pairwise distance from K2P model */
-         mean_JC_dist,  /*! \brief average pairwise distance from JC model */
-         mean_R,        /*! \brief average K2P transition/transversion ratio from pairwise distances */
-         var_R,         /*! \brief variance in K2P transition/transversion ratio from pairwise distances */
-         freq[20];      /*! \brief empirical equilibrium frequencies */
-  double *fromroot;     /*! \brief distance from root (used to calculate distance between tree leaves) */
-  int *idx, *i_l, *i_r; /*! \brief aux vectors for finding leaves spanned by subtrees on any node */
-  int ref_counter;
-};
-
-struct spdist_matrix_struct
-{
-  int size, n_missing;
-  double *mean, *min; /*! \brief mean or min distances across possibilities (within loci) */
-  int *count; /*! \brief how many times this pairwise comparison appears (between or within loci) */
-  bool *species_present; /*! \brief boolean marking if species is present at all in this matrix */
   int ref_counter;
 };
 
@@ -110,22 +84,5 @@ uint32_t biomcmc_hashstring_2 (unsigned char *str); /* PJW algorithm */
 uint32_t biomcmc_hashstring_3 (unsigned char *str); /* dbj2 algorithm */
 uint32_t biomcmc_hashstring_4 (unsigned char *str); /* dbj2 algorithm with XOR */
 uint32_t biomcmc_hashstring_5 (unsigned char *str); /* sdbm algorithm */
-
-/*! \brief creates new matrix of pairwise distances */
-distance_matrix new_distance_matrix (int nseqs);
-/*! \brief specially in gene/sptree distance methods (GLASS, STEAC, etc.) lower is used for means and upper for min. This function resets matrix elements */
-void zero_lower_distance_matrix (distance_matrix dist);
-/*! \brief invert lower and upper diagonals of matrix (since some functions like upgma expect upper, etc.) */
-void transpose_distance_matrix (distance_matrix dist);
-/*! \brief releases memory allocated to distance_matrix (this structure has no smart ref_counter) */
-void del_distance_matrix (distance_matrix dist);
-
-
-spdist_matrix new_spdist_matrix (int n_species);
-void zero_all_spdist_matrix (spdist_matrix dist); /* zero both mean[] and min[] since we only look at AVERAGE across loci (never the min) */
-void finalise_spdist_matrix (spdist_matrix dist);
-void complete_missing_spdist_from_global_spdist (spdist_matrix local, spdist_matrix global);
-void copy_spdist_matrix_to_distance_matrix_upper (spdist_matrix spd, distance_matrix dist, bool use_means);
-void del_spdist_matrix (spdist_matrix dist);
 
 #endif

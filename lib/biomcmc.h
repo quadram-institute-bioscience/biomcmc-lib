@@ -24,6 +24,8 @@
 #include "argtable3.h"
 #include "prob_distribution.h" 
 #include "bipartition.h"  
+#include "distance_matrix.h"
+#include "alignment.h"
 #include "nexus_common.h" // opaque library called by alignment.c, but should also be visible to other progs 
 
 #ifdef THESE_ARE_COMMENTS
