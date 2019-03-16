@@ -30,10 +30,10 @@ typedef struct mrp_parsimony_struct* mrp_parsimony;
 
 /*! \brief matrix representation with parsimony (01 10 11 sequences) */
 struct binary_mrp_matrix_struct {
-  int ntax, nchar, npat;  /*!< \brief number of taxa, sites, and distinct patterns */
-  bool **s;               /*!< \brief 1 (01) and 2 (10) are the two binary states, with 3 (11) being undetermined */
-  int *pattern_freq;      /*!< \brief frequency of pattern. */
-  int ref_counter;        /*!< \brief how many places have a pointer to this instance */
+  int ntax, nchar, i; /*!< \brief number of taxa, distinct sites (patterns), and index to current (last) column */
+  bool **s;           /*!< \brief 1 (01) and 2 (10) are the two binary states, with 3 (11) being undetermined */
+  int *freq;          /*!< \brief frequency of pattern. */
+  int ref_counter;    /*!< \brief how many places have a pointer to this instance */
 };
 
 struct mrp_parsimony_struct {

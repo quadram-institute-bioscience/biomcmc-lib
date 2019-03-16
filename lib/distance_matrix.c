@@ -12,6 +12,7 @@
  */
 
 #include "distance_matrix.h"
+// TODO: clann estimates missing dist pairs from dists between them and common leaf
 
 distance_matrix
 new_distance_matrix (int nseqs)

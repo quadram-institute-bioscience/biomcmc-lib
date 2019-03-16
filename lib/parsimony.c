@@ -1,4 +1,4 @@
-/* 
+
  * This file is part of biomcmc-lib, a low-level library for phylogenomic analysis.
  * Copyright (C) 2019-today  Leonardo de Oliveira Martins [ leomrtns at gmail.com;  http://www.leomartins.org ]
  *
@@ -13,6 +13,8 @@
 
 #include "parsimony.h"
 
+void update_binary_mrp_matrix_column_if_new (binary_mrp_matrix mrp);
+
 binary_mrp_matrix
 new_binary_mrp_matrix (int n_sequences, int n_sites)
 {
@@ -22,13 +24,13 @@ new_binary_mrp_matrix (int n_sequences, int n_sites)
   mrp = (binary_mrp_matrix) biomcmc_malloc (sizeof (struct binary_mrp_matrix_struct));
   mrp->ntax  = n_sequences;
   mrp->nchar = n_sites;
-  mrp->npat  = 0; // used also when filling the matrix (from 0 to nchar)
-  mrp->pattern_freq = NULL;
+  mrp->i= 0;  /* a.k.a. "current" in other structs; used when filling the matrix (from 0 to nchar) */
   mrp->ref_counter = 1;
 
+  mrp->freq = (int*) biomcmc_malloc(mrp->nchar * sizeof (int)); 
   mrp->s = (bool**) biomcmc_malloc(mrp->ntax * sizeof (bool*)); 
-  for (i = 0; i < mrp->ntax; i++) 
-    mrp->s[i] = (bool*) biomcmc_malloc(mrp->nchar * sizeof (bool)); 
+  for (i = 0; i < mrp->ntax; i++)  mrp->s[i] = (bool*) biomcmc_malloc(mrp->nchar * sizeof (bool)); 
+  for (i = 0; i < mrp->char; i++) mrp->freq[i] = 0;
 
   return mrp;
 }
@@ -43,7 +45,7 @@ del_binary_mrp_matrix (binary_mrp_matrix mrp)
       free (mrp->s[i]); 
     }
     if (mrp->s) free (mrp->s);
-    if (mrp->pattern_freq) free (mrp->pattern_freq);
+    if (mrp->freq) free (mrp->freq);
     free (mrp);
   }
 }
@@ -76,19 +78,31 @@ del_mrp_parsimony (mrp_parsimony pars)
 void
 update_binary_mrp_matrix_from_topology (binary_mrp_matrix mrp, topology t, int *map)
 {
-  int i, ones[t->nleaves];
+  int i, j, k, ones[t->nleaves];
   bipartition bp = new_bipartition (t->nleaves);
-  // TODO: maybe check if bipartition exists already here?
   if (!t->traversal_updated) update_topology_traversal (t);
-  for (i=0; i < t->nleaves-3; i++) { /* [n-2] is root; [n-3] is leaf or redundant */
-    for (j=0; j < mrp->ntax; j++) mrp->s[j][mrp->npat] = 3U; // all seqs are 'N' at first (a.k.a. {0,1}) -> absent from t in the end
-    for (j=0; j < t->nleaves; j++) mrp->s[map[j]][mrp->npat] = 1U; // species present in t start as {0}
+
+  for (i=0; i < t->nleaves-3; i++) { // [n-2] is root; [n-3] is leaf or redundant 
+    for (j=0; j < mrp->ntax; j++) mrp->s[j][mrp->i] = 3U; // all seqs are 'N' at first (a.k.a. {0,1}) -> absent from t in the end
+    for (j=0; j < t->nleaves; j++) mrp->s[map[j]][mrp->i] = 1U; // species present in t start as {0}
     bipartition_copy (bp, t->postorder[i]->split);
     bipartition_flip_to_smaller_set (bp); // not essencial, but helps finding same split in diff trees
     bipartition_to_int_vector (bp, ones, bp->n_ones); // n_ones=max number of ones to check (in this case, all of them)
-    for (j=0; j < bp-<n_ones; j++) mrp->s[map[ones[j]]][mrp->npat] = 2U; // these species present in t are then {1} 
-    mrp->npat++;
+    for (j=0; j < bp->n_ones; j++) mrp->s[map[ones[j]]][mrp->i] = 2U; // these species present in t are then {1} 
+    update_binary_mrp_matrix_column_if_new (mrp);
+    if (mrp->i > mrp->nchar) biomcmc_error ("The function calling parsimony underestimated the total number of columns (tree sizes)");
   }
-
   del_bipartition (bp);
 }
+
+void    
+update_binary_mrp_matrix_column_if_new (binary_mrp_matrix mrp)
+{
+  int i, j;
+  for (i=0; i < mrp->i; i++) {
+    for (j=0; (j < mrp->ntax) && (mrp->s[i][j] == mrp->s[mrp->i][j]); j++); // one line loop: finishes or halts when diff is found 
+    if (j == mrp->ntax) { mrp->freq[i]++; break; } // premature ntax loop end 
+  }
+  if (i ==  mrp->i) mrp->freq[mrp->i++] = 1; // column loop didn't stop prematurely (i.e. column was not found and thus is unique)
+}
+
