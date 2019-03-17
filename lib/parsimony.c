@@ -1,4 +1,4 @@
-
+/*
  * This file is part of biomcmc-lib, a low-level library for phylogenomic analysis.
  * Copyright (C) 2019-today  Leonardo de Oliveira Martins [ leomrtns at gmail.com;  http://www.leomartins.org ]
  *
@@ -30,7 +30,7 @@ new_binary_mrp_matrix (int n_sequences, int n_sites)
   mrp->freq = (int*) biomcmc_malloc(mrp->nchar * sizeof (int)); 
   mrp->s = (bool**) biomcmc_malloc(mrp->ntax * sizeof (bool*)); 
   for (i = 0; i < mrp->ntax; i++)  mrp->s[i] = (bool*) biomcmc_malloc(mrp->nchar * sizeof (bool)); 
-  for (i = 0; i < mrp->char; i++) mrp->freq[i] = 0;
+  for (i = 0; i < mrp->nchar; i++) mrp->freq[i] = 0;
 
   return mrp;
 }
@@ -106,3 +106,39 @@ update_binary_mrp_matrix_column_if_new (binary_mrp_matrix mrp)
   if (i ==  mrp->i) mrp->freq[mrp->i++] = 1; // column loop didn't stop prematurely (i.e. column was not found and thus is unique)
 }
 
+int
+binary_mrp_parsimony_score_of_topology (mrp_parsimony pars, topology t)
+{
+  int i,j, pars_score = 0;
+  bool s1, s2, intersection;
+  if (!t->traversal_updated) update_topology_traversal (t);
+  for (i=0; i < pars->external->nchar; i++) pars->score[i] = 0;
+  for (i=0; i < pars->external->nchar; i++) { // pthreads would go here
+    for (j=0; j < t->nleaves-2; j++) {
+      /* id (0...nleaves) are leaves; (nleaves...2x nleaves-1) are internal nodes */
+      if (t->postorder[j]->left->internal) s1 = pars->internal->s[t->postorder[j]->left->id - t->nleaves][i];
+      else s1 = pars->external->s[t->postorder[j]->left->id][i];
+      if (t->postorder[j]->right->internal) s2 = pars->internal->s[t->postorder[j]->right->id - t->nleaves][i];
+      else s2 = pars->external->s[t->postorder[j]->right->id][i];
+      intersection = s1 & s2; // 11, 01, 00, or 10 
+      if (!intersection) { pars->score[i]++; intersection = s1|s2; } //00 only arises with 10 & 01  
+      pars->external->s[t->postorder[j]->id - t->nleaves][i] =  intersection;
+    } // for j in tree node
+    pars_score += (pars->score[i] * pars->internal->freq[i]);
+  } // for i in nchar 
+  return pars_score;
+}
+
+/* Extra ideas/todo:
+ * 1. MRL (binary likelihood) for brlens; extend it to incorporate leaf uncertainty (as is flip supertrees)
+ * 2. branch-wise parsimony scores 
+ * 3. store columns per tree in case of jackniffing gene trees (e.g. by returning column indexes and allowing unweighted
+ * parsimony)
+ * 4. actual score can be replaced by number of columns with perfect score (or almost perfect), as in compatible trees. 
+ * 5. following above, score can be sum over 'best' columns (i.e. exclude 50% columns with worse score)
+ * 6. scores if we remove some leaves 
+ * 7. instead of 0/1 we can have 0/x where x is the split length (parsimony or LS?)
+ * 8. each column is distance from leaf to all others (like mrd (distance) with Sankoff algo (or LS, UPGMA?). distances
+ * normalised. 
+ * <obs: here "weighted" parsimony is not Sankoff algo, but the pattern weights (column frequency)
+ */ 
