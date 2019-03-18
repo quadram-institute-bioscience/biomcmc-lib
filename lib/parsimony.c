@@ -53,7 +53,6 @@ del_binary_mrp_matrix (binary_mrp_matrix mrp)
 mrp_parsimony
 new_mrp_parsimony (int n_sequences, int n_sites)
 {
-  int i;
   mrp_parsimony pars;
   pars = (mrp_parsimony) biomcmc_malloc (sizeof (struct mrp_parsimony_struct));
   pars->ref_counter = 1;
@@ -78,10 +77,10 @@ del_mrp_parsimony (mrp_parsimony pars)
 void
 update_binary_mrp_matrix_from_topology (binary_mrp_matrix mrp, topology t, int *map)
 {
-  int i, j, k, ones[t->nleaves];
+  int i, j, ones[t->nleaves];
   bipartition bp = new_bipartition (t->nleaves);
   if (!t->traversal_updated) update_topology_traversal (t);
-
+  // FIXME: better to realloc dynamically (to mrp->i+t->nleaves-3 each time)
   for (i=0; i < t->nleaves-3; i++) { // [n-2] is root; [n-3] is leaf or redundant 
     for (j=0; j < mrp->ntax; j++) mrp->s[j][mrp->i] = 3U; // all seqs are 'N' at first (a.k.a. {0,1}) -> absent from t in the end
     for (j=0; j < t->nleaves; j++) mrp->s[map[j]][mrp->i] = 1U; // species present in t start as {0}
@@ -100,10 +99,11 @@ update_binary_mrp_matrix_column_if_new (binary_mrp_matrix mrp)
 {
   int i, j;
   for (i=0; i < mrp->i; i++) {
-    for (j=0; (j < mrp->ntax) && (mrp->s[i][j] == mrp->s[mrp->i][j]); j++); // one line loop: finishes or halts when diff is found 
-    if (j == mrp->ntax) { mrp->freq[i]++; break; } // premature ntax loop end 
+    for (j=0; (j < mrp->ntax) && (mrp->s[j][i] == mrp->s[j][mrp->i]); j++); // one line loop: finishes or halts when diff is found 
+    if (j == mrp->ntax) { mrp->freq[i]++; return; } // premature loop end means that they're distinct; here they're the same
   }
-  if (i ==  mrp->i) mrp->freq[mrp->i++] = 1; // column loop didn't stop prematurely (i.e. column was not found and thus is unique)
+  if (i == mrp->i) mrp->freq[mrp->i++] = 1; // column loop didn't stop prematurely (i.e. column was not found and thus is unique)
+  // TODO: function too slow; maybe use hash values?
 }
 
 int
@@ -124,7 +124,7 @@ binary_mrp_parsimony_score_of_topology (mrp_parsimony pars, topology t)
       if (!intersection) { pars->score[i]++; intersection = s1|s2; } //00 only arises with 10 & 01  
       pars->external->s[t->postorder[j]->id - t->nleaves][i] =  intersection;
     } // for j in tree node
-    pars_score += (pars->score[i] * pars->internal->freq[i]);
+    pars_score += (pars->score[i] * pars->external->freq[i]); // only external has freqs
   } // for i in nchar 
   return pars_score;
 }

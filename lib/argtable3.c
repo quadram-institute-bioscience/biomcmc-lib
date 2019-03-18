@@ -161,199 +161,11 @@ void dbg_printf(const char *fmt, ...)
 
 #define	EMSG		""
 
-static int parse_long_options(char * const *, const char *,
-			      const struct option *, int *, int);
-static int gcd(int, int);
-static void permute_args(int, int, int, char * const *);
-
-static char *place = EMSG; /* option letter processing */
-
-/* XXX: set optreset to 1 rather than these two */
-static int nonopt_start = -1; /* first non option argument (for permute) */
-static int nonopt_end = -1;   /* first option after non options (for permute) */
-
-/* Error messages */
-static const char recargchar[] = "option requires an argument -- %c";
-static const char recargstring[] = "option requires an argument -- %s";
-static const char ambig[] = "ambiguous option -- %.*s";
-static const char noarg[] = "option doesn't take an argument -- %.*s";
-static const char illoptchar[] = "unknown option -- %c";
-static const char illoptstring[] = "unknown option -- %s";
-
-
-/*
- * Compute the greatest common divisor of a and b.
- */
-static int
-gcd(int a, int b)
-{
-	int c;
-
-	c = a % b;
-	while (c != 0) {
-		a = b;
-		b = c;
-		c = a % b;
-	}
-
-	return (b);
-}
-
 /*
  * Exchange the block from nonopt_start to nonopt_end with the block
  * from nonopt_end to opt_end (keeping the same order of arguments
  * in each block).
  */
-static void
-permute_args(int panonopt_start, int panonopt_end, int opt_end,
-	char * const *nargv)
-{
-	int cstart, cyclelen, i, j, ncycle, nnonopts, nopts, pos;
-	char *swap;
-
-	/*
-	 * compute lengths of blocks and number and size of cycles
-	 */
-	nnonopts = panonopt_end - panonopt_start;
-	nopts = opt_end - panonopt_end;
-	ncycle = gcd(nnonopts, nopts);
-	cyclelen = (opt_end - panonopt_start) / ncycle;
-
-	for (i = 0; i < ncycle; i++) {
-		cstart = panonopt_end+i;
-		pos = cstart;
-		for (j = 0; j < cyclelen; j++) {
-			if (pos >= panonopt_end)
-				pos -= nnonopts;
-			else
-				pos += nopts;
-			swap = nargv[pos];
-			/* LINTED const cast */
-			((char **) nargv)[pos] = nargv[cstart];
-			/* LINTED const cast */
-			((char **)nargv)[cstart] = swap;
-		}
-	}
-}
-
-/*
- * parse_long_options --
- *	Parse long options in argc/argv argument vector.
- * Returns -1 if short_too is set and the option does not match long_options.
- */
-static int
-parse_long_options(char * const *nargv, const char *options,
-	const struct option *long_options, int *idx, int short_too)
-{
-	char *current_argv, *has_equal;
-	size_t current_argv_len;
-	int i, match;
-
-	current_argv = place;
-	match = -1;
-
-	optind++;
-
-	if ((has_equal = strchr(current_argv, '=')) != NULL) {
-		/* argument found (--option=arg) */
-		current_argv_len = has_equal - current_argv;
-		has_equal++;
-	} else
-		current_argv_len = strlen(current_argv);
-
-	for (i = 0; long_options[i].name; i++) {
-		/* find matching long option */
-		if (strncmp(current_argv, long_options[i].name,
-		    current_argv_len))
-			continue;
-
-		if (strlen(long_options[i].name) == current_argv_len) {
-			/* exact match */
-			match = i;
-			break;
-		}
-		/*
-		 * If this is a known short option, don't allow
-		 * a partial match of a single character.
-		 */
-		if (short_too && current_argv_len == 1)
-			continue;
-
-		if (match == -1)	/* partial match */
-			match = i;
-		else {
-			/* ambiguous abbreviation */
-			if (PRINT_ERROR)
-				warnx(ambig, (int)current_argv_len,
-				     current_argv);
-			optopt = 0;
-			return (BADCH);
-		}
-	}
-	if (match != -1) {		/* option found */
-		if (long_options[match].has_arg == no_argument
-		    && has_equal) {
-			if (PRINT_ERROR)
-				warnx(noarg, (int)current_argv_len,
-				     current_argv);
-			/*
-			 * XXX: GNU sets optopt to val regardless of flag
-			 */
-			if (long_options[match].flag == NULL)
-				optopt = long_options[match].val;
-			else
-				optopt = 0;
-			return (BADARG);
-		}
-		if (long_options[match].has_arg == required_argument ||
-		    long_options[match].has_arg == optional_argument) {
-			if (has_equal)
-				optarg = has_equal;
-			else if (long_options[match].has_arg ==
-			    required_argument) {
-				/*
-				 * optional argument doesn't use next nargv
-				 */
-				optarg = nargv[optind++];
-			}
-		}
-		if ((long_options[match].has_arg == required_argument)
-		    && (optarg == NULL)) {
-			/*
-			 * Missing argument; leading ':' indicates no error
-			 * should be generated.
-			 */
-			if (PRINT_ERROR)
-				warnx(recargstring,
-				    current_argv);
-			/*
-			 * XXX: GNU sets optopt to val regardless of flag
-			 */
-			if (long_options[match].flag == NULL)
-				optopt = long_options[match].val;
-			else
-				optopt = 0;
-			--optind;
-			return (BADARG);
-		}
-	} else {			/* unknown option */
-		if (short_too) {
-			--optind;
-			return (-1);
-		}
-		if (PRINT_ERROR)
-			warnx(illoptstring, current_argv);
-		optopt = 0;
-		return (BADCH);
-	}
-	if (idx)
-		*idx = match;
-	if (long_options[match].flag) {
-		*long_options[match].flag = long_options[match].val;
-		return (0);
-	} else
-		return (long_options[match].val);
-}
 
 char * arg_strptime(const char *buf, const char *fmt, struct tm *tm);
 
@@ -2255,24 +2067,30 @@ static int trex_charnode(TRex *exp,TRexBool isclass)
 			case 'v': exp->_p++; return trex_newnode(exp,'\v');
 			case 'a': case 'A': case 'w': case 'W': case 's': case 'S':
 			case 'd': case 'D': case 'x': case 'X': case 'c': case 'C':
-			case 'p': case 'P': case 'l': case 'u':
-				{
-				t = *exp->_p; exp->_p++;
-				return trex_charclass(exp,t);
-				}
-			case 'b':
-			case 'B':
-				if(!isclass) {
-					int node = trex_newnode(exp,OP_WB);
-					exp->_nodes[node].left = *exp->_p;
-					exp->_p++;
-					return node;
-				} //else default
-			default:
-				t = *exp->_p; exp->_p++;
-				return trex_newnode(exp,t);
-		}
-	}
+      case 'p': case 'P': case 'l': case 'u':
+                {
+                 t = *exp->_p; exp->_p++;
+                 return trex_charclass(exp,t);
+                }
+      case 'b':
+      case 'B':
+                {
+                 if (!isclass) {
+                   int node = trex_newnode(exp,OP_WB);
+                   exp->_nodes[node].left = *exp->_p;
+                   exp->_p++;
+                   return node;
+                 } //else default
+                 else {
+                   t = *exp->_p; exp->_p++;
+                   return trex_newnode(exp,t);
+                 }
+                }
+      default:
+       t = *exp->_p; exp->_p++;
+       return trex_newnode(exp,t);
+    }
+  }
 	else if(!scisprint(*exp->_p)) {
 
 		trex_error(exp,_SC("letter expected"));
