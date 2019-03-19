@@ -13,22 +13,36 @@
 
 #include "parsimony.h"
 
-void update_binary_mrp_matrix_column_if_new (binary_mrp_matrix mrp);
+void update_binary_parsimony_length (binary_parsimony pars, int new_columns_size);
+void update_binary_matrix_parsimony_column_if_new (binary_matrix_parsimony mrp);
 
-binary_mrp_matrix
-new_binary_mrp_matrix (int n_sequences, int n_sites)
+binary_matrix_parsimony
+new_binary_matrix_parsimony (int n_sequences)
 {
   int i; 
-  binary_mrp_matrix mrp;
+  binary_matrix_parsimony mrp;
   
-  mrp = (binary_mrp_matrix) biomcmc_malloc (sizeof (struct binary_mrp_matrix_struct));
+  mrp = (binary_matrix_parsimony) biomcmc_malloc (sizeof (struct binary_matrix_parsimony_struct));
   mrp->ntax  = n_sequences;
-  mrp->nchar = n_sites;
-  mrp->i= 0;  /* a.k.a. "current" in other structs; used when filling the matrix (from 0 to nchar) */
+  mrp->nchar = mrp->i = 0;
   mrp->ref_counter = 1;
-
-  mrp->freq = (int*) biomcmc_malloc(mrp->nchar * sizeof (int)); 
   mrp->s = (bool**) biomcmc_malloc(mrp->ntax * sizeof (bool*)); 
+  for (i = 0; i < mrp->ntax; i++)  mrp->s[i] = NULL; 
+  mrp->freq = NULL;
+  mrp->col_hash = NULL;
+
+  return mrp;
+}
+
+binary_matrix_parsimony
+new_binary_matrix_parsimony_fixed_length (int n_sequences, int n_sites)
+{
+  int i; 
+  binary_matrix_parsimony mrp = new_binary_matrix_parsimony (n_sequences);
+  mrp->nchar = n_sites;
+
+  mrp->freq = (int*) biomcmc_malloc (mrp->nchar * sizeof (int)); 
+  mrp->col_hash = (uint32_t*) biomcmc_malloc (mrp->nchar * sizeof (uint32_t)); 
   for (i = 0; i < mrp->ntax; i++)  mrp->s[i] = (bool*) biomcmc_malloc(mrp->nchar * sizeof (bool)); 
   for (i = 0; i < mrp->nchar; i++) mrp->freq[i] = 0;
 
@@ -36,7 +50,7 @@ new_binary_mrp_matrix (int n_sequences, int n_sites)
 }
 
 void 
-del_binary_mrp_matrix (binary_mrp_matrix mrp)
+del_binary_matrix_parsimony (binary_matrix_parsimony mrp)
 {
   if (mrp) {
     int i;
@@ -46,41 +60,59 @@ del_binary_mrp_matrix (binary_mrp_matrix mrp)
     }
     if (mrp->s) free (mrp->s);
     if (mrp->freq) free (mrp->freq);
+    if (mrp->col_hash) free (mrp->col_hash);
     free (mrp);
   }
 }
 
-mrp_parsimony
-new_mrp_parsimony (int n_sequences, int n_sites)
+binary_parsimony
+new_binary_parsimony (int n_sequences)
 {
-  mrp_parsimony pars;
-  pars = (mrp_parsimony) biomcmc_malloc (sizeof (struct mrp_parsimony_struct));
+  binary_parsimony pars;
+  pars = (binary_parsimony) biomcmc_malloc (sizeof (struct binary_parsimony_struct));
   pars->ref_counter = 1;
-  pars->external = new_binary_mrp_matrix (n_sequences, n_sites);
-  pars->internal = new_binary_mrp_matrix (n_sequences - 1, n_sites);
+  pars->external = new_binary_matrix_parsimony (n_sequences);
+  pars->internal = new_binary_matrix_parsimony (n_sequences - 1);
+  pars->score = NULL; 
+  return pars;
+}
+
+binary_parsimony
+new_binary_parsimony_fixed_length (int n_sequences, int n_sites)
+{
+  binary_parsimony pars;
+  pars = (binary_parsimony) biomcmc_malloc (sizeof (struct binary_parsimony_struct));
+  pars->ref_counter = 1;
+  pars->external = new_binary_matrix_parsimony_fixed_length (n_sequences, n_sites);
+  pars->internal = new_binary_matrix_parsimony_fixed_length (n_sequences - 1, n_sites);
+  if (pars->internal->freq) free (pars->internal->freq);
+  if (pars->internal->col_hash) free (pars->internal->col_hash);
   pars->score = (int*) biomcmc_malloc (pars->external->nchar * sizeof (int));
   return pars;
 }
 
 void
-del_mrp_parsimony (mrp_parsimony pars)
+del_binary_parsimony (binary_parsimony pars)
 {
   if (pars) {
     if (--pars->ref_counter) return; /* some other place is using it, we cannot delete it yet */
     if (pars->score) free (pars->score);
-    del_binary_mrp_matrix (pars->internal);
-    del_binary_mrp_matrix (pars->external);
+    del_binary_matrix_parsimony (pars->internal);
+    del_binary_matrix_parsimony (pars->external);
     free (pars);
   }
 }
 
 void
-update_binary_mrp_matrix_from_topology (binary_mrp_matrix mrp, topology t, int *map)
+update_binary_parsimony_from_topology (binary_parsimony pars, topology t, int *map)
 {
-  int i, j, ones[t->nleaves];
+  int i, j, *ones = NULL;
   bipartition bp = new_bipartition (t->nleaves);
+  binary_matrix_parsimony mrp = pars->external;
   if (!t->traversal_updated) update_topology_traversal (t);
-  // FIXME: better to realloc dynamically (to mrp->i+t->nleaves-3 each time)
+  update_binary_parsimony_length(pars, t->nleaves-3);
+
+  ones = (int*) biomcmc_malloc (t->nleaves * sizeof (int));
   for (i=0; i < t->nleaves-3; i++) { // [n-2] is root; [n-3] is leaf or redundant 
     for (j=0; j < mrp->ntax; j++) mrp->s[j][mrp->i] = 3U; // all seqs are 'N' at first (a.k.a. {0,1}) -> absent from t in the end
     for (j=0; j < t->nleaves; j++) mrp->s[map[j]][mrp->i] = 1U; // species present in t start as {0}
@@ -88,26 +120,51 @@ update_binary_mrp_matrix_from_topology (binary_mrp_matrix mrp, topology t, int *
     bipartition_flip_to_smaller_set (bp); // not essencial, but helps finding same split in diff trees
     bipartition_to_int_vector (bp, ones, bp->n_ones); // n_ones=max number of ones to check (in this case, all of them)
     for (j=0; j < bp->n_ones; j++) mrp->s[map[ones[j]]][mrp->i] = 2U; // these species present in t are then {1} 
-    update_binary_mrp_matrix_column_if_new (mrp);
+    update_binary_matrix_parsimony_column_if_new (mrp);
     if (mrp->i > mrp->nchar) biomcmc_error ("The function calling parsimony underestimated the total number of columns (tree sizes)");
   }
   del_bipartition (bp);
+  if (ones) del (ones);
+}
+
+void
+update_binary_parsimony_length (binary_parsimony pars, int new_columns_size)
+{
+  int i, new_size = pars->i + new_columns_size;
+  pars->external->nchar = pars->internal->nchar = new_size;
+  pars->score = (int*) biomcmc_realloc ((int*) pars->score, new_size * sizeof (int));
+  pars->external->freq = (int*) biomcmc_realloc ((int*) pars->external->freq, new_size * sizeof (int));
+  pars->external->col_hash = (uint32_t*) biomcmc_realloc ((uint32_t*) pars->external->col_hash, new_size * sizeof (uint32_t));
+  for (i = 0; i < pars->external->ntax; i++) { // notice that internal->freq and internal->col_hash are NOT updated (should be NULL)
+    pars->external->s[i] = (bool*) biomcmc_remalloc((bool*) pars->external->s[i], new_size * sizeof (bool)); 
+    pars->internal->s[i] = (bool*) biomcmc_remalloc((bool*) pars->internal->s[i], new_size * sizeof (bool));
+  } 
 }
 
 void    
-update_binary_mrp_matrix_column_if_new (binary_mrp_matrix mrp)
+update_binary_matrix_parsimony_column_if_new (binary_matrix_parsimony mrp)
 {
   int i, j;
+  uint32_t hashv = hash_value_of_binary_matrix_parsimony_column (mrp, mrp->i);
+  // STOPHERE
   for (i=0; i < mrp->i; i++) {
     for (j=0; (j < mrp->ntax) && (mrp->s[j][i] == mrp->s[j][mrp->i]); j++); // one line loop: finishes or halts when diff is found 
     if (j == mrp->ntax) { mrp->freq[i]++; return; } // premature loop end means that they're distinct; here they're the same
   }
   if (i == mrp->i) mrp->freq[mrp->i++] = 1; // column loop didn't stop prematurely (i.e. column was not found and thus is unique)
-  // TODO: function too slow; maybe use hash values?
+}
+
+uint32_t 
+hash_value_of_binary_matrix_parsimony_column (binary_matrix_parsimony mrp, idx)
+{
+  int i;
+  uint32_t hashv = biomcmc_hashint_1 ((uint32_t) mrp->s[0][idx]);
+  for (i=1; i < mrp->ntax; i++) hashv = biomcmc_hashint_mix (hashv, (uint32_t) mrp->s[i-1][idx], (uint32_t) mrp->s[i][idx]);
+  return hashv;
 }
 
 int
-binary_mrp_parsimony_score_of_topology (mrp_parsimony pars, topology t)
+binary_binary_parsimony_score_of_topology (binary_parsimony pars, topology t)
 {
   int i,j, pars_score = 0;
   bool s1, s2, intersection;

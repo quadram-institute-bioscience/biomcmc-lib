@@ -11,43 +11,41 @@
  * details (file "COPYING" or http://www.gnu.org/copyleft/gpl.html).
  */
 
-/*! \file hashtable.h
- *  \brief double hashing open-address hash table using strings as key -- also has distance matrix, that can be used in
- *  alignments and trees
+/*! \file parsimony.h
+ *  \brief binary and multistate parsimony matrices, together with bipartition extraction for MRP  
  *
- * Hash tables allow us to search for the position of a key (taxa name) without scanning the whole vector (like in 
- * sequencial search). This code is derived from the software DCM3, released under the GPL license (Copyright (C) 
- * 2004 The University of Texas at Austin). 
  */
 
-#ifndef _biomcmc_parsimony_mrp_
-#define _biomcmc_parsimony_mrp_
+#ifndef _biomcmc_parsimony__
+#define _biomcmc_parsimony__
 
 #include "topology_common.h"
 
-typedef struct binary_mrp_matrix_struct* binary_mrp_matrix; 
-typedef struct mrp_parsimony_struct* mrp_parsimony;
+typedef struct binary_matrix_parsimony_struct* binary_matrix_parsimony; 
+typedef struct binary_parsimony_struct* binary_parsimony;
 
-/*! \brief matrix representation with parsimony (01 10 11 sequences) */
-struct binary_mrp_matrix_struct {
+/*! \brief used by matrix representation with parsimony (01 10 11 sequences) */
+struct binary_matrix_parsimony_struct {
   int ntax, nchar, i; /*!< \brief number of taxa, distinct sites (patterns), and index to current (last) column */
   bool **s;           /*!< \brief 1 (01) and 2 (10) are the two binary states, with 3 (11) being undetermined */
   int *freq;          /*!< \brief frequency of pattern. */
+  uint32_t *col_hash; /*!< \brief hash value of each column, to speed up comparisons */
   int ref_counter;    /*!< \brief how many places have a pointer to this instance */
 };
 
-struct mrp_parsimony_struct {
+struct binary_parsimony_struct {
   int *score;      /*!< \brief parsimony score per pattern */
-  binary_mrp_matrix external, internal; /*!< \brief binary matrices for leaves and for internal nodes */
+  binary_matrix_parsimony external, internal; /*!< \brief binary matrices for leaves and for internal nodes */
   int ref_counter; /*!< \brief how many places have a pointer to this instance */
 };
 
-binary_mrp_matrix new_binary_mrp_matrix (int n_sequences, int n_sites);
-void del_binary_mrp_matrix (binary_mrp_matrix mrp);
-mrp_parsimony new_mrp_parsimony (int n_sequences, int n_sites);
-void del_mrp_parsimony (mrp_parsimony pars);
+binary_matrix_parsimony new_binary_matrix_parsimony (int n_sequences);
+binary_matrix_parsimony new_binary_matrix_parsimony_fixed_length (int n_sequences, int n_sites);
+void del_binary_matrix_parsimony (binary_matrix_parsimony mrp);
+binary_parsimony new_binary_parsimony (int n_sequences, int n_sites);
+void del_binary_parsimony (binary_parsimony pars);
 /*! \brief given a map[] with location in sptree of gene tree leaves, update binary matrix with splits from genetree */
-void update_binary_mrp_matrix_from_topology (binary_mrp_matrix mrp, topology t, int *map);
-int binary_mrp_parsimony_score_of_topology (mrp_parsimony pars, topology t);
+void update_binary_matrix_parsimony_from_topology (binary_matrix_parsimony mrp, topology t, int *map);
+int binary_binary_parsimony_score_of_topology (binary_parsimony pars, topology t);
 
 #endif
