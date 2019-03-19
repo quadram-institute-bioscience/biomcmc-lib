@@ -15,6 +15,7 @@
 
 void update_binary_parsimony_length (binary_parsimony pars, int new_columns_size);
 void update_binary_matrix_parsimony_column_if_new (binary_matrix_parsimony mrp);
+uint32_t hash_value_of_binary_matrix_parsimony_column (binary_matrix_parsimony mrp, idx);
 
 binary_matrix_parsimony
 new_binary_matrix_parsimony (int n_sequences)
@@ -139,6 +140,7 @@ update_binary_parsimony_length (binary_parsimony pars, int new_columns_size)
     pars->external->s[i] = (bool*) biomcmc_remalloc((bool*) pars->external->s[i], new_size * sizeof (bool)); 
     pars->internal->s[i] = (bool*) biomcmc_remalloc((bool*) pars->internal->s[i], new_size * sizeof (bool));
   } 
+  for (i = pars->i; i < new_size; i++) pars->external->freq[i] = 0;
 }
 
 void    
@@ -146,12 +148,15 @@ update_binary_matrix_parsimony_column_if_new (binary_matrix_parsimony mrp)
 {
   int i, j;
   uint32_t hashv = hash_value_of_binary_matrix_parsimony_column (mrp, mrp->i);
-  // STOPHERE
-  for (i=0; i < mrp->i; i++) {
+
+  for (i=0; i < mrp->i; i++) if (hashv == mrp->col_hash[i]) { // same hash value; identical or collision
     for (j=0; (j < mrp->ntax) && (mrp->s[j][i] == mrp->s[j][mrp->i]); j++); // one line loop: finishes or halts when diff is found 
     if (j == mrp->ntax) { mrp->freq[i]++; return; } // premature loop end means that they're distinct; here they're the same
   }
-  if (i == mrp->i) mrp->freq[mrp->i++] = 1; // column loop didn't stop prematurely (i.e. column was not found and thus is unique)
+  if (i == mrp->i) { // column loop didn't stop prematurely (i.e. column was not found and thus is unique)
+    mrp->freq[mrp->i] = 1;
+    mrp->col_hash[mrp->i++] = hashv;
+  }
 }
 
 uint32_t 

@@ -42,10 +42,11 @@ struct binary_parsimony_struct {
 binary_matrix_parsimony new_binary_matrix_parsimony (int n_sequences);
 binary_matrix_parsimony new_binary_matrix_parsimony_fixed_length (int n_sequences, int n_sites);
 void del_binary_matrix_parsimony (binary_matrix_parsimony mrp);
-binary_parsimony new_binary_parsimony (int n_sequences, int n_sites);
+binary_parsimony new_binary_parsimony (int n_sequences);
+binary_parsimony new_binary_parsimony_fixed_length (int n_sequences, int n_sites);
 void del_binary_parsimony (binary_parsimony pars);
 /*! \brief given a map[] with location in sptree of gene tree leaves, update binary matrix with splits from genetree */
-void update_binary_matrix_parsimony_from_topology (binary_matrix_parsimony mrp, topology t, int *map);
+void update_binary_parsimony_from_topology (binary_parsimony pars, topology t, int *map);
 int binary_binary_parsimony_score_of_topology (binary_parsimony pars, topology t);
 
 #endif
