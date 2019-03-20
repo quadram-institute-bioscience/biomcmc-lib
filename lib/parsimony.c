@@ -15,7 +15,7 @@
 
 void update_binary_parsimony_length (binary_parsimony pars, int new_columns_size);
 void update_binary_matrix_parsimony_column_if_new (binary_matrix_parsimony mrp);
-uint32_t hash_value_of_binary_matrix_parsimony_column (binary_matrix_parsimony mrp, idx);
+uint32_t hash_value_of_binary_matrix_parsimony_column (binary_matrix_parsimony mrp, int idx);
 
 binary_matrix_parsimony
 new_binary_matrix_parsimony (int n_sequences)
@@ -125,22 +125,21 @@ update_binary_parsimony_from_topology (binary_parsimony pars, topology t, int *m
     if (mrp->i > mrp->nchar) biomcmc_error ("The function calling parsimony underestimated the total number of columns (tree sizes)");
   }
   del_bipartition (bp);
-  if (ones) del (ones);
+  if (ones) free (ones);
 }
 
 void
 update_binary_parsimony_length (binary_parsimony pars, int new_columns_size)
 {
-  int i, new_size = pars->i + new_columns_size;
+  int i, new_size = pars->external->i + new_columns_size;
   pars->external->nchar = pars->internal->nchar = new_size;
   pars->score = (int*) biomcmc_realloc ((int*) pars->score, new_size * sizeof (int));
   pars->external->freq = (int*) biomcmc_realloc ((int*) pars->external->freq, new_size * sizeof (int));
   pars->external->col_hash = (uint32_t*) biomcmc_realloc ((uint32_t*) pars->external->col_hash, new_size * sizeof (uint32_t));
-  for (i = 0; i < pars->external->ntax; i++) { // notice that internal->freq and internal->col_hash are NOT updated (should be NULL)
-    pars->external->s[i] = (bool*) biomcmc_remalloc((bool*) pars->external->s[i], new_size * sizeof (bool)); 
-    pars->internal->s[i] = (bool*) biomcmc_remalloc((bool*) pars->internal->s[i], new_size * sizeof (bool));
-  } 
-  for (i = pars->i; i < new_size; i++) pars->external->freq[i] = 0;
+ // notice that internal->freq and internal->col_hash are NOT updated (should be NULL); external->ntax != internal->nchar
+  for (i = 0; i < pars->external->ntax; i++) pars->external->s[i] = (bool*) biomcmc_realloc((bool*) pars->external->s[i], new_size * sizeof (bool)); 
+  for (i = 0; i < pars->internal->ntax; i++) pars->internal->s[i] = (bool*) biomcmc_realloc((bool*) pars->internal->s[i], new_size * sizeof (bool));
+  for (i = pars->external->i; i < new_size; i++) pars->external->freq[i] = 0;
 }
 
 void    
@@ -160,7 +159,7 @@ update_binary_matrix_parsimony_column_if_new (binary_matrix_parsimony mrp)
 }
 
 uint32_t 
-hash_value_of_binary_matrix_parsimony_column (binary_matrix_parsimony mrp, idx)
+hash_value_of_binary_matrix_parsimony_column (binary_matrix_parsimony mrp, int idx)
 {
   int i;
   uint32_t hashv = biomcmc_hashint_1 ((uint32_t) mrp->s[0][idx]);
@@ -169,13 +168,13 @@ hash_value_of_binary_matrix_parsimony_column (binary_matrix_parsimony mrp, idx)
 }
 
 int
-binary_binary_parsimony_score_of_topology (binary_parsimony pars, topology t)
+binary_parsimony_score_of_topology (binary_parsimony pars, topology t)
 {
   int i,j, pars_score = 0;
   bool s1, s2, intersection;
   if (!t->traversal_updated) update_topology_traversal (t);
-  for (i=0; i < pars->external->nchar; i++) pars->score[i] = 0;
-  for (i=0; i < pars->external->nchar; i++) { // pthreads would go here
+  for (i=0; i < pars->external->i; i++) pars->score[i] = 0;  // external->i < external->nchar since may have duplicates
+  for (i=0; i < pars->external->i; i++) { // pthreads would go here
     for (j=0; j < t->nleaves-2; j++) {
       /* id (0...nleaves) are leaves; (nleaves...2x nleaves-1) are internal nodes */
       if (t->postorder[j]->left->internal) s1 = pars->internal->s[t->postorder[j]->left->id - t->nleaves][i];
@@ -184,7 +183,7 @@ binary_binary_parsimony_score_of_topology (binary_parsimony pars, topology t)
       else s2 = pars->external->s[t->postorder[j]->right->id][i];
       intersection = s1 & s2; // 11, 01, 00, or 10 
       if (!intersection) { pars->score[i]++; intersection = s1|s2; } //00 only arises with 10 & 01  
-      pars->external->s[t->postorder[j]->id - t->nleaves][i] =  intersection;
+      pars->internal->s[t->postorder[j]->id - t->nleaves][i] =  intersection;
     } // for j in tree node
     pars_score += (pars->score[i] * pars->external->freq[i]); // only external has freqs
   } // for i in nchar 
