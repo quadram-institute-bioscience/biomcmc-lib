@@ -32,6 +32,8 @@ dnl         (checked with "ifdef _OPENMP"); user can disable it through "--disab
 AC_OPENMP
 AC_SUBST(OPENMP_CFLAGS)
 AC_SUBST(OPENMP_CPPFLAGS)
+dnl unit tests in for "make check"
+PKG_CHECK_MODULES([CHECK], [check >= 0.9.10])
 
 dnl check for the math library
 AC_CHECK_LIB([m],[main])
@@ -101,7 +103,7 @@ AC_SUBST([MPI_CXXLIBS])
 AC_SUBST([MPI_CXXFLAGS])
 
 dnl generate makefiles (last recipes, after defining CFLAGS etc.)
-AC_CONFIG_FILES([Makefile lib/Makefile])
+AC_CONFIG_FILES([Makefile lib/Makefile tests/Makefile])
 AC_OUTPUT
 
 echo \
