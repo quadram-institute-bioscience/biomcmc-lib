@@ -30,7 +30,6 @@
 
 typedef struct topol_node_struct* topol_node;
 typedef struct topology_struct* topology;
-typedef struct reconciliation_struct* reconciliation;
 
 /*! \brief Information of a node (binary tree). */
 struct topol_node_struct
@@ -63,31 +62,8 @@ struct topology_struct
   bool traversal_updated;  /*! \brief zero if postorder[] vector needs update, one if we can use postdorder[] to traverse tree  */ 
   int ref_counter;         /*! \brief number of references of topology (how many places are pointing to it) */
   char_vector taxlabel;    /*! \brief Taxon names (just a pointer; actual values are setup by ::topology_space_struct or ::alignment_struct) */
-  reconciliation rec;      /*! \brief in case of a gene tree, map nodes to foreign species tree */
   int *index;             /*! \brief sandbox vector used in spr moves / quasirandom tree shuffle just to avoid recurrent allocation */
   bool quasirandom;        /*! \brief tells if quasi-random structure was initialized (and topology_struct::idx is properly set) */
-  /* Most recent common ancestor table for topology (assuming this tree is species tree) */ 
-  topol_node **mrca; /*! \brief lower triangular matrix of topol_nodes (LCA between topol_node::id (i-1) and j) of size (nnodes-1)*/
-};
-
-/*! \brief mapping between gene tree nodes (this) and (external) species tree nodes */
-struct reconciliation_struct
-{
-  topology current_sptree; /*! \brief pointer to species tree, to guarantee map is always consistent */
-  topol_node *map_d; /*! \brief Mapping of all nodes from gene to species (the first gene::nnodes are fixed) */
-  topol_node *map_u; /*! \brief Mapping of all nodes from gene to species, assuming gene tree is upside down (unrooted TESTING version) */
-  int *sp_id,    /*! \brief mapping of gene (this tolopogy) leaf to ID of taxon in species tree */
-      *sp_count, /*! \brief how many copies of each species are present in this gene (used by deepcoal) */
-      sp_size,   /*! \brief effective number of species present in gene family */
-      size_diff, /*! \brief twice the difference in number of leaves between gene tree and (reduced/effective) species tree */
-      *dup,      /*! \brief indexes of duplication nodes on gene tree, and number of such nodes (unused for now) */
-      *ndup_d,   /*! \brief number of duplications below node (edge above node, since struct assume node == edge above it) */
-      *ndup_u,   /*! \brief number of duplications above node (edge upside down, thus "children" are 'up' and 'sister') */
-      *nlos_d,   /*! \brief number of losses below node and edge above node */  
-      *nlos_u,   /*! \brief number of losses above node, including edge above it */
-      ndups,     /*! \brief minimum number of duplications over all possible rootings, acc. to reconciliation_struct::dup */
-      nloss,     /*! \brief number of losses corresponding to rooting (edge) that minimizes duplications */
-      ndcos;     /*! \brief total number of deep coalescences (from nloss - 2 X ndups + size_diff) */ 
 };
 
 
@@ -101,21 +77,13 @@ void del_topology (topology topol);
 /* DEBUG function */
 void debug_topol (topology tree);
 
-/*! \brief Allocate space for new reconciliation_struct (other functions defined in topology_mrca.c) */
-reconciliation new_reconciliation (int gene_nleaves, int sp_nleaves);
-/*! \brief Create new reconciliation struct and copy values (except species tree info) from another struct */
-reconciliation new_reconciliation_from_reconciliation (int gene_nleaves, int sp_nleaves, reconciliation from);
-/*! \brief release allocated memory for reconciliation_struct */
-void del_reconciliation (reconciliation r);
-
 /*! \brief Copy information from topology_struct. 
  *
  * Since IDs do not change, this function only needs to update topol_node_struct::up, topol_node_struct::right, 
  * and topol_node_struct::left pointers and topol_node_struct::map_id from internal nodes; update of 
  * topol_node::sister is handled by function update_topology_sisters(). 
  * \param[in]  from_tree original topology_struct 
- * \param[out] to_tree (previously allocated) copied topology_struct
- */
+ * \param[out] to_tree (previously allocated) copied topology_struct */
 void copy_topology_from_topology (topology to_tree, topology from_tree);
 
 /*! \brief Update pointers to topol_node_struct::sister */
@@ -143,8 +111,7 @@ void fill_distance_matrix_from_topology (distance_matrix dist, topology tree, do
  * nexus block). Memory allocation is handled by this function, but needs to be freed by the calling function. 
  * \param[in] tree tree to be printed
  * \param[in] blen vector with branch lengths (usually tree->blength)
- * \return a pointer to newly allocated string 
- */
+ * \return a pointer to newly allocated string  */
 char * topology_to_string_by_id (const topology tree, double *blen);
 
 /*! \brief Print subtree in newick format to string creating names (based on leaf IDs.)
@@ -153,8 +120,7 @@ char * topology_to_string_by_id (const topology tree, double *blen);
  * random trees that must be read by other programs.) Memory allocation is handled by this function, but needs to be freed by the calling function. 
  * \param[in] tree tree to be printed
  * \param[in] blen vector with branch lengths (usually tree->blength)
- * \return a pointer to newly allocated string 
- */
+ * \return a pointer to newly allocated string  */
 char * topology_to_string_create_name (const topology tree, double *blen);
 
 /*! \brief Print subtree in newick format to string using leaf names.

@@ -93,6 +93,7 @@ new_empfreq (int n_elements)
   ef->max = n_elements - 1;
   ef->i = (empfreq_element*) biomcmc_malloc (n_elements * sizeof (empfreq_element));
   for (i=0; i< n_elements; i++) { ef->i[i].freq = 0; ef->i[i].idx  = i; }
+  ef->ref_counter = 1;
   return ef;
 }
 
@@ -100,6 +101,7 @@ void
 del_empfreq (empfreq ef)
 {
   if (!ef) return;
+  if (--ef->ref_counter) return;
   if (ef->i) free (ef->i);
   free (ef);
 }
@@ -115,6 +117,7 @@ new_empfreq_double (int n_elements)
   efd->max = (double)(n_elements) - 1.;
   efd->d = (empfreq_double_element*) biomcmc_malloc (n_elements * sizeof (empfreq_double_element));
   for (i=0; i< n_elements; i++) { efd->d[i].freq = 0.; efd->d[i].idx  = i; }
+  efd->ref_counter = 1;
   return efd;
 }
 
@@ -122,6 +125,7 @@ void
 del_empfreq_double (empfreq_double efd)
 {
   if (!efd) return;
+  if (--efd->ref_counter) return;
   if (efd->d) free (efd->d);
   free (efd);
 }

@@ -41,8 +41,6 @@ new_topology (int nleaves)
   tree->traversal_updated = false;
   tree->ref_counter = 1;
   tree->taxlabel = NULL; /* Memory allocated by topology_space:: or other place */
-  tree->rec = NULL; /* reconciliation not initialized here (used only by gene trees) */
-  tree->mrca = NULL; /* mrca not initialized here (used only if it is a species tree) */
   tree->quasirandom = false;
   tree->blength = NULL; /* used for reading topol_space and in upgma_from_distance_matrix(); therefore initialized there */
 
@@ -115,86 +113,10 @@ del_topology (topology tree)
       }
       free (tree->nodelist);
     }
-    if (tree->mrca) {
-      int i;
-      for (i=tree->nnodes-2; i >= 0; i--) if (tree->mrca[i]) free (tree->mrca[i]);
-      free (tree->mrca);
-    }
-    
     del_char_vector (tree->taxlabel);
-    del_reconciliation (tree->rec);
   
     free (tree);
   }
-}
-
-reconciliation
-new_reconciliation (int gene_nleaves, int sp_nleaves)
-{
-  int i, nnodes = 2 * gene_nleaves - 1, sizeofnode = sizeof (topol_node);
-
-  reconciliation r = (reconciliation) biomcmc_malloc (sizeof (struct reconciliation_struct));
-  r->ndups = -1;
-  r->nloss = -1;
-  r->ndcos = -1;
-  r->sp_size = 0; /* number of species represented */
-  r->size_diff = 0; /* 2 X (gene_nleaves - sp_size) */ 
-
-
-  r->map_d  = (topol_node*) biomcmc_malloc (nnodes * sizeofnode); /* sptree node "below" edge */ 
-  r->map_u  = (topol_node*) biomcmc_malloc (nnodes * sizeofnode); /* sptree node "above" edge */
-  r->ndup_d = (int*)        biomcmc_malloc (nnodes * sizeof (int)); /* partial number of dups below */
-  r->ndup_u = (int*)        biomcmc_malloc (nnodes * sizeof (int)); /* partial number of dups above */
-  r->nlos_d = (int*)        biomcmc_malloc (nnodes * sizeof (int)); /* partial number of losses below */
-  r->nlos_u = (int*)        biomcmc_malloc (nnodes * sizeof (int)); /* partial number of losses above */
-  r->sp_id  = (int*)        biomcmc_malloc (gene_nleaves * sizeof (int));
-
-  r->sp_count = (int*) biomcmc_malloc (sp_nleaves * sizeof (int)); /* frequency of each species (set only once) */ 
-
-  r->map_d[0] = r->map_u[0] = NULL;
-  r->current_sptree = NULL; /* updated dynamically when species tree changes */
-
-  for (i = 0; i < gene_nleaves; i++) r->nlos_d[i] = r->ndup_d[i] = 0; /* number of duplosses on terminal branches (below) */
-
-  return r;
-}
-
-reconciliation
-new_reconciliation_from_reconciliation (int gene_nleaves, int sp_nleaves, reconciliation from)
-{
-  int i;
-  reconciliation r;
-
-  r = new_reconciliation (gene_nleaves, sp_nleaves);
-  r->ndups = from->ndups;
-  r->nloss = from->nloss;
-  r->ndcos = from->ndcos;
-  r->sp_size = from->sp_size; 
-  r->size_diff = from->size_diff;
-  r->current_sptree = NULL; /* needs to call initialize_reconciliation_from_species_tree(), usually called from reconcile_gene_sp() */
-  for (i = 0; i < gene_nleaves; i++) {
-     r->nlos_d[i] = from->nlos_d[i];
-     r->ndup_d[i] = from->ndup_d[i];
-     r->sp_id[i] = from->sp_id[i];
-  }
-  for (i = 0; i < sp_nleaves; i++) r->sp_count[i] = from->sp_count[i];
-
-  return r;
-}
-
-void
-del_reconciliation (reconciliation r)
-{
-  if (!r) return;
-  if (r->map_d)  free (r->map_d);
-  if (r->map_u)  free (r->map_u);
-  if (r->sp_id)  free (r->sp_id);
-  if (r->ndup_d) free (r->ndup_d);
-  if (r->ndup_u) free (r->ndup_u);
-  if (r->nlos_d) free (r->nlos_d);
-  if (r->nlos_u) free (r->nlos_u);
-  if (r->sp_count) free (r->sp_count);
-  free (r);
 }
 
 void
@@ -285,7 +207,6 @@ update_topology_traversal (topology tree)
   tree->root->level = 0;
   for (i = tree->nleaves-3; i >= 0; i--) tree->postorder[i]->level = tree->postorder[i]->up->level + 1; /*internal nodes */
   for (i = 0; i < tree->nleaves; i++)    tree->nodelist[i]->level  = tree->nodelist[i]->up->level  + 1;
-  if (tree->mrca) for (i=0; i < tree->nnodes - 1; i++) for (j=0; j <= i; j++) tree->mrca[i][j] = NULL;
 
   tree->traversal_updated = true;
 }

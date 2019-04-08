@@ -1,0 +1,5 @@
+2018.04.08 -- TODO
+	* split reconciliation into genetree + reconciliation : also, add topology_splitset as auxiliary to genetree
+	* genetre.c -> aux.c -> aux.h -> genetre.h where "->" means 'include' : aux is both reconciliation, splitset, etc.,
+	that are invisible to program. And are _not_ added to Makefile.am (since are not distributed, like prb_distrib_aux.h
+	

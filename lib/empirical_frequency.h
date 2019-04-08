@@ -44,6 +44,7 @@ struct empfreq_struct
 	int n;
   int min;   /*! \brief Min value for index. */
   int max;   /*! \brief Max value for index. */
+  int ref_counter;
 };
 
 struct empfreq_double_struct
@@ -52,6 +53,7 @@ struct empfreq_double_struct
 	int n;
   double min;   /*! \brief Min value for index. */
   double max;   /*! \brief Max value for index. */
+  int ref_counter;
 };
 
 void sort_empfreq_decreasing (empfreq ef);
