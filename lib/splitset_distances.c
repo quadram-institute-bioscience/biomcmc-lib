@@ -1,30 +1,23 @@
 /* 
- * This file is part of guenomu, a hierarchical Bayesian procedure to estimate the distribution of species trees based
- * on multi-gene families data.
- * Copyright (C) 2009  Leonardo de Oliveira Martins [ leomrtns at gmail.com;  http://www.leomartins.org ]
+ * This file is part of biomcmc-lib, a low-level library for phylogenomic analysis.
+ * Copyright (C) 2019-today  Leonardo de Oliveira Martins [ leomrtns at gmail.com;  http://www.leomartins.org ]
  *
- * Guenomu is free software; you can redistribute it and/or modify it under the terms of the GNU General Public 
+ * biomcmc is free software; you can redistribute it and/or modify it under the terms of the GNU General Public
  * License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later
  * version.
- *
+
  * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied 
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more 
  * details (file "COPYING" or http://www.gnu.org/copyleft/gpl.html).
  */
 
-#include "topology_splitset.h"
-#include "topology_mrca.h"
+#include "splitset_distances.h"
 
-/*! \brief function used by qsort for a vector of bipartitions (from smaller to larger) */
-int compare_splitset_bipartition_increasing (const void *a1, const void *a2);
-/*! \brief function used by qsort for a vector of bipartitions (from larger to smaller) */
-int compare_splitset_bipartition_decreasing (const void *a1, const void *a2);
-/*! \brief copies bipartion information of internal nodes to splitset, "unroots" the bipartitions and order the resulting vectors */
-void prepare_split_from_topologies (topology t1, topology t2, splitset split, int recycle_t1);
+splitset new_splitset (int nleaves, int sp_nleaves); 
 void prepare_genetree_sptree_split (topology gene, topology species, splitset split);
-void split_add_gene_subtree (splitset split, int taxa);
 int rf_hdist_topology_lowlevel (splitset split, bool exit_at_rf);
 int dSPR_topology_lowlevel (splitset split);
+
 /*! \brief vector with pointers to bipartitions that are identical on both trees */
 void split_create_agreement_list (splitset split);
 void split_remove_agree_edges (splitset split, bipartition *b, int *nb);
@@ -41,50 +34,45 @@ void split_new_size (splitset split, int size, bool update_bipartitions);
 void split_swap_position (bipartition *b, int i1, int i2);
 
 splitset 
-new_splitset (int nleaves)
+new_splitset (int nleaves, int sp_nleaves)
 {
   splitset split;
   int i;
 
   split = (splitset) biomcmc_malloc (sizeof (struct splitset_struct));
   split->size = split->spsize = nleaves - 1; /* actually can be nleaves-3, but we use disagree[] as temporary for gene/species comparison */
-  split->disagree = split->agree = NULL; /* used only when calculating dSPR */
   split->n_agree = split->n_disagree = 0;
-  split->prune = NULL; 
-  split->h = NULL; /* hungarian method for bipartite matching; unused unless for tree distance */
   split->match = false;
   split->spr = split->spr_extra = split->rf = split->hdist = split->hdist_reduced = 0;
 
-  split->g_split = (bipartition*) biomcmc_malloc (split->size * sizeof (bipartition));
-  split->s_split = (bipartition*) biomcmc_malloc (split->size * sizeof (bipartition));
-  split->g_split[0] = new_bipartition (nleaves);
-  split->s_split[0] = new_bipartition (nleaves);
-  for (i = 1; i < split->size; i++) {
-    split->g_split[i] = new_bipartition_from_bipsize (split->g_split[0]->n); /* use same bipsize */
-    split->s_split[i] = new_bipartition_from_bipsize (split->s_split[0]->n);
-  }
-  split->n_g = split->n_s = 0; /* number of elements actively in use */
+  /* species tree before removal of missing species has at most 2*sp_nleaves-1 bipartitions, and after their removal _but_
+   * considering subtrees spanned by gene tree (multree) has at most 2*gene_nleaves-1 bipartitions. We don't need
+   * the leaves (trivial bipartitions) -- therefore the 2 x nleaves is overkill --, but sp0[] needs sp_nleaves. */
+  if (nleaves > sp_nleaves) split->spsize = 2 * sp_nleaves + nleaves; 
+  else                      split->spsize = 3 * sp_nleaves; /* +sp leaves for the first elems */
 
-  split->sp0 = split->s_split; /* used for gene/species dSPR calculation (sp0 is longer than s_split) */
-  return split;
-}
-
-splitset
-new_splitset_dSPR (int nleaves)
-{
-  int i;
-  splitset split = new_splitset (nleaves);
-
+  split->s_split  = (bipartition*) biomcmc_malloc (split->spsize * sizeof (bipartition));
+  split->g_split  = (bipartition*) biomcmc_malloc (split->size * sizeof (bipartition));
   split->agree    = (bipartition*) biomcmc_malloc (split->size * sizeof (bipartition));
   split->disagree = (bipartition*) biomcmc_malloc (split->size * split->size * sizeof (bipartition));
-  split->agree[0]    = new_bipartition (nleaves); // this bipsize will be recycled below 
-  split->disagree[0] = new_bipartition (nleaves); 
-  for (i = 1; i < split->size; i++)               split->agree[i]    = new_bipartition_from_bipsize (split->agree[0]->n);
-  for (i = 1; i < split->size * split->size; i++) split->disagree[i] = new_bipartition_from_bipsize (split->disagree[0]->n);
-  split->prune = new_bipartition_from_bipsize (split->disagree[0]->n);
 
+  split->s_split[0]  = new_bipartition (nleaves);
+  split->g_split[0]  = new_bipartition (nleaves);
+  split->agree[0]    = new_bipartition (nleaves); 
+  split->disagree[0] = new_bipartition (nleaves); 
+  for (i = 1; i < split->size; i++) {
+    split->g_split[i] = new_bipartition_from_bipsize (split->g_split[0]->n); /* use same bipsize */
+    split->agree[i]   = new_bipartition_from_bipsize (split->agree[0]->n);
+  }
+  for (i = 1; i < split->size * split->size; i++) split->disagree[i] = new_bipartition_from_bipsize (split->disagree[0]->n);
+  for (i = 1; i < split->spsize; i++) split->s_split[i] = new_bipartition_from_bipsize (split->s_split[0]->n);
+
+  split->n_g = split->n_s = 0; /* number of elements actively in use */
+  split->prune = new_bipartition_from_bipsize (split->disagree[0]->n);
   split->h = new_hungarian (split->size);
-  split->match = false; /* do we want to calculate the assignment matching cost (using hungarian() )? */
+
+  split->sp0 = split->s_split; /* E.g.  sp0 => [0|1|2|3|4|5|6|7] while s_split => [4|5|6|7] */
+  split->s_split = split->s_split + sp_nleaves; /* pointer to nleaves-th element */
 
   return split;
 }
@@ -116,99 +104,20 @@ del_splitset (splitset split)
   free (split);
 }
 
-int
-compare_splitset_bipartition_increasing (const void *a1, const void *a2)
-{ /* similar to bipartition_is_larger() */
-  bipartition *b1 = (bipartition *) a1;
-  bipartition *b2 = (bipartition *) a2;
-  int i;
-
-  if ((*b1)->n_ones > (*b2)->n_ones) return 1;
-  if ((*b1)->n_ones < (*b2)->n_ones) return -1;
-
-  for (i = (*b1)->n->ints - 1; (i >= 0) && ((*b1)->bs[i] == (*b2)->bs[i]); i--); /* find position of distinct bipartition elem*/
-  if (i < 0) return 0; /* identical bipartitions */
-  if ((*b1)->bs[i] > (*b2)->bs[i]) return 1;
-  else return -1;
-}
-
-int
-compare_splitset_bipartition_decreasing (const void *a1, const void *a2)
-{ 
-  return compare_splitset_bipartition_increasing (a2, a1);
-}
-
-void
-prepare_split_from_topologies (topology t1, topology t2, splitset split, int recycle_t1)
-{
-  int i;
-  if ((!recycle_t1) && (!t1->traversal_updated)) update_topology_traversal (t1); /* recycle_t1 > 0 --> we just used t1 in prev iteration */
-  if (!t2->traversal_updated) update_topology_traversal (t2);
-  /* the vector elements share a single bitstring size, that is modified by e.g. dSPR calculation */
-  bipsize_resize (split->g_split[0]->n, split->g_split[0]->n->original_size); 
-  bipsize_resize (split->s_split[0]->n, split->s_split[0]->n->original_size); 
-
-  /* heavy child (more leaves or leaf with larger ID in case of tie) at left, after traversal */
-  for (i=0; i < t1->nleaves-3; i++) {
-    /* Q: why i from 0 to nleaves-4 ?       A: [nleaves-2] is root; [nleaves-3] is OR
-     * left child of root  - in which case right child is leaf and left bipartition will be singleton; OR
-     * right child of root - which will have same info as (previously visited) left child and therefore redundant */
-    bipartition_copy (split->s_split[i], t2->postorder[i]->split);
-    /* TODO this is where tripartition is updated BUT must go to nleaves-2 (both children of root are used)*/
-    bipartition_flip_to_smaller_set (split->s_split[i]);
-  }
-  if (!recycle_t1) for (i=0; i < t1->nleaves-3; i++) {  /* Q: why i from 0 to nleaves-4 ? --> same as above */ 
-    bipartition_copy (split->g_split[i], t1->postorder[i]->split);
-    /* TODO this is where tripartition is updated BUT must go to nleaves-2 (both children of root are used)*/
-    bipartition_flip_to_smaller_set (split->g_split[i]);
-  }
-
-  split->n_g = split->n_s = i;
-  //for (i = 0; i < split->n_s; i++) bipartition_print_to_stdout (split->s_split[i]); printf ("::DEBUG::  :: ::S\n");
-  if (!recycle_t1) qsort (split->g_split, split->n_g, sizeof (bipartition), compare_splitset_bipartition_increasing);
-  qsort (split->s_split, split->n_s, sizeof (bipartition), compare_splitset_bipartition_increasing);
-}
-
-bool
-topology_is_equal_unrooted (topology t1, topology t2, splitset split, int recycle_t1)
-{
-  int i;
-  if ((split->size != t1->nleaves - 1) || (split->size != t2->nleaves - 1)) return false; /* can be an error, t1 or t2 has wrong size */
-
-  prepare_split_from_topologies (t1, t2, split, recycle_t1);
-  for (i=0; i < split->n_g; i++) if (!bipartition_is_equal (split->g_split[i], split->s_split[i])) return false;
-  return true;
-}
-
 splitset
-create_splitset_dSPR_genespecies (topology gene, topology species)
+new_splitset_genespecies (topology gene, topology species, reconciliation rec)
 {
   int i, j; 
-  splitset split = new_splitset_dSPR (gene->nleaves);
-
-  /* gene->rec->sp_id[i] has species ID of each gene leaf i, and rec->sp_count[j] has multiplicity of each species j */
-  if (!gene->rec) init_tree_recon_from_species_names (gene, species->taxlabel);
-
-  /* species tree before removal of missing species, has at most 2*sp_nleaves-1 bipartitions, and after their removal _but_
-   * considering subtrees spanned by gene tree (the mul-tree) has at most 2*gene_nleaves-1 bipartitions. We don't need
-   * the leaves (trivial bipartitions) -- therefore the 2 x nleaves is overkill --, but sp0[] needs sp_nleaves. */
-  if (gene->nleaves > species->nleaves) split->spsize = 2 * species->nleaves + gene->nleaves; 
-  else                                  split->spsize = 3 * species->nleaves; /* +sp leaves for the first elems */
-
-  split->s_split = (bipartition*) biomcmc_realloc ((bipartition*) split->s_split, split->spsize * sizeof (bipartition));
-  for (i = split->size; i < split->spsize; i++) split->s_split[i] = new_bipartition_from_bipsize (split->s_split[0]->n);
-  split->sp0 = split->s_split; /* E.g.  sp0 => [0|1|2|3|4|5|6|7] while s_split => [4|5|6|7] */
-  split->s_split = split->s_split + species->nleaves; /* pointer to nleaves-th element */
+  splitset split = new_splitset (gene->nleaves, species->nleaves);
 
   for (i=0; i < species->nleaves; i++) { /* initialize bipartitions at leaves with gene leave information */
     bipartition_zero (split->sp0[i]);
-    for (j = 0; j < gene->nleaves; j++) if (gene->rec->sp_id[j] == i) bipartition_set (split->sp0[i], j);
+    for (j = 0; j < gene->nleaves; j++) if (rec->sp_id[j] == i) bipartition_set (split->sp0[i], j);
   }
   /* temporarily store (total, not reduced) number of bipartitions on both trees (to available to max_distance calcs etc.)*/
   split->n_g = gene->nleaves - 3;
-  split->n_s = gene->rec->sp_size - 3;
-  for (i=0; i < species->nleaves; i++) if (gene->rec->sp_count[i] > 1) split->n_s++; // species not a leaf, but a cherry actually
-
+  split->n_s = rec->sp_size - 3;
+  for (i=0; i < species->nleaves; i++) if (rec->sp_count[i] > 1) split->n_s++; // species not a leaf, but a cherry actually
   /* we could exclude species absent from gene tree (more memory efficient) [1], but it's easier to leave them since indexes
    * are preserved (when calling postorder[]->left->id for instance), otherwise we should need a index vector to map tree
    * IDs to positions here.  [1] means swap_bipartition, s_split -= removed_leaves, realloc (sp0, smaller_size)  
@@ -233,13 +142,11 @@ prepare_genetree_sptree_split (topology gene, topology species, splitset split)
     bipartition_OR (split->sp0[species->postorder[i]->id], /* postorder[i]->id is always larger than nleaves */
                     split->sp0[species->postorder[i]->left->id], /* sp0 has elems not accessible by s_split (w/ leaves info) */
                     split->sp0[species->postorder[i]->right->id], false);
-    //printf ("DEBUG:: %4d %4d %4d\n", species->postorder[i]->id, species->postorder[i]->left->id, species->postorder[i]->right->id); 
     /* TODO this is where tripartition is updated */
   }
   split->n_s = species->nleaves - 1;
   /* some spleaves may be zero (absent on gene) leading to internal nodes with < 2 elems, thus we need to "minimize" the species subtrees 
    * (not to mention some other skipped node in postorder) */ 
-  //for (i = 0; i < split->n_s; i++) bipartition_print_to_stdout (split->s_split[i]); printf ("S initial  ::DEBUG::\n");
   for (i = 0; i < split->n_s; i++) { /* here we use s_split[], that points to internal bipartitions only */
     bipartition_flip_to_smaller_set (split->s_split[i]);
     if (split->s_split[i]->n_ones < 2) { split->n_s--; split_swap_position (split->s_split, i, split->n_s); i--; }
@@ -251,7 +158,6 @@ prepare_genetree_sptree_split (topology gene, topology species, splitset split)
     bipartition_flip_to_smaller_set (split->s_split[split->n_s++]); /* this species has many many copies, that is most of leaves are same species... */
   }
   split_remove_duplicates (split->s_split, &(split->n_s));
-  //for (i = 0; i < split->n_s; i++) { bipartition_print_to_stdout (split->s_split[i]); } printf ("::removed::DEBUG::prepare_genetree\n");
 
   /* gene tree bipartitions are simpler */
   split->n_g = gene->nleaves - 3;
@@ -260,33 +166,6 @@ prepare_genetree_sptree_split (topology gene, topology species, splitset split)
     /* TODO this is where tripartition is updated */
     bipartition_flip_to_smaller_set (split->g_split[i]);
   }
-  /* recreate gene subtree on sptree  -- use disagree[] vector temporarily */
-  //  for (i=0; i < species->nleaves; i++) if (split->sp0[i]->n_ones > 1) split_add_gene_subtree (split, i);//UNUSED 
-}
-
-void /* UNUSED -- this function recreates the subtree spanned by given species on gene tree */
-split_add_gene_subtree (splitset split, int taxa)
-{
-  int j, ndis = 0, size = split->sp0[taxa]->n_ones, last_elem = split->spsize - split->size;
-  /* special case 1: this cherry is on leaf of sptree (accessible through sp0 but not trough s_split) */
-  bipartition_copy (split->s_split[split->n_s++], split->sp0[taxa]); /* RF distance (arxiv.1210.2665) would stop here */
-  if (size < 4) return;
-  /* temporarily use agree[] and disagree[] */
-  bipsize_resize (split->disagree[0]->n, split->g_split[0]->n->bits); 
-  bipsize_resize (split->agree[0]->n,    split->g_split[0]->n->bits); 
-  /* 1) create subtree spanned from gene tree elements from taxa */
-  for (j = 0; j < split->n_g; j++) {
-    bipartition_AND (split->agree[0], split->sp0[taxa], split->g_split[j], true);
-    if ( (split->agree[0]->n_ones > 1) && (split->agree[0]->n_ones < (size-1)) ) { /* internal node of this subtree */
-      bipartition_ANDNOT (split->agree[1], split->sp0[taxa], split->g_split[j], true);
-      if (bipartition_is_larger (split->agree[0], split->agree[1])) bipartition_copy (split->disagree[ndis++], split->agree[1]);
-      else                                                          bipartition_copy (split->disagree[ndis++], split->agree[0]);
-    }
-  }
-  /* 2) maintain only distinct bipartitions, being careful not to apply unmasked operations (the mask is sp0[taxa]) */
-  split_remove_duplicates (split->disagree, &(ndis));
-  /* 3) copy distinct bipartitions to s_split[]; if more than last_elem, something's wrong (I miscalculated vector size?)*/
-  for (j = 0; (j < ndis) && (j < last_elem); j++) bipartition_copy (split->s_split[split->n_s++], split->disagree[j]); 
 }
 
 /* empirical observation: split->spr below tends to overestimate (very rarely it overestimates), while 
@@ -297,34 +176,12 @@ split_add_gene_subtree (splitset split, int taxa)
 /* split->spr += (split->spr_extra/2); // I'll comment it out and leave it to the calling function */
 
 int
-dSPR_topology (topology t1, topology t2, splitset split)
-{
-  if (topology_is_equal_unrooted (t1, t2, split, false)) return 0;
-  rf_hdist_topology_lowlevel (split, false); // calculate Hdist on full trees (without pruning common subtrees)
-  prepare_split_from_topologies (t1, t2, split, false); // prepare bipartitions again
-  return dSPR_topology_lowlevel (split);
-}
-
-int
-dSPR_topology_rf (topology t1, topology t2, splitset split)
-{  // will calculate only RF, not Hdist or Hdist_reduced
-  if (topology_is_equal_unrooted (t1, t2, split, false)) return 0;
-  return rf_hdist_topology_lowlevel (split, true); // true -> exit as soon as RF is calculated
-}
-
-int
-dSPR_topology_hdist (topology t1, topology t2, splitset split)
-{
-  if (topology_is_equal_unrooted (t1, t2, split, false)) return 0;
-  return rf_hdist_topology_lowlevel (split, false);
-}
-
-int
 dSPR_gene_species (topology gene, topology species, splitset split)
 {
   // first calculate Hdist on original (not reduced) trees, then prepare again (to use reduced trees)
   prepare_genetree_sptree_split (gene, species, split);
   rf_hdist_topology_lowlevel (split, false); // hdist, rf
+  if (!split->rf) return 0;
   prepare_genetree_sptree_split (gene, species, split);
   return dSPR_topology_lowlevel (split); // hdist_reduced, spr, spr_extra
 }
@@ -346,7 +203,7 @@ dSPR_gene_species_hdist (topology gene, topology species, splitset split)
 int
 rf_hdist_topology_lowlevel (splitset split, bool exit_at_rf)
 {
-  split->hdist_reduced = split->hdist = split->rf = 0;
+  split->hdist_reduced = split->hdist = split->rf = split->spr = split->spr_extra = 0;
   split->n_agree = split->n_disagree = 0;
   bipsize_resize (split->disagree[0]->n, split->g_split[0]->n->bits); 
   bipsize_resize (split->agree[0]->n,    split->g_split[0]->n->bits); 
@@ -438,7 +295,7 @@ split_remove_duplicates (bipartition *b, int *nb)
   int i, j;
   bipartition pivot;
   if ((*nb) < 2) return; /* only if we have a vector with > 1 element */
-  qsort (b, (*nb), sizeof (bipartition), compare_splitset_bipartition_increasing);
+  qsort (b, (*nb), sizeof (bipartition), compare_bipartitions_increasing);
 
   for (i = (*nb) - 1; i >= 1; i--)
     if (bipartition_is_equal (b[i], b[i-1])) {

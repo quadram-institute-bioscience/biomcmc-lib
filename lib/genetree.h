@@ -16,20 +16,22 @@
  *  exposed functions/structures. 
  */
 
-#ifndef _biomcmc_reconciliation_h_
-#define _biomcmc_reconciliation_h_
+#ifndef _biomcmc_genetree_h_
+#define _biomcmc_genetree_h_
 
 #include "topology_common.h"
 
 typedef struct genetree_struct* genetree;
 typedef struct speciestree_struct* speciestree;
 typedef struct reconciliation_struct* reconciliation;
+typedef struct splitset_struct* splitset;
 
 struct genetree_struct
 {
   topology t;
   reconciliation rec;
   speciestree sptre;  
+  splitset split;
   int ref_counter;
   // splitset missing
 };
@@ -59,6 +61,16 @@ struct reconciliation_struct
       ndups,     /*! \brief minimum number of duplications over all possible rootings, acc. to reconciliation_struct::dup */
       nloss,     /*! \brief number of losses corresponding to rooting (edge) that minimizes duplications */
       ndcos;     /*! \brief total number of deep coalescences (from nloss - 2 X ndups + size_diff) */ 
+};
+
+struct splitset_struct
+{
+  int size, spsize, spr, spr_extra, rf, hdist, hdist_reduced; /*! \brief spr, extra prunes for spr, rf distances and hdist=assignment cost */
+  int n_g, n_s, n_agree, n_disagree;
+  bipartition *g_split, *s_split, *agree, *disagree, *sp0; /* sp0 points to vec[0], s_split points to vec[x] */
+  bipartition prune;
+  hungarian h; /* hungarian method for solving the assignment between edges */
+  bool match;  /*! \brief do we want to calculate the minimum cost assignment */
 };
 
 /*! \brief Allocate space for new genetree_struct, given a gene topology and a specestree_struct */

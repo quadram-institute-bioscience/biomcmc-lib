@@ -262,6 +262,35 @@ topology_is_equal (topology t1, topology t2)
   return true;
 }
 
+bool
+topology_is_equal_unrooted (topology t1, topology t2, bool use_root_later) 
+{ /* check if structures are same once root is removed; do not check induced tree (i.e. excluding unique leaves) */
+  int i, n = t1->nleaves - 3;
+  bipartition *b1, *b2;
+  if (t1->nleaves != t2->nleaves) return false;
+  if (!t1->traversal_updated) update_topology_traversal (t1);
+  if (!t2->traversal_updated) update_topology_traversal (t2);
+
+  b1 = (bipartition*) biomcmc_malloc (2 * n * sizeof (bipartition));
+  b2 = b1 + n; // first half from t1 and second half from t2
+  for (i=0; i < n; i++) { // excludes root node and one before to avoid redundancy
+    b1[i] = t1->postorder[i]->split;
+    b2[i] = t2->postorder[i]->split;
+    bipartition_flip_to_smaller_set (b1[i]); /* WARNING: this changes original splits, leading to problems if root is then used */
+    bipartition_flip_to_smaller_set (b2[i]);
+  }
+  qsort (b1, n, sizeof (bipartition), compare_bipartitions_increasing);
+  qsort (b2, n, sizeof (bipartition), compare_bipartitions_increasing);
+  for (i=0; (i < n) && (bipartition_is_equal (b1[i], b2[i])); i++);
+  if (use_root_later) for (i=0; i < n; i++) {
+    bipartition_OR (t1->postorder[i]->split, t1->postorder[i]->left->split, t1->postorder[i]->right->split, false);
+    bipartition_OR (t2->postorder[i]->split, t2->postorder[i]->left->split, t2->postorder[i]->right->split, false);
+  }
+  if (b1) free (b1);
+  if (i == n) return true;
+  return false;
+}
+
 bool 
 node1_is_child_of_node2 (topol_node node1, topol_node node2)
 {

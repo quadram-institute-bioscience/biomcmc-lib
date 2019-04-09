@@ -93,8 +93,11 @@ void update_topology_sisters (topology tree);
  * and order siblings by number of descendants. */ 
 void update_topology_traversal (topology tree);
 
-/*! \brief Compare two topologies based on bipartitions (not on branch lengths) */
+/*! \brief Compare two topologies based on bipartitions as clades (not on branch lengths) */
 bool topology_is_equal (topology t1, topology t2);
+
+/*! \brief Compare two topologies based on bipartitions neglecting root; boolean ask if split should be reverted to original orientation */
+bool topology_is_equal_unrooted (topology t1, topology t2, bool use_root_later);
 
 /*! \brief Boolean if node2 is on the path of node1 to the root. */
 bool node1_is_child_of_node2 (topol_node node1, topol_node node2);

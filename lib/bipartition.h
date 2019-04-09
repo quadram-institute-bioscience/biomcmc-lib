@@ -122,6 +122,10 @@ void bipartition_to_int_vector (const bipartition b, int *id, int vecsize);
 bool bipartition_is_equal (const bipartition b1, const bipartition b2);
 /*! \brief Compare if two bipartitions represent the same splits (or they are equal or one is the complement of the other) */
 bool bipartition_is_equal_bothsides (const bipartition b1, const bipartition b2);
+/*! \brief Bipartitions comparison, to be used by sort() since returns integer and uses (void)  */
+int compare_bipartitions_increasing (const void *a1, const void *a2);
+/*! \brief Bipartitions comparison, to be used by sort() since returns integer and uses (void)  */
+int compare_bipartitions_decreasing (const void *a1, const void *a2);
 /*! \brief Compare sizes of two bipartitions, by number of active bits with ties broken by actual bitstrings */
 bool bipartition_is_larger (const bipartition b1, const bipartition b2);
 /*! \brief invert ones and zeroes in loco when necessary to assure bipartition has more zeroes than ones */

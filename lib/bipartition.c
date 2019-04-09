@@ -98,6 +98,7 @@ del_bipartition (bipartition bip)
   }
 }
 
+
 void
 del_bipsize (bipsize n)
 {
@@ -282,15 +283,33 @@ bipartition_is_equal_bothsides (const bipartition b1, const bipartition b2)
   return true; /* they are the exact complement of one another */
 }
 
+int
+compare_bipartitions_increasing (const void *a1, const void *a2)
+{ /* similar to bipartition_is_larger() but used in sort() */
+  bipartition *b1 = (bipartition *) a1;
+  bipartition *b2 = (bipartition *) a2;
+  int i;
+  if ((*b1)->n_ones > (*b2)->n_ones) return 1;
+  if ((*b1)->n_ones < (*b2)->n_ones) return -1;
+  for (i = (*b1)->n->ints - 1; (i >= 0) && ((*b1)->bs[i] == (*b2)->bs[i]); i--); /* find position of distinct bipartition elem*/
+  if (i < 0) return 0; /* identical bipartitions */
+  if ((*b1)->bs[i] > (*b2)->bs[i]) return 1;
+  else return -1;
+}
+
+int
+compare_bipartitions_decreasing (const void *a1, const void *a2)
+{ 
+  return compare_bipartitions_increasing (a2, a1);
+}
+
 bool
 bipartition_is_larger (const bipartition b1, const bipartition b2)
 {
   int i;
   if (b1->n_ones > b2->n_ones) return true;
   if (b1->n_ones < b2->n_ones) return false;
-
   for (i = b1->n->ints - 1; (i >= 0) && (b1->bs[i] == b2->bs[i]); i--); /* find position of distinct bipartition elem*/
-
   if (i < 0) return false; /* identical bipartitions */
   if (b1->bs[i] > b2->bs[i]) return true;
   else return false;
@@ -461,7 +480,7 @@ bip_hashtable_insert (bip_hashtable ht, bipartition key)
   for (i = h1; ht->table[i]; i = (i + h2) % ht->size) {
     ht->probelength++;
     if (bipartition_is_equal (ht->table[i]->key, key)) {  // already observed
-      if (ht->maxfreq < ++ht->table[i]->count) ht->maxfreq = ht->table[i]->count; // notice the "count++" 
+      if (ht->maxfreq < ++ht->table[i]->count) ht->maxfreq = ht->table[i]->count; // notice the 'count++' doing main work 
       return; 
     }
   }
@@ -491,7 +510,6 @@ bip_hashtable_get_frequency (bip_hashtable ht, bipartition key)
   }
   return -1.;
 }
-
 
 /* Functions that work with tripartitions (associated to nodes instead of edges) */
 

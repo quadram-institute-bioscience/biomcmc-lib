@@ -11,8 +11,9 @@
  * details (file "COPYING" or http://www.gnu.org/copyleft/gpl.html).
  */
 
-#include "reconciliation.c"
-// #include "splitset_distances.c" // soon
+#include "genetree.h"
+#include "reconciliation.h"
+#include "splitset_distances.h"
 
 genetree
 new_genetree (topology gene, speciestree sptre)
@@ -28,6 +29,7 @@ new_genetree (topology gene, speciestree sptre)
   reconciliation_index_sptaxa_to_genetaxa (sptre->t->taxlabel, gene->taxlabel, gtre->rec->sp_id, sptre->spnames_order);
   initialize_reconciliation_sp_count (gtre->rec, sptre->t->taxlabel->nstrings, gene->nleaves);
   initialize_reconciliation_from_new_species_tree (gtre, sptre); // points to current sptree and updates node pointers
+  gtre->split = new_splitset_genespecies (gene, sptre->t, gtre->rec);
   return gtre;
 }
 
@@ -58,7 +60,7 @@ new_speciestree (topology species, empfreq order_of_species_names)
     sptre->spnames_order = order_of_species_names;
     sptre->spnames_order->ref_counter++;
   }
-  else sptre->spnames_orer = new_empfreq_sort_decreasing (species->taxlabel->nchars, species->taxlabel->nstrings, 1);
+  else sptre->spnames_order = new_empfreq_sort_decreasing (species->taxlabel->nchars, species->taxlabel->nstrings, 1);
   return sptre;
 }
 

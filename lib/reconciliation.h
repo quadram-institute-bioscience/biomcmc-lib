@@ -13,12 +13,12 @@
 
 /*! \file reconciliation.h 
  *  \brief low-level file for gene tree and species tree reconciliation. This file is hidden from user and contains the
- *  LCA-based reconciliation distances */
+ *  LCA-based reconciliation distances.  */
 
 #ifndef _biomcmc_reconciliation_h_
 #define _biomcmc_reconciliation_h_
 
-#include "genetree.h"  // genetree.c -> aux.c -> aux.h -> genetree.h to avoid loops
+#include "genetree.h"  // genetree.c -> genetree.h, aux.h -> genetree.h 
 
 /*! \brief Allocate space for new reconciliation_struct (other functions defined in topology_mrca.c) */
 reconciliation new_reconciliation (int gene_nleaves, int sp_nleaves);
@@ -26,11 +26,6 @@ reconciliation new_reconciliation (int gene_nleaves, int sp_nleaves);
 reconciliation new_reconciliation_from_reconciliation (int gene_nleaves, int sp_nleaves, reconciliation from);
 /*! \brief release allocated memory for reconciliation_struct */
 void del_reconciliation (reconciliation r);
-
-/*! \brief initialize reconciliation_struct based on existing topology - pointed by mrca */
-void init_tree_recon_from_species_topology (topology gene, topology species);
-/*! \brief initialize reconciliation_struct when we only know the species taxon names */
-void init_tree_recon_from_species_names (topology gene, char_vector sptaxlabel);
 
 /*! \brief find occurences of species->string[] inside gene->string[] filling indexes in sp_idx_in_gene.
  *
@@ -48,6 +43,6 @@ void initialize_reconciliation_sp_count (reconciliation rec, int n_sp, int n_idx
 void initialize_reconciliation_from_new_species_tree (genetree gtre, speciestree sptre);
 
 /*! \brief Find reconciliation map between gene and species trees */
-void reconciliation_gene_tree_reconcile (topology gene, topology species);
+void reconciliation_gene_tree_reconcile (genetree gtre, speciestree sptre);
 
 #endif

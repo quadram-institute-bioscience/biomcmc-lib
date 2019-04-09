@@ -14,8 +14,8 @@
 #include "reconciliation.h"
 
 topol_node mrca_between_nodes (speciestree sptre, int i, int j);
-void gene_tree_reconcile_unrooted (topology gene, topology species);
-void prepare_for_loss_calculation (topology gene, topology species);
+void gene_tree_reconcile_unrooted (genetree gtre, speciestree sptre);
+void prepare_for_loss_calculation (genetree gtre, topology species);
 
 reconciliation
 new_reconciliation (int gene_nleaves, int sp_nleaves)
@@ -133,7 +133,7 @@ initialize_reconciliation_from_new_species_tree (genetree gtre, speciestree sptr
   int i, n_mrca = (sptre->t->nnodes * (sptre->t->nnodes-1))/2;
   if (sptre == gtre->sptre) return; // already up-to-date species tree
   del_speciestree (gtre->sptre);
-  gtre->speciestree = sptre; gtre->speciestree->ref_counter++;
+  gtre->sptre = sptre; gtre->sptre->ref_counter++;
   for (i=0; i < gtre->t->nleaves; i++) gtre->rec->map_d[i] = sptre->t->nodelist[ gtre->rec->sp_id[i] ];
   
   if (!sptre->t->traversal_updated) {
@@ -171,7 +171,7 @@ mrca_between_nodes (speciestree sptre, int i, int j)
 
   if (!p) biomcmc_error ("Couldn't find the MRCA. Possible bug related to root node."); /* this shouldn't happen(R) */
 
-  return sptre->t->mrca[index] = p;
+  return sptre->mrca[index] = p;
 }
 
 void
@@ -180,14 +180,14 @@ reconciliation_gene_tree_reconcile (genetree gtre, speciestree sptre)
   int i, g_id;
   topol_node map_lchild, map_rchild;
 
-  initialize_reconciliation_from_species_tree (gtre, stre);
+  initialize_reconciliation_from_new_species_tree (gtre, sptre);
 
-  prepare_for_loss_calculation (gtre->t, sptre->t);
+  prepare_for_loss_calculation (gtre, sptre->t);
 
   for (i=0; i < gtre->t->nleaves-1; i++) {
     g_id = gtre->t->postorder[i]->id; /* node ID on gene tree */
-    map_lchild = gtre->t->rec->map_d[ gtre->t->postorder[i]->left->id ]; /* gene->map[] are nodes on species tree */
-    map_rchild = gtre->t->rec->map_d[ gtre->t->postorder[i]->right->id ];
+    map_lchild = gtre->rec->map_d[ gtre->t->postorder[i]->left->id ]; /* gene->map[] are nodes on species tree */
+    map_rchild = gtre->rec->map_d[ gtre->t->postorder[i]->right->id ];
     gtre->rec->map_d[g_id] = mrca_between_nodes (sptre, map_lchild->id, map_rchild->id);
 
     /* cummulative number of duplications below node, following e.g. Bioinformatics.2001.821 */
@@ -227,7 +227,7 @@ gene_tree_reconcile_unrooted (genetree gtre, speciestree sptre)
 
   /* as "rooted" version, but replacing left and right by up and sister (obs: postorder[gene->nleaves-2] => root) */
   for (i = gtre->t->nleaves-3; i >= 0; i--) if ((gtre->t->postorder[i]->id != r_left) && (gtre->t->postorder[i]->id != r_right)) {
-    g_id = gtre->t->tpostorder[i]->id; /* node ID on gene tree */
+    g_id = gtre->t->postorder[i]->id; /* node ID on gene tree */
     map_up     = gtre->rec->map_u[ gtre->t->postorder[i]->up->id ]; /* gene->map[] are nodes on species tree */
     map_sister = gtre->rec->map_d[ gtre->t->postorder[i]->sister->id ];
     gtre->rec->map_u[g_id] = mrca_between_nodes (sptre, map_up->id, map_sister->id);
@@ -284,7 +284,7 @@ gene_tree_reconcile_unrooted (genetree gtre, speciestree sptre)
     else if ((map_root != gtre->rec->map_u[i]) && (map_root == gtre->rec->map_d[i]))
       thisloss += (gtre->rec->map_u[i]->mid[4] - map_root->mid[4]); // "d(a(g),g) + 1" in SIAM.2000.729  
     else if ((map_root != gtre->rec->map_u[i]) && (map_root != gtre->rec->map_d[i]))
-      thisloss += (gtre->rec->map_u[i]->mid[4] + gene->rec->map_d[i]->mid[4] - 2 * map_root->mid[4] - 2);
+      thisloss += (gtre->rec->map_u[i]->mid[4] + gtre->rec->map_d[i]->mid[4] - 2 * map_root->mid[4] - 2);
     // else "loss(g) = 0" following SIAM.2000.729
     /* deep coalescences = loss - 2 x dups + 2 x |leaf difference between gene and species trees| */
     thiscoal = thisloss - 2 * thisdups + gtre->rec->size_diff;
@@ -299,11 +299,11 @@ gene_tree_reconcile_unrooted (genetree gtre, speciestree sptre)
 }
 
 void
-prepare_for_loss_calculation (topology gene, topology species)
+prepare_for_loss_calculation (genetree gtre, topology species)
 { 
   int i, c_l, c_r;
 
-  for (i = 0; i < species->nleaves; i++) species->nodelist[i]->mid[2] = gene->rec->sp_count[i];
+  for (i = 0; i < species->nleaves; i++) species->nodelist[i]->mid[2] = gtre->rec->sp_count[i];
   for (i = 0; i < species->nleaves - 1; i++) { 
     /* mid[2] is the "effective" subtree cardinality: corrects for duplicates and absent species */
     c_l = species->postorder[i]->left->mid[2]; 

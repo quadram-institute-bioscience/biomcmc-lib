@@ -1,5 +1,9 @@
-2018.04.08 -- TODO
-	* split reconciliation into genetree + reconciliation : also, add topology_splitset as auxiliary to genetree
-	* genetre.c -> aux.c -> aux.h -> genetre.h where "->" means 'include' : aux is both reconciliation, splitset, etc.,
-	that are invisible to program. And are _not_ added to Makefile.am (since are not distributed, like prb_distrib_aux.h
-	
+2018.04.09 -- TODO
+	* topology_is_equal_unrooted() must be simplified and not on splitset_distances;
+	* backbone_tree_is_equal() may be created to check if induced trees/subtrees are same (not in topology_common but in
+	genetree, even if comparing two sptrees
+	* bipartition.c may have tripartion, and also hash functions (unfinished algorithms)
+	* create clade struct for sptree induced partitions
+	* removed t1<->t2 comparisons since can't handle missing data. However we still assume that all gene leaves are found
+	in species trees, but it's better to allow for missing 'species' (e.g. when comparing two orthologous trees with
+	missing data on both): easier for bipartitions (we can mask them) but harder for reconciliation. 
