@@ -5,6 +5,6 @@ LDADD = $(GTKDEPS_LIBS) $(AM_LDFLAGS) ../lib/libbiomcmc.la
 LIST_OF_TEST_PROGS= check_unit
 # duplicate, since we want all to be compiled only with 'make check'
 TESTS = $(LIST_OF_TEST_PROGS)           # list of test programs 
-check_PROGRAMS = $(LIST_OF_TEST_PROGS)  # list of programs to be compiled only with 'make check'
+check_PROGRAMS = $(LIST_OF_TEST_PROGS)  # list of programs to be compiled only with 'make check' (like noinst_PROGRAMS)
 
 check_unit_SOURCES = check_unit.c

@@ -61,7 +61,7 @@ struct topology_struct
   unsigned int hashID1, hashID2; /*! \brief hash values of tree, ideally a unique value for each tree (collisions happen...) */
   bool traversal_updated;  /*! \brief zero if postorder[] vector needs update, one if we can use postdorder[] to traverse tree  */ 
   int ref_counter;         /*! \brief number of references of topology (how many places are pointing to it) */
-  char_vector taxlabel;    /*! \brief Taxon names (just a pointer; actual values are setup by ::topology_space_struct or ::alignment_struct) */
+  char_vector taxlabel;    /*! \brief Taxon names (just a pointer; actual values are setup by ::newick_tree_struct or ::alignment_struct) */
   int *index;             /*! \brief sandbox vector used in spr moves / quasirandom tree shuffle just to avoid recurrent allocation */
   bool quasirandom;        /*! \brief tells if quasi-random structure was initialized (and topology_struct::idx is properly set) */
 };

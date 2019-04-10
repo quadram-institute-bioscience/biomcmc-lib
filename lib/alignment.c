@@ -12,7 +12,6 @@
  */
 
 #include "alignment.h"
-#include "nexus_common.h"
 
 #define EPSLON 1.e-12
 int char2bit[256][2] = {{0xffff}}; /* DNA base to bitpattern translation, with 1st element set to arbitrary value */
@@ -43,56 +42,6 @@ void calc_empirical_equilibrium_freqs (char *seq, int *pfreq, int nsites, double
 void calc_pairwise_distance_K2P (char *s1, char *s2, int *w, int nsites, double *result);
 /*! \brief initializes char2bit vector (local to this file) A->0001 C->0010 G->0100 T->1000 */
 void initialize_char2bit_table (void);
-
-char_vector
-new_char_vector_from_file (char *filename)
-{
-  FILE *infile;
-  char *line = NULL, *line_read = NULL, *start = NULL;
-  size_t linelength = 0;
-  int i;
-  char_vector vec = new_char_vector (1);
-
-  /* start reading file */
-  infile = biomcmc_fopen (filename, "r");
-  while (biomcmc_getline (&line_read, &linelength, infile) != -1) {
-    line = remove_nexus_comments (&line_read, &linelength, infile);
-    if (nonempty_fasta_line (line)) {
-      for (start = line; (*start != '\0') && isspace (*start); start++); /* skip leading spaces */
-      if (*start == '\0') biomcmc_error ("found EOL while reading non-empty line in file \"%s\"\n", filename);
-      char_vector_add_string (vec, start);
-    }
-  }
-  fclose (infile);
-  if (line) free (line);
-
-  for (i = 0; i < vec->nstrings; i++) {
-    linelength = strcspn (vec->string[i], "#;"); /* string length until beginning of comments (if any) */
-    if (linelength < vec->nchars[i]) *(vec->string[i]+linelength) = '\0'; /* EOL here; space released below */
-  }
-
-  /* this function will remove comments (by releasing the memory after EOL) and update nchars[] */
-  if (char_vector_remove_empty_strings (vec)) biomcmc_error ("illegal empty lines in file \"%s\"", filename);
-
-  return vec;
-}
-
-void
-char_vector_longer_first_order (char_vector vec) 
-{
-  empfreq ef;
-  int i, *order;
-
-  order = (int*) biomcmc_malloc (vec->nstrings * sizeof (int));
-  ef = new_empfreq_sort_decreasing (vec->nchars, vec->nstrings, 1); /*1 = size_t (0=char, 2=int) */
-  
-  for (i = 0; i < vec->nstrings; i++) order[i] = ef->i[i].idx;
-
-  char_vector_reorder_strings (vec, order);
-
-  del_empfreq (ef);
-  if (order) free (order);
-}
 
 alignment
 read_alignment_from_file (char *seqfilename)

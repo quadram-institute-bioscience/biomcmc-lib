@@ -24,7 +24,7 @@
 #define _biomcmc_alignment_h_
 
 #include "distance_matrix.h"
-#include "empirical_frequency.h"
+#include "nexus_common.h"
 
 typedef struct alignment_struct* alignment;
 
@@ -43,13 +43,6 @@ struct alignment_struct
   int *pattern_freq;       /*! \brief if sequences are aligned, this is the frequency of each pattern. */
   char *filename;          /*! \brief name of the original file, with extension removed */
 };
-
-/*! \brief General function that stores file content into char_vector_struct, removing shell-type comments */
-char_vector new_char_vector_from_file (char *filename);
-/*! \brief Order the elements of char_vector_struct from longer string to smaller; can be used after calling
- * new_char_vector_from_file() but not on topology-associated char_vectors since other structures may depend on current
- * ordering (like alignment or tree leaves) */
-void char_vector_longer_first_order (char_vector vec);
 
 /*! \brief Reads DNA alignment (guess format between FASTA and NEXUS) from file and store info in alignment_struct. */
 alignment read_alignment_from_file (char *seqfilename);
