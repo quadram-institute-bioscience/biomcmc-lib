@@ -21,7 +21,7 @@
 #ifndef _biomcmc_empirical_frequency_h_
 #define _biomcmc_empirical_frequency_h_
 
-#include "lowlevel.h"
+#include "char_vector.h"
 
 typedef struct empfreq_struct* empfreq;
 typedef struct empfreq_double_struct* empfreq_double;

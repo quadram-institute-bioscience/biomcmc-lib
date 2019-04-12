@@ -23,10 +23,12 @@
 #ifndef _biomcmc_hashtable_h_ 
 #define _biomcmc_hashtable_h_ 
 
-#include "lowlevel.h"
+#include "bipartition.h" // includes lowlevel.h
 
-typedef struct hashtable_struct* hashtable;
+typedef struct hashtable_struct*      hashtable;
 typedef struct hashtable_item_struct* hashtable_item;
+typedef struct bip_hashtable_struct* bip_hashtable;
+typedef struct bip_hashitem_struct*  bip_hashitem;
 
 /*! \brief key/value pair for hash table */
 struct hashtable_item_struct {
@@ -56,6 +58,24 @@ struct hashtable_struct
   int ref_counter;
 };
 
+/*! \brief Hash table of bipartitions (see hashtable.h for original version, with string keys and integer values) */
+struct bip_hashtable_struct 
+{ 
+  int size; /*! \brief Table size. */
+  int probelength;  /*! \brief Number of collisions before empty slot is found. */
+  int maxfreq; /*! \brief frequency (integer) of most frequent bipartition */
+  uint32_t h; /*! \brief Value set by hash(). Used in hash1() and hash2() to avoid calling hash() again. */
+  uint32_t a1, a2, b1, b2, P; /*!< \brief Random values used in hash functions. */
+  bip_hashitem* table; /*! \brief Vector with key/value pairs. */
+  int ref_counter;  /*! \brief Counter of how many external references (structures sharing this hashtable) to avoid deletion */
+};
+
+/*! \brief key (bipartition) and value (frequency) pair for hash table of bipartitions */
+struct bip_hashitem_struct {
+  bipartition key; /*! \brief pointer to bipartition (must update ref_counter) */
+  int count;  /*! \brief frequency of bipartition (counter, but can be scaled to max count so far) */
+};
+
 /*! \brief Insert key/value pair into hashtable. */
 void insert_hashtable (hashtable ht, char* key, int value);
 /*! \brief Return location (value) of corresponding key (string) or negative value if not found. */
@@ -65,8 +85,16 @@ hashtable new_hashtable (int size);
 /*! \brief Free hashtable space. */
 void del_hashtable (hashtable ht);
 
-/* extra hash functions */
+/*! \brief Create new hashtable of size bipartitions. */
+bip_hashtable new_bip_hashtable (int size);
+/*! \brief Free bipartition hashtable space. */
+void  del_bip_hashtable (bip_hashtable ht);
+/*! \brief Insert key (bipartition) into bipartition hashtable, adding one to its count (freq). */
+void bip_hashtable_insert (bip_hashtable ht, bipartition key);
+/*! \brief Return frequency of bipartition (count/maxfreq) or zero if not found. */
+double bip_hashtable_get_frequency (bip_hashtable ht, bipartition key);
 
+/* extra hash functions */
 uint32_t biomcmc_hashint_1 (uint32_t a);
 uint32_t biomcmc_hashint_2 (uint32_t a);
 uint32_t biomcmc_hashint_3 (uint32_t a);
@@ -84,5 +112,8 @@ uint32_t biomcmc_hashstring_2 (unsigned char *str); /* PJW algorithm */
 uint32_t biomcmc_hashstring_3 (unsigned char *str); /* dbj2 algorithm */
 uint32_t biomcmc_hashstring_4 (unsigned char *str); /* dbj2 algorithm with XOR */
 uint32_t biomcmc_hashstring_5 (unsigned char *str); /* sdbm algorithm */
+
+/*! \brief 32bits hash value for bipartition */
+uint32_t bipartition_hash (bipartition bip);
 
 #endif

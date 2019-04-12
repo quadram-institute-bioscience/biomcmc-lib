@@ -98,7 +98,6 @@ newick_space
 new_newick_space ()
 {
   newick_space nwk;
-  int i;
   nwk = (newick_space) biomcmc_malloc (sizeof (struct newick_space_struct));
   nwk->ntrees = 0;
   nwk->t = NULL;
@@ -124,17 +123,41 @@ new_newick_space_from_file (char *filename)
   return nwk;
 }
 
+topology
+new_single_topology_from_newick_file (char *filename)
+{
+  FILE *file;
+  char *line_read=NULL, *str_tree_start=NULL, *str_tree_end=NULL;
+  size_t linelength = 0, str_tree_size = 0;
+  newick_tree tree;
+  topology topol;
+
+  file = biomcmc_fopen (filename, "r");
+  biomcmc_getline (&line_read, &linelength, file);
+  str_tree_start = strchr (line_read, '(');
+  str_tree_end   = strchr (str_tree_start, ';');
+  if (str_tree_end == NULL) str_tree_size = strlen (str_tree_start); 
+  else str_tree_size = str_tree_end - str_tree_start;
+  line_read[str_tree_size] = '\0'; /* not null-terminated by default */
+  tree  = new_newick_tree_from_string (&line_read); // this might increase size, but not decrease (I hope)
+  if (line_read) free (line_read);
+  topol = new_topology (tree->nleaves);
+  if (tree->has_branches) topology_malloc_blength (topol); /* then it will copy length values from newick_tree */
+  copy_topology_from_newick_tree (topol, tree);
+  del_newick_tree (tree);
+  return topol;
+}
+
 void
 update_newick_space_from_file (newick_space nwk, char *filename)
 {
   FILE *file;
   char *line=NULL, *line_read=NULL, *str_tree_start=NULL, *str_tree_end=NULL;
   size_t linelength = 0, str_tree_size = 0;
-  int this_size, size = 0; 
-
+ // TODO: newick may span several lines
   if (!nwk) biomcmc_error ("The calling function should allocate memory for newick_space_struct"); 
   file = biomcmc_fopen (filename, "r");
-  /* *line_read should always point to same value (no line++ etc.) */
+  /* line_read can't be changed (no line_read++ etc.) otherwise we lose first position and can't free() it */
   while (biomcmc_getline (&line_read, &linelength, file) != -1) {
     line = remove_nexus_comments (&line_read, &linelength, file); // will remove comments inside tree
     str_tree_start = strchr (line, '(');
@@ -155,9 +178,9 @@ void
 update_newick_space_from_string (newick_space nwk, char *tree_string, size_t string_size)
 {
   char *local_string;
-  int i, index;
   newick_tree tree;
   topology topol;
+
   /* read string into a newick_tree */
   local_string = (char*) biomcmc_malloc (sizeof (char) * (string_size + 1));
   strncpy (local_string, tree_string, string_size + 1); /* adds '\0' only when long_string is smaller!! */
@@ -204,7 +227,7 @@ estimate_treesize_from_file (char *seqfilename)
 void
 copy_topology_from_newick_tree (topology tree, newick_tree nwk_tree)
 {
-  int i, id, node_id;
+  int i, node_id;
 
   tree->taxlabel = new_char_vector (nwk_tree->nleaves);
   for (i=0; i< nwk_tree->nleaves; i++) { 
@@ -215,6 +238,7 @@ copy_topology_from_newick_tree (topology tree, newick_tree nwk_tree)
 
   for (i = 0; i < tree->nnodes; i++) {
     node_id = nwk_tree->nodelist[i]->id;
+  
     tree->nodelist[node_id]->mid[0] = tree->nodelist[node_id]->mid[1] = tree->nodelist[node_id]->id = node_id;
     if (tree->blength) tree->blength[node_id] = nwk_tree->nodelist[i]->branch_length; /* should be malloc'ed beforehand */
     if (nwk_tree->nodelist[i]->up)    tree->nodelist[node_id]->up    = tree->nodelist[nwk_tree->nodelist[i]->up->id];
@@ -252,7 +276,7 @@ new_newick_tree_from_string (char **string)
   T->root = subtree_newick_tree (T, lptr, rptr, &id, NULL);
   id = 0; /* vector of pointers to the tree leaves */
   create_leaflist_newick_tree (T, T->root, &id); 
-  create_node_id_newick_tree ( T->root, &id); 
+  create_node_id_newick_tree (T->root, &id); 
 
   return T;
 }
@@ -306,7 +330,10 @@ read_taxlabel ( const char *name_start, const char *name_end)
 void
 create_leaflist_newick_tree (newick_tree tree, newick_node this, int *id) 
 {
-  if (this->taxlabel != NULL) tree->leaflist[(*id)++] = this;
+  if (this->taxlabel != NULL) {
+    this->id = (*id);
+    tree->leaflist[(*id)++] = this;
+  }
   else {
     if (this->left)  create_leaflist_newick_tree (tree, this->left, id);
     if (this->right) create_leaflist_newick_tree (tree, this->right, id);

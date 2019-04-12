@@ -49,22 +49,6 @@ new_char_vector_from_file (char *filename)
   return vec;
 }
 
-void
-char_vector_longer_first_order (char_vector vec) 
-{
-  empfreq ef;
-  int i, *order;
-
-  order = (int*) biomcmc_malloc (vec->nstrings * sizeof (int));
-  ef = new_empfreq_sort_decreasing (vec->nchars, vec->nstrings, 1); /*1 = size_t (0=char, 2=int) */
-  for (i = 0; i < vec->nstrings; i++) order[i] = ef->i[i].idx;
-
-  char_vector_reorder_strings (vec, order);
-
-  del_empfreq (ef);
-  if (order) free (order);
-}
-
 char*
 remove_nexus_comments (char **string, size_t *stringsize, FILE *stream)
 { /* shouldn't change address **string points to (like string++ or similar), since it is reallocated by readline */

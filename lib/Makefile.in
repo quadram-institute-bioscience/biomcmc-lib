@@ -108,8 +108,9 @@ am__objects_1 = hashtable.lo lowlevel.lo random_number_gen.lo \
 	prob_distribution.lo empirical_frequency.lo argtable3.lo \
 	distance_matrix.lo alignment.lo topology_common.lo \
 	parsimony.lo genetree.lo reconciliation.lo \
-	splitset_distances.lo read_newick_trees.lo
-am_libbiomcmc_la_OBJECTS = $(am__objects_1)
+	splitset_distances.lo read_newick_trees.lo char_vector.lo
+am__objects_2 =
+am_libbiomcmc_la_OBJECTS = $(am__objects_1) $(am__objects_2)
 libbiomcmc_la_OBJECTS = $(am_libbiomcmc_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -313,18 +314,18 @@ LDADD = $(GTKDEPS_LIBS) $(AM_LDFLAGS)
 common_headers = hashtable.h lowlevel.h random_number_gen.h random_number.h nexus_common.h \
                  bipartition.h prob_distribution.h empirical_frequency.h biomcmc.h argtable3.h \
                  distance_matrix.h alignment.h topology_common.h parsimony.h genetree.h \
-                 reconciliation.h splitset_distances.h read_newick_trees.h
+                 reconciliation.h splitset_distances.h read_newick_trees.h char_vector.h
 
 common_src = hashtable.c lowlevel.c random_number_gen.c random_number.c nexus_common.c \
                  bipartition.c prob_distribution.c empirical_frequency.c argtable3.c \
                  distance_matrix.c alignment.c topology_common.c parsimony.c genetree.c \
-                 reconciliation.c splitset_distances.c read_newick_trees.c
+                 reconciliation.c splitset_distances.c read_newick_trees.c char_vector.c
 
 noinst_LTLIBRARIES = libbiomcmc.la # convenience lib (not installed globally)
 #lib_LTLIBRARIES = libbiomcmc.la  # libtools 
 #otherincludedir = $(includedir)/biomcmc
 #otherinclude_HEADERS = config.h $(common_headers) # if headers are here (=global) should not be on SOURCES (=local)
-libbiomcmc_la_SOURCES = $(common_src) 
+libbiomcmc_la_SOURCES = $(common_src) $(common_headers) config.h # listed here s.t. any change triggers recompilation 
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
@@ -398,6 +399,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/alignment.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/argtable3.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bipartition.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/char_vector.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/distance_matrix.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/empirical_frequency.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/genetree.Plo@am__quote@

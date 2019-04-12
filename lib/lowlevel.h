@@ -56,27 +56,19 @@
 /*! \brief Mnemonic for boolean (char is smaller than int) */
 typedef unsigned char bool;
 
-typedef struct char_vector_struct* char_vector;
 typedef struct hungarian_struct* hungarian;
-
-/*! \brief vector of strings (char vectors) of variable length */
-struct char_vector_struct
-{
-  char **string;  /*! \brief vector of strings */
-  int nstrings;   /*! \brief how many strings */
-  size_t *nchars; /*! \brief length of allocated memory for each string excluding the ending '\0' (the actual size in 
-                    use needs strlen() or a call to char_vector_compress() over the structure )*/
-  int ref_counter;/*! \brief how many times this char_vector_struct is being used */
-  int next_avail; /*! \brief next available position (empty string) */
-};
 
 struct hungarian_struct
 {
-  int **cost, *col_mate; /*! \brief cost matrix, and col_mate[row] with column match for row */
+  int **cost; /*! \brief cost matrix */
   int size,  /*! \brief assignment size. Cost is a square matrix, so size should be an overestimate where "missing" nodes are added w/ cost zero */
       initial_cost, /*! \brief sum of lowest input cost values for each column. The hungarian method rescales them so that minimum per column is zero */
       final_cost;   /*! \brief our final cost is on rescaled cost matrix, therefore to restore the "classical" optimal cost one should sum it with initial_cost */
-  int *unchosen_row, *row_dec, *slack_row, *row_mate, *parent_row, *col_inc, *slack; /* aux vectors */
+  int *col_mate, *unchosen_row, *slack_row, *row_mate, *parent_row;  /*! \brief col_mate[row] with column match for row */
+  double **dcost, initial_dcost, final_dcost; /*! \brief costs when working with float numbers instead of integers */
+  double *row_dec_d, *col_inc_d, *slack_d; 
+  int    *row_dec,   *col_inc,   *slack; /* aux vectors */
+  bool is_double;
 };
 
 /*! \brief Memory-safe malloc() function.
@@ -132,48 +124,10 @@ int compare_double_decreasing (const void *a, const void *b);
    number of characters read (not including the null terminator), or -1 on error or EOF. \endverbatim */
 int biomcmc_getline (char **lineptr, size_t *n, FILE *stream);
 
-
-/*! \brief Create a vector of strings with initial size for each string of zero */
-char_vector new_char_vector (int nstrings);
-
-/*! \brief Create a vector of strings where each string is assigned an initial value of nchars */
-char_vector new_char_vector_fixed_length (int nstrings, int nchars);
-
-/*! \brief Delete vector of strings only after nobody is using it */
-void del_char_vector (char_vector vec);
-
-/*! \brief Link a previously allocated string (to avoid copying all characters) */
-void char_vector_link_string_at_position (char_vector vec, char *string, int position);
-
-/*! \brief Add a new string (vector of characters) at specific location */
-void char_vector_add_string_at_position (char_vector vec, char *string, int position);
-
-/*! \brief Add a new string (vector of characters) at next available location */
-void char_vector_add_string (char_vector vec, char *string);
-
-/*! \brief Append string at the end of existing string at location */
-void char_vector_append_string_at_position (char_vector vec, char *string, int position);
-
-/*! \brief Append string at the end of existing string at most recently used location */
-void char_vector_append_string (char_vector vec, char *string);
-
-/*! \brief Increase size of vector of strings (called automatically by other functions) */
-void char_vector_expand_nstrings (char_vector vec, int new_size);
-
-/*! \brief update order of strings in vector based on a vector of new positions */
-void char_vector_reorder_strings (char_vector vec, int *order);
-
-/*! \brief Reduce size of vector of strings by removing empty strings (returns number of empty strings) */
-int char_vector_remove_empty_strings (char_vector vec);
-/*! \brief Remove identical strings and resizes char_vector_struct */
-int char_vector_remove_duplicate_strings (char_vector vec);
-/*! \brief reduce char_string_struct to only those elements indexed by valid[] */
-void char_vector_reduce_to_valid_strings (char_vector vec, int *valid, int n_valid);
-
 /* Hungarian method for bipartite matching (assignment) */
-hungarian new_hungarian (int size);
+hungarian new_hungarian (int size, bool is_double);
 void hungarian_reset (hungarian p);
-void hungarian_update_cost (hungarian p, int row, int col, int cost);
+void hungarian_update_cost (hungarian p, int row, int col, void *cost); /* pointer since we decide if int/double later */
 void del_hungarian (hungarian p);
 void hungarian_solve (hungarian p, int this_size);
 

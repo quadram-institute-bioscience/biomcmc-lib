@@ -67,7 +67,6 @@ new_speciestree (topology species, empfreq order_of_species_names)
 void
 del_speciestree (speciestree sptre)
 {
-  int i;
   if (!sptre) return;
   if (--sptre->ref_counter) return;
   if (sptre->mrca) free (sptre->mrca);

@@ -20,12 +20,10 @@
 #define _biomcmc_bipartition_h_
 
 
-#include "hashtable.h" // includes  "lowlevel.h"
+#include "lowlevel.h" 
 
 typedef struct bipartition_struct* bipartition;
 typedef struct bipsize_struct* bipsize;
-typedef struct bip_hashtable_struct* bip_hashtable;
-typedef struct bip_hashitem_struct* bip_hashitem;
 typedef bipartition* tripartition; /* just a vector of size 3 */
 
 /*! \brief Bit-string representation of splits. */
@@ -49,24 +47,6 @@ struct bipsize_struct
   int ints, bits, original_size;
   /*! \brief How many times this struct is being referenced */
   int ref_counter;
-};
-
-/*! \brief Hash table of bipartitions (see hashtable.h for original version, with string keys and integer values) */
-struct bip_hashtable_struct 
-{ 
-  int size; /*! \brief Table size. */
-  int probelength;  /*! \brief Number of collisions before empty slot is found. */
-  int maxfreq; /*! \brief frequency (integer) of most frequent bipartition */
-  uint32_t h; /*! \brief Value set by hash(). Used in hash1() and hash2() to avoid calling hash() again. */
-  uint32_t a1, a2, b1, b2, P; /*!< \brief Random values used in hash functions. */
-  bip_hashitem* table; /*! \brief Vector with key/value pairs. */
-  int ref_counter;  /*! \brief Counter of how many external references (structures sharing this hashtable) to avoid deletion */
-};
-
-/*! \brief key (bipartition) and value (frequency) pair for hash table of bipartitions */
-struct bip_hashitem_struct {
-  bipartition key; /*! \brief pointer to bipartition (must update ref_counter) */
-  int count;  /*! \brief frequency of bipartition (counter, but can be scaled to max count so far) */
 };
 
 /*! \brief create a new bipartition (bitstring) capable of storing an arbitrary number of bits and initialize it to zero
@@ -140,17 +120,6 @@ void bipartition_print_to_stdout (const bipartition b1);
 void bipartition_replace_bit_in_vector (bipartition *bvec, int n_b, int to, int from, bool reduce);
 /*! \brief apply mask to last element (useful after manipulations) and count number of bits */
 void bipartition_resize_vector (bipartition *bvec, int n_b);
-
-/*! \brief 32bits hash value for bipartition */
-uint32_t bipartition_hash (bipartition bip);
-/*! \brief Create new hashtable of size bipartitions. */
-bip_hashtable new_bip_hashtable (int size);
-/*! \brief Free bipartition hashtable space. */
-void  del_bip_hashtable (bip_hashtable ht);
-/*! \brief Insert key (bipartition) into bipartition hashtable, adding one to its count (freq). */
-void bip_hashtable_insert (bip_hashtable ht, bipartition key);
-/*! \brief Return frequency of bipartition (count/maxfreq) or zero if not found. */
-double bip_hashtable_get_frequency (bip_hashtable ht, bipartition key);
 
 /*! \brief tripartition of a node (a vector with 3 bipartitions, that should not be 'flipped' to smaller set, however) */
 tripartition new_tripartition (int nleaves);

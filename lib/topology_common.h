@@ -99,6 +99,9 @@ bool topology_is_equal (topology t1, topology t2);
 /*! \brief Compare two topologies based on bipartitions neglecting root; boolean ask if split should be reverted to original orientation */
 bool topology_is_equal_unrooted (topology t1, topology t2, bool use_root_later);
 
+/*! \brief Reorder char_vector_struct; leaf node ids (and bipartitions) must then follow this order */
+void reorder_topology_leaves (topology tree);
+
 /*! \brief Boolean if node2 is on the path of node1 to the root. */
 bool node1_is_child_of_node2 (topol_node node1, topol_node node2);
 

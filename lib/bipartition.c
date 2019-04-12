@@ -15,10 +15,6 @@
 
 int BitStringSize = 8 * sizeof (uint64_t);
 
-/* Aux functios for hashtable of bipartitions */
-inline uint32_t bhash1 (bip_hashtable ht);
-inline uint32_t bhash2 (bip_hashtable ht);
-
 bipartition
 new_bipartition (int size)
 {
@@ -400,117 +396,6 @@ bipartition_resize_vector (bipartition *bvec, int n_b)
   for (k = 0; k < n_b; k++) { bvec[k]->bs[i] &= bvec[0]->n->mask; bipartition_count_n_ones (bvec[k]); }
 }
 
-/* * Functions to work with hashtable of bipartitions * */
-
-uint32_t 
-bipartition_hash (bipartition bip) 
-{ // assumes bipartition is flipped to smaller set
-  int i; 
-  uint32_t h = biomcmc_hashint_9 ((uint32_t) bip->n_ones); // inspired by FNV hash
-  for (i=0; i < bip->n->ints; i++) h = biomcmc_hashint_5 (h) ^ biomcmc_hashint_64to32 ( bip->bs[i]);
-  return h;
-}
-
-bip_hashtable 
-new_bip_hashtable (int size)
-{
-  int i; 
-  double x;
-  bip_hashtable ht;
-  
-  ht = (bip_hashtable) biomcmc_malloc (sizeof (struct bip_hashtable_struct));
-
-  /* Setting hashtable to be size of power of 2. This is required so that proper open addressing can occur, i.e. 
-   * eventually every entry in the table is considered.  */
-  x = ceil (log (size) / log (2));
-  size = pow (2, x+1);
-  ht->size = size;
-  
-  /* allocate memory for table */
-  ht->table = (bip_hashitem*) biomcmc_malloc(ht->size * sizeof (bip_hashitem)); 
-  /* initialize to NULLS */
-  for(i = 0; i < ht->size; i++) ht->table[i] = NULL; 
-  ht->P = 2147483647; /* initialize P (large prime)*/
-  ht->probelength = 0;
-  ht->maxfreq = 1; // will store count of most frequent bipartition, to normalize frequency 
-  
-  /*initialize hash1 and hash2 variables*/
-  srand (time(0)); /* the GSL library would be overkill... */
-  ht->a1 = rand() * (ht->P - 1) + 1;
-  ht->a2 = rand() * (ht->P - 1) + 1;
-  ht->b1 = rand() * ht->P;
-  ht->b2 = rand() * ht->P;
-
-  ht->ref_counter = 1; /* at least one place (the calling structure/function) is using this hashtable */
-
-  return ht;
-}
-
-void 
-del_bip_hashtable (bip_hashtable ht)
-{
-  if (ht) {
-    int i;
-    if (--ht->ref_counter) return; /* some other place is using this hashtable, we cannot delete it yet */
-    for(i=ht->size-1; i>=0; i--) if (ht->table[i]) { 
-      if(ht->table[i]->key) del_bipartition (ht->table[i]->key); 
-      free (ht->table[i]); 
-    }
-    if (ht->table) free (ht->table);
-    free (ht);
-  }
-}
-
-uint32_t bhash1 (bip_hashtable ht) { return ((((ht->a1 * ht->h) + ht->b1) % ht->P) % ht->size) ; }
-
-uint32_t bhash2 (bip_hashtable ht) { return ((((ht->a2 * ht->h + ht->b2) % ht->P) % (ht->size - 3)) | 1); }
-
-void 
-bip_hashtable_insert (bip_hashtable ht, bipartition key) 
-{
-  uint32_t i;
-  int h1, h2;
-  
-  ht->h = bipartition_hash (key) % ht->P; /*P_ is a large prime*/
-  h1 = bhash1 (ht);
-  h2 = bhash2 (ht);
-
-  ht->probelength = 0;
-  
-  for (i = h1; ht->table[i]; i = (i + h2) % ht->size) {
-    ht->probelength++;
-    if (bipartition_is_equal (ht->table[i]->key, key)) {  // already observed
-      if (ht->maxfreq < ++ht->table[i]->count) ht->maxfreq = ht->table[i]->count; // notice the 'count++' doing main work 
-      return; 
-    }
-  }
-  /* alloc space for new key */
-  ht->table[i] = biomcmc_malloc (sizeof (struct hashtable_item_struct));
-  ht->table[i]->key = new_bipartition_copy_from (key); 
-  ht->table[i]->count = 1;
-  return;
-}
-
-double
-bip_hashtable_get_frequency (bip_hashtable ht, bipartition key) 
-{
-  uint32_t i;
-  int h1, h2;
-  
-  ht->h = bipartition_hash (key) % ht->P; /*P_ is a large prime*/
-  h1 = bhash1 (ht);
-  h2 = bhash2 (ht);
-  
-  ht->probelength = 0;
-
-  for (i = h1; ht->table[i]; i = (i + h2) % ht->size) {
-    ht->probelength++;
-    if (!(ht->table[i])) return 0.;
-    else if ( (ht->table[i]) && (bipartition_is_equal (ht->table[i]->key, key)) ) return (double)(ht->table[i]->count)/(double)(ht->maxfreq);
-  }
-  return -1.;
-}
-
 /* Functions that work with tripartitions (associated to nodes instead of edges) */
 
 tripartition
@@ -569,7 +454,7 @@ align_tripartitions (tripartition tp1, tripartition tp2, hungarian h)
   hungarian_reset (h); // assumes has correct size of three
   for (i=0; i<3; i++) for (j=0; j<3; j++) {
     bipartition_XOR (disagree, tp1[i], tp2[j], true); // true-> calculate n_ones
-    hungarian_update_cost (h, i, j, disagree->n_ones);
+    hungarian_update_cost (h, i, j, &(disagree->n_ones));
   }
   hungarian_solve (h, 3);
   del_bipartition (disagree);

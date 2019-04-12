@@ -23,21 +23,24 @@
 
 #include "argtable3.h"
 #include "prob_distribution.h" 
-#include "bipartition.h"  
 #include "alignment.h"
 #include "parsimony.h"
 #include "genetree.h"
-#include "nexus_common.h" 
+#include "read_newick_trees.h"
 
 #ifdef THESE_ARE_COMMENTS
-#include "lowlevel.h"            // called by bipartition.h, hashtable.h, random_number.h, argtable3.h, etc
-#include "hashtable.h"           // called by random_number_gen.h 
-#include "random_number_gen.h"   // called by random_number.h
-#include "random_number.h"       // called by prob_distribution.h 
-#include "topology_common.h"     // called by parsimony.h, reconciliation.h
-#include "reconciliation.h"      // opaque header/library, called by genetree.h
-#include "distance_matrix.h"     // called by alignment.h
-#include "empirical_frequency.h" // called by nexus_common.h  
+#include "lowlevel.h"            // called by char_vector, argtable, bipartition, prob_distribution 
+#include "char_vector.h"         // called by hashtable, random_number, nexus_common, empirical_frequency
+#include "hashtable.h"           // called by random_number_gen 
+#include "bipartition.h"         // called by hashtable
+#include "random_number_gen.h"   // called by random_number
+#include "random_number.h"       // called by prob_distribution
+#include "topology_common.h"     // called by parsimony, reconciliation, read_nexus_trees
+#include "reconciliation.h"      // opaque header/library, called by genetree
+#include "distance_matrix.h"     // called by alignment
+#include "empirical_frequency.h" // called by nexus_common  
+#include "nexus_common.h"        // called by read_nexus_trees 
+#include "splitset_distances.h"  // opaque header/library, called by genetree
 #endif // of THESE_ARE_COMMENTS
 
 #endif //define biomcmc

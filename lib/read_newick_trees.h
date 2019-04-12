@@ -34,6 +34,8 @@ struct newick_space_struct
 
 newick_space new_newick_space ();
 void del_newick_space (newick_space nwk);
+/*! \brief Convenience function to read one newick tree from file, skipping checks (comments, multiline trees, etc.) */
+topology new_single_topology_from_newick_file (char *filename); 
 newick_space new_newick_space_from_file (char *filename);
 void update_newick_space_from_file (newick_space nwk, char *filename);
 void update_newick_space_from_string (newick_space nwk, char *tree_string, size_t string_size);

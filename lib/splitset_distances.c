@@ -69,7 +69,7 @@ new_splitset (int nleaves, int sp_nleaves)
 
   split->n_g = split->n_s = 0; /* number of elements actively in use */
   split->prune = new_bipartition_from_bipsize (split->disagree[0]->n);
-  split->h = new_hungarian (split->size);
+  split->h = new_hungarian (split->size, false); // true/false -> double/integer
 
   split->sp0 = split->s_split; /* E.g.  sp0 => [0|1|2|3|4|5|6|7] while s_split => [4|5|6|7] */
   split->s_split = split->s_split + sp_nleaves; /* pointer to nleaves-th element */
@@ -348,7 +348,7 @@ split_disagreement_assign_match (splitset split)
   
   hungarian_reset (split->h);
   for (g = 0; g < split->n_g; g++) for (s = 0; s < split->n_s; s++)  
-    hungarian_update_cost (split->h, g, s, split->disagree[g * split->n_s + s]->n_ones);
+    hungarian_update_cost (split->h, g, s, &(split->disagree[g * split->n_s + s]->n_ones));
   hungarian_solve (split->h, max_n);
   /* now split->h->col_mate will have the pairs */
   /* if we do the matching below it becomes much faster, but we may miss the best prune subtrees in a few cases (do not compromise the algo) */

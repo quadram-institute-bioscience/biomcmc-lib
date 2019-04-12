@@ -154,8 +154,12 @@ copy_topology_from_topology (topology to_tree, topology from_tree)
     if (!to_tree->blength) to_tree->blength = (double*) biomcmc_malloc (3 * from_tree->nnodes * sizeof (double));
     for (i = 0; i < 3 * from_tree->nnodes; i++) to_tree->blength[i] = from_tree->blength[i];
   }
-
   update_topology_traversal (to_tree);
+  if (from_tree->taxlabel) { // in case from_tree is a dummy/temp but to_tree is important
+    del_char_vector (to_tree->taxlabel);
+    to_tree->taxlabel = from_tree->taxlabel;
+    to_tree->taxlabel->ref_counter++;
+  }
 }
 
 void
@@ -250,8 +254,9 @@ update_subtree_traversal (topology tree, topol_node this, int *postcount, int *u
 
 bool
 topology_is_equal (topology t1, topology t2)
-{ 
-  int i;
+{ // this is a simple (lowlevel) function, doesn't check if taxlabels are equivalent when both are present
+  int i; 
+  if (t1->taxlabel && t2->taxlabel && (t1->taxlabel != t2->taxlabel)) return false;
   if (!t1->traversal_updated) update_topology_traversal (t1);
   if (!t2->traversal_updated) update_topology_traversal (t2);
 
@@ -267,6 +272,7 @@ topology_is_equal_unrooted (topology t1, topology t2, bool use_root_later)
 { /* check if structures are same once root is removed; do not check induced tree (i.e. excluding unique leaves) */
   int i, n = t1->nleaves - 3;
   bipartition *b1, *b2;
+  if (t1->taxlabel && t2->taxlabel && (t1->taxlabel != t2->taxlabel)) return false;
   if (t1->nleaves != t2->nleaves) return false;
   if (!t1->traversal_updated) update_topology_traversal (t1);
   if (!t2->traversal_updated) update_topology_traversal (t2);
@@ -289,6 +295,27 @@ topology_is_equal_unrooted (topology t1, topology t2, bool use_root_later)
   if (b1) free (b1);
   if (i == n) return true;
   return false;
+}
+
+void
+reorder_topology_leaves (topology tree)
+{
+  int i, *order;
+  topol_node *pivot;
+  if (!tree->taxlabel) return; 
+  order = (int*) biomcmc_malloc (tree->taxlabel->nstrings * sizeof (int));
+  char_vector_reorder_by_size_or_lexicographically (tree->taxlabel, false, order); // false/true -> by size/lexico
+
+  pivot = (topol_node*) biomcmc_malloc (tree->nleaves * sizeof (topol_node));
+  for (i=0; i < tree->nleaves; i++) pivot[i] = tree->nodelist[i]; 
+  for (i=0; i < tree->nleaves; i++) {
+    tree->nodelist[i] = pivot[ order[i] ];
+    tree->nodelist[i]->id = i;
+    bipartition_zero (tree->nodelist[i]->split);
+    bipartition_set  (tree->nodelist[i]->split, i);
+  }
+  if (pivot) free (pivot);
+  if (order) free (order);
 }
 
 bool 
