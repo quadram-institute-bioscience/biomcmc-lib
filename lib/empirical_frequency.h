@@ -28,19 +28,19 @@ typedef struct empfreq_double_struct* empfreq_double;
 
 typedef struct
 {
-	int freq;
-	int idx;
+  int freq;
+  int idx;
 } empfreq_element;
 
 typedef struct
 {
-	double freq;
-	int idx;
+  double freq;
+  int idx;
 } empfreq_double_element;
 
 struct empfreq_struct
 {
-	empfreq_element *i;
+  empfreq_element *i;
 	int n;
   int min;   /*! \brief Min value for index. */
   int max;   /*! \brief Max value for index. */

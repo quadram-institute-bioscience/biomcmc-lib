@@ -19,7 +19,7 @@
 #ifndef _biomcmc_genetree_h_
 #define _biomcmc_genetree_h_
 
-#include "topology_common.h"
+#include "upgma.h"
 
 typedef struct genetree_struct* genetree;
 typedef struct speciestree_struct* speciestree;
@@ -32,15 +32,15 @@ struct genetree_struct
   reconciliation rec;
   speciestree sptre;  
   splitset split;
+  int *distance, *minmax;
   int ref_counter;
-  // splitset missing
 };
 
 struct speciestree_struct
 {
   topology t;
   topol_node *mrca; /*! \brief triangular matrix of topol_nodes (LCA between topol_node::id (i-1) and j) in one dimension */
-  empfreq spnames_order;
+  int *spnames_order; /*! \brief Length+lexico order of sptree leaf names (not used unless added by user, when arbitrary leaf ordering is requested) */
   int ref_counter;
 };
 
@@ -73,14 +73,20 @@ struct splitset_struct
   bool match;  /*! \brief do we want to calculate the minimum cost assignment */
 };
 
+// convenience function
+genetree new_genetree_speciestree_pair (topology gene, topology species);
 /*! \brief Allocate space for new genetree_struct, given a gene topology and a specestree_struct */
 genetree new_genetree (topology gene, speciestree sptre);
 void del_genetree (genetree gtre);
 /*! \brief Allocate space for new speciestree_struct, given a species topology and optionally the order of  species names */
-speciestree new_speciestree (topology species, empfreq order_of_species_names);
+speciestree new_speciestree (topology species, int *order_of_species_names);
 void del_speciestree (speciestree sptre);
+/*! \brief calculates all (discrete) distances and update min and max */
+void genetree_speciestree_distances (genetree gtre, speciestree sptre);
 
-/*! \brief dups.loss, ils calculation; accepts unseen speciestree_struct (i.e. updates mrca and pointers). Calls low-level hidden function. */
+/*! \brief <debug function> dups.loss, ils calculation; accepts unseen speciestree_struct (i.e. updates mrca and pointers). Calls low-level hidden function. */
 void genetree_reconcile_speciestree (genetree gtre, speciestree sptre);
+/*! \brief <debug function> dSPR (level > 1), hdist (level > 0), and RF distances; doesn't need to update sptree pointer */
+void genetree_dSPR_speciestree (genetree gtre, speciestree sptre, int level);
 
 #endif

@@ -316,14 +316,17 @@ read_taxlabel ( const char *name_start, const char *name_end)
 {
   size_t seqsize;
   size_t i;
-  char *tmp, *label=NULL;
-  tmp = (char*) name_start;
-  while ((tmp <= name_end) && (*tmp != ',') && (*tmp != ')') && (*tmp != ':')) tmp++;
-  seqsize = tmp - name_start;
+  char *this_end, *this_start, *label=NULL;
+  this_start = (char*) name_start;
+  while (isspace(*this_start)) this_start++;
+  this_end = this_start;
+  while ((this_end <= name_end) && (*this_end != ',') && (*this_end != ')') && (*this_end != ':')) this_end++;
+  while (isspace(*this_end)) this_end--; // go backwards only after reaching end (since spaces in middle are fine)
+  seqsize = this_end - this_start;
   i = sizeof (char)*(seqsize+1);
   label = (char*) biomcmc_malloc (i);
   label[0] = '\0';
-  strncat (label, name_start, seqsize);
+  strncat (label, this_start, seqsize);
   return label;
 }
 
@@ -378,7 +381,7 @@ find_branch_split_newick (char *left_string_ptr, char *right_string_ptr)
   return comma_position;
 }
 
-int
+int // STOPHERE FIXME 
 number_of_leaves_in_newick (char **string, bool resolve_trifurcation)
 {
   int nopen = 0, nclose = 0, ncommas = 0, i, nsplit = 0;
@@ -386,6 +389,7 @@ number_of_leaves_in_newick (char **string, bool resolve_trifurcation)
   int has_branches = 0; /* could be a bool, but I want to debug number of branches */
   char current;
 
+  remove_multifurcations_newick (string, 0); // will resolve all (<2048) polytomies
   if (*(*string + len - 1) == ';') *(*string + len - 1) = '\0';
   for (i = 0; i < len; i++) {
     current = (*string)[i];
@@ -397,7 +401,6 @@ number_of_leaves_in_newick (char **string, bool resolve_trifurcation)
     else if (current == ')') nclose++;
     else if (current == ':') has_branches++;
   }
- //FIXME:: bug with notebook 010 
   if (nopen != nclose || ncommas > 2 || ncommas < 1) biomcmc_error ( "Invalid tree structure: %s", *string);
   if (ncommas == 2) nopen++; /* trifurcation (unrooted tree, hopefully) */
   if (!resolve_trifurcation) return nopen + 1; /* do not fix trifurcation */
@@ -421,4 +424,39 @@ number_of_leaves_in_newick (char **string, bool resolve_trifurcation)
   }
   return nopen + 1;
 }
+
+void
+remove_multifurcations_newick (char **string, int heap_depth)
+{
+  int nopen = 0, nclose = 0, ncommas = 0, i, nsplit = 0;
+  int len = strlen (*string);
+  char current;
+  if (heap_depth > 2048) fprintf (stderr, "biomcmc WARNING: Too many multifurcations;\n");
+  if (*(*string + len - 1) == ';') *(*string + len - 1) = '\0';
+  for (i = 0; i < len; i++) {
+    current = (*string)[i];
+    if (current == ',' && (nopen - nclose) == 1) {
+      if (!nsplit) nsplit = i; // leftmost subtree from polytomy; the remaining subtrees will be split
+      ncommas++;
+    }
+    else if (current == '(') nopen++;
+    else if (current == ')') nclose++;
+  }
+  if (nopen != nclose || ncommas < 1) biomcmc_error ( "Invalid tree structure: %s", *string);
+  if (ncommas > 1) { 
+    char *tstring = NULL;
+    int add = 6;  
+    *string = (char *) biomcmc_realloc ((char *) *string, sizeof (char) * (len + add));
+    tstring = (char *) biomcmc_malloc (sizeof (char) * (len + add));
+    bzero (tstring, sizeof (char) * (len + add + 1));
+    tstring = strncat (tstring, *string, nsplit);
+    tstring = strcat (tstring, ",("); // replaces "," for ",("
+    tstring = strncat (tstring, *string + nsplit + 1, len - nsplit - 1);
+    tstring = strcat (tstring, "):0");
+    strcpy (*string, tstring);
+    free (tstring);
+    remove_multifurcations_newick (string, heap_depth+1);
+  }
+}
+
 

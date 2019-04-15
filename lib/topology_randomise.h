@@ -11,33 +11,23 @@
  * details (file "COPYING" or http://www.gnu.org/copyleft/gpl.html).
  */
 
-/*! \file topology_build.h 
- *  \brief Creation and modification of topologies  
+/*! \file topology_randomise.h 
+ *  \brief Creation of random topologies and modification of existing ones through branch swapping
  *
  */
 
-#ifndef _biomcmc_topology_build_h_
-#define _biomcmc_topology_build_h_
+#ifndef _biomcmc_randomise_h_
+#define _biomcmc_randomise_h_
 
-#include <biomcmc.h> 
+#include "topology_common.h" 
+#include "prob_distribution.h"
 
 /*! \brief low level function that generates a random tree (equiv. to random refinement of a star topology) */
 void randomise_topology (topology tree);
 /*! \brief generates a random topology if sample_type==0, but can reuse some info later to create a "correlated" tree */
 void quasi_randomise_topology (topology tree, int sample_type);
-/*! \brief lowlevel UPGMA (or single-linkage) function that depends on a topology and a matrix_distance */
-void upgma_from_distance_matrix (topology tree, distance_matrix dist, bool single_linkage);
-/*! \brief lowlevel bioNJ function (Gascuel and Cuong implementation) that depends on a topology and a matrix_distance */
-void bionj_from_distance_matrix (topology tree, distance_matrix dist) ;
-/*! \brief updates distances between species based on genes and gene-to-species mapping, with min on upper and mean on lower diagonal  */
-void fill_species_dists_from_gene_dists (distance_matrix spdist, distance_matrix gendist, int *sp_id, bool use_upper_gene);
-/*! \brief update global (over loci) species distances besed on local (within locus) species distances */
-void update_species_dists_from_spdist (distance_matrix global, distance_matrix local, int *spexist);
 
-int prepare_spdistmatrix_from_gene_species_map (spdist_matrix spdist, int *sp_id, int n_sp_id);
-void fill_spdistmatrix_from_gene_dists (spdist_matrix spdist, distance_matrix gendist, int *sp_id, bool use_upper_gene);
-void update_spdistmatrix_from_spdistmatrix (spdist_matrix global, spdist_matrix local);
-
+void create_parent_node_from_children (topology tree, int parent, int lchild, int rchild);
 /*! \brief random rerooting */
 void topology_apply_rerooting (topology tree, bool update_done);
 /*! \brief recursive SPR over all internal nodes, assuming common prob of swap  per node */

@@ -288,6 +288,7 @@ topology_is_equal_unrooted (topology t1, topology t2, bool use_root_later)
   qsort (b1, n, sizeof (bipartition), compare_bipartitions_increasing);
   qsort (b2, n, sizeof (bipartition), compare_bipartitions_increasing);
   for (i=0; (i < n) && (bipartition_is_equal (b1[i], b2[i])); i++);
+
   if (use_root_later) for (i=0; i < n; i++) {
     bipartition_OR (t1->postorder[i]->split, t1->postorder[i]->left->split, t1->postorder[i]->right->split, false);
     bipartition_OR (t2->postorder[i]->split, t2->postorder[i]->left->split, t2->postorder[i]->right->split, false);
@@ -316,6 +317,7 @@ reorder_topology_leaves (topology tree)
   }
   if (pivot) free (pivot);
   if (order) free (order);
+  update_topology_traversal (tree);
 }
 
 bool 
@@ -343,6 +345,50 @@ new_distance_matrix_for_topology (int nleaves)
 
 void
 fill_distance_matrix_from_topology (distance_matrix dist, topology tree, double *blen, bool use_upper)
+{
+  int i, j = 0, k, row, col;
+  if (dist->size > tree->nleaves) biomcmc_error ("distance matrix is smaller than number of leaves from tree");
+  if (!tree->traversal_updated) update_topology_traversal (tree);
+  /* STEP 1: find distances from every node to root */
+  if (!blen) for (i = 0; i < tree->nnodes; i++) dist->fromroot[i] = (double)(tree->nodelist[i]->level); /* level = nodal distance from root */
+  else {
+    dist->fromroot[ tree->root->id ] = 0.;
+    for (i = tree->nleaves-3; i >= 0; i--)  /* internal nodes */
+      dist->fromroot[ tree->postorder[i]->id ] = dist->fromroot[ tree->postorder[i]->up->id ] + blen[ tree->postorder[i]->id ];
+    for (i = 0; i < tree->nleaves; i++) /* external nodes (do not belong to postorder) */
+      dist->fromroot[ tree->nodelist[i]->id ] = dist->fromroot[ tree->nodelist[i]->up->id ] + blen[ tree->nodelist[i]->id ];
+  }
+  /* STEP 2: create tour in postorder so that we have subvectors with all leaves below it */
+  j = 0;
+  for (i = 0; i < tree->nleaves-1; i++) {
+    /* for leaves: idx will have its id; and left and right will point to same idx position; j is for index positions  */
+    if (!tree->postorder[i]->left->internal)  { 
+      dist->idx[j] = tree->postorder[i]->left->id; /* idx[] contain leaf "names" (ids actually) */  
+      dist->i_l[ tree->postorder[i]->left->id ] = dist->i_r[ tree->postorder[i]->left->id ] = j++; /* interval of leaves below, as idx indexes */
+    }
+    if (!tree->postorder[i]->right->internal) { 
+      dist->idx[j] = tree->postorder[i]->right->id; 
+      dist->i_l[ tree->postorder[i]->right->id ] = dist->i_r[ tree->postorder[i]->right->id ] = j++; /* interval of leaves below, as idx indexes */
+    }
+    dist->i_l[ tree->postorder[i]->id ] = dist->i_l[ tree->postorder[i]->left->id ]; 
+    dist->i_r[ tree->postorder[i]->id ] = dist->i_r[ tree->postorder[i]->right->id ]; /* this interval covers from leftest of left to rightest of right */
+  } 
+  /* STEP 3: dist(A,B) = fromroot[A] + fromroot[B] - 2 * fromroot[mrca between A and B] (from STEP2 we know all A's and B's)*/
+  if (use_upper) for (i = 0; i < tree->nleaves; i++) for (j = i; j < tree->nleaves; j++) dist->d[i][j] = 0.;
+  else           for (i = 0; i < tree->nleaves; i++) for (j = 0; j <= i; j++)            dist->d[i][j] = 0.;
+
+  for (i = 0; i < tree->nleaves-1; i++) 
+    for (j = dist->i_l[tree->postorder[i]->left->id]; j <= dist->i_r[tree->postorder[i]->left->id]; j++)
+      for (k = dist->i_l[tree->postorder[i]->right->id]; k <= dist->i_r[tree->postorder[i]->right->id]; k++) {
+        row = dist->idx[j]; col = dist->idx[k];
+        if (((row > col) && use_upper) || ((row < col) && !use_upper)) { col = dist->idx[j]; row = dist->idx[k]; }
+        dist->d[row][col] = dist->fromroot[row] + dist->fromroot[col] - 2 * dist->fromroot[ tree->postorder[i]->id ]; 
+      }
+  //for (i=0;i<dist->size;i++) {for (j=0; j<dist->size;j++) printf("%12.10g ", dist->d[i][j]);printf (" DEBUG\n");}
+}
+
+void // FIXME 20190415
+patristic_distances_from_topology (distance_matrix dist, topology tree, double *blen, bool use_upper)
 {
   int i, j = 0, k, row, col;
   if (dist->size > tree->nleaves) biomcmc_error ("distance matrix is smaller than number of leaves from tree");

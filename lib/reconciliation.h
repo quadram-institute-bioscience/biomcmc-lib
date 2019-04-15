@@ -30,11 +30,9 @@ void del_reconciliation (reconciliation r);
 /*! \brief find occurences of species->string[] inside gene->string[] filling indexes in sp_idx_in_gene.
  *
  *  The species are taxon names which may be associated with topologies or alignments, such that we can not reorder its
- *  elements from longer to shorter (which is essential for pattern finding). So we must use a local or external vector
- *  with the mapping between original and sorted species names. If this function (and not the
- *  index_sptaxa_to_reconciliation() below) is used, the initialization of rec->sp_count[] must be done by hand (by
- *  calling initialize_reconciliation_sp_count()). */
-void reconciliation_index_sptaxa_to_genetaxa (char_vector species, char_vector gene, int *sp_idx_in_gene, empfreq ef_external);
+ *  elements here (without also modifing e.g. tree leaves). But ordering from longer to shorter is essential for pattern finding, 
+ *  so it is assumed that the char_vector is already sorted UNLESS user provides the ordering. */ 
+void reconciliation_index_sptaxa_to_genetaxa (char_vector species, char_vector gene, int *sp_idx_in_gene, int *order_external);
 
 /*! \brief Fill rec->sp_count[] with the number of representatives of each species (idexed by rec->sp_id[]) */
 void initialize_reconciliation_sp_count (reconciliation rec, int n_sp, int n_idx);

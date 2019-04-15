@@ -74,5 +74,7 @@ void char_vector_reduce_to_valid_strings (char_vector vec, int *valid, int n_val
  * new_char_vector_from_file() but if topology etc. are associated to it, then order[] must be externally defined and
  * will have new locations, to keep track of changes */
 void char_vector_reorder_by_size_or_lexicographically (char_vector vec, bool lexico, int *order);
+/*! \brief If the two char_vectors are identical (same strings in same order), then delete one and make it point to the other one */
+bool char_vector_link_address_if_identical (char_vector *v1, char_vector *v2);
 
 #endif

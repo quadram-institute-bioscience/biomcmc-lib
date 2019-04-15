@@ -320,4 +320,22 @@ char_vector_reorder_by_size_or_lexicographically (char_vector vec, bool lexico, 
   if (cvs) free (cvs);
 }
 
+bool
+char_vector_link_address_if_identical (char_vector *v1, char_vector *v2)
+{
+  int i, k;
+  bool equal = true;
+  if ((*v1) == (*v2)) return true; // already the same
+  if ((*v1)->nstrings != (*v2)->nstrings) return false; // must be identical
+  for (i = 0; (i < (*v1)->nstrings) && ((*v1)->nchars[i] == (*v2)->nchars[i]); i++);
+  if (i < (*v1)->nstrings) return false; // 
+  for (i = 0; equal && (i < (*v1)->nstrings); i++)
+    for (k = 0; equal && (k < (int) (*v1)->nchars[i]); k++) 
+      if ((*v1)->string[i][k] != (*v2)->string[i][k]) equal = false;
+  if (!equal) return false; // lines below assume, then, that both char_vectors are identical
+  del_char_vector (*v2);
+  *v2 = *v1;
+  (*v1)->ref_counter++;
+  return true;
+}
 

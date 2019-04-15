@@ -22,7 +22,6 @@
 #define _biomcmc_h_
 
 #include "argtable3.h"
-#include "prob_distribution.h" 
 #include "alignment.h"
 #include "parsimony.h"
 #include "genetree.h"
@@ -36,11 +35,14 @@
 #include "random_number_gen.h"   // called by random_number
 #include "random_number.h"       // called by prob_distribution
 #include "topology_common.h"     // called by parsimony, reconciliation, read_nexus_trees
+#include "topology_randomise.h"  // called by upgma
+#include "upgma.h"               // called by genetree 
 #include "reconciliation.h"      // opaque header/library, called by genetree
+#include "splitset_distances.h"  // opaque header/library, called by genetree
 #include "distance_matrix.h"     // called by alignment
 #include "empirical_frequency.h" // called by nexus_common  
 #include "nexus_common.h"        // called by read_nexus_trees 
-#include "splitset_distances.h"  // opaque header/library, called by genetree
+#include "prob_distribution.h"   // called by topology_randomise 
 #endif // of THESE_ARE_COMMENTS
 
 #endif //define biomcmc
