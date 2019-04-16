@@ -412,10 +412,10 @@ number_of_leaves_in_newick (char **string, bool resolve_trifurcation)
 void 
 remove_multifurcations_newick (char **string, char *left, char *right, int heap_depth)
 {
-  char *new_right = right, *current;
+  char *new_right = right, *new_left, *current;
   int nsplit[2] = {0,0}, nopen = 0, nclose = 0, ncommas = 0;
 
-  if (heap_depth > 2048) { fprintf (stderr, "biomcmc WARNING: Too many multifurcations, I give up!\n"); return; }
+  if (heap_depth > 48) { fprintf (stderr, "biomcmc WARNING: Too many multifurcations, I give up!\n"); return; }
   for (current = left; (current < right) && (ncommas < 2); current++) {
     if ((*current == ',') && ((nopen - nclose) == 1) && (ncommas < 2)) nsplit[ncommas++] = current - left; // store two first commas 
     else if (*current == '(') nopen++;
@@ -428,18 +428,20 @@ remove_multifurcations_newick (char **string, char *left, char *right, int heap_
     tstring = (char *) biomcmc_malloc (sizeof (char) * (len + 5));
     memset (tstring, '\0',  sizeof (char) * (len + 5)); 
     next = tstring;
+    printf ("%s<< %p %p \n", left, left, right);
     memcpy (next, *string, left - *string); next += left - *string;
     memcpy (next, "(", 1); next += 1;
     memcpy (next, left, nsplit[1]); next += nsplit[1];  // FIXME maybe nsplit+1
-    //printf ("%s<< %p %p \n", tstring, tstring, next);
     memcpy (next, "):0", 3); next += 3;
     memcpy (next, *string + nsplit[1], len - nsplit[1]);
+    new_left  = left  - *string + tstring; // must now point to tstring
+    new_right = right - *string + tstring;
 
     pivot = *string;  
     *string = tstring; 
     free (pivot);
     printf ("__after__%d:\n%s\n", heap_depth, *string);  //DEBUG 
-    remove_multifurcations_newick (string, left, right, heap_depth+1);
+    remove_multifurcations_newick (string, new_left, new_right, heap_depth+1);
     return;
   }
 
