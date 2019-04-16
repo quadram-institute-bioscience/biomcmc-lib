@@ -61,7 +61,7 @@ END_TEST
 
 START_TEST(compare_ortho_nwk_rooted_loop)
 {
-  int idx[6][2] = {{0,1},{0,2},{0,3},{1,2},{1,3},{2,3}}; // all pairs should be distinct
+  int idx[5][2] = {{0,1},{0,2},{0,3},{1,2},{1,3}}; // all pairs should be distinct except {2,3} by chance of remove_multifurcation
   // [0] and [1] only differ by root location BUT topology needs same leaves AND same leaf order
   reorder_topology_leaves (nwk_spc->t[ idx[_i][0]]);
   reorder_topology_leaves (nwk_spc->t[ idx[_i][1]]);
@@ -73,7 +73,7 @@ END_TEST
 
 START_TEST(new_speciestree_function)
 {
-  int idx[3][6] = {{1,0,0,0,0,0}, {2,13,96,70,44,103}, {3,13,96,70,44,103}}; // no SPR since not exact
+  int idx[3][6] = {{1,0,0,0,0,0}, {2,13,106,80,44,103}, {3,13,106,80,44,103}}; // no SPR since not exact
   bool is_correct = true;
   sptre = new_speciestree (nwk_spc->t[0], NULL);
   gtre = new_genetree (nwk_spc->t[idx[_i][0]], sptre);
@@ -102,7 +102,7 @@ Suite * topology_suite(void)
   tcase_add_checked_fixture(tc_case, newick_space_setup_ortho_nwk, del_trees_teardown); // unchecked -> once per case; checked -> per unit
   tcase_add_test(tc_case, new_newick_space_from_file_ortho_nwk);
   tcase_add_loop_test (tc_case, compare_ortho_nwk_unrooted_loop, 0, 5); // loops, using index _i
-  tcase_add_loop_test (tc_case, compare_ortho_nwk_rooted_loop, 0, 6); 
+  tcase_add_loop_test (tc_case, compare_ortho_nwk_rooted_loop, 0, 5); 
   suite_add_tcase(s, tc_case);
   tc_case = tcase_create("create_gene_species_trees");
   tcase_add_checked_fixture(tc_case, newick_space_setup_ortho_nwk, del_trees_teardown); // unchecked -> once per case; checked -> per unit

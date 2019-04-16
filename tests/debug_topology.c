@@ -22,6 +22,11 @@ int main(void)
   int i,j;
   bool is_it_true = false;
   
+  memcpy(filename + prefix_size, "multifurcation.nwk", 18);
+  t = new_single_topology_from_newick_file (filename);
+  char *s; s = topology_to_string_by_name (t, NULL); printf("\nDEBUG::tree:: %s\n", s); free (s);
+  del_topology (t);
+
   memcpy(filename + prefix_size, "iqtree.nwk", 11); // 11 is sizeof file (or larger)
   t = new_single_topology_from_newick_file (filename);
   printf("DEBUG:: This program does not perform true tests, and serves to debug functions and to show expected behaviour\n");
