@@ -31,7 +31,7 @@ struct newick_tree_struct
   newick_node *nodelist; /*! \brief Vector with pointers to every internal node. */
   newick_node *leaflist; /*! \brief Vector with pointers to tree leaves. */
   newick_node root;      /*! \brief Pointer to root node. */
-  bool has_branches;     /*! \brief Boolean saying if tree has branch lengths or not. */
+  bool has_branches;     /*! \brief Boolean saying if tree has branch lengths or not. (topology alsways has, even if one-zero) */
   int nnodes, nleaves;   /*! \brief Number of nodes (including leaves), and number of leaves */
 };
 
@@ -56,9 +56,10 @@ double read_branch_length (char *right_string_ptr);
 /*! \brief Returns position of innermost comma (divides string into two subtrees). */
 int find_branch_split_newick (char *left_string_ptr, char *right_string_ptr);
 /*! \brief Counts the number of leaves and resolves (one) trifurcation of tree string. */
-int number_of_leaves_in_newick (char **string, bool resolve_trifurcation);
+int number_of_leaves_in_newick (char **string);
 /*! \brief Tries to resolve multifurcations on string, by replacing (,,) for (,(,)) ; heap_depth to avoid infinite recursion */
-void remove_multifurcations_newick (char **string, char *left, char *right, int heap_depth);
+size_t remove_multifurcations_newick (char **string, size_t i_left, size_t i_right, int heap_depth);
+size_t create_new_bifurcation_newick (char **string, size_t i_left, size_t comma_location);
 
 /** global functions **/
 
@@ -144,7 +145,6 @@ new_single_topology_from_newick_file (char *filename)
   tree  = new_newick_tree_from_string (line_read); // this might increase size, but not decrease (I hope)
   if (line_read) free (line_read);
   topol = new_topology (tree->nleaves);
-  if (tree->has_branches) topology_malloc_blength (topol); /* then it will copy length values from newick_tree */
   copy_topology_from_newick_tree (topol, tree);
   del_newick_tree (tree);
   return topol;
@@ -190,7 +190,6 @@ update_newick_space_from_string (newick_space nwk, char *tree_string, size_t str
   tree  = new_newick_tree_from_string (local_string);
   if (local_string) free (local_string);
   topol = new_topology (tree->nleaves);
-  if (tree->has_branches) topology_malloc_blength (topol); /* then it will copy length values from newick_tree */
   copy_topology_from_newick_tree (topol, tree);
   del_newick_tree (tree);
 
@@ -213,7 +212,7 @@ estimate_treesize_from_file (char *seqfilename)
     line = remove_nexus_comments (&line_read, &linelength, seqfile);
     if (strcasestr (line, "TREE") && (needle_tip = strcasestr (line, "="))) {
       needle_tip++; /* remove "=" from string */
-      this_size  = number_of_leaves_in_newick (&needle_tip, false); /* false = do not attempt to change tree string */
+      this_size  = number_of_leaves_in_newick (&needle_tip); /* false = do not attempt to change tree string */
       if (this_size) { size += this_size; ntrees++; }
     }
   }
@@ -270,7 +269,7 @@ new_newick_tree_from_string (char *external_string)
   strncpy (string, external_string, string_size + 1); /* adds '\0' only when long_string is smaller!! */
   string[string_size] = '\0'; /* not null-terminated by default */
   string = remove_space_from_string (string);
-  nleaves = number_of_leaves_in_newick (&string, true); /* true = resolves trifurcation, changing string allocation */
+  nleaves = number_of_leaves_in_newick (&string);
   T = new_newick_tree (nleaves);
   if (strchr (string, ':')) T->has_branches = true;
   
@@ -292,10 +291,10 @@ subtree_newick_tree (newick_tree tree, char *lsptr, char *rsptr, int *node_id, n
 {
   newick_node thisnode;
   
-  thisnode = tree->nodelist[*node_id];  
+  thisnode = tree->nodelist[*node_id];
   thisnode->up = up;
   thisnode->id = -1; 
-  thisnode->branch_length = tree->has_branches ? read_branch_length (rsptr) : 0.;
+  thisnode->branch_length = tree->has_branches ? read_branch_length (rsptr) : DEFAULTBLENGTH;
   thisnode->left = NULL;
   thisnode->right = NULL;
   thisnode->taxlabel = NULL;
@@ -378,7 +377,7 @@ double
 read_branch_length (char *right_string_ptr) 
 {
    char *backwards = right_string_ptr;
-   double branch=0.;
+   double branch = DEFAULTBLENGTH;
   
   if ((*backwards == ')') || (*backwards == ',')) return DEFAULTBLENGTH;
   while (*backwards != ':') backwards--;
@@ -388,7 +387,7 @@ read_branch_length (char *right_string_ptr)
 }
 
 int 
-number_of_leaves_in_newick (char **string, bool resolve_trifurcation)
+number_of_leaves_in_newick (char **string)
 {
   int nopen = 0, nclose = 0, ncommas = 0, i;
   int has_branches = 0; /* could be a bool, but I want to debug number of branches */
@@ -396,7 +395,7 @@ number_of_leaves_in_newick (char **string, bool resolve_trifurcation)
   char current;
 
   if (*(*string + len - 1) == ';') *(*string + len - 1) = '\0';
-  if (resolve_trifurcation) remove_multifurcations_newick (string, *string, *string + len, 0); // will resolve all (<2048) polytomies
+  remove_multifurcations_newick (string, 0, (size_t) len, 0); // will resolve all (<2048) polytomies
   len = strlen (*string); // updated
   for (i = 0; i < len; i++) {
     current = (*string)[i];
@@ -409,84 +408,74 @@ number_of_leaves_in_newick (char **string, bool resolve_trifurcation)
   return nopen + 1;
 }
 
-void 
-remove_multifurcations_newick (char **string, char *left, char *right, int heap_depth)
-{
-  char *new_right = right, *new_left, *current;
-  int nsplit[2] = {0,0}, nopen = 0, nclose = 0, ncommas = 0;
-
-  if (heap_depth > 48) { fprintf (stderr, "biomcmc WARNING: Too many multifurcations, I give up!\n"); return; }
-  for (current = left; (current < right) && (ncommas < 2); current++) {
-    if ((*current == ',') && ((nopen - nclose) == 1) && (ncommas < 2)) nsplit[ncommas++] = current - left; // store two first commas 
-    else if (*current == '(') nopen++;
-    else if (*current == ')') nclose++;
-  }
-  printf ("__before__%d:\n%s\n", heap_depth, *string);  //DEBUG 
-  if (ncommas > 1) {  // nsplits[1] has the second comma (everything before will become a new subtree)
-    char *pivot, *tstring, *next;
-    int len = strlen (*string);
-    tstring = (char *) biomcmc_malloc (sizeof (char) * (len + 5));
-    memset (tstring, '\0',  sizeof (char) * (len + 5)); 
-    next = tstring;
-    printf ("%s<< %p %p \n", left, left, right);
-    memcpy (next, *string, left - *string); next += left - *string;
-    memcpy (next, "(", 1); next += 1;
-    memcpy (next, left, nsplit[1]); next += nsplit[1];  // FIXME maybe nsplit+1
-    memcpy (next, "):0", 3); next += 3;
-    memcpy (next, *string + nsplit[1], len - nsplit[1]);
-    new_left  = left  - *string + tstring; // must now point to tstring
-    new_right = right - *string + tstring;
-
-    pivot = *string;  
-    *string = tstring; 
-    free (pivot);
-    printf ("__after__%d:\n%s\n", heap_depth, *string);  //DEBUG 
-    remove_multifurcations_newick (string, new_left, new_right, heap_depth+1);
-    return;
-  }
-
-  remove_multifurcations_newick (string, left + 1, left + nsplit[0] - 1, heap_depth); // nsplits[0] has usual comma even in binary trees
-  while ((new_right != left) && (new_right != NULL) && (*new_right != ')')) new_right--;
-  if (new_right == left) new_right = right;
-  remove_multifurcations_newick (string, left + nsplit[0] + 1, new_right - 1, heap_depth);
-  return;
+void prtdbg (char *string, int start, int end) { // not declared above since just debugging tool
+  int i; 
+  printf(" <<");
+  for (i=start; i<=end;i++) printf ("%c",string[i]); 
+  printf(">> ");
 }
 
-void
-remove_multifurcations_newickOLD (char **string, int heap_depth)
-{
-  int nopen = 0, nclose = 0, ncommas = 0, i, nsplit[2] = {0,0};
-  int len = strlen (*string);
+size_t 
+remove_multifurcations_newick (char **string, size_t i_left, size_t i_right, int heap_depth)
+{ /* returns how many chars it shifted */
   char current;
-  if (heap_depth > 2048) fprintf (stderr, "biomcmc WARNING: Too many multifurcations;\n");
-  if (*(*string + len - 1) == ';') *(*string + len - 1) = '\0';
-  for (i = 0; i < len; i++) {
+  size_t i, shifted_chars = 0, *nsplit;
+  int nopen = 0, nclose = 0, ncommas = 0;
+  if ((*string)[i_left] != '(') return 0;
+  if (heap_depth > 2048) { fprintf (stderr, "biomcmc WARNING: Too many multifurcations, I give up!\n"); return 0; }
+
+  nsplit = (size_t*) biomcmc_malloc (2 * sizeof (size_t));
+  for (i = i_left; i <= i_right; i++) {
     current = (*string)[i];
     if ((current == ',') && ((nopen - nclose) == 1) && (ncommas < 2)) nsplit[ncommas++] = i; // store two first commas 
     else if (current == '(') nopen++;
     else if (current == ')') nclose++;
   }
-  if (nopen != nclose || ncommas < 1) biomcmc_error ("%d %d %d Invalid tree structure remove_multifurcations() : %s", nopen, nclose, ncommas, *string);
-  printf ("__before__%d:\n%s\n", heap_depth, *string);  //DEBUG 
-  if (ncommas > 1) { 
-    char *pivot, *tstring;
-    int add = 7;  
-    tstring = (char *) biomcmc_malloc (sizeof (char) * (len + add));
-    memset (tstring, '\0',  sizeof (char) * (len + add)); 
-    tstring[0] = '('; 
-//    tstring = strncat (tstring, *string, nsplit[1]); 
-//    tstring = strcat (tstring, "):0.0");
-//    tstring = strncat (tstring, *string + nsplit[1], len - nsplit[1]); 
-
-    memcpy (tstring + 1, *string, nsplit[1]);
-    memcpy (tstring + 1 + nsplit[1], "):0", 3);
-    memcpy (tstring + 1 + nsplit[1] + 3, *string + nsplit[1], len - nsplit[1]); 
-
-    pivot = *string;
-    *string = tstring; 
-    free (pivot);
- 
-    printf ("__after__%d:\n%s\n", heap_depth, *string);  //DEBUG 
-    remove_multifurcations_newickOLD (string, heap_depth+1);
+  //printf ("\n\tDEBUG::start  this_left_right: %d %d __ %d :: %d %d %d\n", i_left, i_right, heap_depth, nopen, nclose, ncommas);  //DEBUG
+  if ((!nopen) || (!ncommas)) {free (nsplit); return 0; } // reached a leaf, although the != '(' above should have catched it...
+  if (nopen != nclose || ncommas < 1) biomcmc_error ("<%d %d | %d> Invalid tree remove_multifurcations() : %s\n", nopen, nclose, ncommas, *string);
+  if (ncommas > 1) {
+    //prtdbg (*string, i_left, nsplit[1]); printf ("\t::DEBUG::%d %d|\t", i_left, nsplit[1]); prtdbg (*string, nsplit[1], i_right);
+    shifted_chars = create_new_bifurcation_newick (string, i_left, nsplit[1]);
+    //printf ("\nDEBUG::After resolving:: "); prtdbg (*string, i_left, i_right + shifted_chars); printf ("\n");
+    i = remove_multifurcations_newick (string, i_left, i_right + shifted_chars, heap_depth+1);
+    shifted_chars += i;
   }
+  else {// Updating left side will change string size, so when we update right size we must add these new bifurcations 
+    size_t new_right = i_right;
+    while ((new_right != i_left) && ((*string)[new_right] != ')')) new_right--;
+    if (new_right == i_left) new_right = i_right;
+    //printf ("::DEBUG::regular:: new_left and right: %d  %d \tcomma: %d   (below are subtrees)\n", i_left, new_right, nsplit[0]);
+    //prtdbg (*string, i_left+1, nsplit[0]); printf("\t\t"); prtdbg (*string, nsplit[0], new_right-1); printf ("\n");
+    shifted_chars = remove_multifurcations_newick (string, i_left + 1, nsplit[0] - 1, heap_depth); // nsplits[0] has usual comma even in binary trees
+    i = remove_multifurcations_newick (string, nsplit[0] + 1 + shifted_chars, new_right - 1 + shifted_chars, heap_depth);
+    shifted_chars += i;
+  }
+  free (nsplit);
+  return shifted_chars;
+}
+
+size_t
+create_new_bifurcation_newick (char **string, size_t i_left, size_t comma_location)
+{ 
+  char *pivot = NULL, *tstring = NULL, *next = NULL, *fixed[2]={"(", "):0.0"};
+  size_t len = strlen (*string), flen0, flen1; /* how many extra chars we add with this function */
+  flen0 = strlen(fixed[0]);
+  flen1 = strlen(fixed[1]);
+
+  //*string = (char *) biomcmc_realloc ((char*) (*string), sizeof (char) * (len + flen0 + flen1));
+  tstring = (char *) biomcmc_malloc (sizeof (char) * (len + flen0 + flen1));
+  memset (tstring, '\0',  sizeof (char) * (len + flen0 + flen1)); 
+  next = tstring;
+  memcpy (next, *string, i_left); next += i_left;
+  memcpy (next, fixed[0], flen0); next += flen0;
+  memcpy (next, *string + i_left, comma_location - i_left); next += comma_location - i_left; 
+  memcpy (next, fixed[1], flen1); next += flen1;
+  memcpy (next, *string + comma_location, len - comma_location);
+
+  //memcpy (*string, tstring, len + flen0 + flen1); free (tstring);
+  pivot = *string;  
+  *string = tstring; 
+  free (pivot);
+  return flen0 + flen1;
 }

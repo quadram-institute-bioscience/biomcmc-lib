@@ -42,13 +42,15 @@ new_topology (int nleaves)
   tree->ref_counter = 1;
   tree->taxlabel = NULL; /* Memory allocated by topology_space:: or other place */
   tree->quasirandom = false;
-  tree->blength = NULL; /* used for reading topol_space and in upgma_from_distance_matrix(); therefore initialized there */
 
   /* actual allocation */
   tree->nodelist  = (topol_node*) biomcmc_malloc (tree->nnodes * sizeof (topol_node));
   /* pointers only */
   tree->postorder = (topol_node*) biomcmc_malloc ((tree->nleaves - 1) * sizeof (topol_node));
   tree->undone    = (topol_node*) biomcmc_malloc ((tree->nleaves - 1) * sizeof (topol_node));
+  tree->blength = (double*) biomcmc_malloc (tree->nnodes * sizeof(double));
+  for (i = 0; i < tree->nnodes; i++) tree->blength[i] = 1.; 
+
 
   /* sandbox vector (thread-safe "global" variable) used 
    * - when drawing nodes in random spr (two vectors of size nnodes)
@@ -88,10 +90,8 @@ void
 topology_malloc_blength (topology tree)
 {
   int i;
-
-  if (tree->blength) free (tree->blength); /* weird scenario */
-  tree->blength = (double*) biomcmc_malloc (tree->nnodes * 3 * sizeof(double));
-  for (i = 0; i < tree->nnodes; i++) tree->blength[i] = 0.; /* actual branch length (mean value for topol_space) */
+  /* extra vectors, besides usual branch lengths */
+  tree->blength = (double*) biomcmc_realloc ((double*) tree->blength, tree->nnodes * 3 * sizeof(double));
   for (i =     tree->nnodes; i < 2 * tree->nnodes; i++) tree->blength[i] = 1.e12; /* min branch length observed in  topol_space */
   for (i = 2 * tree->nnodes; i < 3 * tree->nnodes; i++) tree->blength[i] = -1.; /* max branch length observed in  topol_space */
 }
@@ -387,7 +387,7 @@ fill_distance_matrix_from_topology (distance_matrix dist, topology tree, double 
   //for (i=0;i<dist->size;i++) {for (j=0; j<dist->size;j++) printf("%12.10g ", dist->d[i][j]);printf (" DEBUG\n");}
 }
 
-void // FIXME 20190415
+void // STOPHERE 20190415
 patristic_distances_from_topology (distance_matrix dist, topology tree, double *blen, bool use_upper)
 {
   int i, j = 0, k, row, col;
@@ -436,12 +436,13 @@ topology_to_string_by_id (const topology tree, double *blen)
 {
   char *str;
   /* allocate space for str (overestimate size) */
-  int size = tree->nnodes * 4 + tree->nleaves * 8;
+  int size = tree->nnodes * 3 + tree->nleaves * 8;
   if (blen) size += 16 * tree->nnodes;
 
   str = (char *) biomcmc_malloc (sizeof (char) * size);
   memset (str, '\0', sizeof (char) * size);
   topology_subtree_to_string_by_id (str, tree->root, blen, false);
+  str = strcat (str, ";");
   return str;
 }
 
@@ -450,32 +451,33 @@ topology_to_string_create_name (const topology tree, double *blen)
 {
   char *str;
   /* allocate space for str (overestimate size) */
-  int size = tree->nnodes * 4 + tree->nleaves * 12;
+  int size = tree->nnodes * 3 + tree->nleaves * 12;
   if (blen) size += 16 * tree->nnodes;
 
   str = (char *) biomcmc_malloc (sizeof (char) * size);
   memset (str, '\0', sizeof (char) * size);
   topology_subtree_to_string_by_id (str, tree->root, blen, true);
+  str = strcat (str, ";");
   return str;
 }
 
 void
 topology_subtree_to_string_by_id (char *str, const topol_node node, double *blen, bool create_name)
 {
-  char s1[32];
+  char s1[64];
   if (node->internal) { /* internal node */
     str = strcat (str, "(");
     topology_subtree_to_string_by_id (str, node->left, blen, create_name);
     str = strcat (str, ",");
     topology_subtree_to_string_by_id (str, node->right, blen, create_name);
-    if (blen) { sprintf (s1, "):%12.9g", blen[node->id]); str = strcat (str, s1); }
+    if (blen) { sprintf (s1, "):%.12g", blen[node->id]); str = strcat (str, s1); }
     else str = strcat (str,  ")");
   } else {
     if (create_name) { /* taxa names will be s1, s2 etc. */
-      if (blen) sprintf (s1, "T%d:%12.9g", node->id+1, blen[node->id]);
+      if (blen) sprintf (s1, "T%d:%.12g", node->id+1, blen[node->id]);
       else      sprintf (s1, "T%d", node->id+1);
     } else {
-      if (blen) sprintf (s1, "%d:%12.9g", node->id+1, blen[node->id]);
+      if (blen) sprintf (s1, "%d:%.12g", node->id+1, blen[node->id]);
       else      sprintf (s1, "%d", node->id+1);
     }
     str = strcat (str, s1); 
@@ -487,7 +489,7 @@ char *
 topology_to_string_by_name (const topology tree, double *blen)
 {
   char *str;
-  int size = 1 + tree->nnodes * 4, i;
+  int size = 1 + tree->nnodes * 3, i;
 
   if (!tree->taxlabel) return topology_to_string_by_id (tree, blen);
 
@@ -498,24 +500,25 @@ topology_to_string_by_name (const topology tree, double *blen)
   str = (char *) biomcmc_malloc (sizeof (char) * size);
   memset (str, '\0', sizeof (char) * size);
   topology_subtree_to_string_by_name (str, tree->root, (const char **) tree->taxlabel->string, blen);
+  str = strcat (str, ";");
   return str;
 }
 
 void
 topology_subtree_to_string_by_name (char *str, const topol_node node, const char **taxlabel, double *blen)
 {
-  char s1[32];
+  char s1[64];
   if (node->internal) { /* internal node */
     str = strcat (str, "(");
     topology_subtree_to_string_by_name (str, node->left, taxlabel, blen);
     str = strcat (str, ",");
     topology_subtree_to_string_by_name (str, node->right, taxlabel, blen);
-    if (blen) { sprintf (s1, "):%12.9g", blen[node->id]); str = strcat (str, s1); }
+    if (blen) { sprintf (s1, "):%.12g", blen[node->id]); str = strcat (str, s1); }
     else str = strcat (str,  ")");
   }
   else {
     str = strcat (str, taxlabel[node->id]);
-    if (blen) { sprintf (s1, ":%12.9g", blen[node->id]); str = strcat (str, s1); }
+    if (blen) { sprintf (s1, ":%.12g", blen[node->id]); str = strcat (str, s1); }
   }
 }
 

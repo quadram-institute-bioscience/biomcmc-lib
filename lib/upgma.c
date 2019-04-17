@@ -25,8 +25,6 @@ upgma_from_distance_matrix (topology tree, distance_matrix dist, bool single_lin
   /* tree->index is also used by quasi_randomise_topology(), and here we tell it the info was destroyed */
   tree->quasirandom = false;
   
-  if (!tree->blength) topology_malloc_blength (tree);
-
   gsize      = (double *) biomcmc_malloc (n_idx * sizeof (double)); /* number of leaves below node */
   height     = (double *) biomcmc_malloc (n_idx * sizeof (double)); /* distance from node to tips (ultrametric) */ 
   dst_by_row = (double *) biomcmc_malloc (n_idx * sizeof (double)); /* min value itself for each row */
@@ -139,8 +137,6 @@ bionj_from_distance_matrix (topology tree, distance_matrix dist)
 
   /* tree->index is also used by quasi_randomise_topology(), and here we tell it the info was destroyed */
   tree->quasirandom = false;
-  
-  if (!tree->blength) topology_malloc_blength (tree);
 
   delta = (double **) biomcmc_malloc (n_idx * sizeof (double*)); /* delta matrix with dists, variances and sums of distances */
   for (i=0; i < n_idx; i++) delta[i] = (double *) biomcmc_malloc (n_idx * sizeof (double));
