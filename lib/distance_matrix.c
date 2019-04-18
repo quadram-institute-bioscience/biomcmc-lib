@@ -175,3 +175,139 @@ del_spdist_matrix (spdist_matrix dist)
   free (dist);
 }
 
+void
+fill_species_dists_from_gene_dists (distance_matrix spdist, distance_matrix gendist, int *sp_id, bool use_upper_gene)
+{
+  int i, j, k, row, col, *freq;
+
+  freq = (int*) biomcmc_malloc (spdist->size * sizeof (int));
+  for (i = 0; i < spdist->size; i++) freq[i] = 0; /* species frequency for this gene */
+  for (i = 0; i < gendist->size; i++) freq[ sp_id[i] ]++; /* used to calculate mean */
+  for (i = 0; i < spdist->size; i++) {
+    for (j = 0; j <= i; j++)     spdist->d[i][j] = 0.; /* lower diag are mean values */
+    for (;j < spdist->size; j++) spdist->d[i][j] = 1.e35; /* upper diag are minimum values */
+  }
+  
+  for (j=1; j < gendist->size; j++) for (i=0; i < j; i++) if (sp_id[i] != sp_id[j]) {
+    if (sp_id[i] < sp_id[j]) { row = sp_id[i]; col = sp_id[j]; } /* [row][col] of sptree is upper triangular for minimum */
+    else                     { row = sp_id[j]; col = sp_id[i]; }
+    if (!use_upper_gene) { k = i; i = j; j = k; } /* then i should be larger than j -- swap values */
+    if (gendist->d[i][j] < spdist->d[row][col]) spdist->d[row][col] = gendist->d[i][j]; /* upper diag = minimum */
+    spdist->d[col][row] += gendist->d[i][j]; /* lower diag = mean */
+  }
+
+  for (i = 0; i < spdist->size; i++) for (j = 0; j < i; j++) if (freq[i] && freq[j]) spdist->d[i][j] /= (double)(freq[i] * freq[j]); 
+
+#ifdef BIOMCMC_PRINT_DEBUG
+  for (i=0; i < gendist->size; i++) printf ("spdistfromgene %d\t -> %d\n", i, sp_id[i]);
+  for (j=1; j < spdist->size; j++)  for (i=0; i < j; i++) 
+    printf ("spdistfromgene (%d\t%d)\t%lf\n", i, j, spdist->d[i][j]); 
+#endif
+  free (freq);
+}
+
+void
+update_species_dists_from_spdist (distance_matrix global, distance_matrix local, int *spexist)
+{ 
+  int i, j;
+  if (global->size != local->size) biomcmc_error ("species distance matrices have different sizes within and across loci");
+
+  for (i = 0; i < local->size; i++) for (j = 0; j < i; j++) if (spexist[i] && spexist[j]) { 
+    if (global->d[j][i] > local->d[j][i]) global->d[j][i] = local->d[j][i]; /* upper triangular => minimum */
+    global->d[i][j] += local->d[i][j]; /* just the sum; to have the mean we need to divide by representativity of each species across loci */
+    // // guenomu receives another matrix // if (counter) { counter->d[i][j] += 1.; counter->d[j][i] += 1.; }
+  }
+}
+
+int
+prepare_spdistmatrix_from_gene_species_map (spdist_matrix spdist, int *sp_id, int n_sp_id)
+{
+  int i, number_of_species_present_in_gene = 0;
+  for (i = 0; i < spdist->size; i++) spdist->species_present[i] = false; // update presence mask of species in gene 
+  for (i = 0; i < n_sp_id; i++) spdist->species_present[ sp_id[i] ] = true;
+  for (i = 0; i < spdist->size; i++) if (spdist->species_present[i]) number_of_species_present_in_gene++;
+  return number_of_species_present_in_gene;
+}
+
+void 
+fill_spdistmatrix_from_gene_dists (spdist_matrix spdist, distance_matrix gendist, int *sp_id, bool use_upper_gene)
+{ // more compact than functions above (which could be eliminated in future versions)
+  int i, j, i2, j2, idx, row, col, n_pairs = spdist->size*(spdist->size-1)/2;
+
+  for (i = 0; i < n_pairs; i++) {
+    spdist->mean[i] = 0;
+    spdist->min[i] = 1.e35;
+    spdist->count[i] = 0;
+  }
+  
+  for (j=1; j < gendist->size; j++) for (i=0; i < j; i++) if (sp_id[i] != sp_id[j]) {
+    if (sp_id[i] < sp_id[j]) { row = sp_id[i]; col = sp_id[j]; } /* make sure that row < col */
+    else                     { row = sp_id[j]; col = sp_id[i]; }
+    i2 = i; j2 = j;  // i2 < j2 if upper and i2 > j2 if lower diag is used
+    if (!use_upper_gene) { i2 = j; j2 = i; } /* then i2 should be larger than j2 -- swap values */
+    idx = col * (col-1)/2 + row; /* index in spdist */
+    if (gendist->d[i2][j2] < spdist->min[idx]) spdist->min[idx] = gendist->d[i2][j2];
+    spdist->mean[idx] += gendist->d[i2][j2];
+    spdist->count[idx]++;
+  }
+
+  for (i = 0; i < n_pairs; i++) if (spdist->count[i]) spdist->mean[i] /= spdist->count[i];
+  return;
+}
+
+void 
+fill_spdistmatrix_from_gene_dist_vector (spdist_matrix spdist, double *gdist, int n_gdist, int *sp_id)
+{ 
+  int i, j, idx_s, idx_g, row, col, n_pairs = spdist->size*(spdist->size-1)/2;
+
+  for (i = 0; i < n_pairs; i++) {
+    spdist->mean[i] = 0;
+    spdist->min[i] = DBL_MAX;
+    spdist->count[i] = 0;
+  }
+
+  for (j=1; j < n_gdist; j++) for (i=0; i < j; i++) if (sp_id[i] != sp_id[j]) {
+    if (sp_id[i] < sp_id[j]) { row = sp_id[i]; col = sp_id[j]; } /* make sure that row < col */
+    else                     { row = sp_id[j]; col = sp_id[i]; }
+    i2 = i; j2 = j;  // i2 < j2 if upper and i2 > j2 if lower diag is used
+    if (!use_upper_gene) { i2 = j; j2 = i; } /* then i2 should be larger than j2 -- swap values */
+    idx_s = (col * (col-1))/2 + row; /* index in spdist */
+    idx_g = (j * (j - 1))/2 + i; /* index in gene vector */
+    if (gdist[idx_g] < spdist->min[idx_s]) spdist->min[idx_s] = gdist[idx_g];
+    spdist->mean[idx_s] += gdist[idx_g];
+    spdist->count[idx_s]++;
+  }
+
+  for (i = 0; i < n_pairs; i++) if (spdist->count[i]) spdist->mean[i] /= spdist->count[i];
+  return;
+}
+
+void
+update_spdistmatrix_from_spdistmatrix (spdist_matrix global, spdist_matrix local)
+{ 
+  int i, j, idx;
+  if (global->size != local->size) biomcmc_error ("species spdist matrices have different sizes within and across loci");
+
+  for (j = 1; j < local->size; j++) for (i = 0; i < j; i++) if (local->species_present[i] && local->species_present[j]) { 
+    idx = j * (j-1) /2 + i; // index in 1D vector without diagonals (for diagonals replace -1 for +1 BTW) 
+    global->mean[idx] += local->mean[idx]; // global only stores average across locals (min => within locus)
+    global->min[idx] += local->min[idx];
+    global->count[idx]++;
+  }
+  for (i = 0; i < global->size; i++) global->species_present[i] |= local->species_present[i]; // overall presence of species 
+}
+
+/* 
+  How to use these functions for MRD (matrix repres with distances): < old way>
+1.  distance_matrix genedist = new_distance_matrix_for_topology (gene_topol->nleaves);
+2.  fill_distance_matrix_from_topology (genedist, gene_topol, NULL, true);
+3.  fill_spdistmatrix_from_gene_dists (pool->this_gene_spdist, genedist, idx_gene_to_species, true);
+4.  update_spdistmatrix_from_spdistmatrix (pool->d_total, pool->this_gene_spdist);
+5.  finalise_spdist_matrix (pool->d_total);
+6.  complete_missing_spdist_from_global_spdist (pool->d[i], pool->d_total);
+7.  copy_spdist_matrix_to_distance_matrix_upper (dist, pool->square_matrix, use_within_gf_means);
+
+  <new way> :  replaces 2D distance_matrix by 1D spdistmatrix, and uses branch lengths + internodal distances
+1: not needed; 2: spdistmatrix; 3: spdist to spdist
+*/
+

@@ -387,48 +387,63 @@ fill_distance_matrix_from_topology (distance_matrix dist, topology tree, double 
   //for (i=0;i<dist->size;i++) {for (j=0; j<dist->size;j++) printf("%12.10g ", dist->d[i][j]);printf (" DEBUG\n");}
 }
 
-void // STOPHERE 20190415
-patristic_distances_from_topology (distance_matrix dist, topology tree, double *blen, bool use_upper)
+void 
+patristic_distances_from_topology_to_vectors (topology tree, double *d_w, double *d_u, double tolerance)
 {
-  int i, j = 0, k, row, col;
-  if (dist->size > tree->nleaves) biomcmc_error ("distance matrix is smaller than number of leaves from tree");
+  int i, j = 0, k, row, col, *idx, *i_l, *i_r, onedim;
   if (!tree->traversal_updated) update_topology_traversal (tree);
+  double *fromroot_w = NULL, *fromroot_u = NULL, nodal_dist = 0.;
+
+  if (tolerance < 1e-15) tolerance = 1e-15; /* any branch length shorter than this will be assumed zero (multifurcation) */
+  fromroot_w = (double*) biomcmc_malloc ((2 * tree->nleaves - 1) * sizeof (double));
+  fromroot_u = (double*) biomcmc_malloc ((2 * tree->nleaves - 1) * sizeof (double));
+  idx = (int*) biomcmc_malloc ((5 * tree->nleaves - 2) * sizeof (int));/* |---idx---|---i_left---|---i_right---| used in Euler tour-like struct */
+  i_l = idx + tree->nleaves;
+  i_r = i_l + (2 * tree->nleaves - 1);
+
   /* STEP 1: find distances from every node to root */
-  if (!blen) for (i = 0; i < tree->nnodes; i++) dist->fromroot[i] = (double)(tree->nodelist[i]->level); /* level = nodal distance from root */
-  else {
-    dist->fromroot[ tree->root->id ] = 0.;
-    for (i = tree->nleaves-3; i >= 0; i--)  /* internal nodes */
-      dist->fromroot[ tree->postorder[i]->id ] = dist->fromroot[ tree->postorder[i]->up->id ] + blen[ tree->postorder[i]->id ];
-    for (i = 0; i < tree->nleaves; i++) /* external nodes (do not belong to postorder) */
-      dist->fromroot[ tree->nodelist[i]->id ] = dist->fromroot[ tree->nodelist[i]->up->id ] + blen[ tree->nodelist[i]->id ];
+  fromroot_u[ tree->root->id ] = fromroot_w[ tree->root->id ] = 0.;
+  for (i = tree->nleaves-3; i >= 0; i--) {  /* internal nodes */
+    nodal_dist = tree->blength[ tree->postorder[i]->id ] > tolerance ? 1. : 0.;
+    fromroot_w[ tree->postorder[i]->id ] = fromroot_w[ tree->postorder[i]->up->id ] + tree->blength[ tree->postorder[i]->id ];
+    fromroot_u[ tree->postorder[i]->id ] = fromroot_u[ tree->postorder[i]->up->id ] + nodal_dist;
   }
+  for (i = 0; i < tree->nleaves; i++) { /* external nodes (do not belong to postorder) */
+    nodal_dist = tree->blength[ tree->nodelist[i]->id ] > tolerance ? 1. : 0.;
+    fromroot_w[ tree->nodelist[i]->id ] = fromroot_w[ tree->nodelist[i]->up->id ] + tree->blength[ tree->nodelist[i]->id ];
+    fromroot_u[ tree->nodelist[i]->id ] = fromroot_u[ tree->nodelist[i]->up->id ] + nodal_dist;
+  }
+
   /* STEP 2: create tour in postorder so that we have subvectors with all leaves below it */
   j = 0;
   for (i = 0; i < tree->nleaves-1; i++) {
     /* for leaves: idx will have its id; and left and right will point to same idx position; j is for index positions  */
     if (!tree->postorder[i]->left->internal)  { 
-      dist->idx[j] = tree->postorder[i]->left->id; /* idx[] contain leaf "names" (ids actually) */  
-      dist->i_l[ tree->postorder[i]->left->id ] = dist->i_r[ tree->postorder[i]->left->id ] = j++; /* interval of leaves below, as idx indexes */
+      idx[j] = tree->postorder[i]->left->id; /* idx[] contain leaf "names" (ids actually) */  
+      i_l[ tree->postorder[i]->left->id ] = i_r[ tree->postorder[i]->left->id ] = j++; /* interval of leaves below, as idx indexes */
     }
     if (!tree->postorder[i]->right->internal) { 
-      dist->idx[j] = tree->postorder[i]->right->id; 
-      dist->i_l[ tree->postorder[i]->right->id ] = dist->i_r[ tree->postorder[i]->right->id ] = j++; /* interval of leaves below, as idx indexes */
+      idx[j] = tree->postorder[i]->right->id; 
+      i_l[ tree->postorder[i]->right->id ] = i_r[ tree->postorder[i]->right->id ] = j++; /* interval of leaves below, as idx indexes */
     }
-    dist->i_l[ tree->postorder[i]->id ] = dist->i_l[ tree->postorder[i]->left->id ]; 
-    dist->i_r[ tree->postorder[i]->id ] = dist->i_r[ tree->postorder[i]->right->id ]; /* this interval covers from leftest of left to rightest of right */
+    i_l[ tree->postorder[i]->id ] = i_l[ tree->postorder[i]->left->id ]; 
+    i_r[ tree->postorder[i]->id ] = i_r[ tree->postorder[i]->right->id ]; /* this interval covers from leftest of left to rightest of right */
   } 
   /* STEP 3: dist(A,B) = fromroot[A] + fromroot[B] - 2 * fromroot[mrca between A and B] (from STEP2 we know all A's and B's)*/
-  if (use_upper) for (i = 0; i < tree->nleaves; i++) for (j = i; j < tree->nleaves; j++) dist->d[i][j] = 0.;
-  else           for (i = 0; i < tree->nleaves; i++) for (j = 0; j <= i; j++)            dist->d[i][j] = 0.;
+  for (i = 0; i < ((tree->nleaves - 1) * tree->nleaves)/2; i++) d_w[i] = d_u[i] = 0.; 
 
   for (i = 0; i < tree->nleaves-1; i++) 
-    for (j = dist->i_l[tree->postorder[i]->left->id]; j <= dist->i_r[tree->postorder[i]->left->id]; j++)
-      for (k = dist->i_l[tree->postorder[i]->right->id]; k <= dist->i_r[tree->postorder[i]->right->id]; k++) {
-        row = dist->idx[j]; col = dist->idx[k];
-        if (((row > col) && use_upper) || ((row < col) && !use_upper)) { col = dist->idx[j]; row = dist->idx[k]; }
-        dist->d[row][col] = dist->fromroot[row] + dist->fromroot[col] - 2 * dist->fromroot[ tree->postorder[i]->id ]; 
+    for (j = i_l[tree->postorder[i]->left->id]; j <= i_r[tree->postorder[i]->left->id]; j++)
+      for (k = i_l[tree->postorder[i]->right->id]; k <= i_r[tree->postorder[i]->right->id]; k++) {
+        row = idx[j]; col = idx[k];
+        if (row > col) { col = idx[j]; row = idx[k]; }
+        onedim = (col * (col-1))/2 + row;
+        d_w[onedim] = fromroot_w[row] + fromroot_w[col] - 2 * fromroot_w[ tree->postorder[i]->id ];
+        d_u[onedim] = fromroot_u[row] + fromroot_u[col] - 2 * fromroot_u[ tree->postorder[i]->id ];
       }
-  //for (i=0;i<dist->size;i++) {for (j=0; j<dist->size;j++) printf("%12.10g ", dist->d[i][j]);printf (" DEBUG\n");}
+  if (fromroot_u) free (fromroot_u);
+  if (fromroot_w) free (fromroot_w);
+  if (idx) free (idx);
 }
 
 char *

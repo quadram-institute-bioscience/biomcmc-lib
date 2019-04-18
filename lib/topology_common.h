@@ -111,6 +111,10 @@ distance_matrix new_distance_matrix_for_topology (int nleaves);
 /*! \brief fill in distance_matrix with the patristic distances from topology (can be used with distinct branch length vectors to fill upper and lower diagonals */
 void fill_distance_matrix_from_topology (distance_matrix dist, topology tree, double *blen, bool use_upper);
 
+/*! \brief calculates patristic (weighted) and internodal (unweighted) distances returning directly to vectors d_w and d_u (externally allocated) 
+ * The 'tolerance' is the minimum branch length to be considered a multifurcation (length zero) */
+void patristic_distances_from_topology_to_vectors (topology tree, double *d_w, double *d_u, double tolerance);
+
 /*! \brief Print subtree in newick format to string using leaf IDs.
  *
  * Stores in string the tree in newick format, using leaf ID numbers (in practical applications needs a TRANSLATION 

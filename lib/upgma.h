@@ -25,13 +25,5 @@
 void upgma_from_distance_matrix (topology tree, distance_matrix dist, bool single_linkage);
 /*! \brief lowlevel bioNJ function (Gascuel and Cuong implementation) that depends on a topology and a matrix_distance */
 void bionj_from_distance_matrix (topology tree, distance_matrix dist) ;
-/*! \brief updates distances between species based on genes and gene-to-species mapping, with min on upper and mean on lower diagonal  */
-void fill_species_dists_from_gene_dists (distance_matrix spdist, distance_matrix gendist, int *sp_id, bool use_upper_gene);
-/*! \brief update global (over loci) species distances besed on local (within locus) species distances */
-void update_species_dists_from_spdist (distance_matrix global, distance_matrix local, int *spexist);
-
-int prepare_spdistmatrix_from_gene_species_map (spdist_matrix spdist, int *sp_id, int n_sp_id);
-void fill_spdistmatrix_from_gene_dists (spdist_matrix spdist, distance_matrix gendist, int *sp_id, bool use_upper_gene);
-void update_spdistmatrix_from_spdistmatrix (spdist_matrix global, spdist_matrix local);
 
 #endif

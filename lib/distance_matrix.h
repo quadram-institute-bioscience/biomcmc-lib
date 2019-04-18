@@ -13,6 +13,8 @@
 
 /*! \file distance_matrix.h
  *  \brief distance matrix, that can be used in alignments and trees, and patristic-distance based species distances
+ *  These functions don't know about trees/topologies: topology_common.c creates the actual patristic distances, and
+ *  downstream software or genetree.h should decide how to use this information
  */
 
 #ifndef _biomcmc_distance_matrix_h_
@@ -62,5 +64,17 @@ void finalise_spdist_matrix (spdist_matrix dist);
 void complete_missing_spdist_from_global_spdist (spdist_matrix local, spdist_matrix global);
 void copy_spdist_matrix_to_distance_matrix_upper (spdist_matrix spd, distance_matrix dist, bool use_means);
 void del_spdist_matrix (spdist_matrix dist);
+
+
+/*! \brief updates distances between species based on genes and gene-to-species mapping, with min on upper and mean on lower diagonal  */
+void fill_species_dists_from_gene_dists (distance_matrix spdist, distance_matrix gendist, int *sp_id, bool use_upper_gene);
+/*! \brief update global (over loci) species distances besed on local (within locus) species distances */
+void update_species_dists_from_spdist (distance_matrix global, distance_matrix local, int *spexist);
+
+int prepare_spdistmatrix_from_gene_species_map (spdist_matrix spdist, int *sp_id, int n_sp_id);
+void fill_spdistmatrix_from_gene_dists (spdist_matrix spdist, distance_matrix gendist, int *sp_id, bool use_upper_gene);
+/*! \brief initialise spdist_matrix with patristic distances from gdist vector of size n_gdist (1D) */
+void fill_spdistmatrix_from_gene_dist_vector (spdist_matrix spdist, double *gdist, int n_gdist, int *sp_id);
+void update_spdistmatrix_from_spdistmatrix (spdist_matrix global, spdist_matrix local);
 
 #endif
