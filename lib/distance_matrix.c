@@ -269,8 +269,6 @@ fill_spdistmatrix_from_gene_dist_vector (spdist_matrix spdist, double *gdist, in
   for (j=1; j < n_gdist; j++) for (i=0; i < j; i++) if (sp_id[i] != sp_id[j]) {
     if (sp_id[i] < sp_id[j]) { row = sp_id[i]; col = sp_id[j]; } /* make sure that row < col */
     else                     { row = sp_id[j]; col = sp_id[i]; }
-    i2 = i; j2 = j;  // i2 < j2 if upper and i2 > j2 if lower diag is used
-    if (!use_upper_gene) { i2 = j; j2 = i; } /* then i2 should be larger than j2 -- swap values */
     idx_s = (col * (col-1))/2 + row; /* index in spdist */
     idx_g = (j * (j - 1))/2 + i; /* index in gene vector */
     if (gdist[idx_g] < spdist->min[idx_s]) spdist->min[idx_s] = gdist[idx_g];
