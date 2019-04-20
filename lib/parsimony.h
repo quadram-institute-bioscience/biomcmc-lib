@@ -21,11 +21,11 @@
 
 #include "topology_common.h"
 
-typedef struct binary_matrix_parsimony_struct* binary_matrix_parsimony; 
+typedef struct binary_parsimony_datamatrix_struct* binary_parsimony_datamatrix; 
 typedef struct binary_parsimony_struct* binary_parsimony;
 
 /*! \brief used by matrix representation with parsimony (01 10 11 sequences) */
-struct binary_matrix_parsimony_struct {
+struct binary_parsimony_idatamatrix_struct {
   int ntax, nchar, i; /*!< \brief number of taxa, distinct sites (patterns), and index to current (last) column */
   bool **s;           /*!< \brief 1 (01) and 2 (10) are the two binary states, with 3 (11) being undetermined */
   int *freq;          /*!< \brief frequency of pattern. */
@@ -35,13 +35,13 @@ struct binary_matrix_parsimony_struct {
 
 struct binary_parsimony_struct {
   int *score;      /*!< \brief parsimony score per pattern */
-  binary_matrix_parsimony external, internal; /*!< \brief binary matrices for leaves and for internal nodes */
+  binary_parsimony_datamatrix external, internal; /*!< \brief binary matrices for leaves and for internal nodes */
   int ref_counter; /*!< \brief how many places have a pointer to this instance */
 };
 
-binary_matrix_parsimony new_binary_matrix_parsimony (int n_sequences);
-binary_matrix_parsimony new_binary_matrix_parsimony_fixed_length (int n_sequences, int n_sites);
-void del_binary_matrix_parsimony (binary_matrix_parsimony mrp);
+binary_parsimony_datamatrix new_binary_parsimony_datamatrix (int n_sequences);
+binary_parsimony_datamatrix new_binary_parsimony_datamatrix_fixed_length (int n_sequences, int n_sites);
+void del_binary_parsimony_datamatrix (binary_parsimony_datamatrix mrp);
 binary_parsimony new_binary_parsimony (int n_sequences);
 binary_parsimony new_binary_parsimony_fixed_length (int n_sequences, int n_sites);
 void del_binary_parsimony (binary_parsimony pars);

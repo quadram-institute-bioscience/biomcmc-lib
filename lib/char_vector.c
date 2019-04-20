@@ -66,6 +66,15 @@ new_char_vector (int nstrings)
   return vec;
 }
 
+void
+new_char_vector_from_valid_strings_char_vector (char_vector vec, int *valid, int n_valid)
+{
+  int i;
+  char_vector newvec = new_char_vector (n_valid);
+  for (i=0; i < n_valid; i++) char_vector_add_string (newvec, vec->string[ valid[i] ]);
+  return newvec;
+} 
+
 char_vector
 new_char_vector_fixed_length (int nstrings, int nchars)
 {
@@ -339,3 +348,49 @@ char_vector_link_address_if_identical (char_vector *v1, char_vector *v2)
   return true;
 }
 
+void // oldname: index_sptaxa_to_genetaxa
+index_species_gene_char_vectors (char_vector species, char_vector gene, int *sp_idx_in_gene, int *order_external)
+{ /* Don't need gene tree, just gene leaf names; alternative is to  use gene->rec instead of gene->rec->sp_id (int*) */
+  int i, j, n_index = gene->nstrings, *index, *sp_order;
+  
+  if (!order_external) {/* Search first largest species names (so that for example "ecoli" will match only if "ecoliII" doesn't) */
+    sp_order = (int*) biomcmc_malloc (species->nstrings * sizeof (int));
+    for (i=0; i < species->nstrings; i++) sp_order[i] = i;
+  } // assumes species char_vector is already ordered, unless order_external is present
+  else sp_order = order_external;
+
+  index = (int*) biomcmc_malloc (n_index * sizeof (int));
+  for (i=0; i < n_index; i++) { 
+    sp_idx_in_gene[i] = -1; /* initialize mapping */ 
+    index[i] = i;  /* scan gene leaves _without_ replacement */
+  }
+
+  for (i=0; i < species->nstrings; i++) for (j=0; j < n_index; j++) /* search sp name in all unmapped gene names */
+    if ((gene->nchars[index[j]] >= species->nchars[sp_order[i]]) && /* ordered species names (by nchars[]) */
+        (strcasestr (gene->string[index[j]], species->string[sp_order[i]]))) { 
+      /* found species name within gene name; we have a mapping */
+      sp_idx_in_gene[ index[j] ] = sp_order[i];
+      index[j] = index[--n_index]; // with this the whole search takes O(N ln N),
+      j--; // index[j] is now a distinct element (the last)
+    }
+
+  if (n_index) {
+    fprintf (stderr, "Couldn't find species for genes:\n");
+    for (i=0; i < n_index; i++) fprintf (stderr, " \"%s\"\n", gene->string[index[i]]);
+    biomcmc_error ("gene names should contain the name of species");
+  }
+
+  if (!order_external) if (sp_order) free (sp_order); // only if not external (o.w. will delete it)
+  if (index) free (index);
+}
+
+void
+update_species_count_from_gene_char_vector (char_vector species, char_vector gene, int *sp_count)
+{
+  int *idx_gene_to_sp, i;
+  idx_gene_to_sp = (int *) biomcmc_malloc (gene->nstrings * sizeof (int));
+  index_species_gene_char_vectors (species, gene, idx_gene_to_sp, NULL); /* map species names to gene names and store into idx[] */
+  for (i = 0; i < gene->nstrings; i++) sp_count[ idx_gene_to_sp[i] ]++; /* update species frequencies */
+  if (idx_gene_to_sp) free (idx_gene_to_sp);
+  return;
+}

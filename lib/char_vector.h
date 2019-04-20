@@ -35,7 +35,8 @@ struct char_vector_struct
 
 /*! \brief Create a vector of strings with initial size for each string of zero */
 char_vector new_char_vector (int nstrings);
-
+/*! \brief Create a vector of strings from subset of strings of another char_vector */
+void new_char_vector_from_valid_strings_char_vector (char_vector vec, int *valid, int n_valid); 
 /*! \brief Create a vector of strings where each string is assigned an initial value of nchars */
 char_vector new_char_vector_fixed_length (int nstrings, int nchars);
 
@@ -76,5 +77,12 @@ void char_vector_reduce_to_valid_strings (char_vector vec, int *valid, int n_val
 void char_vector_reorder_by_size_or_lexicographically (char_vector vec, bool lexico, int *order);
 /*! \brief If the two char_vectors are identical (same strings in same order), then delete one and make it point to the other one */
 bool char_vector_link_address_if_identical (char_vector *v1, char_vector *v2);
+/*! \brief find occurences of species->string[] inside gene->string[] filling indexes in sp_idx_in_gene.
+ *
+ *  The species are taxon names which may be associated with topologies or alignments, such that we can not reorder its
+ *  elements here (without also modifing e.g. tree leaves). But ordering from longer to shorter is essential for pattern finding, 
+ *  so it is assumed that the char_vector is already sorted UNLESS user provides the ordering. */ 
+void index_species_gene_char_vectors (char_vector species, char_vector gene, int *sp_idx_in_gene, int *order_external);
+void update_species_count_from_gene_char_vector (char_vector species, char_vector gene, int *sp_count);
 
 #endif

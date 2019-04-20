@@ -81,42 +81,6 @@ del_reconciliation (reconciliation r)
 }
 
 void
-reconciliation_index_sptaxa_to_genetaxa (char_vector species, char_vector gene, int *sp_idx_in_gene, int *order_external)
-{ /* Don't need gene tree, just gene leaf names; alternative is to  use gene->rec instead of gene->rec->sp_id (int*) */
-  int i, j, n_index = gene->nstrings, *index, *sp_order;
-  
-  if (!order_external) {/* Search first largest species names (so that for example "ecoli" will match only if "ecoliII" doesn't) */
-    sp_order = (int*) biomcmc_malloc (species->nstrings * sizeof (int));
-    for (i=0; i < species->nstrings; i++) sp_order[i] = i;
-  }
-  else sp_order = order_external;
-
-  index = (int*) biomcmc_malloc (n_index * sizeof (int));
-  for (i=0; i < n_index; i++) { 
-    sp_idx_in_gene[i] = -1; /* initialize mapping */ 
-    index[i] = i;  /* scan gene leaves _without_ replacement */
-  }
-
-  for (i=0; i < species->nstrings; i++) for (j=0; j < n_index; j++) /* search sp name in all unmapped gene names */
-    if ((gene->nchars[index[j]] >= species->nchars[sp_order[i]]) && /* ordered species names (by nchars[]) */
-        (strcasestr (gene->string[index[j]], species->string[sp_order[i]]))) { 
-      /* found species name within gene name; we have a mapping */
-      sp_idx_in_gene[ index[j] ] = sp_order[i];
-      index[j] = index[--n_index]; // with this the whole search takes O(N ln N),
-      j--; // index[j] is now a distinct element (the last)
-    }
-
-  if (n_index) {
-    fprintf (stderr, "Couldn't find species for genes:\n");
-    for (i=0; i < n_index; i++) fprintf (stderr, " \"%s\"\n", gene->string[index[i]]);
-    biomcmc_error ("gene names should contain the name of species");
-  }
-
-  if (!order_external) if (sp_order) free (sp_order); // only if not external (o.w. will delete it)
-  if (index) free (index);
-}
-
-void
 initialize_reconciliation_sp_count (reconciliation rec, int n_sp, int n_idx)
 {
   int i; /* rec->sp_id[i] is the species index for gene i */

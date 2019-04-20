@@ -27,13 +27,6 @@ reconciliation new_reconciliation_from_reconciliation (int gene_nleaves, int sp_
 /*! \brief release allocated memory for reconciliation_struct */
 void del_reconciliation (reconciliation r);
 
-/*! \brief find occurences of species->string[] inside gene->string[] filling indexes in sp_idx_in_gene.
- *
- *  The species are taxon names which may be associated with topologies or alignments, such that we can not reorder its
- *  elements here (without also modifing e.g. tree leaves). But ordering from longer to shorter is essential for pattern finding, 
- *  so it is assumed that the char_vector is already sorted UNLESS user provides the ordering. */ 
-void reconciliation_index_sptaxa_to_genetaxa (char_vector species, char_vector gene, int *sp_idx_in_gene, int *order_external);
-
 /*! \brief Fill rec->sp_count[] with the number of representatives of each species (idexed by rec->sp_id[]) */
 void initialize_reconciliation_sp_count (reconciliation rec, int n_sp, int n_idx);
 
