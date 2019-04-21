@@ -267,6 +267,8 @@ fill_spdistmatrix_from_gene_dist_vector (spdist_matrix spdist, double *gdist, in
     spdist->min[i] = DBL_MAX;
     spdist->count[i] = 0;
   }
+  for (i = 0; i < spdist->size; i++) spdist->species_present[i] = false; 
+  for (i = 0; i < n_gdist; i++) spdist->species_present[ sp_id[i] ] = true;
 
   for (j=1; j < n_gdist; j++) for (i=0; i < j; i++) if (sp_id[i] != sp_id[j]) {
     if (sp_id[i] < sp_id[j]) { row = sp_id[i]; col = sp_id[j]; } /* make sure that row < col */
@@ -289,7 +291,7 @@ update_spdistmatrix_from_spdistmatrix (spdist_matrix global, spdist_matrix local
   if (global->size != local->size) biomcmc_error ("species spdist matrices have different sizes within and across loci");
 
   for (j = 1; j < local->size; j++) for (i = 0; i < j; i++) if (local->species_present[i] && local->species_present[j]) { 
-    idx = j * (j-1) /2 + i; // index in 1D vector without diagonals (for diagonals replace -1 for +1 BTW) 
+    idx = (j * (j-1)) /2 + i; // index in 1D vector without diagonals (for diagonals replace -1 for +1 BTW) 
     global->mean[idx] += local->mean[idx]; // global only stores average across locals (min => within locus)
     global->min[idx] += local->min[idx];
     global->count[idx]++;
