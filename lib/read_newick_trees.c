@@ -198,6 +198,14 @@ update_newick_space_from_string (newick_space nwk, char *tree_string, size_t str
   return;
 }
 
+void
+update_newick_space_from_topology (newick_space nwk, topology topol)
+{
+  nwk->t = (topology*) biomcmc_realloc ((topology*) nwk->t, sizeof (topology) * (nwk->ntrees + 1));
+  nwk->t[nwk->ntrees++] = topol;
+  topol->ref_counter++;
+}
+
 int
 estimate_treesize_from_file (char *seqfilename)
 {

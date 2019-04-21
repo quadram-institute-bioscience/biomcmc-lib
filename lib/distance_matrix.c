@@ -94,19 +94,20 @@ new_spdist_matrix (int n_species)
   dist->count = (int*)    biomcmc_malloc (n_pairs * sizeof (int));
   dist->species_present = (bool*) biomcmc_malloc (n_species * sizeof (bool));
   for (i=0; i < n_pairs; i++) {
-    dist->mean[i] = 0.; dist->min[i] = 1.e35; dist->count[i] = 0;
+    dist->mean[i] = 0.; dist->min[i] = DBL_MAX; dist->count[i] = 0;
   }
   for (i=0; i < n_species; i++) dist->species_present[i] = false;
   return dist;
 }
 
 void
-zero_all_spdist_matrix (spdist_matrix dist)
+zero_all_spdist_matrix (spdist_matrix dist, bool is_global)
 { /* zero both mean and min, since assumes this is across loci (and only means are accounted) */
-  int i, n_pairs = (dist->size - 1)*(dist->size)/2;
+  int i, n_pairs = (dist->size - 1)*(dist->size)/2, min_value = DBL_MAX;
+  if (is_global) min_value = 0.
   dist->n_missing = n_pairs; // number of missing comparisons
   for (i=0; i < n_pairs; i++) {
-    dist->mean[i] = 0.; dist->min[i] = 0.; dist->count[i] = 0;
+    dist->mean[i] = 0.; dist->min[i] = min_value; dist->count[i] = 0;
   }
   for (i=0; i < dist->size; i++) dist->species_present[i] = false;
   return;
@@ -116,7 +117,7 @@ void
 finalise_spdist_matrix (spdist_matrix dist)
 { /* calculate averages across loci over within-locus means and within-locus mins */
   int i, n_pairs = (dist->size - 1)*(dist->size)/2;
-  double max_mean = -1.e35, max_min = -1.e35;
+  double max_mean = DBL_MIN, max_min = DBL_MIN;
   for (i=0; i < n_pairs; i++) if (dist->count[i]) {
     dist->n_missing--; // one less missing pairwise comparison
     dist->mean[i] /= (double)(dist->count[i]);
@@ -130,8 +131,8 @@ finalise_spdist_matrix (spdist_matrix dist)
     dist->min[i] /= max_min;
   }
   if (dist->n_missing) for (i=0; i < n_pairs; i++) if (! dist->count[i]) {
-    dist->mean[i] = 1.00001;
-    dist->min[i]  = 1.00001;
+    dist->mean[i] = 1.0001;
+    dist->min[i]  = 1.0001;
   }
 }
 
@@ -150,7 +151,7 @@ complete_missing_spdist_from_global_spdist (spdist_matrix local, spdist_matrix g
 
 void
 copy_spdist_matrix_to_distance_matrix_upper (spdist_matrix spd, distance_matrix dist, bool use_means)
-{ /* UPGMA< bioNJ work with upper diagonal of a square distance matrix */
+{ /* UPGMA, bioNJ work with upper diagonal of a square distance matrix */
 // upper diagonal --> i < j in d[i][j]; index in 1d vector--> j(j-1)/2 + i 
   int i,j;
   double *sp_dist = spd->min; // default is to use min dists

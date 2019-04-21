@@ -39,6 +39,7 @@ topology new_single_topology_from_newick_file (char *filename);
 newick_space new_newick_space_from_file (char *filename);
 void update_newick_space_from_file (newick_space nwk, char *filename);
 void update_newick_space_from_string (newick_space nwk, char *tree_string, size_t string_size);
+void update_newick_space_from_topology (newick_space nwk, topology topol);
 
 /*! \brief Quickly counts the number of leaves in a tree file, without storing any info. Assumes file and trees are well-formed */
 int estimate_treesize_from_file (char *seqfilename);
