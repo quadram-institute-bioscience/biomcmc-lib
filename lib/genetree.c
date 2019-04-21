@@ -51,7 +51,7 @@ new_genetree (topology gene, speciestree sptre)
   for (i=0; i < NDISTS; i++) { gtre->minmax[i] = INT32_MAX;  gtre->minmax[i + NDISTS] = INT32_MIN; }
  
   gtre->rec = new_reconciliation (gtre->t->nleaves, sptre->t->nleaves);
-  reconciliation_index_sptaxa_to_genetaxa (sptre->t->taxlabel, gene->taxlabel, gtre->rec->sp_id, sptre->spnames_order);
+  index_species_gene_char_vectors (sptre->t->taxlabel, gene->taxlabel, gtre->rec->sp_id, sptre->spnames_order);
   initialize_reconciliation_sp_count (gtre->rec, sptre->t->taxlabel->nstrings, gene->nleaves);
   initialize_reconciliation_from_new_species_tree (gtre, sptre); // points to current sptree and updates node pointers
   gtre->split = new_splitset_genespecies (gene, sptre->t, gtre->rec);

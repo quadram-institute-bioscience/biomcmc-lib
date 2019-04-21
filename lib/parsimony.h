@@ -25,7 +25,7 @@ typedef struct binary_parsimony_datamatrix_struct* binary_parsimony_datamatrix;
 typedef struct binary_parsimony_struct* binary_parsimony;
 
 /*! \brief used by matrix representation with parsimony (01 10 11 sequences) */
-struct binary_parsimony_idatamatrix_struct {
+struct binary_parsimony_datamatrix_struct {
   int ntax, nchar, i; /*!< \brief number of taxa, distinct sites (patterns), and index to current (last) column */
   bool **s;           /*!< \brief 1 (01) and 2 (10) are the two binary states, with 3 (11) being undetermined */
   int *freq;          /*!< \brief frequency of pattern. */

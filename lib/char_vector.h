@@ -36,7 +36,7 @@ struct char_vector_struct
 /*! \brief Create a vector of strings with initial size for each string of zero */
 char_vector new_char_vector (int nstrings);
 /*! \brief Create a vector of strings from subset of strings of another char_vector */
-void new_char_vector_from_valid_strings_char_vector (char_vector vec, int *valid, int n_valid); 
+char_vector new_char_vector_from_valid_strings_char_vector (char_vector vec, int *valid, int n_valid); 
 /*! \brief Create a vector of strings where each string is assigned an initial value of nchars */
 char_vector new_char_vector_fixed_length (int nstrings, int nchars);
 

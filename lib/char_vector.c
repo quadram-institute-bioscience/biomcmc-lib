@@ -66,7 +66,7 @@ new_char_vector (int nstrings)
   return vec;
 }
 
-void
+char_vector
 new_char_vector_from_valid_strings_char_vector (char_vector vec, int *valid, int n_valid)
 {
   int i;

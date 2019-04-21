@@ -103,8 +103,9 @@ new_spdist_matrix (int n_species)
 void
 zero_all_spdist_matrix (spdist_matrix dist, bool is_global)
 { /* zero both mean and min, since assumes this is across loci (and only means are accounted) */
-  int i, n_pairs = (dist->size - 1)*(dist->size)/2, min_value = DBL_MAX;
-  if (is_global) min_value = 0.
+  int i, n_pairs = (dist->size - 1)*(dist->size)/2;
+  double min_value = DBL_MAX;
+  if (is_global) min_value = 0.;
   dist->n_missing = n_pairs; // number of missing comparisons
   for (i=0; i < n_pairs; i++) {
     dist->mean[i] = 0.; dist->min[i] = min_value; dist->count[i] = 0;
