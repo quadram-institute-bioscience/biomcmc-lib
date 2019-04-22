@@ -83,7 +83,7 @@ spdist_matrix
 new_spdist_matrix (int n_species)
 {
   spdist_matrix dist;
-  int i, n_pairs = (n_species - 1)*(n_species)/2;
+  int i, n_pairs = (n_species*(n_species-1))/2;
 
   dist = (spdist_matrix) biomcmc_malloc (sizeof (struct spdist_matrix_struct));
   dist->ref_counter = 1;
@@ -101,14 +101,12 @@ new_spdist_matrix (int n_species)
 }
 
 void
-zero_all_spdist_matrix (spdist_matrix dist, bool is_global)
+zero_all_spdist_matrix (spdist_matrix dist)
 { /* zero both mean and min, since assumes this is across loci (and only means are accounted) */
-  int i, n_pairs = (dist->size - 1)*(dist->size)/2;
-  double min_value = DBL_MAX;
-  if (is_global) min_value = 0.;
+  int i, n_pairs = (dist->size * (dist->size - 1))/2;
   dist->n_missing = n_pairs; // number of missing comparisons
   for (i=0; i < n_pairs; i++) {
-    dist->mean[i] = 0.; dist->min[i] = min_value; dist->count[i] = 0;
+    dist->mean[i] = 0.; dist->min[i] = 0.; dist->count[i] = 0;
   }
   for (i=0; i < dist->size; i++) dist->species_present[i] = false;
   return;
@@ -117,7 +115,7 @@ zero_all_spdist_matrix (spdist_matrix dist, bool is_global)
 void
 finalise_spdist_matrix (spdist_matrix dist)
 { /* calculate averages across loci over within-locus means and within-locus mins */
-  int i, n_pairs = (dist->size - 1)*(dist->size)/2;
+  int i, n_pairs = (dist->size *(dist->size -1))/2;
   double max_mean = DBL_MIN, max_min = DBL_MIN;
   for (i=0; i < n_pairs; i++) if (dist->count[i]) {
     dist->n_missing--; // one less missing pairwise comparison
@@ -140,7 +138,7 @@ finalise_spdist_matrix (spdist_matrix dist)
 void
 complete_missing_spdist_from_global_spdist (spdist_matrix local, spdist_matrix global)
 {
-  int i, n_pairs = (local->size - 1)*(local->size)/2;
+  int i, n_pairs = (local->size*(local->size-1))/2;
   for (i = 0; i < n_pairs; i++) if (! local->count[i]) {
     local->mean[i] = global->mean[i];
     local->min[i] = global->min[i];
@@ -159,7 +157,7 @@ copy_spdist_matrix_to_distance_matrix_upper (spdist_matrix spd, distance_matrix 
 
   if (spd->size != dist->size) biomcmc_error ("distance matrix for NJ and species-based spdist_matrix have different sizes\n");
   if (use_means) sp_dist = spd->mean; /* alternative to use one or another would be to fill both lower and upper of dist (but a biy more expensive later to transpose) */
-  for (j = 1; j < spd->size; j++) for (i = 0; i < j; i++) dist->d[i][j] = sp_dist[ (j * (j-1) / 2 + i) ];
+  for (j = 1; j < spd->size; j++) for (i = 0; i < j; i++) dist->d[i][j] = sp_dist[ ((j * (j-1)) / 2 + i) ];
   return;
 }
 
@@ -310,6 +308,8 @@ update_spdistmatrix_from_spdistmatrix (spdist_matrix global, spdist_matrix local
 7.  copy_spdist_matrix_to_distance_matrix_upper (dist, pool->square_matrix, use_within_gf_means);
 
   <new way> :  replaces 2D distance_matrix by 1D spdistmatrix, and uses branch lengths + internodal distances
-1: not needed; 2: spdistmatrix; 3: spdist to spdist
+    index_species_gene_char_vectors (species_names, g_nwk->t[i]->taxlabel, sp_idx_in_gene, NULL);
+    zero_all_spdist_matrix (dm_local, false);
+    fill_spdistmatrix_from_gene_dist_vector (dm_local, d_w, g_nwk->t[i]->nleaves, sp_idx_in_gene);
 */
 

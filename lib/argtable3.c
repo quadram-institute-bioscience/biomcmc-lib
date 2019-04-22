@@ -3841,18 +3841,16 @@ void arg_free(void * *argtable)
 }
 
 /* frees each non-NULL element of argtable[], where n is the size of the number of entries in the array */
-void arg_freetable(void * *argtable, size_t n)
+void arg_freetable(void** argtable, size_t n)
 {
-    struct arg_hdr * *table = (struct arg_hdr * *)argtable;
-    size_t tabindex = 0;
-    /*printf("arg_freetable(%p)\n",argtable);*/
-    for (tabindex = 0; tabindex < n; tabindex++)
-    {
-        if (table[tabindex] == NULL)
-            continue;
-
-        free(table[tabindex]);
-        table[tabindex] = NULL;
-    };
+  struct arg_hdr** table = (struct arg_hdr**)argtable;
+  size_t tabindex = 0;
+  for (tabindex = 0; tabindex < n; tabindex++) {
+    if (table[tabindex] != NULL) {
+      free(table[tabindex]);
+      table[tabindex] = NULL;
+    }
+  }
+  if (argtable) free (argtable);
 }
 

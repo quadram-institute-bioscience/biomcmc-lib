@@ -404,12 +404,12 @@ patristic_distances_from_topology_to_vectors (topology tree, double *d_w, double
   /* STEP 1: find distances from every node to root */
   fromroot_u[ tree->root->id ] = fromroot_w[ tree->root->id ] = 0.;
   for (i = tree->nleaves-3; i >= 0; i--) {  /* internal nodes */
-    nodal_dist = tree->blength[ tree->postorder[i]->id ] > tolerance ? 1. : 0.;
+    nodal_dist = (tree->blength[ tree->postorder[i]->id ] > tolerance) ? 1. : 0.;
     fromroot_w[ tree->postorder[i]->id ] = fromroot_w[ tree->postorder[i]->up->id ] + tree->blength[ tree->postorder[i]->id ];
     fromroot_u[ tree->postorder[i]->id ] = fromroot_u[ tree->postorder[i]->up->id ] + nodal_dist;
   }
   for (i = 0; i < tree->nleaves; i++) { /* external nodes (do not belong to postorder) */
-    nodal_dist = tree->blength[ tree->nodelist[i]->id ] > tolerance ? 1. : 0.;
+    nodal_dist = (tree->blength[ tree->nodelist[i]->id ] > tolerance) ? 1. : 0.;
     fromroot_w[ tree->nodelist[i]->id ] = fromroot_w[ tree->nodelist[i]->up->id ] + tree->blength[ tree->nodelist[i]->id ];
     fromroot_u[ tree->nodelist[i]->id ] = fromroot_u[ tree->nodelist[i]->up->id ] + nodal_dist;
   }
