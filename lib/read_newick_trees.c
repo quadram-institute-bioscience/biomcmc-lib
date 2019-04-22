@@ -394,6 +394,13 @@ read_branch_length (char *right_string_ptr)
   else return branch;
 }
 
+void prtdbg (char *string, int start, int end) { // not declared above since just debugging tool
+  int i; 
+  printf(" <<");
+  for (i=start; i<=end;i++) printf ("%c",string[i]); 
+  printf(">> ");
+}
+
 int 
 number_of_leaves_in_newick (char **string)
 {
@@ -403,7 +410,9 @@ number_of_leaves_in_newick (char **string)
   char current;
 
   if (*(*string + len - 1) == ';') *(*string + len - 1) = '\0';
+  //printf ("\nDEBUG1:: <<%s>>\n", *string); 
   remove_multifurcations_newick (string, 0, (size_t) len, 0); // will resolve all (<2048) polytomies
+  //printf ("\nDEBUG2:: <<%s>>\n", *string); 
   len = strlen (*string); // updated
   for (i = 0; i < len; i++) {
     current = (*string)[i];
@@ -412,15 +421,8 @@ number_of_leaves_in_newick (char **string)
     else if (current == ')') nclose++; 
     else if (current == ':') has_branches++;
   }
-  if (nopen != nclose || ncommas > 2 || ncommas < 1) biomcmc_error ("%d %d %d Invalid tree structure n_leaves_newick(): %s", nopen, nclose, ncommas, *string);
+  if (nopen != nclose || ncommas > 2 || ncommas < 1) biomcmc_error ("%d %d %d Invalid tree structure n_leaves_newick(): <<%s>>", nopen, nclose, ncommas, *string);
   return nopen + 1;
-}
-
-void prtdbg (char *string, int start, int end) { // not declared above since just debugging tool
-  int i; 
-  printf(" <<");
-  for (i=start; i<=end;i++) printf ("%c",string[i]); 
-  printf(">> ");
 }
 
 size_t 
@@ -472,8 +474,8 @@ create_new_bifurcation_newick (char **string, size_t i_left, size_t comma_locati
   flen1 = strlen(fixed[1]);
 
   //*string = (char *) biomcmc_realloc ((char*) (*string), sizeof (char) * (len + flen0 + flen1));
-  tstring = (char *) biomcmc_malloc (sizeof (char) * (len + flen0 + flen1));
-  memset (tstring, '\0',  sizeof (char) * (len + flen0 + flen1)); 
+  tstring = (char *) biomcmc_malloc (sizeof (char) * (len + flen0 + flen1 + 1));
+  memset (tstring, '\0',  sizeof (char) * (len + flen0 + flen1 + 1)); 
   next = tstring;
   memcpy (next, *string, i_left); next += i_left;
   memcpy (next, fixed[0], flen0); next += flen0;
