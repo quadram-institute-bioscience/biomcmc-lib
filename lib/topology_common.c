@@ -150,7 +150,7 @@ copy_topology_from_topology (topology to_tree, topology from_tree)
     to_tree->nodelist[i]->sister = to_tree->nodelist[from_tree->nodelist[i]->sister->id];
   } // for (nnodes)
   
-  if (from_tree->blength) {
+  if (from_tree->blength) { // FIXME: from_tree may have _extra_ blens or not 
     if (!to_tree->blength) to_tree->blength = (double*) biomcmc_malloc (3 * from_tree->nnodes * sizeof (double));
     for (i = 0; i < 3 * from_tree->nnodes; i++) to_tree->blength[i] = from_tree->blength[i];
   }

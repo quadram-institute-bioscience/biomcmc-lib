@@ -22,15 +22,17 @@ new_binary_parsimony_datamatrix (int n_sequences)
 {
   int i; 
   binary_parsimony_datamatrix mrp;
-  
+
   mrp = (binary_parsimony_datamatrix) biomcmc_malloc (sizeof (struct binary_parsimony_datamatrix_struct));
   mrp->ntax  = n_sequences;
   mrp->nchar = mrp->i = 0;
   mrp->ref_counter = 1;
+  mrp->freq_sum = 0;
   mrp->s = (bool**) biomcmc_malloc(mrp->ntax * sizeof (bool*)); 
   for (i = 0; i < mrp->ntax; i++)  mrp->s[i] = NULL; 
   mrp->freq = NULL;
   mrp->col_hash = NULL;
+  mrp->occupancy = NULL;
 
   return mrp;
 }
@@ -44,8 +46,9 @@ new_binary_parsimony_datamatrix_fixed_length (int n_sequences, int n_sites)
 
   mrp->freq = (int*) biomcmc_malloc (mrp->nchar * sizeof (int)); 
   mrp->col_hash = (uint32_t*) biomcmc_malloc (mrp->nchar * sizeof (uint32_t)); 
+  mrp->occupancy = (int*) biomcmc_malloc (mrp->nchar * sizeof (int)); 
   for (i = 0; i < mrp->ntax; i++)  mrp->s[i] = (bool*) biomcmc_malloc(mrp->nchar * sizeof (bool)); 
-  for (i = 0; i < mrp->nchar; i++) mrp->freq[i] = 0;
+  for (i = 0; i < mrp->nchar; i++) mrp->freq[i] = mrp->occupancy[i] = 0;
 
   return mrp;
 }
@@ -62,6 +65,7 @@ del_binary_parsimony_datamatrix (binary_parsimony_datamatrix mrp)
     if (mrp->s) free (mrp->s);
     if (mrp->freq) free (mrp->freq);
     if (mrp->col_hash) free (mrp->col_hash);
+    if (mrp->occupancy) free (mrp->occupancy);
     free (mrp);
   }
 }
@@ -88,6 +92,7 @@ new_binary_parsimony_fixed_length (int n_sequences, int n_sites)
   pars->internal = new_binary_parsimony_datamatrix_fixed_length (n_sequences - 1, n_sites);
   if (pars->internal->freq) free (pars->internal->freq);
   if (pars->internal->col_hash) free (pars->internal->col_hash);
+  if (pars->internal->occupancy) free (pars->internal->occupancy);
   pars->score = (int*) biomcmc_malloc (pars->external->nchar * sizeof (int));
   return pars;
 }
@@ -117,13 +122,15 @@ update_binary_parsimony_from_topology (binary_parsimony pars, topology t, int *m
   for (i=0; i < t->nleaves-3; i++) { // [n-2] is root; [n-3] is leaf or redundant 
     for (j=0; j < mrp->ntax; j++) mrp->s[j][mrp->i] = 3U; // all seqs are 'N' at first (a.k.a. {0,1}) -> absent from t in the end
     for (j=0; j < t->nleaves; j++) mrp->s[map[j]][mrp->i] = 1U; // species present in t start as {0}
-    bipartition_copy (bp, t->postorder[i]->split);
-    bipartition_flip_to_smaller_set (bp); // not essencial, but helps finding same split in diff trees
-    bipartition_to_int_vector (bp, ones, bp->n_ones); // n_ones=max number of ones to check (in this case, all of them)
-    for (j=0; j < bp->n_ones; j++) mrp->s[map[ones[j]]][mrp->i] = 2U; // these species present in t are then {1} 
-    update_binary_parsimony_datamatrix_column_if_new (mrp);
-    if (mrp->i > mrp->nchar) biomcmc_error ("The function calling parsimony underestimated the total number of columns (tree sizes)");
+  bipartition_copy (bp, t->postorder[i]->split);
+  bipartition_flip_to_smaller_set (bp); // not essencial, but helps finding same split in diff trees
+  bipartition_to_int_vector (bp, ones, bp->n_ones); // n_ones=max number of ones to check (in this case, all of them)
+  for (j=0; j < bp->n_ones; j++) mrp->s[map[ones[j]]][mrp->i] = 2U; // these species present in t are then {1} 
+  mrp->occupancy[mrp->i] = t->nleaves; // completeness (# species represented in bipartition)
+  update_binary_parsimony_datamatrix_column_if_new (mrp);
+  if (mrp->i > mrp->nchar) biomcmc_error ("The function calling parsimony underestimated the total number of columns (tree sizes)");
   }
+  pars->external->freq_sum += t->nleaves-3; 
   del_bipartition (bp);
   if (ones) free (ones);
 }
@@ -131,15 +138,16 @@ update_binary_parsimony_from_topology (binary_parsimony pars, topology t, int *m
 void
 update_binary_parsimony_length (binary_parsimony pars, int new_columns_size)
 {
-  int i, new_size = pars->external->i + new_columns_size;
+  int i, new_size = pars->external->i + new_columns_size + 1;
   pars->external->nchar = pars->internal->nchar = new_size;
   pars->score = (int*) biomcmc_realloc ((int*) pars->score, new_size * sizeof (int));
   pars->external->freq = (int*) biomcmc_realloc ((int*) pars->external->freq, new_size * sizeof (int));
   pars->external->col_hash = (uint32_t*) biomcmc_realloc ((uint32_t*) pars->external->col_hash, new_size * sizeof (uint32_t));
- // notice that internal->freq and internal->col_hash are NOT updated (should be NULL); external->ntax != internal->nchar
+  pars->external->occupancy = (int*) biomcmc_realloc ((int*) pars->external->occupancy, new_size * sizeof (int));
+  // notice that internal->freq and internal->col_hash are NOT updated (should be NULL); external->ntax != internal->nchar
   for (i = 0; i < pars->external->ntax; i++) pars->external->s[i] = (bool*) biomcmc_realloc((bool*) pars->external->s[i], new_size * sizeof (bool)); 
   for (i = 0; i < pars->internal->ntax; i++) pars->internal->s[i] = (bool*) biomcmc_realloc((bool*) pars->internal->s[i], new_size * sizeof (bool));
-  for (i = pars->external->i; i < new_size; i++) pars->external->freq[i] = 0;
+  for (i = pars->external->i; i < new_size; i++) pars->external->freq[i] = pars->external->occupancy[i] = 0;
 }
 
 void    
@@ -148,7 +156,8 @@ update_binary_parsimony_datamatrix_column_if_new (binary_parsimony_datamatrix mr
   int i, j;
   uint32_t hashv = hash_value_of_binary_parsimony_datamatrix_column (mrp, mrp->i);
 
-  for (i=0; i < mrp->i; i++) if (hashv == mrp->col_hash[i]) { // same hash value; identical or collision
+  for (i=0; i < mrp->i; i++) if ((hashv == mrp->col_hash[i]) && (mrp->occupancy[i] == mrp->occupancy[mrp->i])) { 
+    // same hash value and occupancy; may be identical or may be coincidence (collision)
     for (j=0; (j < mrp->ntax) && (mrp->s[j][i] == mrp->s[j][mrp->i]); j++); // one line loop: finishes or halts when diff is found 
     if (j == mrp->ntax) { mrp->freq[i]++; return; } // premature loop end means that they're distinct; here they're the same
   }
@@ -170,10 +179,15 @@ hash_value_of_binary_parsimony_datamatrix_column (binary_parsimony_datamatrix mr
 int
 binary_parsimony_score_of_topology (binary_parsimony pars, topology t)
 {
-  int i,j, pars_score = 0;
+  int i,j, pars_score = 0, incompatible = 0;
+  double  incomplete = 0., complete = 0.;
   bool s1, s2, intersection;
   if (!t->traversal_updated) update_topology_traversal (t);
   for (i=0; i < pars->external->i; i++) pars->score[i] = 0;  // external->i < external->nchar since may have duplicates
+#ifdef _OPENMP
+#pragma omp parallel for shared(pars, t) \
+  private(i,j,s1,s2,intersection) reduction (+:pars_score, incompatible, incomplete)
+#endif
   for (i=0; i < pars->external->i; i++) { // pthreads would go here
     for (j=0; j < t->nleaves-2; j++) {
       /* id (0...nleaves) are leaves; (nleaves...2x nleaves-1) are internal nodes */
@@ -186,8 +200,32 @@ binary_parsimony_score_of_topology (binary_parsimony pars, topology t)
       pars->internal->s[t->postorder[j]->id - t->nleaves][i] =  intersection;
     } // for j in tree node
     pars_score += (pars->score[i] * pars->external->freq[i]); // only external has freqs
+    if (pars->score[i] > 1) incompatible += pars->external->freq[i];
+    incomplete += (double) (pars->score[i] * pars->external->freq[i]) / (double) (pars->external->occupancy[i]); // trees w more species are less penalised
+    complete += (double) (pars->score[i] * pars->external->freq[i]) / (double) (pars->external->ntax - pars->external->occupancy[i] + 1); // bigger trees more penalised
   } // for i in nchar 
+  pars->costs[0] = pars_score;
+  pars->costs[1] = incompatible;
+  pars->costs[2] = incomplete;
+  pars->costs[3] = complete;
   return pars_score;
+}
+
+void
+pairwise_distances_from_binary_parsimony_datamatrix (binary_parsimony_datamatrix mrp, double *d_w, double *d_u)
+{
+  int i,j,k, dist_int;
+  double dist_dbl;
+  for (j = 1; j < mrp->ntax; j++) for (i = 0; i < j; i++) {
+    dist_int = 0; // {10}^{01}={11}   
+    dist_dbl = 0.;
+    for (k = 0; k < mrp->i; k++) if (((mrp->s[i][k] ^ mrp->s[j][k]) & 3U) == 3U) { 
+      dist_int += mrp->freq[k];
+      dist_dbl += ((double) (mrp->freq[k]) / biomcmc_log1p ((double) (mrp->occupancy[i])));
+    } // FIXME: must scale by _valid_ pairs, not freq_sum 
+    d_u[(j * (j-1)) /2 + i] = (double) (dist_int)/ (double) (mrp->freq_sum);
+    d_w[(j * (j-1)) /2 + i] = dist_dbl; 
+  }
 }
 
 /* Extra ideas/todo:
@@ -195,7 +233,7 @@ binary_parsimony_score_of_topology (binary_parsimony pars, topology t)
  * 2. branch-wise parsimony scores 
  * 3. store columns per tree in case of jackniffing gene trees (e.g. by returning column indexes and allowing unweighted
  * parsimony)
- * 4. actual score can be replaced by number of columns with perfect score (or almost perfect), as in compatible trees. 
+ * 4. <done> actual score can be replaced by number of columns with perfect score (or almost perfect), as in compatible trees. 
  * 5. following above, score can be sum over 'best' columns (i.e. exclude 50% columns with worse score)
  * 6. scores if we remove some leaves 
  * 7. instead of 0/1 we can have 0/x where x is the split length (parsimony or LS?)

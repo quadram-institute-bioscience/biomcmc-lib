@@ -42,7 +42,7 @@
 #include "distance_matrix.h"     // called by alignment
 #include "empirical_frequency.h" // called by nexus_common  
 #include "nexus_common.h"        // called by read_nexus_trees 
-#include "prob_distribution.h"   // called by topology_randomise 
+#include "prob_distribution.h"   // called by topology_randomise, char_vector
 #endif // of THESE_ARE_COMMENTS
 
 #endif //define biomcmc

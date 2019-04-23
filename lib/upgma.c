@@ -13,6 +13,8 @@
 
 #include "upgma.h"
 
+void correct_negative_branch_lengths (topology t);
+
 void
 upgma_from_distance_matrix (topology tree, distance_matrix dist, bool single_linkage) 
 { /* always upper diagonal (that is, only i < j in d[i][j]) */
@@ -164,7 +166,7 @@ bionj_from_distance_matrix (topology tree, distance_matrix dist)
       if (idx[i] < idx[j]) { i1 = i; i2 = j; } // idx[i1] < idx[i2] always
       else                 { i1 = j; i2 = i; }
       Q_ij = (double)(n_idx - 2) * delta[idx[i1]][idx[i2]] - delta[idx[i1]][idx[i1]] - delta[idx[i2]][idx[i2]];
-      if (Q_ij < Q_min - 1.e-8) { Q_min = Q_ij; b1 = i1; b2 = i2; }
+      if (Q_ij < Q_min - 1.e-18) { Q_min = Q_ij; b1 = i1; b2 = i2; }
     }
     //for (i=0; i < n_idx; i++) {
     //  for (j=0; j < n_idx; j++) { printf ("%9.8lf ", delta[idx[i]][idx[j]]); } printf (" <-- \n");
@@ -175,7 +177,7 @@ bionj_from_distance_matrix (topology tree, distance_matrix dist)
     blen_2 = 0.5 * (delta[idx[b1]][idx[b2]] - diff_1_2);
     /* calculate lambda */
     var_1_2 = delta[idx[b2]][idx[b1]];  // variance between b1 and b2
-    if(var_1_2 < 1.e-12) lambda=0.5; // delta[b2][b1] is var between b1 and b2
+    if(var_1_2 < 1.e-18) lambda=0.5; // delta[b2][b1] is var between b1 and b2
     else {
       lambda = 0.;
       for (i=0; i< n_idx; i++) if(b1 != i && b2 != i) {
@@ -226,4 +228,31 @@ bionj_from_distance_matrix (topology tree, distance_matrix dist)
     for (i = n_idx - 1; i >= 0; i--) if (delta[i]) free (delta[i]);
     free (delta);
   }
+  correct_negative_branch_lengths (tree);
 }
+
+void
+correct_negative_branch_lengths (topology t)
+{
+  int i;
+
+  for (i=0; i < t->nleaves-1; i++) { // postorder are internal nodes only
+    if (t->blength[t->postorder[i]->left->id] < DBL_MIN) { 
+      t->blength[t->postorder[i]->id] -= t->blength[t->postorder[i]->left->id]; // left is negative number
+      t->blength[t->postorder[i]->left->id] = 0.;
+    }
+    if (t->blength[t->postorder[i]->right->id] < DBL_MIN) { 
+      t->blength[t->postorder[i]->id] -= t->blength[t->postorder[i]->right->id];
+      t->blength[t->postorder[i]->right->id] = 0.;
+    }
+  }
+  if (t->blength[t->root->id] > 0.) {
+    t->blength[t->root->left->id]  += t->blength[t->root->id];
+    t->blength[t->root->right->id] += t->blength[t->root->id];
+    t->blength[t->root->id] = 0.;
+  } 
+}
+
+/* IDEA from njmerge: UPGMA constrained by subtrees (always check if merging clades A and B clashes with subtrees)
+ * however in njmerge subtrees are not overlapping, while we may have to _minimise_ uncompatibility instead of
+ * _excluding_ it */
