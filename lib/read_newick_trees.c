@@ -15,36 +15,7 @@
 
 #define DEFAULTBLENGTH 1. /*!< \brief Default branch length. */
 
-typedef struct newick_node_struct* newick_node;
-typedef struct newick_tree_struct* newick_tree; /*! \brief newick trees have minimal information, unlike topology_struct */
 
-struct newick_node_struct
-{
-  newick_node up, right, left; /*! \brief Parent and children nodes. */
-  int id;               /*! \brief Initial pre-order numbering of node. */
-  double branch_length; /*! \brief Branch length from node to node->up. */
-  char *taxlabel;       /*! \brief Leaf sequence name */
-};
-
-struct newick_tree_struct
-{
-  newick_node *nodelist; /*! \brief Vector with pointers to every internal node. */
-  newick_node *leaflist; /*! \brief Vector with pointers to tree leaves. */
-  newick_node root;      /*! \brief Pointer to root node. */
-  bool has_branches;     /*! \brief Boolean saying if tree has branch lengths or not. (topology alsways has, even if one-zero) */
-  int nnodes, nleaves;   /*! \brief Number of nodes (including leaves), and number of leaves */
-};
-
-/*! \brief Allocates memory for newick_tree_struct. */
-newick_tree new_newick_tree (int nleaves);
-/*! \brief Frees memory used by tree. */
-void del_newick_tree (newick_tree T);
-/*! \brief Copy information from newick_tree struct to topology_struct  */
-void copy_topology_from_newick_tree (topology tree, newick_tree nwk_tree);
-/*! \brief Creates newick_tree structure. */ 
-newick_tree new_newick_tree_from_string (char *external_string);
-/*! \brief Recursive function that creates a node based on parenthetic structure. */
-newick_node subtree_newick_tree (newick_tree tree, char *lsptr, char *rsptr, int *node_id, newick_node up);
 /*! \brief Reads leaf name (or number, if translation table is present). */
 char* read_taxlabel ( const char *name_start, const char *name_end);
 /*! \brief Preorder initialization of leaves. */
@@ -55,13 +26,10 @@ void create_node_id_newick_tree (newick_node this, int *id);
 double read_branch_length (char *right_string_ptr);
 /*! \brief Returns position of innermost comma (divides string into two subtrees). */
 int find_branch_split_newick (char *left_string_ptr, char *right_string_ptr);
-/*! \brief Counts the number of leaves and resolves (one) trifurcation of tree string. */
-int number_of_leaves_in_newick (char **string);
 /*! \brief Tries to resolve multifurcations on string, by replacing (,,) for (,(,)) ; heap_depth to avoid infinite recursion */
 size_t remove_multifurcations_newick (char **string, size_t i_left, size_t i_right, int heap_depth);
 size_t create_new_bifurcation_newick (char **string, size_t i_left, size_t comma_location);
 
-/** global functions **/
 
 newick_tree
 new_newick_tree (int nleaves) 
@@ -96,142 +64,6 @@ del_newick_tree (newick_tree T)
   if (T->leaflist) free (T->leaflist);
   free (T);
 }
-
-newick_space
-new_newick_space ()
-{
-  newick_space nwk;
-  nwk = (newick_space) biomcmc_malloc (sizeof (struct newick_space_struct));
-  nwk->ntrees = 0;
-  nwk->t = NULL;
-  nwk->ref_counter = 1;
-  return nwk;
-}
-
-void
-del_newick_space (newick_space nwk)
-{
-  if (!nwk) return;
-  if (--nwk->ref_counter) return;
-  int i;
-  for (i = nwk->ntrees - 1; i >= 0; i--) del_topology (nwk->t[i]);
-  free (nwk);
-}
-
-newick_space
-new_newick_space_from_file (char *filename)
-{
-  newick_space nwk = new_newick_space ();
-  update_newick_space_from_file (nwk, filename);
-  return nwk;
-}
-
-topology
-new_single_topology_from_newick_file (char *filename)
-{
-  FILE *file;
-  char *line_read=NULL, *str_tree_start=NULL, *str_tree_end=NULL;
-  size_t linelength = 0, str_tree_size = 0;
-  newick_tree tree;
-  topology topol;
-
-  file = biomcmc_fopen (filename, "r");
-  biomcmc_getline (&line_read, &linelength, file);
-  str_tree_start = strchr (line_read, '(');
-  str_tree_end   = strchr (str_tree_start, ';');
-  if (str_tree_end == NULL) str_tree_size = strlen (str_tree_start); 
-  else str_tree_size = str_tree_end - str_tree_start;
-  line_read[str_tree_size] = '\0'; /* not null-terminated by default */
-  tree  = new_newick_tree_from_string (line_read); // this might increase size, but not decrease (I hope)
-  if (line_read) free (line_read);
-  topol = new_topology (tree->nleaves);
-  copy_topology_from_newick_tree (topol, tree);
-  del_newick_tree (tree);
-  return topol;
-}
-
-void
-update_newick_space_from_file (newick_space nwk, char *filename)
-{
-  FILE *file;
-  char *line=NULL, *line_read=NULL, *str_tree_start=NULL, *str_tree_end=NULL;
-  size_t linelength = 0, str_tree_size = 0;
- // TODO: newick may span several lines
-  if (!nwk) biomcmc_error ("The calling function should allocate memory for newick_space_struct"); 
-  file = biomcmc_fopen (filename, "r");
-  /* line_read can't be changed (no line_read++ etc.) otherwise we lose first position and can't free() it */
-  while (biomcmc_getline (&line_read, &linelength, file) != -1) {
-    line = remove_nexus_comments (&line_read, &linelength, file); // will remove comments inside tree
-    str_tree_start = strchr (line, '(');
-    while (str_tree_start) { /* possible to store several newick files in one line */
-      str_tree_end = strchr (str_tree_start, ';');
-      if (str_tree_end == NULL) str_tree_size = strlen (str_tree_start); /* function strchrnul() does this, but may not be portable? */
-      else str_tree_size = str_tree_end - str_tree_start;
-      update_newick_space_from_string (nwk, str_tree_start, str_tree_size);
-      if (str_tree_end) str_tree_start = strchr (str_tree_end, '(');
-      else str_tree_start = NULL;
-    }
-  }
-  fclose (file);
-  if (line_read) free (line_read);
-}
-
-void
-update_newick_space_from_string (newick_space nwk, char *tree_string, size_t string_size)
-{
-  char *local_string;
-  newick_tree tree;
-  topology topol;
-
-  /* read string into a newick_tree; better to work on copy since we could have several trees per line */
-  local_string = (char*) biomcmc_malloc (sizeof (char) * (string_size + 1));
-  strncpy (local_string, tree_string, string_size + 1); /* adds '\0' only when long_string is smaller!! */
-  local_string[string_size] = '\0'; /* not null-terminated by default */
-  tree  = new_newick_tree_from_string (local_string);
-  if (local_string) free (local_string);
-  topol = new_topology (tree->nleaves);
-  copy_topology_from_newick_tree (topol, tree);
-  del_newick_tree (tree);
-
-  nwk->t = (topology*) biomcmc_realloc ((topology*) nwk->t, sizeof (topology) * (nwk->ntrees + 1));
-  nwk->t[nwk->ntrees++] = topol;
-  return;
-}
-
-void
-update_newick_space_from_topology (newick_space nwk, topology topol)
-{
-  nwk->t = (topology*) biomcmc_realloc ((topology*) nwk->t, sizeof (topology) * (nwk->ntrees + 1));
-  nwk->t[nwk->ntrees++] = topol;
-  topol->ref_counter++;
-}
-
-int
-estimate_treesize_from_file (char *seqfilename)
-{
-  FILE *seqfile;
-  char *line=NULL, *line_read=NULL, *needle_tip=NULL;
-  size_t linelength = 0;
-  int this_size, size = 0, ntrees = 0; 
-
-  seqfile = biomcmc_fopen (seqfilename, "r");
-  /* the variable *line should point always to the same value (no line++ or alike) */
-  while ((biomcmc_getline (&line_read, &linelength, seqfile) != -1) && (ntrees < 10)) {
-    line = remove_nexus_comments (&line_read, &linelength, seqfile);
-    if (strcasestr (line, "TREE") && (needle_tip = strcasestr (line, "="))) {
-      needle_tip++; /* remove "=" from string */
-      this_size  = number_of_leaves_in_newick (&needle_tip); /* false = do not attempt to change tree string */
-      if (this_size) { size += this_size; ntrees++; }
-    }
-  }
-  fclose (seqfile);
-  if (line_read) free (line_read);
-
-  if (!ntrees) return -1;
-  return size/ntrees;
-}
-
-/** local functions (declared here) **/
 
 void
 copy_topology_from_newick_tree (topology tree, newick_tree nwk_tree)

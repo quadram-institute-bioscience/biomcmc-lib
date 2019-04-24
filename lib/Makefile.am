@@ -7,13 +7,13 @@ common_headers = hashtable.h lowlevel.h random_number_gen.h random_number.h nexu
                  bipartition.h prob_distribution.h empirical_frequency.h biomcmc.h argtable3.h \
                  distance_matrix.h alignment.h topology_common.h parsimony.h genetree.h \
                  reconciliation.h splitset_distances.h read_newick_trees.h char_vector.h \
-                 upgma.h topology_randomise.h
+                 upgma.h topology_randomise.h newick_space.h
                  
 common_src     = hashtable.c lowlevel.c random_number_gen.c random_number.c nexus_common.c \
                  bipartition.c prob_distribution.c empirical_frequency.c argtable3.c \
                  distance_matrix.c alignment.c topology_common.c parsimony.c genetree.c \
                  reconciliation.c splitset_distances.c read_newick_trees.c char_vector.c \
-                 upgma.c topology_randomise.c
+                 upgma.c topology_randomise.c newick_space.c
 
 
 noinst_LTLIBRARIES = libbiomcmc.la # convenience lib (not installed globally)

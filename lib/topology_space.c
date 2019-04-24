@@ -16,32 +16,6 @@
 #include "topology_space.h"
 #include "nexus_common.h"
 
-#define DEFAULTBLENGTH 1. /*!< \brief Default branch length. */
-
-typedef struct nexus_node_struct* nexus_node;
-typedef struct nexus_tree_struct* nexus_tree;
-
-/*! \brief Node information for each tree in tree file. */
-struct nexus_node_struct
-{
-  nexus_node up, right, left; /*! \brief Parent and children nodes. */
-  int id;               /*! \brief Initial pre-order numbering of node. */
-  double branch_length; /*! \brief Branch length from node to node->up. */
-  char *taxlabel;       /*! \brief Leaf sequence name (pointer to actual string in nexus_treespace_struct). */
-};
-
-/*! \brief Data from each tree in tree file. */
-struct nexus_tree_struct
-{
-  nexus_node *nodelist;  /*! \brief Vector with pointers to every internal node. */
-  nexus_node *leaflist;  /*! \brief Vector with pointers to tree leaves. */
-  nexus_node root;       /*! \brief Pointer to root node. */
-  bool has_branches;     /*! \brief Boolean saying if tree has branch lengths or not. */
-  int nleaves;           /*! \brief Number of leaves (number of seqs in nexus_alignment_struct). */
-  /*! \brief Number of nodes, including leaves. Since the tree is binary and rooted, the number of nodes equals 
-   * \f$ 2L-1\f$ where \f$L\f$ is the number of leaves. */
-  int nnodes;
-};
 
 
 /*! \brief Allocates memory for nexus_tree_struct. */

@@ -12,36 +12,47 @@
  */
 
 /*! \file read_newick_trees.h
- *  \brief Reads a list of trees in newick format and creates vector of topologies.
+ *  \brief Low-level functions for reading newick strings 
  *
  *  Currently does not check for duplicated trees, or same leaf names on a tree */
 
-#ifndef _biomcmc_read_newick_trees_h_
-#define _biomcmc_read_newick_trees_h_
+#ifndef _biomcmc_read_newick_trees_h
+#define _biomcmc_read_newick_trees_h
 
 #include "topology_common.h" 
 #include "nexus_common.h" 
 
-typedef struct newick_space_struct* newick_space;
+typedef struct newick_node_struct* newick_node;
+typedef struct newick_tree_struct* newick_tree; /*! \brief newick trees have minimal information, unlike topology_struct */
 
-/*! \brief Collection of topologies from tree file. Each topology will have its own char_vector */ 
-struct newick_space_struct 
+struct newick_node_struct
 {
-  int ntrees;      /*! \brief Number of trees originally in nexus file and compacted (only distinct topologies). */
-  topology *t;     /*! \brief Vector of trees originally in nexus file and compacted. */
-  int ref_counter; /*! \brief How many variables point to this structure (to see if memory can be free'd or not) */
+  newick_node up, right, left; /*! \brief Parent and children nodes. */
+  int id;               /*! \brief Initial pre-order numbering of node. */
+  double branch_length; /*! \brief Branch length from node to node->up. */
+  char *taxlabel;       /*! \brief Leaf sequence name */
 };
 
-newick_space new_newick_space ();
-void del_newick_space (newick_space nwk);
-/*! \brief Convenience function to read one newick tree from file, skipping checks (comments, multiline trees, etc.) */
-topology new_single_topology_from_newick_file (char *filename); 
-newick_space new_newick_space_from_file (char *filename);
-void update_newick_space_from_file (newick_space nwk, char *filename);
-void update_newick_space_from_string (newick_space nwk, char *tree_string, size_t string_size);
-void update_newick_space_from_topology (newick_space nwk, topology topol);
+struct newick_tree_struct
+{
+  newick_node *nodelist; /*! \brief Vector with pointers to every internal node. */
+  newick_node *leaflist; /*! \brief Vector with pointers to tree leaves. */
+  newick_node root;      /*! \brief Pointer to root node. */
+  bool has_branches;     /*! \brief Boolean saying if tree has branch lengths or not. (topology alsways has, even if one-zero) */
+  int nnodes, nleaves;   /*! \brief Number of nodes (including leaves), and number of leaves */
+};
 
-/*! \brief Quickly counts the number of leaves in a tree file, without storing any info. Assumes file and trees are well-formed */
-int estimate_treesize_from_file (char *seqfilename);
+/*! \brief Allocates memory for newick_tree_struct. */
+newick_tree new_newick_tree (int nleaves);
+/*! \brief Frees memory used by tree. */
+void del_newick_tree (newick_tree T);
+/*! \brief Copy information from newick_tree struct to topology_struct  */
+void copy_topology_from_newick_tree (topology tree, newick_tree nwk_tree);
+/*! \brief Creates newick_tree structure. */ 
+newick_tree new_newick_tree_from_string (char *external_string);
+/*! \brief Recursive function that creates a node based on parenthetic structure. */
+newick_node subtree_newick_tree (newick_tree tree, char *lsptr, char *rsptr, int *node_id, newick_node up);
+/*! \brief Counts the number of leaves and resolves (one) trifurcation of tree string. */
+int number_of_leaves_in_newick (char **string);
 
 #endif
