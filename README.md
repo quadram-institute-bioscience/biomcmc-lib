@@ -1,15 +1,17 @@
 # Biomcmc-lib 
 
-This library has low level functions used by other C programs that work with phylogenetic analyses. 
+This library provides low level functions used by other phylogenetic programs. 
 It borrows many functions from the [guenomu software](https://bitbucket.org/leomrtns/guenomu/) for phylogenomic species tree inference and 
-also some ideas from the [genefam-dist library](https://github.com/leomrtns/genefam-dist).
+extends some ideas from the [genefam-dist library](https://github.com/leomrtns/genefam-dist).
 
 It includes a version of [argtable3](https://www.argtable.org/) downloaded from
 [github](https://github.com/argtable/argtable3) on 2019.03.12. Argtable3 is released under a BSD license. 
 
 ## Installation
-This library usually is not installed directly, but as a submodule of another project. It includes the 'makefile.am' for
-autotools.
+This library is usually not installed directly, but as a submodule of another project. 
+It includes, however, the `makefile.am` and `configure.ac` for autotools, and it provides unit tests from the
+[libcheck](https://github.com/libcheck/check) library as well as custom checks. 
+
 
 ## License 
 Copyright (C) 2019-today  [Leonardo de Oliveira Martins](https://github.com/leomrtns)

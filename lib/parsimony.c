@@ -125,6 +125,7 @@ update_binary_parsimony_from_topology (binary_parsimony pars, topology t, int *m
   bipartition_copy (bp, t->postorder[i]->split);
   bipartition_flip_to_smaller_set (bp); // not essencial, but helps finding same split in diff trees
   bipartition_to_int_vector (bp, ones, bp->n_ones); // n_ones=max number of ones to check (in this case, all of them)
+  // FIXME: they may be 11111|1111 on both sides; we must first check map[ones] and map[~ones] to see which makes sense
   for (j=0; j < bp->n_ones; j++) mrp->s[map[ones[j]]][mrp->i] = 2U; // these species present in t are then {1} 
   mrp->occupancy[mrp->i] = t->nleaves; // completeness (# species represented in bipartition)
   update_binary_parsimony_datamatrix_column_if_new (mrp);
@@ -212,19 +213,26 @@ binary_parsimony_score_of_topology (binary_parsimony pars, topology t)
 }
 
 void
-pairwise_distances_from_binary_parsimony_datamatrix (binary_parsimony_datamatrix mrp, double *d_w, double *d_u)
+pairwise_distances_from_binary_parsimony_datamatrix (binary_parsimony_datamatrix mrp, double **dist, int size_dist)
 {
-  int i,j,k, dist_int;
+  int i,j,k, idx, dist_int;
   double dist_dbl;
   for (j = 1; j < mrp->ntax; j++) for (i = 0; i < j; i++) {
+    idx = (j * (j-1)) /2 + i;
     dist_int = 0; // {10}^{01}={11}   
     dist_dbl = 0.;
-    for (k = 0; k < mrp->i; k++) if (((mrp->s[i][k] ^ mrp->s[j][k]) & 3U) == 3U) { 
+    for (k = 0; k < mrp->i; k++) if (((mrp->s[i][k] ^ mrp->s[j][k]) & 3U) == 3U) { // only {10} to {01} 
       dist_int += mrp->freq[k];
       dist_dbl += ((double) (mrp->freq[k]) / biomcmc_log1p ((double) (mrp->occupancy[i])));
-    } // FIXME: must scale by _valid_ pairs, not freq_sum 
-    d_u[(j * (j-1)) /2 + i] = (double) (dist_int)/ (double) (mrp->freq_sum);
-    d_w[(j * (j-1)) /2 + i] = dist_dbl; 
+    }
+    /* different distances/scalings: */
+    dist[0][idx] = (double) (dist_int)/ (double) (mrp->freq_sum);
+    if (size_dist > 0) dist[1][idx] = dist_dbl;
+    if (size_dist > 1) {
+      int invalid_pairs = 0;
+      for (k = 0; k < mrp->i; k++) if ((mrp->s[i][k] + mrp->s[j][k]) == 6U) invalid_pairs++; 
+      dist[2][idx] = (double) (dist_int)/ ((double) (mrp->freq_sum - invalid_pairs) + 1); // avoid division by zero
+    }
   }
 }
 

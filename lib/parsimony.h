@@ -50,6 +50,6 @@ void del_binary_parsimony (binary_parsimony pars);
 /*! \brief given a map[] with location in sptree of gene tree leaves, update binary matrix with splits from genetree */
 void update_binary_parsimony_from_topology (binary_parsimony pars, topology t, int *map);
 int binary_parsimony_score_of_topology (binary_parsimony pars, topology t);
-void pairwise_distances_from_binary_parsimony_datamatrix (binary_parsimony_datamatrix mrp, double *d_w, double *d_u);
+void pairwise_distances_from_binary_parsimony_datamatrix (binary_parsimony_datamatrix mrp, double **dist, int n_dist);
 
 #endif
