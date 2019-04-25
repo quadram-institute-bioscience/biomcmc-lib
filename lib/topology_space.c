@@ -14,7 +14,6 @@
 // OBS: topology_space object should always have <distinct> set, and <freq> scaled to one 
 
 #include "topology_space.h"
-#include "nexus_common.h"
 
 /*! \brief Allocates memory for topology_space_struct (set of trees present in nexus file).  */
 topology_space new_topology_space (void);
@@ -38,7 +37,7 @@ topology_space new_topology_space (void);
  * despite the taxlabel[] vector with leaf names is shared.
  * This is necessary since despite newick_tree_struct has freedom about the order of nodes (including leaves), in 
  * topology_struct the order is defined. */
-void add_tree_to_topology_space (topology_space tsp, const char *string, bool translate, hashtable external_hash, int **order, bool use_root_location);
+void add_tree_to_topology_space (topology_space tsp, const char *string, bool translate, hashtable external_hash, int **order, double tree_weight, bool use_root_location);
 
 /*! \brief Reads translation table (one line) of the form "number = taxa name" in tree file. */
 void translate_taxa_topology_space (topology_space tsp, char *string, hashtable external_hash);
@@ -47,6 +46,34 @@ void translate_taxa_topology_space (topology_space tsp, char *string, hashtable 
 void store_filename_in_topology_space (topology_space tre, char *filename);
 
 // TODO: create from_newick_space_to_topol_space
+
+bool
+is_file_nexus_tree_file (char *seqfilename) 
+{
+  FILE *seqfile;
+  char *line = NULL, *line_read = NULL;
+  size_t linelength = 0;
+  int is_nexus = 0, i;
+
+  seqfile = biomcmc_fopen (seqfilename, "r");
+
+  /* Search for evidence of nexus file; if obligatory syntax "#NEXUS" is found, see if it is an alignment */
+  for (i=0; (is_nexus < 3) && (i < 256) && (biomcmc_getline (&line_read, &linelength, seqfile) != -1);) {
+    line = line_read; /* the variable *line_read should point always to the same value (no line++ or alike) */
+    if (nonempty_string (line)) { 
+      if ((!is_nexus) && strcasestr (line, "#NEXUS")) is_nexus++; 
+      else if ((is_nexus == 1) && strcasestr (line, "BEGIN") && strcasestr (line, "TREES")) is_nexus++; 
+      else if ((is_nexus > 1) && (strcasestr (line, "TRANSLATE") || strcasestr (line, "TREE"))) is_nexus++; 
+    }
+    if (!is_nexus) i++; /* give up if "#NEXUS" is not found in first 256 lines; otherwise keep looking */
+  }
+
+  fclose (seqfile);
+  if (line_read) free (line_read);
+
+  if (is_nexus == 3) return true;
+  return false;
+}
 
 /*! \brief Auxiliary function for the python module */
 void
@@ -96,46 +123,10 @@ add_string_with_size_to_topology_space (topology_space *tsp, char *long_string, 
   copy_topology_from_newick_tree (topol, tree, false); // false=don't copy taxlabels from newick_tree 
   topol->taxlabel = (*tsp)->taxlabel; /* taxlabel is shared among all topologies */
   (*tsp)->taxlabel->ref_counter++;    /* since it is shared, it cannot be deleted if still in use */
-
-  /* comparisons below _assume_ that trees share a char_vector so lines above important */
-  add_topology_to_topology_space_if_distinct (topol, (*tsp), use_root_location);
-
   del_newick_tree (tree);
+  /* comparisons below _assume_ that trees share a char_vector so lines above important */
+  add_topology_to_topology_space_if_distinct (topol, (*tsp), 1., use_root_location); // 1. is this tree's weight
   return;
-}
-
-void
-add_topology_to_topology_space_if_distinct (topology topol, topology_space tsp, bool use_root_location)
-{ // Assumes freqs are counts, not normalized to one (currently this function is used by other functions that dont care for freqs)
- // Also, (1) doesn't update branch lengths; and (2) doesn't care about tsp->taxlabel
-  int i, found_id = -1;
-  tsp->tree = (topology*) biomcmc_realloc ((topology*) tsp->tree, sizeof (topology) * (tsp->ntrees+1));
-
-  /* comparison includes root location (faster than unrooted since uses hash) */ 
-  for (i=0; (i < tsp->ndistinct) && (found_id < 0); i++) if (topology_is_equal (topol, tsp->distinct[i])) found_id = i;
-  if ((!use_root_location) && (tsp->ndistinct) && (found_id < 0)) { /* if they look distinct (different root), then do slower unrooted calculation */ 
-    for (i=0; (i < tsp->ndistinct) && (found_id < 0); i++) if (topology_is_equal_unrooted (topol, tsp->distinct[i], true)) found_id = i;
-  }
-// FIXME: update branch lengths
-  if (found_id >= 0) {
-    tsp->tree[tsp->ntrees] = tsp->distinct[found_id];
-    tsp->freq[found_id] += 1.;
-    del_topology (topol);
-  } // if tree was found 
-  else { // then topol is unique 
-    topol->id = tsp->ndistinct++;
-    tsp->freq =     (double*)   biomcmc_realloc ((double*)   tsp->freq,     sizeof (double) * (tsp->ndistinct));
-    tsp->distinct = (topology*) biomcmc_realloc ((topology*) tsp->distinct, sizeof (topology) * (tsp->ndistinct));
-    tsp->freq[topol->id] = 1.;
-    tsp->distinct[topol->id] = topol;
-    if (topol->id > 0) for (i=0; i < tsp->distinct[topol->id]->nleaves; i++) {
-      /* the leaf bipartitions never change, so can be shared among all topologies */
-      del_bipartition (tsp->distinct[topol->id]->nodelist[i]->split);
-      tsp->distinct[topol->id]->nodelist[i]->split = tsp->distinct[0]->nodelist[i]->split;
-      tsp->distinct[0]->nodelist[i]->split->ref_counter++;
-    }
-  }
-  tsp->ntrees++;
 }
 
 topology_space
@@ -155,8 +146,8 @@ read_topology_space_from_file_with_burnin_thin (char *seqfilename, hashtable ext
        option_translate_temp = false,
        option_include_tree = false;
   size_t linelength = 0;
-  double freq_sum = 0., this_freq, *freq = NULL; /* posterior frequency per tree (if present) */
-  int iteration = 1, i = 0, n_freq = 0, *order_external = NULL; // leaves will follow external_taxhash if exists (malloc'ed by add_tree_to_topology_space())
+  double freq_sum = 0., this_tree_weight;  /* posterior frequency per tree (if present) */
+  int i=0, j=0, iteration = 1, *order_external = NULL; // leaves will follow external_taxhash if exists (malloc'ed by add_tree_to_topology_space())
   if (burnin < 0) burnin = 0;
   if (thin < 1) thin = 1;
 
@@ -177,27 +168,22 @@ read_topology_space_from_file_with_burnin_thin (char *seqfilename, hashtable ext
   while (biomcmc_getline (&line_read, &linelength, seqfile) != -1) {
     /* read frequency ('posterior distribution) information, in mrbayes' .trprobs format -> before remove_comments */
     needle_tip = line_read;
+    this_tree_weight = 1.;
     if ((iteration > burnin) && !(iteration%thin)) option_include_tree = true;
     else option_include_tree = false;
 
     if ( option_include_tree && (needle_tip = strcasestr (needle_tip, "TREE")) && 
          (needle_tip = strrchr (needle_tip, '=')) &&
-         (sscanf (needle_tip, "= [ &W %lf ]", &this_freq) == 1) ) {
-      freq = (double*) biomcmc_realloc ((double*) freq, (n_freq + 1) * sizeof (double));
-      freq[n_freq++] = this_freq;
-      freq_sum += this_freq;
-    }
+         (sscanf (needle_tip, "= [ &W %lf ]", &this_tree_weight) != 1) ) this_tree_weight = 1.; 
 
     line = remove_nexus_comments (&line_read, &linelength, seqfile);
-    if (nonempty_string (line)) { 
-      /* don't do anything untill 'BEGIN TREES' block */
+    if (nonempty_string (line)) { /* don't do anything untill 'BEGIN TREES' block */
       if ((!option_begin_trees) && (strcasestr (line, "BEGIN TREES"))) {
         option_begin_trees = true;
         treespace = new_topology_space ();
       } 
 
-      else if (!option_translate_temp) {
-        /* check if we need to translate taxon names; in any case see if we have trees to read */
+      else if (!option_translate_temp) {/* check if we need to translate taxon names; in any case see if we have trees to read */
         if (strcasestr (line, "TRANSLATE")) {
           option_translate_perm = true;
           option_translate_temp = true;
@@ -206,25 +192,22 @@ read_topology_space_from_file_with_burnin_thin (char *seqfilename, hashtable ext
           needle_tip++; /* remove "=" from string */
           iteration++;
           if (option_include_tree)
-            add_tree_to_topology_space (treespace, needle_tip, option_translate_perm, external_taxhash, &order_external, use_root_location);
+            add_tree_to_topology_space (treespace, needle_tip, option_translate_perm, external_taxhash, &order_external, this_tree_weight, use_root_location);
         }
       }
     
-      if (option_translate_temp) {
-        /* we are reading translation table token <-> taxlabel */  
+      if (option_translate_temp) {/* we are reading translation table token <-> taxlabel */  
         translate_taxa_topology_space (treespace, line, external_taxhash);
         if (strchr (line, ';')) option_translate_temp = false;
       }
-      
     } // if (line)
   } //while (biomcmc_getline)
 
   if (external_taxhash) {
     treespace->taxlabel_hash = external_taxhash;
     external_taxhash->ref_counter++; /* since we are sharing the hashfunction */
-
     // reorder taxlabels to conform to hashtable 
-    char_vector_reorder_strings (treespace->taxlabel, order_external);
+    char_vector_reorder_strings_from_external_order (treespace->taxlabel, order_external);
   }
 
   fclose (seqfile);
@@ -234,35 +217,13 @@ read_topology_space_from_file_with_burnin_thin (char *seqfilename, hashtable ext
   /* char_vector_remove_empty_strings() also updates string lengths into taxlabel->nchars so we call it anyway */
   if (char_vector_remove_empty_strings (treespace->taxlabel)) /* this problem should have been detected before... */
     biomcmc_error ("empty taxon names in nexus tree file (reading problem or wrong/duplicate numbers in translate)");
+  /* each branch value is sum over all trees with same topol; must be scaled to mean value */
+  for (i=0; i < treespace->ndistinct; i++) for (j=0; j < treespace->distinct[i]->nnodes; j++)
+    treespace->distinct[i]->blength[j] /= treespace->freq[i]; /* weighted avge = sum{W.x} / sum{W} */
+  /* Now we store frequency values (over all trees) in treespace->freq[], for weighted or unweighted files */
+  for (i=0; i < treespace->ndistinct; i++) freq_sum += treespace->freq[i];
+  for (i=0; i < treespace->ndistinct; i++) treespace->freq[i] /= freq_sum; /* normalize to one */
 
-  /* vector of frequencies */
-  treespace->freq = (double*) biomcmc_malloc (treespace->ndistinct * sizeof (double));
-  for (i=0; i < treespace->ndistinct; i++) treespace->freq[i] = 0.;
-
-  /* temporarily use treespace->freq[] to calculate mean branch lengths and mean tree length for each topology */
-  if (treespace->has_branch_lengths) {
-    int j;
-    /* count how many times tree was seen (neglect frequency over distinct trees; we are interested in mean lenghts for this one tree */
-    for (i=0; i < treespace->ntrees; i++) treespace->freq[ treespace->tree[i]->id ] += 1.;
-    /* each branch value is sum over all trees with same topol; must be scaled to mean value */
-    for (i=0; i < treespace->ndistinct; i++) for (j=0; j < treespace->distinct[i]->nnodes; j++)
-      treespace->distinct[i]->blength[j] /= treespace->freq[i];
-    /* branch values are scaled to one; to recover original values we must multiply by tlen. Now we calculate avge tree length */
-    for (i=0; i < treespace->ndistinct; i++) treespace->tlen[3*i] /= treespace->freq[i]; /* [mean, min, max] sum of branch lengths */
-    for (i=0; i < treespace->ndistinct; i++) treespace->freq[i] = 0.; /* clean up temp values */
-  }
-
-  /* Now we store the proper frequency values (over all trees) in treespace->freq[], for weighted or unweighted files */
-  if ((freq) && (n_freq == treespace->ntrees)) { /* we have posterior frequency information */
-    for (i=0; i < treespace->ntrees; i++)    treespace->freq[ treespace->tree[i]->id ] += freq[i];
-    for (i=0; i < treespace->ndistinct; i++) treespace->freq[i] /= freq_sum; /* normalize to one */
-  }
-  else {
-    for (i=0; i < treespace->ntrees; i++)    treespace->freq[ treespace->tree[i]->id ] += 1.;
-    for (i=0; i < treespace->ndistinct; i++) treespace->freq[i] /= (double) treespace->ntrees; /* BUG found in 2013.02.28 (was dividing by ndistinct) */
-  }
-  if (freq) free (freq);
-  
   store_filename_in_topology_space (treespace, seqfilename);
   return treespace;
 }
@@ -274,7 +235,6 @@ merge_topology_spaces (topology_space ts1, topology_space ts2, double weight_ts1
   double total_freq = 0.;
 
   // TODO: check if taxlabel_hash is the same; branch lengths; mark where convergence could go.
-  
   if (weight_ts1 <= 0.) weight_ts1 = 1.; // usually ts1->ntrees/ts2->ntrees
 
   idx = (int*) biomcmc_malloc (ts1->ndistinct * sizeof (int)); 
@@ -325,7 +285,7 @@ sort_topology_space_by_frequency(topology_space tsp, double *external_freqs)
   empfreq_double efd;
   if (external_freqs) local_freqs = external_freqs; 
   efd = new_empfreq_double_sort_decreasing (local_freqs, tsp->ndistinct);
-  // FIXME: stopped here: must change tlen[3 x ndistinct] and freq[] if external is NULL. tree[i] is ponter to distinct, wont change
+  // FIXME: stopped here: must change and freq[] if external is NULL. tree[i] is ponter to distinct, wont change
 } */
 
 void
@@ -382,7 +342,7 @@ estimate_treesize_from_file (char *seqfilename)
     line = remove_nexus_comments (&line_read, &linelength, seqfile);
     if (strcasestr (line, "TREE") && (needle_tip = strcasestr (line, "="))) {
       needle_tip++; /* remove "=" from string */
-      this_size  = number_of_leaves_in_newick (&needle_tip, false); /* false = do not attempt to change tree string */
+      this_size  = number_of_leaves_in_newick (&needle_tip); 
       if (this_size) { size += this_size; ntrees++; }
     }
   }
@@ -405,14 +365,11 @@ new_topology_space (void)
   tsp->taxlabel = NULL;
   tsp->taxlabel_hash = NULL;
   tsp->filename = NULL;
-  tsp->has_branch_lengths = false;
-  /* tsp->dinstinct vector is increased by add_tree_to_topology_space() while tsp->tree are pointers to dsp->distinct
-   * tsp->taxlabel vector is setup by translate_taxa_topology_space() or add_tree_to_topology_space(), whichever 
-   * is used
+  tsp->freq = NULL; /* will be created online (as we read more trees) or when reading "[&W 0.01]" posterior probability data */
+  /* tsp->distinct vector is increased by add_tree_to_topology_space() while tsp->tree are pointers to dsp->distinct
+   * tsp->taxlabel vector is setup by translate_taxa_topology_space() or add_tree_to_topology_space(), whichever is used
    * tsp->taxlabel_hash is setup by one of the above in absence of global external_hash -- will be replaced by a pointer to an external hastable (from
    * alignment or another tree file, for instance) */
-  tsp->freq = NULL; /* will be created online (as we read more trees) or when reading "[&W 0.01]" posterior probability data */
-  tsp->tlen = NULL; /* created only if trees have branch lengths */
   return tsp;
 }
 
@@ -427,7 +384,6 @@ del_topology_space (topology_space tsp)
     }
     if (tsp->tree)     free (tsp->tree);
     if (tsp->freq)     free (tsp->freq);
-    if (tsp->tlen)     free (tsp->tlen);
     if (tsp->filename) free (tsp->filename);
     del_hashtable (tsp->taxlabel_hash);
     del_char_vector (tsp->taxlabel);
@@ -436,22 +392,19 @@ del_topology_space (topology_space tsp)
 }
 
 void
-add_tree_to_topology_space (topology_space tsp, const char *string, bool translate, hashtable external_hash, int **order, bool use_root_location)
+add_tree_to_topology_space (topology_space tsp, const char *string, bool translate, hashtable external_hash, int **order, double tree_weight, bool use_root_location)
 {
   int i, index, *original_order;
   char *local_string;
-  double treelength = 0.;
   newick_tree tree;
   topology topol;
 
   /* use local copy of string to avoid problems with biomcmc_getline() */
   local_string = (char*) biomcmc_malloc (sizeof (char) * (strlen (string) + 1));
   strcpy (local_string, string);
-  local_string[string_size] = '\0'; /* not null-terminated by default */
+  local_string[strlen(string)] = '\0'; /* not null-terminated by default */
   tree  = new_newick_tree_from_string (local_string); // also copies string, but relies on '\0' which may not be present 
   if (local_string) free (local_string);
-
-  topol = new_topology (tree->nleaves);
 
   if ((tsp->ntrees == 0) && (!translate)) { /* CASE 1: first tree read and no TRANSLATE command in nexus file */
     tsp->has_branch_lengths = tree->has_branches; /* first tree decides if branch lengths are taken into account */
@@ -547,77 +500,59 @@ add_tree_to_topology_space (topology_space tsp, const char *string, bool transla
     }
   }
 
-  create_node_id_newick_tree (tree->root, &i);
-
   if (external_hash) {
     original_order = (*order) + tsp->taxlabel->nstrings;
     for (i=0; i < tree->nleaves; i++) original_order[i] = tree->leaflist[i]->id;
     for (i=0; i < tree->nleaves; i++) tree->leaflist[i]->id = (*order)[ original_order[i] ];
   }
-  /* at this point newick_tree is ready to be copied to topology */
-  if (tsp->has_branch_lengths) topology_malloc_blength (topol); /* then it will copy length values from newick_tree */
-  copy_topology_from_newick_tree (topol, tree);
+
+  topol = new_topology (tree->nleaves);
+  copy_topology_from_newick_tree (topol, tree, false);
   topol->taxlabel = tsp->taxlabel; /* taxlabel is shared among all topologies */
   tsp->taxlabel->ref_counter++;    /* since it is shared, it cannot be deleted if still in use */
+  del_newick_tree (tree);
+  add_topology_to_topology_space_if_distinct (topol, tsp, tree_weight, use_root_location);
+  return;
+}
 
-  /* branch lenghts scaled to one, but original tree length stored in tsp->tlen */
-  if (tsp->has_branch_lengths) {
-    treelength= 0.;
-    for (i = 0; i < topol->nnodes; i++)  treelength += topol->blength[i];
-    for (i = 0; i < topol->nnodes; i++)  topol->blength[i] /= treelength;
-    if (!tsp->ndistinct) tsp->tlen = (double*) biomcmc_malloc (3 * sizeof (double)); /* so that we can realloc() later */
-  }
-  /* look if same topology is already present */
-  int found_id = -1;
-
+void
+add_topology_to_topology_space_if_distinct (topology topol, topology_space tsp, double tree_weight, bool use_root_location)
+{
+  int i, found_id = -1;
   tsp->tree = (topology*) biomcmc_realloc ((topology*) tsp->tree, sizeof (topology) * (tsp->ntrees+1));
 
   /* distinct trees might have same unrooted info, but rooted calculation is faster */
   for (i=0; (i < tsp->ndistinct) && (found_id < 0); i++) if (topology_is_equal (topol, tsp->distinct[i])) found_id = i;
   if ((!use_root_location) && (found_id < 0)) /* if they look distinct (different root), then do slower unrooted calculation */ 
     for (i=0; (i < tsp->ndistinct) && (found_id < 0); i++) if (topology_is_equal_unrooted (topol, tsp->distinct[i], true)) found_id = i;
-  // FIXME: better solution is to have vector of splits for each tree, since slowest part is to copy/order bipartitions 
+  // better solution is to have vector of splits for each tree, since slowest part is to copy/order bipartitions 
 
-  if (found_id >= 0) {
+  if (found_id >= 0) { 
     tsp->tree[tsp->ntrees] = tsp->distinct[found_id];
-    if (tsp->has_branch_lengths) {
-      for (i = 0; i < topol->nnodes; i++) { /* first branches (which are already scaled to one) */
-        tsp->distinct[found_id]->blength[i] += topol->blength[i]; /* mean length */
-        if (tsp->distinct[found_id]->blength[i+  topol->nnodes] > topol->blength[i]) tsp->distinct[found_id]->blength[i+ topol->nnodes] = topol->blength[i]; /* min value */
-        if (tsp->distinct[found_id]->blength[i+2*topol->nnodes] < topol->blength[i]) tsp->distinct[found_id]->blength[i+2*topol->nnodes] = topol->blength[i]; /*max value */
-      }
-      /* then total tree length (sum of unscaled branches) */
-      tsp->tlen[3 * found_id] += treelength; /* has 3 consecutive elements: mean, min, max */
-      if (tsp->tlen[3 * found_id + 1] > treelength) tsp->tlen[3 * found_id + 1] = treelength; /* min */
-      if (tsp->tlen[3 * found_id + 2] < treelength) tsp->tlen[3 * found_id + 2] = treelength; /* max */
+    tsp->freq[found_id] += tree_weight;
+    for (i = 0; i < topol->nnodes; i++) { 
+      tsp->distinct[found_id]->blength[i] += (tree_weight * topol->blength[i]); /* weighted mean length */
     }
     del_topology (topol);
   }
   else {
     topol->id = tsp->ndistinct++;
-    if      (!(tsp->ndistinct%10000)) fprintf (stderr, "+");
-    else if (!(tsp->ndistinct%1000))  fprintf (stderr, "."); /* the "else" is to avoid printing both */
-    fflush (stdout); /* exponentially slower; maybe use hash values to find in linear time? */
-    
-    if (tsp->has_branch_lengths) {/* mean, min and max are same value, corresponding to the one in newick_tree */
-      for (i = 0; i < topol->nnodes; i++) topol->blength[i + topol->nnodes] = topol->blength[i + 2 * topol->nnodes] = topol->blength[i];
-      tsp->tlen = (double*) biomcmc_realloc ((double*) tsp->tlen, 3 * sizeof (double) * (tsp->ndistinct));
-      tsp->tlen[3 * topol->id] = tsp->tlen[3 * topol->id + 1] = tsp->tlen[3 * topol->id + 2] = treelength; 
-    }
-
+    for (i = 0; i < topol->nnodes; i++) topol->blength[i] *= tree_weight; // weighted average 
     tsp->distinct = (topology*) biomcmc_realloc ((topology*) tsp->distinct, sizeof (topology) * (tsp->ndistinct));
-    tsp->distinct[tsp->ndistinct-1] = topol;
-    tsp->tree[tsp->ntrees] = tsp->distinct[tsp->ndistinct-1];
-    if (tsp->ndistinct > 1) for (i=0; i < tree->nleaves; i++) {
-      /* the leaf bipartitions never change, so can be shared among all topologies */
-      del_bipartition (tsp->distinct[tsp->ndistinct-1]->nodelist[i]->split);
-      tsp->distinct[tsp->ndistinct-1]->nodelist[i]->split = tsp->distinct[0]->nodelist[i]->split;
+    tsp->freq =     (double*)   biomcmc_realloc ((double*)   tsp->freq,     sizeof (double) * (tsp->ndistinct));
+    tsp->distinct[topol->id] = topol;
+    tsp->freq[topol->id] = tree_weight;
+    tsp->tree[tsp->ntrees] = tsp->distinct[topol->id];
+    if (topol->id > 0) for (i=0; i < tsp->distinct[topol->id]->nleaves; i++) {/* leaf bipartitions never change -> shared among all topologies */
+      del_bipartition (tsp->distinct[topol->id]->nodelist[i]->split);
+      tsp->distinct[topol->id]->nodelist[i]->split = tsp->distinct[0]->nodelist[i]->split;
       tsp->distinct[0]->nodelist[i]->split->ref_counter++;
     }
+    if      (!(tsp->ndistinct%10000)) fprintf (stderr, "+");
+    else if (!(tsp->ndistinct%1000))  fprintf (stderr, "."); /* the "else" is to avoid printing both */
+    fflush (stdout); 
   }
-
   tsp->ntrees++;
-  del_newick_tree (tree);
 }
 
 /* TODO: create unroot_topol_space() */

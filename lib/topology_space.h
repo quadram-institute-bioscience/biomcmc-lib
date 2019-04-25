@@ -28,7 +28,6 @@ struct topology_space_struct
   int ntrees, ndistinct; /*! \brief Number of trees originally in nexus file and compacted (only distinct topologies). */
   topology *tree, *distinct; /*! \brief Vector of trees originally in nexus file and compacted. */
   double *freq;              /*! \brief frequency of each distinct topology (add up to one) */
-  double *tlen;              /*! \brief tree length (mean, min, max), since branch lengths will be scaled s.t. sum up to one */
   char_vector taxlabel;      /*! \brief Taxon names. */
   hashtable taxlabel_hash;   /*! \brief Lookup table with taxon names. */
   bool has_branch_lengths;   /*! \brief if false, then topology_space_struct::tree = topology_space_struct:distinct */
@@ -38,7 +37,7 @@ struct topology_space_struct
 /*! \brief Read tree in newick format until char string_size, returning updated topolgy_space. Auxiliary for python module */
 void add_string_with_size_to_topology_space (topology_space *tsp_address, char *long_string, size_t string_size, bool use_root_location);
 /*! \brief Add topology to topology_space only if unrooted version is distinct, updating freqs, trees[] etc. Aux for python module */
-void add_topology_to_topology_space_if_distinct (topology topol, topology_space tsp, bool use_root_location);
+void add_topology_to_topology_space_if_distinct (topology topol, topology_space tsp, double tree_weight, bool use_root_location);
 
 /*! \brief Read tree file and store info in topology_space_struct with possible external hashtable to impose the leaf ordering. */
 topology_space read_topology_space_from_file (char *seqfilename, hashtable external_taxhash, bool use_root_location);

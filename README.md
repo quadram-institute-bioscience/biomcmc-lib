@@ -21,22 +21,35 @@ The trees can be in nexus or newick formats, and the sequences can be in nexus o
 ```
 * All missing branch lengths are given a value of one. This way we can work with topologies (a.k.a. cladograms, trees without  
   lengths) transparently.
-* A file is assumed to be in the nexus format if one of the first lines start with the keyword `#NEXUS`, otherwise it's
-  treated as newick (or fasta, for sequence files).
+* A file is assumed to be in the nexus format if one of the first lines start with the keyword `#NEXUS`, followed by
+  some other nexus keyword (`DATA` or `TREES`). Otherwise it's treated as newick (or fasta, for sequence files). 
 * All trees from a single nexus file must contain the same taxa (e.g. output from a Bayesian inference algorithm). 
-  This means that more compact representations are allowed, leading to smaller files:
+  This means that more compact representations are allowed, leading to smaller files. This also allow for some
+  optimisations when reading large files.
   1. The taxon names can come first, in a `TRANSLATE` table; the individual trees then just point to the IDs in this
      table. BTW, technically each tree in a nexus file is represented in newick format.
   2. If the same topology is observed, then some programs (e.g. MrBayes, guenomu) just output the distinct topologies, with 
      their equivalent *frequencies* as nexus comments. The trees are ordered, with the most frequent trees at the top.
      The individual branch length information is lost, however, as just the mean values are reported.
-  3. Two topologies can be equal at the unrooted level but not at the rooted (i.e. the only difference is the root
+  3. Since nexus files may represent MCMC samples, you can do "thinning", i.e. you may subsample by skipping consecutive
+     trees, and also by skipping the first ones (from the "burnin" period). 
+  4. Two topologies can be equal at the unrooted level but not at the rooted (i.e. the only difference is the root
      location). Please pay attention to this information, as this should be solved by the calling program.
-* The so-called "newick files", however, can have 
+* The so-called "newick files", however, can have trees from different leaf sets. That is, trees in the same file are not 
+  assumed to have all the same leaves. 
+* Newick files are allowed to have the same leaf name for several leaves in the same tree. However nexus files must have
+  unique taxon names (to allow for interoperability, although I may change this in the future).
 * All trees are stored internally as rooted trees, and are saved/printed as rooted, without the `[U]` flag some nexus
   implementations assume. The downstream program/user must take into account if the rooting is relevant or not. Having
   said that, all algorithms know when to ignore the root node (e.g. gene tree / species tree reconciliation assumes
   both trees are rooted, but we optimise over all gene rootings effectively looking at unrooted gene trees).
+* The nexus format uses square brackets (`[]`) for comments, which can span several lines. These comments are ignored by
+  all reading functions, including those for fasta and newick files. The only exception so far are the tree frequencies, which 
+  follow the convention of the `.trprobs` files of MrBayes and guenomu (`p` for frequency, `P` for cummulative
+  frequency):
+```[bash]
+tree t_1 [p = 0.51, P = 0.51] = [&W 0.51] ((((((((5,4),6),((2,1),3)),7),(9,8)),((((12,11),10),13),14)),(16,15)),((((((25,24),23),22),21),(20,19)),(18,17)));
+```
 
 ### The rooting saga
 Most phylogenetic inference software work with or assume unrooted trees, but sometimes we want to know the root

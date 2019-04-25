@@ -77,7 +77,7 @@ copy_topology_from_newick_tree (topology tree, newick_tree nwk_tree, bool create
       nwk_tree->leaflist[i]->taxlabel = NULL; // we don't need this copy anymore
     }
   }
-  else del_char_vector (tree);
+  else del_char_vector (tree->taxlabel);
 
   for (i=0; i< nwk_tree->nleaves; i++) nwk_tree->leaflist[i]->id = i;
 

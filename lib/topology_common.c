@@ -13,6 +13,8 @@
 
 #include "topology_common.h"
 
+/*! \brief rescales original branches and stores distance from root into #fromroot[], using up to 6 distinct rescalings */
+void rescale_rooted_distances_for_patristic_distances (topology tree, double *fromroot, int mode, double tolerance);
 /*! \brief update internal bipartitions and reorder siblings by heavy child on left */
 unsigned int update_subtree_bipartitions (topol_node this);
 /*! \brief tree traversal with preorder and postorder node tracking */
@@ -86,16 +88,6 @@ new_topology (int nleaves)
   return tree;
 }
 
-void
-topology_malloc_blength (topology tree)
-{
-  int i;
-  /* extra vectors, besides usual branch lengths */
-  tree->blength = (double*) biomcmc_realloc ((double*) tree->blength, tree->nnodes * 3 * sizeof(double));
-  for (i =     tree->nnodes; i < 2 * tree->nnodes; i++) tree->blength[i] = 1.e12; /* min branch length observed in  topol_space */
-  for (i = 2 * tree->nnodes; i < 3 * tree->nnodes; i++) tree->blength[i] = -1.; /* max branch length observed in  topol_space */
-}
-
 void 
 del_topology (topology tree) 
 {
@@ -150,9 +142,9 @@ copy_topology_from_topology (topology to_tree, topology from_tree)
     to_tree->nodelist[i]->sister = to_tree->nodelist[from_tree->nodelist[i]->sister->id];
   } // for (nnodes)
   
-  if (from_tree->blength) { // FIXME: from_tree may have _extra_ blens or not 
-    if (!to_tree->blength) to_tree->blength = (double*) biomcmc_malloc (3 * from_tree->nnodes * sizeof (double));
-    for (i = 0; i < 3 * from_tree->nnodes; i++) to_tree->blength[i] = from_tree->blength[i];
+  if (from_tree->blength) { 
+    if (!to_tree->blength) to_tree->blength = (double*) biomcmc_malloc (from_tree->nnodes * sizeof (double));
+    for (i = 0; i < from_tree->nnodes; i++) to_tree->blength[i] = from_tree->blength[i];
   }
   update_topology_traversal (to_tree);
   if (from_tree->taxlabel) { // in case from_tree is a dummy/temp but to_tree is important
@@ -388,33 +380,23 @@ fill_distance_matrix_from_topology (distance_matrix dist, topology tree, double 
 }
 
 void 
-patristic_distances_from_topology_to_vectors (topology tree, double *d_w, double *d_u, double tolerance)
+patristic_distances_from_topology_to_vectors (topology tree, double **dist, int n_dists, double tolerance)
 {
-  int i, j = 0, k, row, col, *idx, *i_l, *i_r, onedim;
+  int i=0, j=0, k=0, l=0, row, col, *idx, *i_l, *i_r, onedim;
   if (!tree->traversal_updated) update_topology_traversal (tree);
-  double *fromroot_w = NULL, *fromroot_u = NULL, nodal_dist = 0.;
-
-  // FIXME: add rescaled blens (s.t. sum is one or sum is # leaves, creating two more *d_w)
+  double **fromroot = NULL;
 
   if (tolerance < 1e-15) tolerance = 1e-15; /* any branch length shorter than this will be assumed zero (multifurcation) */
-  fromroot_w = (double*) biomcmc_malloc ((2 * tree->nleaves - 1) * sizeof (double));
-  fromroot_u = (double*) biomcmc_malloc ((2 * tree->nleaves - 1) * sizeof (double));
+  if (n_dists > 6) { n_dists = 6; fprintf(stderr, "biomcmc WARNING: more than 6 patristic distances rescaling requested\n"); }
+  fromroot = (double**) biomcmc_malloc (n_dists * sizeof (double*));
+  for (i = 0; i < n_dists; i++) fromroot[i] = (double*) biomcmc_malloc ((2 * tree->nleaves - 1) * sizeof (double));
+
   idx = (int*) biomcmc_malloc ((5 * tree->nleaves - 2) * sizeof (int));/* |---idx---|---i_left---|---i_right---| used in Euler tour-like struct */
   i_l = idx + tree->nleaves;
   i_r = i_l + (2 * tree->nleaves - 1);
 
   /* STEP 1: find distances from every node to root */
-  fromroot_u[ tree->root->id ] = fromroot_w[ tree->root->id ] = 0.;
-  for (i = tree->nleaves-3; i >= 0; i--) {  /* internal nodes */
-    nodal_dist = (tree->blength[ tree->postorder[i]->id ] > tolerance) ? 1. : 0.;
-    fromroot_w[ tree->postorder[i]->id ] = fromroot_w[ tree->postorder[i]->up->id ] + tree->blength[ tree->postorder[i]->id ];
-    fromroot_u[ tree->postorder[i]->id ] = fromroot_u[ tree->postorder[i]->up->id ] + nodal_dist;
-  }
-  for (i = 0; i < tree->nleaves; i++) { /* external nodes (do not belong to postorder) */
-    nodal_dist = (tree->blength[ tree->nodelist[i]->id ] > tolerance) ? 1. : 0.;
-    fromroot_w[ tree->nodelist[i]->id ] = fromroot_w[ tree->nodelist[i]->up->id ] + tree->blength[ tree->nodelist[i]->id ];
-    fromroot_u[ tree->nodelist[i]->id ] = fromroot_u[ tree->nodelist[i]->up->id ] + nodal_dist;
-  }
+  for (i = 0; i < n_dists; i++) rescale_rooted_distances_for_patristic_distances (tree, fromroot[i], i, tolerance);
 
   /* STEP 2: create tour in postorder so that we have subvectors with all leaves below it */
   j = 0;
@@ -432,7 +414,7 @@ patristic_distances_from_topology_to_vectors (topology tree, double *d_w, double
     i_r[ tree->postorder[i]->id ] = i_r[ tree->postorder[i]->right->id ]; /* this interval covers from leftest of left to rightest of right */
   } 
   /* STEP 3: dist(A,B) = fromroot[A] + fromroot[B] - 2 * fromroot[mrca between A and B] (from STEP2 we know all A's and B's)*/
-  for (i = 0; i < ((tree->nleaves - 1) * tree->nleaves)/2; i++) d_w[i] = d_u[i] = 0.; 
+  for (i = 0; i < ((tree->nleaves - 1) * tree->nleaves)/2; i++) for (j = 0; j < n_dists; j++) dist[j][i] = 0.; 
 
   for (i = 0; i < tree->nleaves-1; i++) 
     for (j = i_l[tree->postorder[i]->left->id]; j <= i_r[tree->postorder[i]->left->id]; j++)
@@ -440,13 +422,75 @@ patristic_distances_from_topology_to_vectors (topology tree, double *d_w, double
         row = idx[j]; col = idx[k];
         if (row > col) { col = idx[j]; row = idx[k]; }
         onedim = (col * (col-1))/2 + row;
-        d_w[onedim] = fromroot_w[row] + fromroot_w[col] - 2 * fromroot_w[ tree->postorder[i]->id ];
-        d_u[onedim] = fromroot_u[row] + fromroot_u[col] - 2 * fromroot_u[ tree->postorder[i]->id ];
+        for (l=0; l < n_dists; l++)  dist[l][onedim] = fromroot[l][row] + fromroot[l][col] - 2 * fromroot[l][ tree->postorder[i]->id ];
       }
-  if (fromroot_u) free (fromroot_u);
-  if (fromroot_w) free (fromroot_w);
+  if (fromroot) {
+    for (i = n_dists-1; i >= 0; i--) if (fromroot[i]) free (fromroot[i]);
+    free (fromroot);
+  }
   if (idx) free (idx);
 }
+
+void
+rescale_rooted_distances_for_patristic_distances (topology tree, double *fromroot, int mode, double tolerance)
+{
+  int i;
+  double *internal_d, *external_d, tmp1;
+
+  internal_d = (double*) biomcmc_malloc ((tree->nleaves - 2) * sizeof (double));
+  external_d = (double*) biomcmc_malloc ((tree->nleaves) * sizeof (double));
+  
+  fromroot[ tree->root->id ] = 0.;
+
+  switch (mode) {
+    case 0:  /*  unscaled (original) distance  */
+      for (i = tree->nleaves-3; i >= 0; i--) internal_d[i] = tree->blength[ tree->postorder[i]->id ];
+      for (i = 0; i < tree->nleaves; i++)    external_d[i] = tree->blength[ tree->nodelist[i]->id ];
+      break;
+    case 1:  /*  nodal distance (number of edges > tolerance)  */
+      for (i = tree->nleaves-3; i >= 0; i--) internal_d[i] = (tree->blength[ tree->postorder[i]->id ] > tolerance) ? 1. : 0.;
+      for (i = 0; i < tree->nleaves; i++)    external_d[i] = (tree->blength[ tree->nodelist[i]->id ] > tolerance) ? 1. : 0.; 
+      break;
+    case 2: /* divided by number of nodes */ 
+      tmp1 = tree->nnodes;
+      for (i = tree->nleaves-3; i >= 0; i--) internal_d[i] = tree->blength[ tree->postorder[i]->id ] / tmp1;
+      for (i = 0; i < tree->nleaves; i++)    external_d[i] = tree->blength[ tree->nodelist[i]->id ] / tmp1;
+      break;
+    case 3: /* divided by average (s.t. average blen is 1. and treelength = nnodes) */ 
+      tmp1 = 0.;
+      for (i = 0; i < tree->nnodes; i++) tmp1 += tree->blength[tree->nodelist[i]->id];
+      tmp1 /= tree->nnodes;
+      if (tmp1 < 1e-12) tmp1 = 1e-12;
+      for (i = tree->nleaves-3; i >= 0; i--) internal_d[i] = tree->blength[ tree->postorder[i]->id ] / tmp1;
+      for (i = 0; i < tree->nleaves; i++)    external_d[i] = tree->blength[ tree->nodelist[i]->id ] / tmp1;
+      break;
+    case 4: /* divided by treelength (s.t. average is 1/nodes and treelength=1) */ 
+      tmp1 = 0.;
+      for (i = 0; i < tree->nnodes; i++) tmp1 += tree->blength[tree->nodelist[i]->id];
+      if (tmp1 < 1e-12) tmp1 = 1e-12;
+      for (i = tree->nleaves-3; i >= 0; i--) internal_d[i] = tree->blength[ tree->postorder[i]->id ] / tmp1;
+      for (i = 0; i < tree->nleaves; i++)    external_d[i] = tree->blength[ tree->nodelist[i]->id ] / tmp1;
+      break;
+    default: /* divided by shortest branch */ 
+      tmp1 = 1e9;
+      for (i = 0; i < tree->nnodes; i++) 
+        if ((tmp1 > tree->blength[tree->nodelist[i]->id]) && (tree->blength[tree->nodelist[i]->id] > tolerance))
+          tmp1 = tree->blength[tree->nodelist[i]->id];
+      if (tmp1 > 1e8) tmp1 = 1.;
+      for (i = tree->nleaves-3; i >= 0; i--) internal_d[i] = tree->blength[ tree->postorder[i]->id ] / tmp1;
+      for (i = 0; i < tree->nleaves; i++)    external_d[i] = tree->blength[ tree->nodelist[i]->id ] / tmp1;
+      break;
+  }
+  /* main function: calculate distance from root to node in preorder */
+  for (i = tree->nleaves-3; i >= 0; i--) 
+    fromroot[ tree->postorder[i]->id ] = fromroot[ tree->postorder[i]->up->id ] + internal_d[i];
+  for (i = 0; i < tree->nleaves; i++)  /* external nodes (do not belong to postorder) */
+    fromroot[ tree->nodelist[i]->id ] = fromroot[ tree->nodelist[i]->up->id ] + external_d[i];
+
+  if (internal_d) free (internal_d);
+  if (external_d) free (external_d);
+}
+
 
 char *
 topology_to_string_by_id (const topology tree, double *blen) 
