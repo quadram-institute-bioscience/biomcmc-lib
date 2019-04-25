@@ -61,7 +61,7 @@ new_single_topology_from_newick_file (char *filename)
   tree  = new_newick_tree_from_string (line_read); // this might increase size, but not decrease (I hope)
   if (line_read) free (line_read);
   topol = new_topology (tree->nleaves);
-  copy_topology_from_newick_tree (topol, tree);
+  copy_topology_from_newick_tree (topol, tree, true); // true=create char_vector and copy taxlabel
   del_newick_tree (tree);
   return topol;
 }
@@ -103,10 +103,10 @@ update_newick_space_from_string (newick_space nwk, char *tree_string, size_t str
   local_string = (char*) biomcmc_malloc (sizeof (char) * (string_size + 1));
   strncpy (local_string, tree_string, string_size + 1); /* adds '\0' only when long_string is smaller!! */
   local_string[string_size] = '\0'; /* not null-terminated by default */
-  tree  = new_newick_tree_from_string (local_string);
+  tree  = new_newick_tree_from_string (local_string); // also copies, but relies on '\0' at end
   if (local_string) free (local_string);
   topol = new_topology (tree->nleaves);
-  copy_topology_from_newick_tree (topol, tree);
+  copy_topology_from_newick_tree (topol, tree, true); // true=create char_vector and copy taxlabel
   del_newick_tree (tree);
 
   nwk->t = (topology*) biomcmc_realloc ((topology*) nwk->t, sizeof (topology) * (nwk->ntrees + 1));
@@ -120,30 +120,5 @@ update_newick_space_from_topology (newick_space nwk, topology topol)
   nwk->t = (topology*) biomcmc_realloc ((topology*) nwk->t, sizeof (topology) * (nwk->ntrees + 1));
   nwk->t[nwk->ntrees++] = topol;
   topol->ref_counter++;
-}
-
-int
-estimate_treesize_from_file (char *seqfilename)
-{
-  FILE *seqfile;
-  char *line=NULL, *line_read=NULL, *needle_tip=NULL;
-  size_t linelength = 0;
-  int this_size, size = 0, ntrees = 0; 
-
-  seqfile = biomcmc_fopen (seqfilename, "r");
-  /* the variable *line should point always to the same value (no line++ or alike) */
-  while ((biomcmc_getline (&line_read, &linelength, seqfile) != -1) && (ntrees < 10)) {
-    line = remove_nexus_comments (&line_read, &linelength, seqfile);
-    if (strcasestr (line, "TREE") && (needle_tip = strcasestr (line, "="))) {
-      needle_tip++; /* remove "=" from string */
-      this_size  = number_of_leaves_in_newick (&needle_tip); /* false = do not attempt to change tree string */
-      if (this_size) { size += this_size; ntrees++; }
-    }
-  }
-  fclose (seqfile);
-  if (line_read) free (line_read);
-
-  if (!ntrees) return -1;
-  return size/ntrees;
 }
 

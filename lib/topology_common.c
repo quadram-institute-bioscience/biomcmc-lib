@@ -394,6 +394,8 @@ patristic_distances_from_topology_to_vectors (topology tree, double *d_w, double
   if (!tree->traversal_updated) update_topology_traversal (tree);
   double *fromroot_w = NULL, *fromroot_u = NULL, nodal_dist = 0.;
 
+  // FIXME: add rescaled blens (s.t. sum is one or sum is # leaves, creating two more *d_w)
+
   if (tolerance < 1e-15) tolerance = 1e-15; /* any branch length shorter than this will be assumed zero (multifurcation) */
   fromroot_w = (double*) biomcmc_malloc ((2 * tree->nleaves - 1) * sizeof (double));
   fromroot_u = (double*) biomcmc_malloc ((2 * tree->nleaves - 1) * sizeof (double));

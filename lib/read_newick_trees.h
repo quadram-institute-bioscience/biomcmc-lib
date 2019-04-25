@@ -46,8 +46,9 @@ struct newick_tree_struct
 newick_tree new_newick_tree (int nleaves);
 /*! \brief Frees memory used by tree. */
 void del_newick_tree (newick_tree T);
-/*! \brief Copy information from newick_tree struct to topology_struct  */
-void copy_topology_from_newick_tree (topology tree, newick_tree nwk_tree);
+/*! \brief Copy information from newick_tree struct to topology_struct; newick_space copies taxlabels but topology_space
+ * (from nexus files) share the taxlabel and thus don't copy from #newick_tree_struct  */
+void copy_topology_from_newick_tree (topology tree, newick_tree nwk_tree, bool create_tree_taxlabel);
 /*! \brief Creates newick_tree structure. */ 
 newick_tree new_newick_tree_from_string (char *external_string);
 /*! \brief Recursive function that creates a node based on parenthetic structure. */

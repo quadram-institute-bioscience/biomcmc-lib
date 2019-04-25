@@ -66,16 +66,20 @@ del_newick_tree (newick_tree T)
 }
 
 void
-copy_topology_from_newick_tree (topology tree, newick_tree nwk_tree)
+copy_topology_from_newick_tree (topology tree, newick_tree nwk_tree, bool create_tree_taxlabel)
 {
   int i, node_id;
 
-  tree->taxlabel = new_char_vector (nwk_tree->nleaves);
-  for (i=0; i< nwk_tree->nleaves; i++) { 
-    char_vector_link_string_at_position (tree->taxlabel, nwk_tree->leaflist[i]->taxlabel, i); 
-    nwk_tree->leaflist[i]->taxlabel = NULL; // we don't need this copy anymore
-    nwk_tree->leaflist[i]->id = i;
+  if (create_tree_taxlabel) {
+    tree->taxlabel = new_char_vector (nwk_tree->nleaves);
+    for (i=0; i< nwk_tree->nleaves; i++) { 
+      char_vector_link_string_at_position (tree->taxlabel, nwk_tree->leaflist[i]->taxlabel, i); 
+      nwk_tree->leaflist[i]->taxlabel = NULL; // we don't need this copy anymore
+    }
   }
+  else del_char_vector (tree);
+
+  for (i=0; i< nwk_tree->nleaves; i++) nwk_tree->leaflist[i]->id = i;
 
   for (i = 0; i < tree->nnodes; i++) {
     node_id = nwk_tree->nodelist[i]->id;
@@ -122,6 +126,7 @@ new_newick_tree_from_string (char *external_string)
   id = 0; /* vector of pointers to the tree leaves */
   create_leaflist_newick_tree (T, T->root, &id); 
   create_node_id_newick_tree (T->root, &id); 
+  if (string) free (string);
 
   return T;
 }

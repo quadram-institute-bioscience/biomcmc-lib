@@ -25,7 +25,7 @@
 #include "alignment.h"
 #include "parsimony.h"
 #include "genetree.h"
-#include "newick_space.h"
+#include "topology_space.h"
 
 #ifdef THESE_ARE_COMMENTS
 #include "lowlevel.h"            // called by char_vector, argtable, bipartition, prob_distribution 
@@ -43,7 +43,8 @@
 #include "empirical_frequency.h" // called by nexus_common  
 #include "nexus_common.h"        // called by read_nexus_trees 
 #include "prob_distribution.h"   // called by topology_randomise, char_vector
-#include "read_newick_trees.h"   // called by newick_space, topology_space
+#include "read_newick_trees.h"   // called by newick_space
+#include "newick_space.h"        // called by topology_space
 #endif // of THESE_ARE_COMMENTS
 
 #endif //define biomcmc

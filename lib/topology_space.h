@@ -17,7 +17,7 @@
 #ifndef _biomcmc_topology_space_h_
 #define _biomcmc_topology_space_h_
 
-#include <biomcmc.h> 
+#include "newick_space.h" 
 
 typedef struct topology_space_struct* topology_space;
 
