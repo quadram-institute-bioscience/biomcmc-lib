@@ -38,7 +38,6 @@ struct newick_tree_struct
   newick_node *nodelist; /*! \brief Vector with pointers to every internal node. */
   newick_node *leaflist; /*! \brief Vector with pointers to tree leaves. */
   newick_node root;      /*! \brief Pointer to root node. */
-  bool has_branches;     /*! \brief Boolean saying if tree has branch lengths or not. (topology alsways has, even if one-zero) */
   int nnodes, nleaves;   /*! \brief Number of nodes (including leaves), and number of leaves */
 };
 
@@ -54,6 +53,6 @@ newick_tree new_newick_tree_from_string (char *external_string);
 /*! \brief Recursive function that creates a node based on parenthetic structure. */
 newick_node subtree_newick_tree (newick_tree tree, char *lsptr, char *rsptr, int *node_id, newick_node up);
 /*! \brief Counts the number of leaves and resolves (one) trifurcation of tree string. */
-int number_of_leaves_in_newick (char **string);
+int number_of_leaves_in_newick (char **string, int *number_branches);
 
 #endif

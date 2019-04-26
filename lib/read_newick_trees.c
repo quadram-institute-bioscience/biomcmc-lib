@@ -41,7 +41,6 @@ new_newick_tree (int nleaves)
   tree = (newick_tree) biomcmc_malloc (sizeof (struct newick_tree_struct));
   tree->nleaves = nleaves;
   tree->nnodes  = 2 * nleaves - 1;
-  tree->has_branches = false;
   
   tree->nodelist = (newick_node*) biomcmc_malloc (tree->nnodes * sizeof (newick_node));
   tree->leaflist = (newick_node*) biomcmc_malloc (tree->nleaves * sizeof (newick_node));
@@ -105,7 +104,7 @@ newick_tree
 new_newick_tree_from_string (char *external_string) 
 {
   char *lptr, *rptr, *string;
-  int id, nleaves;
+  int id, nleaves, n_branches = 0;
   size_t string_size = strlen (external_string);
   newick_tree T; 
   
@@ -113,9 +112,8 @@ new_newick_tree_from_string (char *external_string)
   strncpy (string, external_string, string_size + 1); /* adds '\0' only when long_string is smaller!! */
   string[string_size] = '\0'; /* not null-terminated by default */
   string = remove_space_from_string (string);
-  nleaves = number_of_leaves_in_newick (&string);
+  nleaves = number_of_leaves_in_newick (&string, &n_branches); // this function resolves multifurcations
   T = new_newick_tree (nleaves);
-  if (strchr (string, ':')) T->has_branches = true;
   
   /* begin & end of string */
   lptr = string;  
@@ -126,6 +124,13 @@ new_newick_tree_from_string (char *external_string)
   id = 0; /* vector of pointers to the tree leaves */
   create_leaflist_newick_tree (T, T->root, &id); 
   create_node_id_newick_tree (T->root, &id); 
+ /* if original tree didn't have branch lengths, then dist(left,right) should be one for unrooted version 
+  * but our rooted representation adds a branch with redundant info */
+  if ((n_branches < (2 * nleaves - 2)) &&
+      (root->left->branch_length + root->right->branch_length - (2 * DEFAULTBLENGTH) < 1e-9)) {
+    root->left->branch_length = root->right->branch_length = DEFAULTBLENGTH/2.;
+  }
+
   if (string) free (string);
 
   return T;
@@ -139,7 +144,7 @@ subtree_newick_tree (newick_tree tree, char *lsptr, char *rsptr, int *node_id, n
   thisnode = tree->nodelist[*node_id];
   thisnode->up = up;
   thisnode->id = -1; 
-  thisnode->branch_length = tree->has_branches ? read_branch_length (rsptr) : DEFAULTBLENGTH;
+  thisnode->branch_length = read_branch_length (rsptr);
   thisnode->left = NULL;
   thisnode->right = NULL;
   thisnode->taxlabel = NULL;
@@ -221,12 +226,12 @@ create_node_id_newick_tree (newick_node this, int *id)
 double
 read_branch_length (char *right_string_ptr) 
 {
-   char *backwards = right_string_ptr;
-   double branch = DEFAULTBLENGTH;
-  
-  if ((*backwards == ')') || (*backwards == ',')) return DEFAULTBLENGTH;
-  while (*backwards != ':') backwards--;
-  sscanf (backwards, ": %lf", &branch);
+  char *backwards = right_string_ptr;
+  double branch = DEFAULTBLENGTH;
+
+  while ((*backwards != ':') && (*backwards != '(') && (*backwards != ')') && (*backwards != ',')) backwards--;
+  if ((*backwards == '(') || (*backwards == ')') || (*backwards == ',')) return DEFAULTBLENGTH;
+  sscanf (backwards, ": %lf", &branch); // if backwards == '(' we are in trouble! (I use it as a hard stop to prevent leakage)
   if (branch < 0.) return 0.;
   else return branch;
 }
@@ -239,12 +244,12 @@ void prtdbg (char *string, int start, int end) { // not declared above since jus
 }
 
 int 
-number_of_leaves_in_newick (char **string)
+number_of_leaves_in_newick (char **string, int *number_branches)
 {
   int nopen = 0, nclose = 0, ncommas = 0, i;
-  int has_branches = 0; /* could be a bool, but I want to debug number of branches */
   int len = strlen (*string);
   char current;
+  (*number_branches) = 0; /* could be a bool, but I want to debug number of branches */
 
   if (*(*string + len - 1) == ';') *(*string + len - 1) = '\0';
   //printf ("\nDEBUG1:: <<%s>>\n", *string); 
@@ -256,7 +261,7 @@ number_of_leaves_in_newick (char **string)
     if (current == ',' && (nopen - nclose) == 1) ncommas++;
     else if (current == '(') nopen++;
     else if (current == ')') nclose++; 
-    else if (current == ':') has_branches++;
+    else if (current == ':') (*number_branches)++;
   }
   if (nopen != nclose || ncommas > 2 || ncommas < 1) biomcmc_error ("%d %d %d Invalid tree structure n_leaves_newick(): <<%s>>", nopen, nclose, ncommas, *string);
   return nopen + 1;

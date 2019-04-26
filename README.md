@@ -27,12 +27,16 @@ The trees can be in nexus or newick formats, and the sequences can be in nexus o
   This means that more compact representations are allowed, leading to smaller files. This also allow for some
   optimisations when reading large files.
   1. The taxon names can come first, in a `TRANSLATE` table; the individual trees then just point to the IDs in this
-     table. BTW, technically each tree in a nexus file is represented in newick format.
+     table. BTW, technically each tree in a nexus file is represented in newick format (so "newick file" is a
+     synecdoche).
   2. If the same topology is observed, then some programs (e.g. MrBayes, guenomu) just output the distinct topologies, with 
      their equivalent *frequencies* as nexus comments. The trees are ordered, with the most frequent trees at the top.
-     The individual branch length information is lost, however, as just the mean values are reported.
+     The individual branch length information is lost, however, as just the mean values are reported. Unless explicitly
+     flagged by the calling program, our nexus tree reading functions will also store only mean branch lengths for equal
+     topologies. 
   3. Since nexus files may represent MCMC samples, you can do "thinning", i.e. you may subsample by skipping consecutive
-     trees, and also by skipping the first ones (from the "burnin" period). 
+     trees, and also by skipping the first ones (from the "burnin" period). This leads to faster reading of nexus files
+     and some potential checking, as convergence tests in MCMC analyses. 
   4. Two topologies can be equal at the unrooted level but not at the rooted (i.e. the only difference is the root
      location). Please pay attention to this information, as this should be solved by the calling program.
 * The so-called "newick files", however, can have trees from different leaf sets. That is, trees in the same file are not 
@@ -43,6 +47,9 @@ The trees can be in nexus or newick formats, and the sequences can be in nexus o
   implementations assume. The downstream program/user must take into account if the rooting is relevant or not. Having
   said that, all algorithms know when to ignore the root node (e.g. gene tree / species tree reconciliation assumes
   both trees are rooted, but we optimise over all gene rootings effectively looking at unrooted gene trees).
+* If the calling function (downstream software) knows that the nexus trees are unrooted, then they are rooted close to a
+  common leaf. This is to facilitate branch length comparisons. One possibility is to first read all nexus files and then 
+  decide for the same leaf (the most commom across files) as (dummy) outgroup. 
 * The nexus format uses square brackets (`[]`) for comments, which can span several lines. These comments are ignored by
   all reading functions, including those for fasta and newick files. The only exception so far are the tree frequencies, which 
   follow the convention of the `.trprobs` files of MrBayes and guenomu (`p` for frequency, `P` for cummulative
@@ -72,6 +79,7 @@ taxa), or use midpoint/MAD/minimum variance to find the best root location for y
 
 In any case, it is good idea to always assume that the trees are unrooted unless explicitly stated otherwise.
 Irrespective of what the newick string tells you. 
+
 
 
 ## License 

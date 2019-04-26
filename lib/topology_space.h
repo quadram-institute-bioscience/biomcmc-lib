@@ -12,7 +12,11 @@
  */
 
 /*! \file topology_space.h
- *  \brief Reads tree files in nexus format and creates a vector of topologies. */
+ *  \brief Reads tree files in nexus format and creates a vector of topologies. 
+ *
+ *  The #topology_space_struct is distinct from the #newick_space_struct since all trees here must share same
+ *  char_vector (newick spaces can have general, uncomparable trees), and also since we store the distribution of trees
+ *  (that is, each tree will have a frequency/representativity associated to it, as typical from Bayesian analyes).  */
 
 #ifndef _biomcmc_topology_space_h_
 #define _biomcmc_topology_space_h_
@@ -30,7 +34,7 @@ struct topology_space_struct
   double *freq;              /*! \brief frequency of each distinct topology (add up to one) */
   char_vector taxlabel;      /*! \brief Taxon names. */
   hashtable taxlabel_hash;   /*! \brief Lookup table with taxon names. */
-  bool has_branch_lengths;   /*! \brief if false, then topology_space_struct::tree = topology_space_struct:distinct */
+  bool is_rooted;            /*! \brief If trees are unrooted, then branch lengths must be accounted for in some comparisons */ 
   char *filename;            /*! \brief name (without extension) of the originating file from where topology_space was read */
 };
 

@@ -361,10 +361,12 @@ new_topology_space (void)
   tsp = (topology_space) biomcmc_malloc (sizeof (struct topology_space_struct));
 
   tsp->ndistinct = tsp->ntrees = 0;
+  tsp->is_rooted = true;  /* if true then tree comparison is straightforward; o.w. we must reroot to same leaf (to compare branches) */
   tsp->tree = tsp->distinct = NULL;
   tsp->taxlabel = NULL;
   tsp->taxlabel_hash = NULL;
   tsp->filename = NULL;
+  tsp->distinct = NULL;
   tsp->freq = NULL; /* will be created online (as we read more trees) or when reading "[&W 0.01]" posterior probability data */
   /* tsp->distinct vector is increased by add_tree_to_topology_space() while tsp->tree are pointers to dsp->distinct
    * tsp->taxlabel vector is setup by translate_taxa_topology_space() or add_tree_to_topology_space(), whichever is used
@@ -407,8 +409,6 @@ add_tree_to_topology_space (topology_space tsp, const char *string, bool transla
   if (local_string) free (local_string);
 
   if ((tsp->ntrees == 0) && (!translate)) { /* CASE 1: first tree read and no TRANSLATE command in nexus file */
-    tsp->has_branch_lengths = tree->has_branches; /* first tree decides if branch lengths are taken into account */
-
     /* tsp->taxlabel will point to names of first tree. This info will be also available at the hashtable */ 
     tsp->taxlabel = new_char_vector (tree->nleaves); 
 
@@ -438,7 +438,6 @@ add_tree_to_topology_space (topology_space tsp, const char *string, bool transla
   }
 
   else if ((tsp->ntrees == 0) && (translate)) { /* CASE 2: first tree read and TRANSLATE command in nexus file */
-    tsp->has_branch_lengths = tree->has_branches; /* first tree decides if branch lengths are taken into account */
     for (i=0; i< tree->nleaves; i++) {
       sscanf (tree->leaflist[i]->taxlabel, " %d ", &index);
       index--;
