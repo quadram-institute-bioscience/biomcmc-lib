@@ -34,7 +34,8 @@
 #include "bipartition.h"         // called by hashtable
 #include "random_number_gen.h"   // called by random_number
 #include "random_number.h"       // called by prob_distribution
-#include "topology_common.h"     // called by parsimony, reconciliation, read_nexus_trees
+#include "topology_common.h"     // called by topology_distance 
+#include "topology_distance.h"   // called by parsimony, reconciliation, read_nexus_trees
 #include "topology_randomise.h"  // called by upgma
 #include "upgma.h"               // called by genetree 
 #include "reconciliation.h"      // opaque header/library, called by genetree

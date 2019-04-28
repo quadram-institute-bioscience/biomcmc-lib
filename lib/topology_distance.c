@@ -11,7 +11,7 @@
  * details (file "COPYING" or http://www.gnu.org/copyleft/gpl.html).
  */
 
-#include "topology_common.h"
+#include "topology_distance.h"
 
 /*! \brief rescales original branches and stores distance from root into #fromroot[], using up to 6 distinct rescalings */
 double rescale_rooted_distances_for_patristic_distances (topology tree, double *fromroot, int mode, double tolerance);
@@ -211,7 +211,7 @@ fast_multiplication_topological_matrix (topology tree, int *idx, double *dist)
 
  //eqs 9 and 10 of molbev.a025863
   for (i = 0; i < tree->nnodes; i++) delta[i] = 0.;
-  for (1 = 0; i < tree->nleaves; i++) for (j = 0; j < tree->i; j++) { 
+  for (i = 1; i < tree->nleaves; i++) for (j = 0; j < i; j++) { 
     delta[i] += dist[ (i*(i-1))/2 + j];
     delta[j] += dist[ (i*(i-1))/2 + j];
   }
@@ -230,16 +230,16 @@ fast_multiplication_topological_matrix (topology tree, int *idx, double *dist)
 double*
 ols_branch_lengths_from_fast_mtm (topology tree, double *delta)
 {
-  int i, j; 
-  double tmp1, n_j, n_k, n_l, n_m, nleaves; 
+  int i; 
+  double *blen = NULL, tmp1, n_j, n_k, n_l, n_m, nleaves; 
   blen = (double*) biomcmc_malloc (tree->nnodes * sizeof (double));
   for (i = 0; i < tree->nnodes; i++) blen[i] = 0.;
   nleaves = tree->nleaves;
   for (i = 0; i < tree->nleaves; i++) { //eq30 of molbev.a025863
     n_j = (double) tree->nodelist[i]->sister->split->n_ones;
     n_k = nleaves - n_j - 1.; // remaining leaves
-    tmp = (1. + n_j - n_k) * delta[tree->nodelist[i]->sister->id]  + (1. - n_j + n_k) * delta[tree->nodelist[i]->up->id];
-    blen[i] = (nleaves * delta[i] - tmp)/(4. * n_j * n_k);
+    tmp1 = (1. + n_j - n_k) * delta[tree->nodelist[i]->sister->id]  + (1. - n_j + n_k) * delta[tree->nodelist[i]->up->id];
+    blen[i] = (nleaves * delta[i] - tmp1)/(4. * n_j * n_k);
   }
   for (i = 0; i < tree->nleaves - 2; i++) { //eq24 of molbev.a025863
     n_j = (double) tree->postorder[i]->sister->split->n_ones;
@@ -262,7 +262,6 @@ ols_branch_lengths_from_fast_mtm (topology tree, double *delta)
 void
 estimate_topology_branch_lengths_from_distances (topology tree, double *dist)
 {
-  int i;
   double *blen;
   blen = new_topology_branch_lengths_from_distances (tree, dist);
   if (tree->blength) free (tree->blength);

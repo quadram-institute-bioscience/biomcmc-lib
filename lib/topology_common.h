@@ -105,19 +105,6 @@ void reorder_topology_leaves (topology tree);
 /*! \brief Boolean if node2 is on the path of node1 to the root. */
 bool node1_is_child_of_node2 (topol_node node1, topol_node node2);
 
-/*! \brief allocate memory for a new distance_matrix that will be used on topologies */
-distance_matrix new_distance_matrix_for_topology (int nleaves);
-
-/*! \brief fill in distance_matrix with the patristic distances from topology (can be used with distinct branch length vectors to fill upper and lower diagonals */
-void fill_distance_matrix_from_topology (distance_matrix dist, topology tree, double *blen, bool use_upper);
-
-/*! \brief calculates rescaled patristic distances returning up to 6 distinct 1D vectors #dist (externally allocated) 
- * The 'tolerance' is the minimum branch length to be considered a multifurcation (length zero) */
-void patristic_distances_from_topology_to_vectors (topology tree, double **dist, double *scaling, int n_dists, double tolerance);
-
-/*! \brief similar to an Euler tour, has list of leaves below each node */
-int* create_vector_with_idx_leaves_below_for_patristic (topology tree);
-
 /*! \brief Print subtree in newick format to string using leaf IDs.
  *
  * Stores in string the tree in newick format, using leaf ID numbers (in practical applications needs a TRANSLATION 
