@@ -113,7 +113,10 @@ void fill_distance_matrix_from_topology (distance_matrix dist, topology tree, do
 
 /*! \brief calculates rescaled patristic distances returning up to 6 distinct 1D vectors #dist (externally allocated) 
  * The 'tolerance' is the minimum branch length to be considered a multifurcation (length zero) */
-void patristic_distances_from_topology_to_vectors (topology tree, double **dist, int n_dists, double tolerance);
+void patristic_distances_from_topology_to_vectors (topology tree, double **dist, double *scaling, int n_dists, double tolerance);
+
+/*! \brief similar to an Euler tour, has list of leaves below each node */
+int* create_vector_with_idx_leaves_below_for_patristic (topology tree);
 
 /*! \brief Print subtree in newick format to string using leaf IDs.
  *

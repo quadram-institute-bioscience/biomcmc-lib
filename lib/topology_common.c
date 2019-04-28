@@ -14,7 +14,7 @@
 #include "topology_common.h"
 
 /*! \brief rescales original branches and stores distance from root into #fromroot[], using up to 6 distinct rescalings */
-void rescale_rooted_distances_for_patristic_distances (topology tree, double *fromroot, int mode, double tolerance);
+double rescale_rooted_distances_for_patristic_distances (topology tree, double *fromroot, int mode, double tolerance);
 /*! \brief update internal bipartitions and reorder siblings by heavy child on left */
 unsigned int update_subtree_bipartitions (topol_node this);
 /*! \brief tree traversal with preorder and postorder node tracking */
@@ -380,7 +380,7 @@ fill_distance_matrix_from_topology (distance_matrix dist, topology tree, double 
 }
 
 void 
-patristic_distances_from_topology_to_vectors (topology tree, double **dist, int n_dists, double tolerance)
+patristic_distances_from_topology_to_vectors (topology tree, double **dist, double *scaling, int n_dists, double tolerance)
 {
   int i=0, j=0, k=0, l=0, row, col, *idx, *i_l, *i_r, onedim;
   if (!tree->traversal_updated) update_topology_traversal (tree);
@@ -391,28 +391,13 @@ patristic_distances_from_topology_to_vectors (topology tree, double **dist, int 
   fromroot = (double**) biomcmc_malloc (n_dists * sizeof (double*));
   for (i = 0; i < n_dists; i++) fromroot[i] = (double*) biomcmc_malloc ((2 * tree->nleaves - 1) * sizeof (double));
 
-  idx = (int*) biomcmc_malloc ((5 * tree->nleaves - 2) * sizeof (int));/* |---idx---|---i_left---|---i_right---| used in Euler tour-like struct */
-  i_l = idx + tree->nleaves;
-  i_r = i_l + (2 * tree->nleaves - 1);
-
   /* STEP 1: find distances from every node to root */
-  for (i = 0; i < n_dists; i++) rescale_rooted_distances_for_patristic_distances (tree, fromroot[i], i, tolerance);
+  for (i = 0; i < n_dists; i++) scaling[i] = rescale_rooted_distances_for_patristic_distances (tree, fromroot[i], i, tolerance);
 
   /* STEP 2: create tour in postorder so that we have subvectors with all leaves below it */
-  j = 0;
-  for (i = 0; i < tree->nleaves-1; i++) {
-    /* for leaves: idx will have its id; and left and right will point to same idx position; j is for index positions  */
-    if (!tree->postorder[i]->left->internal)  { 
-      idx[j] = tree->postorder[i]->left->id; /* idx[] contain leaf "names" (ids actually) */  
-      i_l[ tree->postorder[i]->left->id ] = i_r[ tree->postorder[i]->left->id ] = j++; /* interval of leaves below, as idx indexes */
-    }
-    if (!tree->postorder[i]->right->internal) { 
-      idx[j] = tree->postorder[i]->right->id; 
-      i_l[ tree->postorder[i]->right->id ] = i_r[ tree->postorder[i]->right->id ] = j++; /* interval of leaves below, as idx indexes */
-    }
-    i_l[ tree->postorder[i]->id ] = i_l[ tree->postorder[i]->left->id ]; 
-    i_r[ tree->postorder[i]->id ] = i_r[ tree->postorder[i]->right->id ]; /* this interval covers from leftest of left to rightest of right */
-  } 
+  idx = create_vector_with_idx_leaves_below_for_patristic (tree);
+  i_l = idx + tree->nleaves;
+  i_r = i_l + (2 * tree->nleaves - 1);
   /* STEP 3: dist(A,B) = fromroot[A] + fromroot[B] - 2 * fromroot[mrca between A and B] (from STEP2 we know all A's and B's)*/
   for (i = 0; i < ((tree->nleaves - 1) * tree->nleaves)/2; i++) for (j = 0; j < n_dists; j++) dist[j][i] = 0.; 
 
@@ -431,11 +416,36 @@ patristic_distances_from_topology_to_vectors (topology tree, double **dist, int 
   if (idx) free (idx);
 }
 
-void
+int*
+create_vector_with_idx_leaves_below_for_patristic (topology tree)
+{
+  int i=0, j=0, *idx, *i_l, *i_r;
+  idx = (int*) biomcmc_malloc ((5 * tree->nleaves - 2) * sizeof (int));/* |---idx---|---i_left---|---i_right---| used in Euler tour-like struct */
+  i_l = idx + tree->nleaves;
+  i_r = i_l + (2 * tree->nleaves - 1);
+
+  j = 0;
+  for (i = 0; i < tree->nleaves-1; i++) {
+    /* for leaves: idx will have its id; and left and right will point to same idx position; j is for index positions  */
+    if (!tree->postorder[i]->left->internal)  { 
+      idx[j] = tree->postorder[i]->left->id; /* idx[] contain leaf "names" (ids actually) */  
+      i_l[ tree->postorder[i]->left->id ] = i_r[ tree->postorder[i]->left->id ] = j++; /* interval of leaves below, as idx indexes */
+    }
+    if (!tree->postorder[i]->right->internal) { 
+      idx[j] = tree->postorder[i]->right->id; 
+      i_l[ tree->postorder[i]->right->id ] = i_r[ tree->postorder[i]->right->id ] = j++; /* interval of leaves below, as idx indexes */
+    }
+    i_l[ tree->postorder[i]->id ] = i_l[ tree->postorder[i]->left->id ]; 
+    i_r[ tree->postorder[i]->id ] = i_r[ tree->postorder[i]->right->id ]; /* this interval covers from leftest of left to rightest of right */
+  } 
+  return idx;
+}
+
+double
 rescale_rooted_distances_for_patristic_distances (topology tree, double *fromroot, int mode, double tolerance)
 {
   int i;
-  double *internal_d, *external_d, tmp1;
+  double *internal_d, *external_d, scale = 1.;
 
   internal_d = (double*) biomcmc_malloc ((tree->nleaves - 2) * sizeof (double));
   external_d = (double*) biomcmc_malloc ((tree->nleaves) * sizeof (double));
@@ -452,33 +462,33 @@ rescale_rooted_distances_for_patristic_distances (topology tree, double *fromroo
       for (i = 0; i < tree->nleaves; i++)    external_d[i] = (tree->blength[ tree->nodelist[i]->id ] > tolerance) ? 1. : 0.; 
       break;
     case 2: /* divided by number of nodes */ 
-      tmp1 = tree->nnodes;
-      for (i = tree->nleaves-3; i >= 0; i--) internal_d[i] = tree->blength[ tree->postorder[i]->id ] / tmp1;
-      for (i = 0; i < tree->nleaves; i++)    external_d[i] = tree->blength[ tree->nodelist[i]->id ] / tmp1;
+      scale = tree->nnodes;
+      for (i = tree->nleaves-3; i >= 0; i--) internal_d[i] = tree->blength[ tree->postorder[i]->id ] / scale;
+      for (i = 0; i < tree->nleaves; i++)    external_d[i] = tree->blength[ tree->nodelist[i]->id ] / scale;
       break;
     case 3: /* divided by average (s.t. average blen is 1. and treelength = nnodes) */ 
-      tmp1 = 0.;
-      for (i = 0; i < tree->nnodes; i++) tmp1 += tree->blength[tree->nodelist[i]->id];
-      tmp1 /= tree->nnodes;
-      if (tmp1 < 1e-12) tmp1 = 1e-12;
-      for (i = tree->nleaves-3; i >= 0; i--) internal_d[i] = tree->blength[ tree->postorder[i]->id ] / tmp1;
-      for (i = 0; i < tree->nleaves; i++)    external_d[i] = tree->blength[ tree->nodelist[i]->id ] / tmp1;
+      scale = 0.;
+      for (i = 0; i < tree->nnodes; i++) scale += tree->blength[tree->nodelist[i]->id];
+      scale /= tree->nnodes;
+      if (scale < 1e-12) scale = 1e-12;
+      for (i = tree->nleaves-3; i >= 0; i--) internal_d[i] = tree->blength[ tree->postorder[i]->id ] / scale;
+      for (i = 0; i < tree->nleaves; i++)    external_d[i] = tree->blength[ tree->nodelist[i]->id ] / scale;
       break;
     case 4: /* divided by treelength (s.t. average is 1/nodes and treelength=1) */ 
-      tmp1 = 0.;
-      for (i = 0; i < tree->nnodes; i++) tmp1 += tree->blength[tree->nodelist[i]->id];
-      if (tmp1 < 1e-12) tmp1 = 1e-12;
-      for (i = tree->nleaves-3; i >= 0; i--) internal_d[i] = tree->blength[ tree->postorder[i]->id ] / tmp1;
-      for (i = 0; i < tree->nleaves; i++)    external_d[i] = tree->blength[ tree->nodelist[i]->id ] / tmp1;
+      scale = 0.;
+      for (i = 0; i < tree->nnodes; i++) scale += tree->blength[tree->nodelist[i]->id];
+      if (scale < 1e-12) scale = 1e-12;
+      for (i = tree->nleaves-3; i >= 0; i--) internal_d[i] = tree->blength[ tree->postorder[i]->id ] / scale;
+      for (i = 0; i < tree->nleaves; i++)    external_d[i] = tree->blength[ tree->nodelist[i]->id ] / scale;
       break;
     default: /* divided by shortest branch */ 
-      tmp1 = 1e9;
+      scale = 1e9;
       for (i = 0; i < tree->nnodes; i++) 
-        if ((tmp1 > tree->blength[tree->nodelist[i]->id]) && (tree->blength[tree->nodelist[i]->id] > tolerance))
-          tmp1 = tree->blength[tree->nodelist[i]->id];
-      if (tmp1 > 1e8) tmp1 = 1.;
-      for (i = tree->nleaves-3; i >= 0; i--) internal_d[i] = tree->blength[ tree->postorder[i]->id ] / tmp1;
-      for (i = 0; i < tree->nleaves; i++)    external_d[i] = tree->blength[ tree->nodelist[i]->id ] / tmp1;
+        if ((scale > tree->blength[tree->nodelist[i]->id]) && (tree->blength[tree->nodelist[i]->id] > tolerance))
+          scale = tree->blength[tree->nodelist[i]->id];
+      if (scale > 1e8) scale = 1.;
+      for (i = tree->nleaves-3; i >= 0; i--) internal_d[i] = tree->blength[ tree->postorder[i]->id ] / scale;
+      for (i = 0; i < tree->nleaves; i++)    external_d[i] = tree->blength[ tree->nodelist[i]->id ] / scale;
       break;
   }
   /* main function: calculate distance from root to node in preorder */
@@ -489,6 +499,7 @@ rescale_rooted_distances_for_patristic_distances (topology tree, double *fromroo
 
   if (internal_d) free (internal_d);
   if (external_d) free (external_d);
+  return scale;
 }
 
 

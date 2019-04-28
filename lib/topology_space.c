@@ -334,7 +334,7 @@ estimate_treesize_from_file (char *seqfilename)
   FILE *seqfile;
   char *line=NULL, *line_read=NULL, *needle_tip=NULL;
   size_t linelength = 0;
-  int this_size, size = 0, ntrees = 0; 
+  int this_size, size = 0, ntrees = 0, n_branches = 0; 
 
   seqfile = biomcmc_fopen (seqfilename, "r");
   /* the variable *line should point always to the same value (no line++ or alike) */
@@ -342,7 +342,7 @@ estimate_treesize_from_file (char *seqfilename)
     line = remove_nexus_comments (&line_read, &linelength, seqfile);
     if (strcasestr (line, "TREE") && (needle_tip = strcasestr (line, "="))) {
       needle_tip++; /* remove "=" from string */
-      this_size  = number_of_leaves_in_newick (&needle_tip); 
+      this_size  = number_of_leaves_in_newick (&needle_tip, &n_branches); 
       if (this_size) { size += this_size; ntrees++; }
     }
   }

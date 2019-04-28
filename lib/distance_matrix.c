@@ -136,6 +136,42 @@ finalise_spdist_matrix (spdist_matrix dist)
 }
 
 void
+finalise_spdist_matrix_with_rescaling (spdist_matrix dist, double scale)
+{ /* calculate averages across loci over within-locus means and within-locus mins */
+  int i, j, k, id1, id2, id3, n_pairs = (dist->size *(dist->size -1))/2;
+  double max_mean = DBL_MIN, max_min = DBL_MIN, mm_me, mm_mi, tmp_max;
+  for (i=0; i < n_pairs; i++) if (dist->count[i]) {
+    dist->n_missing--; // one less missing pairwise comparison
+    dist->mean[i] *= (scale / (double)(dist->count[i]) );
+    dist->min[i]  *= (scale / (double)(dist->count[i]) ); /* reminder: min is within locus, b/c across loci is always average */
+    if (max_mean < dist->mean[i]) max_mean = dist->mean[i];
+    if (max_min < dist->min[i])   max_min = dist->min[i];
+    dist->count[i] = 1; /* we don't need to know it anymore, but may use when resampling/averaring several matrices */
+  }
+  if (!dist->n_missing) return;
+  for (j=1; j < dist->size; j++) for (i=0; i < j; i++) {
+    id1 = (j * (j-1)) /2 + i;
+    if (!dist->count[id1]) { // 10.1093/bioinformatics/bth211 Ultrametric
+      mm_me = max_mean; mm_mi = max_min;
+      for (k=0; k < dist->size; k++) {
+        if (k > i) id2 = (k * (k-1)) /2 + i;
+        else       id2 = (i * (i-1)) /2 + k;
+        if (k > j) id3 = (k * (k-1)) /2 + j;
+        else       id3 = (j * (j-1)) /2 + k;
+        if (dist->count[id2] && dist->count[id3]) {
+          tmp_max = (dist->mean[id2] > dist->mean[id3])? dist->mean[id2] : dist->mean[id3];
+          if (tmp_max < mm_me) mm_me = tmp_max;
+          tmp_max = (dist->min[id2] > dist->min[id3])? dist->min[id2] : dist->min[id3];
+          if (tmp_max < mm_mi) mm_mi = tmp_max;
+        }
+      } // for k
+      dist->mean[id1] = mm_me;
+      dist->min[id1]  = mm_mi;
+    }
+  } // for (i,j)
+}
+
+void
 complete_missing_spdist_from_global_spdist (spdist_matrix local, spdist_matrix global)
 {
   int i, n_pairs = (local->size*(local->size-1))/2;

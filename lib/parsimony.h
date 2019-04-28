@@ -19,7 +19,7 @@
 #ifndef _biomcmc_parsimony_
 #define _biomcmc_parsimony_
 
-#include "topology_common.h"
+#include "topology_distance.h"
 
 typedef struct binary_parsimony_datamatrix_struct* binary_parsimony_datamatrix; 
 typedef struct binary_parsimony_struct* binary_parsimony;

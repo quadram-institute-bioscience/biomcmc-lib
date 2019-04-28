@@ -127,8 +127,8 @@ new_newick_tree_from_string (char *external_string)
  /* if original tree didn't have branch lengths, then dist(left,right) should be one for unrooted version 
   * but our rooted representation adds a branch with redundant info */
   if ((n_branches < (2 * nleaves - 2)) &&
-      (root->left->branch_length + root->right->branch_length - (2 * DEFAULTBLENGTH) < 1e-9)) {
-    root->left->branch_length = root->right->branch_length = DEFAULTBLENGTH/2.;
+      (T->root->left->branch_length + T->root->right->branch_length - (2 * DEFAULTBLENGTH) < 1e-9)) {
+    T->root->left->branch_length = T->root->right->branch_length = DEFAULTBLENGTH/2.;
   }
 
   if (string) free (string);

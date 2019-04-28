@@ -61,6 +61,7 @@ void del_distance_matrix (distance_matrix dist);
 spdist_matrix new_spdist_matrix (int n_species);
 void zero_all_spdist_matrix (spdist_matrix dist); /**< zero both mean[] and min[] since we only look at average (never min) across loci */
 void finalise_spdist_matrix (spdist_matrix dist);
+void finalise_spdist_matrix_with_rescaling (spdist_matrix dist, double scale);
 void complete_missing_spdist_from_global_spdist (spdist_matrix local, spdist_matrix global);
 void copy_spdist_matrix_to_distance_matrix_upper (spdist_matrix spd, distance_matrix dist, bool use_means);
 void del_spdist_matrix (spdist_matrix dist);

@@ -19,7 +19,7 @@
 #ifndef _biomcmc_randomise_h_
 #define _biomcmc_randomise_h_
 
-#include "topology_common.h" 
+#include "topology_distance.h" 
 #include "prob_distribution.h"
 
 /*! \brief low level function that generates a random tree (equiv. to random refinement of a star topology) */

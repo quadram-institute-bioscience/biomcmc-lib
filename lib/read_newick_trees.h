@@ -19,7 +19,7 @@
 #ifndef _biomcmc_read_newick_trees_h
 #define _biomcmc_read_newick_trees_h
 
-#include "topology_common.h" 
+#include "topology_distance.h" 
 #include "nexus_common.h" 
 
 typedef struct newick_node_struct* newick_node;
