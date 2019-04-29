@@ -13,7 +13,7 @@
 
 #include "parsimony.h"
 
-int update_biparsdatmat_column_from_ones (binary_parsimony_datamatrix mrp, topology t, int *ones, bipartition bp);
+int update_biparsdatmat_column_from_ones (binary_parsimony_datamatrix mrp, topology t, int *ones, bipartition bp, int *map);
 void update_binary_parsimony_length (binary_parsimony pars, int new_columns_size);
 void update_binary_parsimony_datamatrix_column_if_new (binary_parsimony_datamatrix mrp);
 uint32_t hash_value_of_binary_parsimony_datamatrix_column (binary_parsimony_datamatrix mrp, int idx);
@@ -125,14 +125,14 @@ update_binary_parsimony_from_topology (binary_parsimony pars, topology t, int *m
   for (i=0; i < t->nleaves-3; i++) { // [n-2] is root; [n-3] is leaf or redundant 
     bipartition_copy (bp, t->postorder[i]->split);
     bipartition_to_int_vector (bp, ones, bp->n_ones); // n_ones=max number of ones to check (in this case, all of them)
-    n1 = update_biparsdatmat_column_from_ones (mrp, t, ones, bp);
+    n1 = update_biparsdatmat_column_from_ones (mrp, t, ones, bp, map);
     if ((n1 > 1) && (n1 < n_sp - 1)) {
       mrp->occupancy[mrp->i] = n_sp; // completeness (# species represented in bipartition)
       update_binary_parsimony_datamatrix_column_if_new (mrp);
     }
     bipartition_NOT (not, bp);
     bipartition_to_int_vector (not, ones, not->n_ones); // n_ones=max number of ones to check (in this case, all of them)
-    n2 = update_biparsdatmat_column_from_ones (mrp, t, ones, not);
+    n2 = update_biparsdatmat_column_from_ones (mrp, t, ones, not, map);
     if ((n2 > 1) && (n2 < n_sp - 1) && ((n2 + n1) != n_sp)) { 
       mrp->occupancy[mrp->i] = n_sp; // completeness (# species represented in bipartition)
       update_binary_parsimony_datamatrix_column_if_new (mrp);
@@ -146,7 +146,7 @@ update_binary_parsimony_from_topology (binary_parsimony pars, topology t, int *m
 }
 
 int
-update_biparsdatmat_column_from_ones (binary_parsimony_datamatrix mrp, topology t, int *ones, bipartition bp)
+update_biparsdatmat_column_from_ones (binary_parsimony_datamatrix mrp, topology t, int *ones, bipartition bp, int *map)
 {
   int j, nsp = 0;
   for (j=0; j < mrp->ntax; j++)  mrp->s[         j  ][mrp->i] = 3U; // all seqs are 'N' at first (a.k.a. {0,1}) -> absent from t in the end

@@ -99,9 +99,9 @@ count_species_in_index_species_gene (int *sp_id, int max_sp, int n_sp_id)
   int *sp_count;
   sp_count = (int*) biomcmc_malloc (max_sp * sizeof (int));
 
-  for (i = 0; i < max_sp; i++)  sp_count[i] = 0; /* representativity of each species in gene family */
+  for (i = 0; i < max_sp; i++) sp_count[i] = 0; /* representativity of each species in gene family */
   for (i = 0; i < n_sp_id; i++) sp_count[ sp_id[i] ]++; /* update species frequencies */
-  for (i = 0; i < max_id; i++) if (sp_count[i]) n_species++;
+  for (i = 0; i < max_sp; i++) if (sp_count[i]) n_species++;
   if (sp_count) free (sp_count);
   return n_species;
 }
