@@ -92,6 +92,20 @@ initialize_reconciliation_sp_count (reconciliation rec, int n_sp, int n_idx)
   rec->size_diff = 2 * (n_idx - rec->sp_size); /* term to calculate deepcoals */ 
 }
 
+int
+count_species_in_index_species_gene (int *sp_id, int max_sp, int n_sp_id)
+{
+  int i, n_species = 0;
+  int *sp_count;
+  sp_count = (int*) biomcmc_malloc (max_sp * sizeof (int));
+
+  for (i = 0; i < max_sp; i++)  sp_count[i] = 0; /* representativity of each species in gene family */
+  for (i = 0; i < n_sp_id; i++) sp_count[ sp_id[i] ]++; /* update species frequencies */
+  for (i = 0; i < max_id; i++) if (sp_count[i]) n_species++;
+  if (sp_count) free (sp_count);
+  return n_species;
+}
+
 void
 initialize_reconciliation_from_new_species_tree (genetree gtre, speciestree sptre)
 {

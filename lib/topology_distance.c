@@ -90,7 +90,7 @@ patristic_distances_from_topology_to_vectors (topology tree, double **dist, doub
   for (i = 0; i < n_dists; i++) fromroot[i] = (double*) biomcmc_malloc ((2 * tree->nleaves - 1) * sizeof (double));
 
   /* STEP 1: find distances from every node to root */
-  for (i = 0; i < n_dists; i++) scaling[i] = rescale_rooted_distances_for_patristic_distances (tree, fromroot[i], i, tolerance);
+  for (i = 0; i < n_dists; i++) if (dist[i]) scaling[i] = rescale_rooted_distances_for_patristic_distances (tree, fromroot[i], i, tolerance);
 
   /* STEP 2: create tour in postorder so that we have subvectors with all leaves below it */
   idx = create_vector_with_idx_leaves_below_for_patristic (tree);
@@ -105,7 +105,7 @@ patristic_distances_from_topology_to_vectors (topology tree, double **dist, doub
         row = idx[j]; col = idx[k];
         if (row > col) { col = idx[j]; row = idx[k]; }
         onedim = (col * (col-1))/2 + row;
-        for (l=0; l < n_dists; l++)  dist[l][onedim] = fromroot[l][row] + fromroot[l][col] - 2 * fromroot[l][ tree->postorder[i]->id ];
+        for (l=0; l < n_dists; l++) if (dist[l]) dist[l][onedim] = fromroot[l][row] + fromroot[l][col] - 2 * fromroot[l][ tree->postorder[i]->id ];
       }
   if (fromroot) {
     for (i = n_dists-1; i >= 0; i--) if (fromroot[i]) free (fromroot[i]);

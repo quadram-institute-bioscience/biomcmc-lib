@@ -13,6 +13,7 @@
 
 #include "parsimony.h"
 
+int update_biparsdatmat_column_from_ones (binary_parsimony_datamatrix mrp, topology t, int *ones, bipartition bp);
 void update_binary_parsimony_length (binary_parsimony pars, int new_columns_size);
 void update_binary_parsimony_datamatrix_column_if_new (binary_parsimony_datamatrix mrp);
 uint32_t hash_value_of_binary_parsimony_datamatrix_column (binary_parsimony_datamatrix mrp, int idx);
@@ -110,30 +111,49 @@ del_binary_parsimony (binary_parsimony pars)
 }
 
 void
-update_binary_parsimony_from_topology (binary_parsimony pars, topology t, int *map)
+update_binary_parsimony_from_topology (binary_parsimony pars, topology t, int *map, int n_sp)
 {
-  int i, j, *ones = NULL;
+  int i, n1, n2, *ones = NULL;
   bipartition bp = new_bipartition (t->nleaves);
+  bipartition not = new_bipartition (t->nleaves);
   binary_parsimony_datamatrix mrp = pars->external;
+
   if (!t->traversal_updated) update_topology_traversal (t);
-  update_binary_parsimony_length (pars, t->nleaves-3);
+  update_binary_parsimony_length (pars, 2*(t->nleaves-3));
 
   ones = (int*) biomcmc_malloc (t->nleaves * sizeof (int));
   for (i=0; i < t->nleaves-3; i++) { // [n-2] is root; [n-3] is leaf or redundant 
-    for (j=0; j < mrp->ntax; j++) mrp->s[j][mrp->i] = 3U; // all seqs are 'N' at first (a.k.a. {0,1}) -> absent from t in the end
-    for (j=0; j < t->nleaves; j++) mrp->s[map[j]][mrp->i] = 1U; // species present in t start as {0}
-  bipartition_copy (bp, t->postorder[i]->split);
-  bipartition_flip_to_smaller_set (bp); // not essencial, but helps finding same split in diff trees
-  bipartition_to_int_vector (bp, ones, bp->n_ones); // n_ones=max number of ones to check (in this case, all of them)
-  // FIXME: they may be 11111|1111 on both sides; we must first check map[ones] and map[~ones] to see which makes sense
-  for (j=0; j < bp->n_ones; j++) mrp->s[map[ones[j]]][mrp->i] = 2U; // these species present in t are then {1} 
-  mrp->occupancy[mrp->i] = t->nleaves; // completeness (# species represented in bipartition)
-  update_binary_parsimony_datamatrix_column_if_new (mrp);
-  if (mrp->i > mrp->nchar) biomcmc_error ("The function calling parsimony underestimated the total number of columns (tree sizes)");
+    bipartition_copy (bp, t->postorder[i]->split);
+    bipartition_to_int_vector (bp, ones, bp->n_ones); // n_ones=max number of ones to check (in this case, all of them)
+    n1 = update_biparsdatmat_column_from_ones (mrp, t, ones, bp);
+    if ((n1 > 1) && (n1 < n_sp - 1)) {
+      mrp->occupancy[mrp->i] = n_sp; // completeness (# species represented in bipartition)
+      update_binary_parsimony_datamatrix_column_if_new (mrp);
+    }
+    bipartition_NOT (not, bp);
+    bipartition_to_int_vector (not, ones, not->n_ones); // n_ones=max number of ones to check (in this case, all of them)
+    n2 = update_biparsdatmat_column_from_ones (mrp, t, ones, not);
+    if ((n2 > 1) && (n2 < n_sp - 1) && ((n2 + n1) != n_sp)) { 
+      mrp->occupancy[mrp->i] = n_sp; // completeness (# species represented in bipartition)
+      update_binary_parsimony_datamatrix_column_if_new (mrp);
+    }
+    if (mrp->i > mrp->nchar) biomcmc_error ("The function calling parsimony underestimated the total number of columns (tree sizes)");
   }
   pars->external->freq_sum += t->nleaves-3; 
   del_bipartition (bp);
+  del_bipartition (not);
   if (ones) free (ones);
+}
+
+int
+update_biparsdatmat_column_from_ones (binary_parsimony_datamatrix mrp, topology t, int *ones, bipartition bp)
+{
+  int j, nsp = 0;
+  for (j=0; j < mrp->ntax; j++)  mrp->s[         j  ][mrp->i] = 3U; // all seqs are 'N' at first (a.k.a. {0,1}) -> absent from t in the end
+  for (j=0; j < t->nleaves; j++) mrp->s[     map[j] ][mrp->i] = 1U; // species present in t start as 
+  for (j=0; j < bp->n_ones; j++) mrp->s[map[ones[j]]][mrp->i] = 2U; // these species present in t are then {1} 
+  for (j=0; j < mrp->ntax; j++) if (mrp->s[j][mrp->i] == 2U) nsp++;
+  return nsp;
 }
 
 void

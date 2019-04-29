@@ -83,6 +83,8 @@ speciestree new_speciestree (topology species, int *order_of_species_names);
 void del_speciestree (speciestree sptre);
 /*! \brief calculates all (discrete) distances and update min and max */
 void genetree_speciestree_distances (genetree gtre, speciestree sptre);
+/*! \brief from gene-species map index, count number of distinct species represented */
+int count_species_in_index_species_gene (int *sp_id, int max_sp, int n_sp_id);
 
 /*! \brief <debug function> dups.loss, ils calculation; accepts unseen speciestree_struct (i.e. updates mrca and pointers). Calls low-level hidden function. */
 void genetree_reconcile_speciestree (genetree gtre, speciestree sptre);
