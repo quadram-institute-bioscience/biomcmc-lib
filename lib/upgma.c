@@ -13,8 +13,6 @@
 
 #include "upgma.h"
 
-void correct_negative_branch_lengths (topology t);
-
 void
 upgma_from_distance_matrix (topology tree, distance_matrix dist, bool single_linkage) 
 { /* always upper diagonal (that is, only i < j in d[i][j]) */
@@ -228,29 +226,7 @@ bionj_from_distance_matrix (topology tree, distance_matrix dist)
     for (i = n_idx - 1; i >= 0; i--) if (delta[i]) free (delta[i]);
     free (delta);
   }
-  correct_negative_branch_lengths (tree);
-}
-
-void
-correct_negative_branch_lengths (topology t)
-{
-  int i;
-
-  for (i=0; i < t->nleaves-1; i++) { // postorder are internal nodes only
-    if (t->blength[t->postorder[i]->left->id] < DBL_MIN) { 
-      t->blength[t->postorder[i]->id] -= t->blength[t->postorder[i]->left->id]; // left is negative number
-      t->blength[t->postorder[i]->left->id] = 0.;
-    }
-    if (t->blength[t->postorder[i]->right->id] < DBL_MIN) { 
-      t->blength[t->postorder[i]->id] -= t->blength[t->postorder[i]->right->id];
-      t->blength[t->postorder[i]->right->id] = 0.;
-    }
-  }
-  if (t->blength[t->root->id] > 0.) {
-    t->blength[t->root->left->id]  += t->blength[t->root->id];
-    t->blength[t->root->right->id] += t->blength[t->root->id];
-    t->blength[t->root->id] = 0.;
-  } 
+  correct_negative_branch_lengths_from_topology (tree, tree->blength);
 }
 
 /* IDEA from njmerge: UPGMA constrained by subtrees (always check if merging clades A and B clashes with subtrees)

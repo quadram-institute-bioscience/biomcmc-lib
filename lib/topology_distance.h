@@ -36,5 +36,7 @@ int* create_vector_with_idx_leaves_below_for_patristic (topology tree);
 
 void estimate_topology_branch_lengths_from_distances (topology tree, double *dist);
 double* new_topology_branch_lengths_from_distances (topology tree, double *dist);
+void correct_negative_branch_lengths_from_topology (topology t, double *blength);
+
 
 #endif

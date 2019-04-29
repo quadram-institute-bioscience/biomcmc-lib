@@ -236,26 +236,56 @@ ols_branch_lengths_from_fast_mtm (topology tree, double *delta)
   for (i = 0; i < tree->nnodes; i++) blen[i] = 0.;
   nleaves = tree->nleaves;
   for (i = 0; i < tree->nleaves; i++) { //eq30 of molbev.a025863
-    n_j = (double) tree->nodelist[i]->sister->split->n_ones;
-    n_k = nleaves - n_j - 1.; // remaining leaves
-    tmp1 = (1. + n_j - n_k) * delta[tree->nodelist[i]->sister->id]  + (1. - n_j + n_k) * delta[tree->nodelist[i]->up->id];
-    blen[i] = (nleaves * delta[i] - tmp1)/(4. * n_j * n_k);
+    if (tree->nodelist[i]->up != tree->root) {
+      n_j = (double) tree->nodelist[i]->sister->split->n_ones;
+      n_k = nleaves - n_j - 1.; // remaining leaves
+      tmp1 = (1. + n_j - n_k) * delta[tree->nodelist[i]->sister->id]  + (1. - n_j + n_k) * delta[tree->nodelist[i]->up->id];
+      blen[i] = (nleaves * delta[i] - tmp1)/(4. * n_j * n_k);
+    }
+    else {
+      n_j = (double) tree->nodelist[i]->sister->left->split->n_ones;
+      n_k = (double) tree->nodelist[i]->sister->right->split->n_ones;
+      tmp1 = (1. + n_j - n_k) * delta[tree->nodelist[i]->sister->left->id]  + (1. - n_j + n_k) * delta[tree->nodelist[i]->sister->right->id];
+      blen[i] = (nleaves * delta[i] - tmp1)/(8. * n_j * n_k); // half here...
+      blen[tree->nodelist[i]->sister->id] = blen[i]; // ... and half to the sister branch (skipped below)
+      delta[tree->root->id] = delta[i]; // copy delta info from this leaf into root 
+    }
   }
-  for (i = 0; i < tree->nleaves - 2; i++) { //eq24 of molbev.a025863
-    n_j = (double) tree->postorder[i]->sister->split->n_ones;
-    n_l = (double) tree->postorder[i]->left->split->n_ones;
-    n_m = (double) tree->postorder[i]->right->split->n_ones;
-    n_k = nleaves - n_j - n_l - n_m; // remaining leaves
-    tmp1  = (2.*n_k - nleaves) * delta[tree->postorder[i]->sister->id];
-    tmp1 += (2.*n_j - nleaves) * delta[tree->postorder[i]->up->id];
-    blen[tree->postorder[i]->id] = ((n_k + n_j)/(n_k * n_j)) * tmp1;
-    tmp1  = (2.*n_l - nleaves) * delta[tree->postorder[i]->right->id];
-    tmp1 += (2.*n_m - nleaves) * delta[tree->postorder[i]->left->id];
-    blen[tree->postorder[i]->id] += ((n_l + n_m)/(n_l * n_m)) * tmp1;
-    tmp1 = nleaves/n_m +  nleaves/n_l +  nleaves/n_j +  nleaves/n_k - 4.; 
-    blen[tree->postorder[i]->id] += tmp1 * delta[tree->postorder[i]->id];
-    blen[tree->postorder[i]->id] /= (4. * (n_j + n_k) * (n_l * n_m)); 
+  for (i = 0; i < tree->nleaves - 3; i++) { //eq24 of molbev.a025863 (skip right daughter of root, even if internal)
+    if (tree->postorder[i]->up != tree->root) {
+      n_j = (double) tree->postorder[i]->sister->split->n_ones;
+      n_l = (double) tree->postorder[i]->left->split->n_ones;
+      n_m = (double) tree->postorder[i]->right->split->n_ones;
+      n_k = nleaves - n_j - n_l - n_m; // remaining leaves
+      tmp1  = (2.*n_k - nleaves) * delta[tree->postorder[i]->sister->id];
+      tmp1 += (2.*n_j - nleaves) * delta[tree->postorder[i]->up->id];
+      blen[tree->postorder[i]->id] = ((n_k + n_j)/(n_k * n_j)) * tmp1;
+      tmp1  = (2.*n_l - nleaves) * delta[tree->postorder[i]->right->id];
+      tmp1 += (2.*n_m - nleaves) * delta[tree->postorder[i]->left->id];
+      blen[tree->postorder[i]->id] += ((n_l + n_m)/(n_l * n_m)) * tmp1;
+      tmp1 = nleaves/n_m +  nleaves/n_l +  nleaves/n_j +  nleaves/n_k - 4.; 
+      blen[tree->postorder[i]->id] += tmp1 * delta[tree->postorder[i]->id];
+      blen[tree->postorder[i]->id] /= (4. * (n_j + n_k) * (n_l * n_m)); 
+    }
+    else { // sister is internal node (o.w. postorder is nleaves-2)
+      n_j = (double) tree->postorder[i]->sister->left->split->n_ones;
+      n_k = (double) tree->postorder[i]->sister->right->split->n_ones;
+      n_l = (double) tree->postorder[i]->left->split->n_ones;
+      n_m = (double) tree->postorder[i]->right->split->n_ones;
+      tmp1  = (2.*n_k - nleaves) * delta[tree->postorder[i]->sister->left->id];
+      tmp1 += (2.*n_j - nleaves) * delta[tree->postorder[i]->sister->right->id];
+      blen[tree->postorder[i]->id] = ((n_k + n_j)/(n_k * n_j)) * tmp1;
+      tmp1  = (2.*n_l - nleaves) * delta[tree->postorder[i]->right->id];
+      tmp1 += (2.*n_m - nleaves) * delta[tree->postorder[i]->left->id];
+      blen[tree->postorder[i]->id] += ((n_l + n_m)/(n_l * n_m)) * tmp1;
+      tmp1 = nleaves/n_m +  nleaves/n_l +  nleaves/n_j +  nleaves/n_k - 4.; 
+      blen[tree->postorder[i]->id] += tmp1 * delta[tree->postorder[i]->id];
+      blen[tree->postorder[i]->id] /= (8. * (n_j + n_k) * (n_l * n_m)); // half the true value   
+      blen[tree->postorder[i]->sister->id] = blen[tree->postorder[i]->id];
+    //  printf ("DEBUG::<2> %d %lf %lf %d \n", i, n_k, delta[tree->postorder[i]->up->id], tree->postorder[i]->up->id);
+    }
   }
+  correct_negative_branch_lengths_from_topology (tree, blen);
   return blen;
 }
 
@@ -273,7 +303,7 @@ new_topology_branch_lengths_from_distances (topology tree, double *dist)
 {
   int *idx;
   double *delta, *blen;
-  
+
   idx = create_vector_with_idx_leaves_below_for_patristic (tree);
   delta = fast_multiplication_topological_matrix (tree, idx, dist);
   blen = ols_branch_lengths_from_fast_mtm (tree, delta);
@@ -283,3 +313,24 @@ new_topology_branch_lengths_from_distances (topology tree, double *dist)
   return blen;
 }
 
+void
+correct_negative_branch_lengths_from_topology (topology t, double *blength)
+{
+  int i;
+
+  for (i=0; i < t->nleaves-1; i++) { // postorder are internal nodes only
+    if (blength[t->postorder[i]->left->id] < DBL_MIN) { 
+      blength[t->postorder[i]->id] -= blength[t->postorder[i]->left->id]; // left is negative number
+      blength[t->postorder[i]->left->id] = 0.;
+    }
+    if (blength[t->postorder[i]->right->id] < DBL_MIN) { 
+      blength[t->postorder[i]->id] -= blength[t->postorder[i]->right->id];
+      blength[t->postorder[i]->right->id] = 0.;
+    }
+  }
+  if (blength[t->root->id] > 0.) {
+    blength[t->root->left->id]  += blength[t->root->id];
+    blength[t->root->right->id] += blength[t->root->id];
+    blength[t->root->id] = 0.;
+  } 
+}

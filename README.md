@@ -12,6 +12,16 @@ This library is usually not installed directly, but as a submodule of another pr
 It includes, however, the `makefile.am` and `configure.ac` for autotools, and it provides unit tests from the
 [libcheck](https://github.com/libcheck/check) library as well as custom checks. 
 
+## Algorithms (incomplete list)
+- **Random number generation.** Can work with MPI, where some streams are shared and some are independent. Depend therefore on initialisation,low level control 
+  of the seed structures. 
+
+- **Patristic distance calculations** with several rescaling options, and with mul-tree mapping (average or minimum
+  within-locus, average accross loci).
+
+- **OLS branch lengths.** Given a tree and a distance matrix, finds the optimal branch lengths through ordinary least
+  squares.
+
 ## Assumptions and limitations
 This library works mainly with phylogenetic trees, but also contain a few functions to work with sequences. 
 The trees can be in nexus or newick formats, and the sequences can be in nexus or fasta formats.
