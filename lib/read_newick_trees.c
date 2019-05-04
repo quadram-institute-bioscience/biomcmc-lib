@@ -130,6 +130,7 @@ new_newick_tree_from_string (char *external_string)
       (T->root->left->branch_length + T->root->right->branch_length - (2 * DEFAULTBLENGTH) < 1e-9)) {
     T->root->left->branch_length = T->root->right->branch_length = DEFAULTBLENGTH/2.;
   }
+  T->root->branch_length = 0.;
 
   if (string) free (string);
 

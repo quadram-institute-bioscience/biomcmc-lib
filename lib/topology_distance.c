@@ -215,7 +215,7 @@ fast_multiplication_topological_matrix (topology tree, int *idx, double *dist)
     delta[i] += dist[ (i*(i-1))/2 + j];
     delta[j] += dist[ (i*(i-1))/2 + j];
   }
-  for (i = 0; i < tree->nleaves-1; i++) { // FIXME: todo check for closest to root (postorder[nleaves-2]) 
+  for (i = 0; i < tree->nleaves-1; i++) if (tree->postorder[i]->id != tree->root->left->id) { 
     delta[tree->postorder[i]->id] = delta[tree->postorder[i]->left->id] + delta[tree->postorder[i]->right->id];
     for (j = i_l[tree->postorder[i]->left->id]; j <= i_r[tree->postorder[i]->left->id]; j++)
       for (k = i_l[tree->postorder[i]->right->id]; k <= i_r[tree->postorder[i]->right->id]; k++) {
@@ -224,6 +224,8 @@ fast_multiplication_topological_matrix (topology tree, int *idx, double *dist)
         delta[tree->postorder[i]->id] -= 2*dist[ (col*(col-1))/2 + row];
       }
   }
+  /* same information as right branch (and |right| <= |left| */
+  delta[tree->root->left->id] = delta[tree->root->right->id]; 
   return delta;
 }
 
@@ -265,7 +267,7 @@ ols_branch_lengths_from_fast_mtm (topology tree, double *delta)
       blen[tree->postorder[i]->id] += ((n_l + n_m)/(n_l * n_m)) * tmp1;
       tmp1 = nleaves/n_m +  nleaves/n_l +  nleaves/n_j +  nleaves/n_k - 4.; 
       blen[tree->postorder[i]->id] += tmp1 * delta[tree->postorder[i]->id];
-      blen[tree->postorder[i]->id] /= (4. * (n_j + n_k) * (n_l * n_m)); 
+      blen[tree->postorder[i]->id] /= (4. * (n_j + n_k) * (n_l + n_m)); 
     }
     else { // sister is internal node (o.w. postorder is nleaves-2)
       n_j = (double) tree->postorder[i]->sister->left->split->n_ones;
@@ -280,7 +282,7 @@ ols_branch_lengths_from_fast_mtm (topology tree, double *delta)
       blen[tree->postorder[i]->id] += ((n_l + n_m)/(n_l * n_m)) * tmp1;
       tmp1 = nleaves/n_m +  nleaves/n_l +  nleaves/n_j +  nleaves/n_k - 4.; 
       blen[tree->postorder[i]->id] += tmp1 * delta[tree->postorder[i]->id];
-      blen[tree->postorder[i]->id] /= (8. * (n_j + n_k) * (n_l * n_m)); // half the true value   
+      blen[tree->postorder[i]->id] /= (8. * (n_j + n_k) * (n_l + n_m)); // half the true value   
       blen[tree->postorder[i]->sister->id] = blen[tree->postorder[i]->id];
     //  printf ("DEBUG::<2> %d %lf %lf %d \n", i, n_k, delta[tree->postorder[i]->up->id], tree->postorder[i]->up->id);
     }
