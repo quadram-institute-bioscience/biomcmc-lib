@@ -151,24 +151,24 @@ rescale_rooted_distances_for_patristic_distances (topology tree, double *fromroo
   fromroot[ tree->root->id ] = 0.;
 
   switch (mode) {
-    case 0:  /*  unscaled (original) distance  */
-      for (i = tree->nleaves-3; i >= 0; i--) internal_d[i] = tree->blength[ tree->postorder[i]->id ];
-      for (i = 0; i < tree->nleaves; i++)    external_d[i] = tree->blength[ tree->nodelist[i]->id ];
-      break;
-    case 1:  /*  nodal distance (number of edges > tolerance)  */
+    case 0:  /*  nodal distance (number of edges > tolerance)  */
       for (i = tree->nleaves-3; i >= 0; i--) internal_d[i] = (tree->blength[ tree->postorder[i]->id ] > tolerance) ? 1. : 0.;
       for (i = 0; i < tree->nleaves; i++)    external_d[i] = (tree->blength[ tree->nodelist[i]->id ] > tolerance) ? 1. : 0.; 
       break;
-    case 2: /* divided by number of nodes */ 
-      scale = tree->nnodes;
-      for (i = tree->nleaves-3; i >= 0; i--) internal_d[i] = tree->blength[ tree->postorder[i]->id ] / scale;
-      for (i = 0; i < tree->nleaves; i++)    external_d[i] = tree->blength[ tree->nodelist[i]->id ] / scale;
-      break;
-    case 3: /* divided by average (s.t. average blen is 1. and treelength = nnodes) */ 
+    case 1: /* divided by average (s.t. average blen is 1. and treelength = nnodes) */ 
       scale = 0.;
       for (i = 0; i < tree->nnodes; i++) scale += tree->blength[tree->nodelist[i]->id];
       scale /= tree->nnodes;
       if (scale < 1e-12) scale = 1e-12;
+      for (i = tree->nleaves-3; i >= 0; i--) internal_d[i] = tree->blength[ tree->postorder[i]->id ] / scale;
+      for (i = 0; i < tree->nleaves; i++)    external_d[i] = tree->blength[ tree->nodelist[i]->id ] / scale;
+      break;
+    case 2:  /*  unscaled (original) distance  */
+      for (i = tree->nleaves-3; i >= 0; i--) internal_d[i] = tree->blength[ tree->postorder[i]->id ];
+      for (i = 0; i < tree->nleaves; i++)    external_d[i] = tree->blength[ tree->nodelist[i]->id ];
+      break;
+    case 3: /* divided by number of nodes */ 
+      scale = tree->nnodes;
       for (i = tree->nleaves-3; i >= 0; i--) internal_d[i] = tree->blength[ tree->postorder[i]->id ] / scale;
       for (i = 0; i < tree->nleaves; i++)    external_d[i] = tree->blength[ tree->nodelist[i]->id ] / scale;
       break;
