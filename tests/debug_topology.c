@@ -44,6 +44,8 @@ debug_simple_tree_functions (void)
   s = topology_to_string_by_name (nwk->t[0], nwk->t[0]->blength); 
   printf("for file 'multifurcation.nwk'\n Resolved tree: %s\n\n", s); free (s);
   check_distance_estimation (nwk->t[1]);
+  check_distance_estimation (nwk->t[2]);
+  check_distance_estimation (nwk->t[3]);
   del_newick_space (nwk);
 
   printf ("\n<orthologous newick file>\n");
@@ -91,11 +93,13 @@ check_distance_estimation (topology tree)
   scale = (double*) biomcmc_malloc (6 * sizeof (double));
   patristic_distances_from_topology_to_vectors (tree, dist, scale, 6, 1e-9);
 
+  s = topology_to_string_by_name (tree, tree->blength); 
+  printf("<x> %s\n", s); free (s);
   for (i=0; i < 6; i++) {
     estimate_topology_branch_lengths_from_distances (this, dist[i]);
     for (j=0;j<tree->nnodes;j++) this->blength[j] *= scale[i];
     s = topology_to_string_by_name (this, this->blength); 
-    printf("%s\n", s); free (s);
+    printf("<%d> %s\n", i, s); free (s);
   }
 
   if (dist) {

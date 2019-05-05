@@ -295,20 +295,28 @@ reorder_topology_leaves (topology tree)
 {
   int i, *order;
   topol_node *pivot;
+  double *blen;
+
   if (!tree->taxlabel) return; 
   order = (int*) biomcmc_malloc (tree->taxlabel->nstrings * sizeof (int));
   char_vector_reorder_by_size_or_lexicographically (tree->taxlabel, false, order); // false/true -> by size/lexico
 
   pivot = (topol_node*) biomcmc_malloc (tree->nleaves * sizeof (topol_node));
-  for (i=0; i < tree->nleaves; i++) pivot[i] = tree->nodelist[i]; 
+  blen = (double*) biomcmc_malloc (tree->nnodes *sizeof (double*));
+  for (i=0; i < tree->nleaves; i++) {
+    pivot[i] = tree->nodelist[i];
+    blen[i] = tree->blength[i];
+  }
   for (i=0; i < tree->nleaves; i++) {
     tree->nodelist[i] = pivot[ order[i] ];
     tree->nodelist[i]->id = i;
     bipartition_zero (tree->nodelist[i]->split);
     bipartition_set  (tree->nodelist[i]->split, i);
+    tree->blength[i] = blen[ order[i] ];
   }
   if (pivot) free (pivot);
   if (order) free (order);
+  if (blen) free (blen);
   update_topology_traversal (tree);
 }
 
