@@ -116,4 +116,7 @@ uint32_t biomcmc_hashstring_5 (unsigned char *str); /* sdbm algorithm */
 /*! \brief 32bits hash value for bipartition */
 uint32_t bipartition_hash (bipartition bip);
 
+/*! \brief murmurhash3 using 64bits to return 128 bits (4 ints) of hash into out[] */
+void biomcmc_murmurhash3 ( const void * key, const int len, const uint32_t seed, void * out);
+
 #endif

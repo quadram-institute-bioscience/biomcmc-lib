@@ -22,7 +22,7 @@
 #define _biomcmc_h_
 
 #include "argtable3.h"
-#include "alignment.h"
+#include "minhash.h"
 #include "parsimony.h"
 #include "genetree.h"
 #include "topology_space.h"
@@ -41,6 +41,7 @@
 #include "reconciliation.h"      // opaque header/library, called by genetree
 #include "splitset_distances.h"  // opaque header/library, called by genetree
 #include "distance_matrix.h"     // called by alignment
+#include "alignment.h"           // called by minhash
 #include "empirical_frequency.h" // called by nexus_common  
 #include "nexus_common.h"        // called by read_nexus_trees 
 #include "prob_distribution.h"   // called by topology_randomise, char_vector

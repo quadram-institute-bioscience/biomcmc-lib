@@ -103,17 +103,22 @@ CONFIG_HEADER = $(top_builddir)/lib/config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__EXEEXT_1 = check_unit$(EXEEXT) check_topology$(EXEEXT) \
-	debug_topology$(EXEEXT)
-am_check_topology_OBJECTS = check_topology.$(OBJEXT)
-check_topology_OBJECTS = $(am_check_topology_OBJECTS)
-check_topology_LDADD = $(LDADD)
+	check_minhash$(EXEEXT) debug_topology$(EXEEXT)
+am_check_minhash_OBJECTS = check_minhash.$(OBJEXT)
+check_minhash_OBJECTS = $(am_check_minhash_OBJECTS)
+check_minhash_LDADD = $(LDADD)
 am__DEPENDENCIES_1 =
-check_topology_DEPENDENCIES = $(am__DEPENDENCIES_1) \
+check_minhash_DEPENDENCIES = $(am__DEPENDENCIES_1) \
 	../lib/libbiomcmc.la
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
 am__v_lt_1 = 
+am_check_topology_OBJECTS = check_topology.$(OBJEXT)
+check_topology_OBJECTS = $(am_check_topology_OBJECTS)
+check_topology_LDADD = $(LDADD)
+check_topology_DEPENDENCIES = $(am__DEPENDENCIES_1) \
+	../lib/libbiomcmc.la
 am_check_unit_OBJECTS = check_unit.$(OBJEXT)
 check_unit_OBJECTS = $(am_check_unit_OBJECTS)
 check_unit_LDADD = $(LDADD)
@@ -157,10 +162,10 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(check_topology_SOURCES) $(check_unit_SOURCES) \
-	$(debug_topology_SOURCES)
-DIST_SOURCES = $(check_topology_SOURCES) $(check_unit_SOURCES) \
-	$(debug_topology_SOURCES)
+SOURCES = $(check_minhash_SOURCES) $(check_topology_SOURCES) \
+	$(check_unit_SOURCES) $(debug_topology_SOURCES)
+DIST_SOURCES = $(check_minhash_SOURCES) $(check_topology_SOURCES) \
+	$(check_unit_SOURCES) $(debug_topology_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -524,8 +529,9 @@ AM_CPPFLAGS = $(GTKDEPS_CFLAGS)  @OPENMP_CPPFLAGS@ -I$(srcdir)/../lib -DTEST_FIL
 LDADD = $(GTKDEPS_LIBS) $(AM_LDFLAGS) @CHECK_LIBS@ ../lib/libbiomcmc.la 
 EXTRA_DIST = files # directory with fasta etc files (accessed with #define TEST_FILE_DIR above)
 # we use the list twice below, since we want all to be compiled only with 'make check'
-LIST_OF_TEST_PROGS = check_unit check_topology debug_topology 
+LIST_OF_TEST_PROGS = check_unit check_topology check_minhash debug_topology  
 check_unit_SOURCES = check_unit.c
+check_minhash_SOURCES = check_minhash.c
 check_topology_SOURCES = check_topology.c
 debug_topology_SOURCES = debug_topology.c
 all: all-am
@@ -571,6 +577,10 @@ clean-checkPROGRAMS:
 	echo " rm -f" $$list; \
 	rm -f $$list
 
+check_minhash$(EXEEXT): $(check_minhash_OBJECTS) $(check_minhash_DEPENDENCIES) $(EXTRA_check_minhash_DEPENDENCIES) 
+	@rm -f check_minhash$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(check_minhash_OBJECTS) $(check_minhash_LDADD) $(LIBS)
+
 check_topology$(EXEEXT): $(check_topology_OBJECTS) $(check_topology_DEPENDENCIES) $(EXTRA_check_topology_DEPENDENCIES) 
 	@rm -f check_topology$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(check_topology_OBJECTS) $(check_topology_LDADD) $(LIBS)
@@ -589,6 +599,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/check_minhash.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/check_topology.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/check_unit.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/debug_topology.Po@am__quote@
@@ -823,6 +834,13 @@ check_unit.log: check_unit$(EXEEXT)
 check_topology.log: check_topology$(EXEEXT)
 	@p='check_topology$(EXEEXT)'; \
 	b='check_topology'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+check_minhash.log: check_minhash$(EXEEXT)
+	@p='check_minhash$(EXEEXT)'; \
+	b='check_minhash'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
