@@ -28,8 +28,10 @@ struct cm_sketch_struct
   int size, count;
   uint64_t mod;
   int *freq;
-}
+};
 
+void del_cm_sketch (cm_sketch cm);
+cm_sketch new_cm_sketch (int max_vector_size);
 /*! \brief min-count sketch of fixedhash (numeric representation of 16mers) */
 void fixedhash_sketch_from_dna (char *dna);
 

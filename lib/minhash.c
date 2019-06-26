@@ -19,13 +19,14 @@ uint8_t  dna4bits[256][2] = {{0xff}}; /* DNA base to bitpattern translation, wit
 void initialize_dna_to_bit_table (void);
 void fixedhash_values_from_16mer (int dnachar, uint64_t *hf, uint64_t *hr);
 
-cm_sketch // this may not be a locally-sensitive hashing (LSH) since similar inputs go to distinct buckets
+cm_sketch
 new_cm_sketch (int max_vector_size)
-{
+{ // this may not be a locally-sensitive hashing (LSH) since similar inputs go to distinct buckets
+  int i;
   cm_sketch cm = (cm_sketch) biomcmc_malloc (sizeof (struct cm_sketch_struct));
   cm->size = max_vector_size;
   cm->mod = (0xffffffffffffffffUL / (uint64_t) (max_vector_size + 1)); // plusone for case hash == MAX 
-  cm->count = 0;
+  cm->count = 0; // FIXME: modulus is 32bits now
   cm->freq = (int*) biomcmc_malloc (cm->size * sizeof (int));
   for (i = 0; i < cm->size; i++) cm->freq[i] = 0;
 
@@ -40,14 +41,18 @@ del_cm_sketch (cm_sketch cm)
   free (cm);
 }
 
+void
 update_cm_sketch_from_fixedhash (cm_sketch cm, uint64_t hash_f, uint64_t hash_r)
 {
-  if (hash_f < hash_r) cm->freq[ (int) hash_f/cm->mod ]++; // one of them is redundant
-  else                 cm->freq[ (int) hash_r/cm->mod ]++;  
+  uint32_t h32[4];
+  int i; // FIXME: must hash 64bits before tovecotr() otherwise it's just 8-mer
+  if (hash_f < hash_r) biomcmc_hashint64_to_vector (hash_f, h32); // one of them is redundant
+  else                 biomcmc_hashint64_to_vector (hash_r, h32);
+  for (i=0; i < 4; i++) cm->freq[i][ (int) h32[i]/cm->mod ]++;  
 }
 
-void // TODO: sketch should be a struct with vector (empfreq?) size (hash/BIGNUMBER) where BIGNUMBER  = MAX_INT64/vector_size
-fixedhash_sketch_from_dna (char *dna) // count-min sketch?
+void 
+fixedhash_sketch_from_dna (char *dna)
 {
   int i;
   int length = strlen (dna);

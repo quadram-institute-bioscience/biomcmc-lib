@@ -256,6 +256,7 @@ bip_hashtable_get_frequency (bip_hashtable ht, bipartition key)
  * http://www.cs.hmc.edu/~geoff/classes/hmc.cs070.200101/homework10/hashfuncs.html
  * http://burtleburtle.net/bob/hash/integer.html 
  * http://www.cse.yorku.ca/~oz/hash.html
+ * https://lemire.me/blog/2018/08/15/fast-strongly-universal-64-bit-hashing-everywhere/
  * http://www.concentric.net/~Ttwang/tech/inthash.htm * * */
 
 uint32_t 
@@ -327,14 +328,59 @@ biomcmc_hashint_9 (uint32_t a)
   return a;
 }
 
+int ulx_size = 12;
+uint64_t ulx[ulx_size] = {
+  0x65d200ce55b19ad8UL, 0x4f2162926e40c299UL, 0x162dd799029970f8UL, // 0...2
+  0x68b665e6872bd1f4UL, 0xb6cfcf9d79b51db2UL, 0x7a2b92ae912898c2UL, // 3...5
+  0xff51afd7ed558ccdUL, 0xc4ceb9fe1a85ec53UL, 0x87c37b91114253d5UL, 0x4cf5ad432745937fUL, // 6...9 (murmurhash) 
+  0x52dce729UL, 0x38495ab5UL}; // 10...11 
+
 uint64_t 
-biomcmc_hashint_64bits (uint64_t key) /* 64 bits */
+biomcmc_hashint64_1 (uint64_t key) /* 64 bits */
 {
   /* ((key + (key << 3)) + (key << 8)) = key * 265 and ((key + (key << 2)) + (key << 4)) = key * 21 */
-  key = (~key) + (key << 21); key = key ^ (key >> 24);               key = (key + (key << 3)) + (key << 8);
-  key = key ^ (key >> 14);    key = (key + (key << 2)) + (key << 4); key = key ^ (key >> 28);
+  key = (~key) + (key << 21); key = key ^ (key >> 24); key = (key + (key << 3)) + (key << 8);
+  key = key ^ (key >> 14); key = (key + (key << 2)) + (key << 4); key = key ^ (key >> 28);
   key = key + (key << 31);
   return key;
+}
+
+uint64_t 
+biomcmc_hashint64_2 (uint64_t x) /* 64 bits */
+{
+  uint32_t low = x;
+  uint32_t high = x >> 32UL;
+  return ((ulx[0] * low + ulx[1] * high + ulx[2]) >> 32) | ((ulx[3] * low + ulx[4] * high + ulx[5]) & 0xFFFFFFFF00000000UL);
+}
+
+void
+biomcmc_hashint64_to_vector (uint64_t x, uint32_t *out) /* 64 bits */
+{
+  uint32_t low = x;
+  uint32_t high = x >> 32UL;
+  out[0] = (ulx[0] * low + ulx[1] * high + ulx[2]) >> 32;
+  out[1] = (ulx[3] * low + ulx[4] * high + ulx[5]) >> 32;
+  out[2] =  (low ^ 61) ^ (low >> 16);  out[2] += (out[2] << 3); out[2] ^= (out[2] >> 4); out[2] *= 0x27d4eb2d; out[2] ^= (out[2] >> 15);
+  out[3] = (high ^ 61) ^ (high >> 16); out[3] += (out[3] << 3); out[3] ^= (out[3] >> 4); out[3] *= 0x27d4eb2d; out[3] ^= (out[3] >> 15);
+}
+
+uint64_t 
+biomcmc_hashint64_seed (uint64_t h, int seed) /* based on murmur; original uses seed = 6 */
+{
+  int i = seed % (ulx_size - 1); 
+  h ^= h >> 33; h *= ulx[i];
+  h ^= h >> 33; h *= ulx[i+1];
+  h ^= h >> 33;
+  return h;
+}
+
+uint32_t 
+biomcmc_hashint_64to32_seed (uint64_t x, int seed) /* 64 bits */
+{ // published algo uses seed=0 or seed=3
+  uint32_t low = x;
+  uint32_t high = x >> 32UL;
+  int i = seed % (ulx_size - 2); 
+  return (uint32_t) ((ulx[i] * low + ulx[i+1] * high + ulx[i+2]) >> 32);
 }
 
 uint32_t 
@@ -419,24 +465,20 @@ void biomcmc_murmurhash3 ( const void * key, const int len, const uint32_t seed,
   const uint8_t * data = (const uint8_t*)key;
   const int nblocks = len / 16;
   int i;
-  uint64_t h1 = seed;
-  uint64_t h2 = seed;
-  uint64_t c1 = 0x87c37b91114253d5LLU;
-  uint64_t c2 = 0x4cf5ad432745937fLLU;
+  uint64_t h1 = h2 = seed;
   const uint64_t * blocks = (const uint64_t *)(data);
 
   for(i = 0; i < nblocks; i++) {
     uint64_t k1 = blocks[i*2+0];
     uint64_t k2 = blocks[i*2+1];
-    k1 *= c1; k1  =  (k1 << 31) | (k1 >> 33); k1 *= c2; h1 ^= k1;
-    h1 = (h1 << 27) | (h1 >> 37); h1 += h2; h1 = h1*5+0x52dce729;
-    k2 *= c2; k2  = (k2 << 33) | (k2 >> 31); k2 *= c1; h2 ^= k2;
-    h2 = (h2 << 31) | (h2 >> 33); h2 += h1; h2 = h2*5+0x38495ab5;
+    k1 *= ulx[8]; k1 = (k1 << 31) | (k1 >> 33); k1 *= ulx[9]; h1 ^= k1;
+    h1 = (h1 << 27) | (h1 >> 37); h1 += h2; h1 = h1 * 5 + ulx[10];
+    k2 *= ulx[9]; k2 = (k2 << 33) | (k2 >> 31); k2 *= ulx[8]; h2 ^= k2;
+    h2 = (h2 << 31) | (h2 >> 33); h2 += h1; h2 = h2 * 5 + ulx[11];
   }
 
   const uint8_t * tail = (const uint8_t*)(data + nblocks*16);
-  uint64_t k1 = 0;
-  uint64_t k2 = 0;
+  uint64_t k1 = 0, k2 = 0;
 
   switch(len & 15) {
     case 15: k2 ^= (uint64_t)(tail[14]) << 48; break;
@@ -446,7 +488,7 @@ void biomcmc_murmurhash3 ( const void * key, const int len, const uint32_t seed,
     case 11: k2 ^= (uint64_t)(tail[10]) << 16; break;
     case 10: k2 ^= (uint64_t)(tail[ 9]) << 8;  break;
     case  9: k2 ^= (uint64_t)(tail[ 8]) << 0;  break;
-             k2 *= c2; k2 = (k2 << 33) | (k2 >> 31); k2 *= c1; h2 ^= k2; break;
+             k2 *= ulx[9]; k2 = (k2 << 33) | (k2 >> 31); k2 *= ulx[8]; h2 ^= k2; break;
 
     case  8: k1 ^= (uint64_t)(tail[ 7]) << 56; break;
     case  7: k1 ^= (uint64_t)(tail[ 6]) << 48; break;
@@ -456,20 +498,17 @@ void biomcmc_murmurhash3 ( const void * key, const int len, const uint32_t seed,
     case  3: k1 ^= (uint64_t)(tail[ 2]) << 16; break;
     case  2: k1 ^= (uint64_t)(tail[ 1]) << 8;  break;
     default: k1 ^= (uint64_t)(tail[ 0]) << 0; // equiv to "case 1"  
-             k1 *= c1; k1 = (k1 << 31) | (k1 >> 33); k1 *= c2; h1 ^= k1; break;
+             k1 *= ulx[8]; k1 = (k1 << 31) | (k1 >> 33); k1 *= ulx[9]; h1 ^= k1; break;
   };
 
   h1 ^= len; h2 ^= len;
-  h1 += h2;
-  h2 += h1;
+  h1 += h2; h2 += h1;
 
-  h1 ^= h1 >> 33; h1 *= 0xff51afd7ed558ccdLLU; 
-  h1 ^= h1 >> 33; h1 *= 0xc4ceb9fe1a85ec53LLU; h1 ^= h1 >> 33;
-  h2 ^= h2 >> 33; h2 *= 0xff51afd7ed558ccdLLU; 
-  h2 ^= h2 >> 33; h2 *= 0xc4ceb9fe1a85ec53LLU; h2 ^= h2 >> 33;
+  h1 ^= h1 >> 33; h1 *= ulx[6]; h1 ^= h1 >> 33; h1 *= ulx[7]; h1 ^= h1 >> 33;
+  h2 ^= h2 >> 33; h2 *= ulx[6]; h2 ^= h2 >> 33; h2 *= ulx[7]; h2 ^= h2 >> 33;
 
-  h1 += h2;
-  h2 += h1;
+  h1 += h2; h2 += h1;
   ((uint64_t*)out)[0] = h1;
   ((uint64_t*)out)[1] = h2;
 }
+ // see also https://github.com/torvalds/linux/blob/master/lib/xxhash.c

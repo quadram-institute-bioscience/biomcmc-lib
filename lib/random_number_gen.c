@@ -606,7 +606,7 @@ uint64_t
 rng_twist_array_64bits (uint64_t *a, uint32_t n_a, uint64_t seed)
 { /* modified from MT19937 (http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/emt.html) */
   uint32_t i, im;
-  uint64_t s1 = biomcmc_hashint_64bits (seed) + ((uint64_t) n_a);
+  uint64_t s1 = biomcmc_hashint64_1 (seed) + ((uint64_t) n_a);
 
   if (!a[0]) a[0] = (1ULL << 63);
   a[0] += rng_get_std61 (&seed);
