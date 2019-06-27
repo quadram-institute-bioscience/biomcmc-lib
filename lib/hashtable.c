@@ -329,7 +329,7 @@ biomcmc_hashint_9 (uint32_t a)
 }
 
 int ulx_size = 12;
-uint64_t ulx[ulx_size] = {
+uint64_t ulx[] = {
   0x65d200ce55b19ad8UL, 0x4f2162926e40c299UL, 0x162dd799029970f8UL, // 0...2
   0x68b665e6872bd1f4UL, 0xb6cfcf9d79b51db2UL, 0x7a2b92ae912898c2UL, // 3...5
   0xff51afd7ed558ccdUL, 0xc4ceb9fe1a85ec53UL, 0x87c37b91114253d5UL, 0x4cf5ad432745937fUL, // 6...9 (murmurhash) 
@@ -346,7 +346,7 @@ biomcmc_hashint64_1 (uint64_t key) /* 64 bits */
 }
 
 uint64_t 
-biomcmc_hashint64_2 (uint64_t x) /* 64 bits */
+biomcmc_hashint64_2 (uint64_t x) /* 64 bits, splits into 2 32bits blocks */
 {
   uint32_t low = x;
   uint32_t high = x >> 32UL;
@@ -354,7 +354,7 @@ biomcmc_hashint64_2 (uint64_t x) /* 64 bits */
 }
 
 void
-biomcmc_hashint64_to_vector (uint64_t x, uint32_t *out) /* 64 bits */
+biomcmc_hashint64_to_vector (uint64_t x, uint32_t *out) /* 64 bits, splits into two 32bits blocks */
 {
   uint32_t low = x;
   uint32_t high = x >> 32UL;
@@ -365,7 +365,7 @@ biomcmc_hashint64_to_vector (uint64_t x, uint32_t *out) /* 64 bits */
 }
 
 uint64_t 
-biomcmc_hashint64_seed (uint64_t h, int seed) /* based on murmur; original uses seed = 6 */
+biomcmc_hashint64_seed (uint64_t h, int seed) /* based on murmur (mixer algo); original uses seed = 6 */
 {
   int i = seed % (ulx_size - 1); 
   h ^= h >> 33; h *= ulx[i];
@@ -465,7 +465,7 @@ void biomcmc_murmurhash3 ( const void * key, const int len, const uint32_t seed,
   const uint8_t * data = (const uint8_t*)key;
   const int nblocks = len / 16;
   int i;
-  uint64_t h1 = h2 = seed;
+  uint64_t h1 = seed, h2 = seed;
   const uint64_t * blocks = (const uint64_t *)(data);
 
   for(i = 0; i < nblocks; i++) {

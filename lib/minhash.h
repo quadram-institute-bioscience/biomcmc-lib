@@ -26,14 +26,14 @@ typedef struct cm_sketch_struct* cm_sketch;
 struct cm_sketch_struct
 {
   int size, count;
-  uint64_t mod;
-  int *freq;
+  uint32_t mod;
+  int **freq;
 };
 
-void del_cm_sketch (cm_sketch cm);
 cm_sketch new_cm_sketch (int max_vector_size);
+void del_cm_sketch (cm_sketch cm);
 /*! \brief min-count sketch of fixedhash (numeric representation of 16mers) */
-void fixedhash_sketch_from_dna (char *dna);
-
+cm_sketch new_fixedhash_sketch_from_dna (char *dna, int dna_length, int sketch_size);
+void compare_cm_sketches (cm_sketch cm1, cm_sketch cm2, double *result);
 
 #endif

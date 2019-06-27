@@ -29,7 +29,7 @@ new_cm_sketch (int max_vector_size)
   cm->size = max_vector_size;
   cm->mod = 0xffffffff / (max_vector_size + 1); // plusone for case hash == MAX 
   cm->count = 0; 
-  cm->freq = (int**) biomcmc_malloc (8 * sizeof (int*));
+  cm->freq = (int**) biomcmc_malloc (8 * sizeof (int));
   for (i = 0; i < 8; i++) {
     cm->freq[i] = (int*) biomcmc_malloc (cm->size * sizeof (int));
     for (j = 0; j < cm->size; j++) cm->freq[i][j] = 0;
@@ -57,6 +57,7 @@ new_fixedhash_sketch_from_dna (char *dna, int dna_length, int sketch_size)
   cm_sketch cm = new_cm_sketch (sketch_size);
   uint64_t hash_f = 0UL, hash_r = 0UL;
   if (dna4bits[0][0] == 0xff) initialize_dna_to_bit_table ();
+  printf ("%d\n", dna_length);
   for (i = 0; i < 15; i++) fixedhash_values_from_16mer ((int) dna[i], &hash_f, &hash_r); 
   for (i = 15; i < dna_length; i++) {
     fixedhash_values_from_16mer ((int) dna[i], &hash_f, &hash_r);
@@ -69,7 +70,7 @@ new_fixedhash_sketch_from_dna (char *dna, int dna_length, int sketch_size)
 void
 update_cm_sketch_from_fixedhash (cm_sketch cm, uint64_t hash_f, uint64_t hash_r)
 {
-  uint32_t h32[8]; // int = (-x,x); uint = (0,2x) 
+  uint32_t h32[8];
   uint64_t small_h=0;  
   int i; 
   if (hash_f < hash_r) small_h = hash_f;
@@ -78,7 +79,8 @@ update_cm_sketch_from_fixedhash (cm_sketch cm, uint64_t hash_f, uint64_t hash_r)
   biomcmc_hashint64_to_vector (small_h, h32); // first four elements of h32[] are filled
   small_h = biomcmc_hashint64_seed (small_h, 6); // 6 will give original murmur constants
   biomcmc_hashint64_to_vector (small_h, h32 + 4); // last four elements of h32[] are filled
-  for (i=0; i < 8; i++) cm->freq[i][ (int) (h32[i]/cm->mod) ]++;  
+  for (i=0; i < 8; i++) { printf ("%4d \t %d %d\n", i, (int) h32[i], (int) h32[i]/cm->mod); fflush (stdin); }
+  for (i=0; i < 8; i++) cm->freq[i][ (int) h32[i]/cm->mod ]++;  
   cm->count++;
 }
 
@@ -95,7 +97,7 @@ compare_cm_sketches (cm_sketch cm1, cm_sketch cm2, double *result)
       x = (double)(cm1->freq[i][j]) - frac * (double)(cm2->freq[i][j]);
       result[i] += x * x;
     }
-    result[i] /= (double)(cm1->count * cm1->count); 
+    result[i] /= (double)(cm1->count); 
   }
 }
 
