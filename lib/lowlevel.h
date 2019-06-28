@@ -102,16 +102,12 @@ FILE *biomcmc_fopen (const char *path, const char *mode);
  * \result exits program */
 void biomcmc_error (const char *template, ...);
 
-/*! \brief Comparison between two integers used by qsort() in crescent order */
+/*! \brief Comparison between integers, doubles, etc. used by qsort() */
 int compare_int_increasing (const void *a, const void *b);
-
-/*! \brief Comparison between two integers used by qsort() in decrescent order */
 int compare_int_decreasing (const void *a, const void *b);
-
-/*! \brief Comparison between two double floats used by qsort() in crescent order */
+int compare_uint64_increasing (const void *a, const void *b);
+int compare_uint64_decreasing (const void *a, const void *b);
 int compare_double_increasing (const void *a, const void *b);
-
-/*! \brief Comparison between two double floats used by qsort() in decrescent order */
 int compare_double_decreasing (const void *a, const void *b);
 
 /*! \brief read file line-by-line (like homonymous function from GNU C library)

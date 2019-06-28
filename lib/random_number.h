@@ -71,7 +71,6 @@ typedef struct biomcmc_rng_struct* biomcmc_rng;
 struct biomcmc_rng_struct 
 {
   rng_taus_struct taus; /*! \brief Tausworthe linear feedback shift-register from GSL */
-
   rng_mt19937_struct mt; /*! \brief 64 bits Mersenne Twister from Matsumoto's webpage */
 
   uint64_t bit32;    /*! \brief temporary values when only 32 bits are necessary */
@@ -120,7 +119,7 @@ extern double biomcmc_rng_snorm (void);
 extern double biomcmc_rng_unif (void);
 /*! \brief Returns a positive random number between 0 and 1 (excluding 0 and including 1) (52 bits). */
 extern double biomcmc_rng_unif_pos (void);
-/*! \brief Returns an long integer (64 bits) random number between 0 and n (excluding n), with \f$n < 10^{15}\f$. */
+/*! \brief Returns a long integer (64 bits) random number between 0 and n (excluding n), with \f$n < 10^{15}\f$. */
 extern uint64_t biomcmc_rng_unif_int64 (uint64_t n);
 
 /*! \brief Returns a random number between 0 and 1 (including 1) with precision \f$\approx 10^{-9}\f$ (32 int bits). */
