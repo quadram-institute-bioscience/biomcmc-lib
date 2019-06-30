@@ -275,7 +275,7 @@ biomcmc_hashint_2 (uint32_t a)
 
 uint32_t 
 biomcmc_hashint_3 (uint32_t a)
-{
+{ // half-avalanche: Every input bit affects itself and all higher output bits, plus a few lower output bits
   a = (a+0x479ab41d) + (a<<8); a = (a^0xe4aa10ce) ^ (a>>5); a = (a+0x9942f0a6) - (a<<14); 
   a = (a^0x5aedd67d) ^ (a>>3); a = (a+0x17bea992) + (a<<7);
   return a;
@@ -315,7 +315,7 @@ biomcmc_hashint_7 (uint32_t key)
 
 uint32_t 
 biomcmc_hashint_8 (uint32_t  a)
-{
+{ // full avalanche
   a = (a+0x7ed55d16) + (a<<12); a = (a^0xc761c23c) ^ (a>>19); a = (a+0x165667b1) + (a<<5);
   a = (a+0xd3a2646c) ^ (a<<9);  a = (a+0xfd7046c5) + (a<<3);  a = (a^0xb55a4f09) ^ (a>>16);
   return a;
@@ -325,6 +325,13 @@ uint32_t
 biomcmc_hashint_9 (uint32_t a)
 {
   a = (a ^ 61) ^ (a >> 16); a = a + (a << 3); a = a ^ (a >> 4); a = a * 0x27d4eb2d; a = a ^ (a >> 15);
+  return a;
+}
+
+uint32_t 
+biomcmc_hashint_10 (uint32_t a)
+{ 
+  a = (a+0x479ab41d)+(a<<8); a = (a^0xe4aa10ce)^(a>>5); a = (a+0x9942f0a6)-(a<<14); a = (a^0x5aedd67d)^(a>>3); a = (a+0x17bea992)+(a<<7);
   return a;
 }
 
@@ -351,6 +358,18 @@ biomcmc_hashint64_2 (uint64_t x) /* 64 bits, splits into 2 32bits blocks */
   uint32_t low = x;
   uint32_t high = x >> 32UL;
   return ((ulx[0] * low + ulx[1] * high + ulx[2]) >> 32) | ((ulx[3] * low + ulx[4] * high + ulx[5]) & 0xFFFFFFFF00000000UL);
+}
+
+uint64_t 
+biomcmc_hashint64_3 (uint64_t x) /* 64 bits, splits into 2 32bits blocks */
+{
+  uint64_t a, b; // only 32bit of each used 
+  x = (x << 27) | (x >> 37);  // rotate x
+  a = x; b = x >> 32UL; // a=half-avalanche (#3), b=full-avalanche (#8)
+  a = (a+0x479ab41d)+(a<<8); a = (a^0xe4aa10ce)^(a>>5); a = (a+0x9942f0a6)-(a<<14); a = (a^0x5aedd67d)^(a>>3); a = (a+0x17bea992)+(a<<7);
+  b=(b+0x7ed55d16)+(b<<12); b=(b^0xc761c23c)^(b>>19); b=(b+0x165667b1)+(b<<5);
+  b=(b+0xd3a2646c)^(b<<9); b=(b+0xfd7046c5)+(b<<3); b=(b^0xb55a4f09)^(b>>16);
+  return ((a << 32) | b);
 }
 
 void
@@ -462,11 +481,11 @@ bipartition_hash (bipartition bip)
 
 void biomcmc_murmurhash3 ( const void * key, const int len, const uint32_t seed, void * out )
 {  /* out[] is 128 bits (4 x uint_32, for instance) */
-  const uint8_t * data = (const uint8_t*)key;
+  const uint8_t * data = (const uint8_t*) key;
   const int nblocks = len / 16;
   int i;
   uint64_t h1 = seed, h2 = seed;
-  const uint64_t * blocks = (const uint64_t *)(data);
+  const uint64_t * blocks = (const uint64_t *) (data);
 
   for(i = 0; i < nblocks; i++) {
     uint64_t k1 = blocks[i*2+0];
@@ -497,7 +516,7 @@ void biomcmc_murmurhash3 ( const void * key, const int len, const uint32_t seed,
     case  4: k1 ^= (uint64_t)(tail[ 3]) << 24; break;
     case  3: k1 ^= (uint64_t)(tail[ 2]) << 16; break;
     case  2: k1 ^= (uint64_t)(tail[ 1]) << 8;  break;
-    default: k1 ^= (uint64_t)(tail[ 0]) << 0; // equiv to "case 1"  
+    case  1: k1 ^= (uint64_t)(tail[ 0]) << 0; // equiv to "case 1"  
              k1 *= ulx[8]; k1 = (k1 << 31) | (k1 >> 33); k1 *= ulx[9]; h1 ^= k1; break;
   };
 

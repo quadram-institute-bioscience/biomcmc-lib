@@ -106,6 +106,7 @@ uint32_t biomcmc_hashint_8 (uint32_t a);
 uint32_t biomcmc_hashint_9 (uint32_t a);
 uint64_t biomcmc_hashint64_1 (uint64_t key);
 uint64_t biomcmc_hashint64_2 (uint64_t x);
+uint64_t biomcmc_hashint64_3 (uint64_t x);
 void biomcmc_hashint64_to_vector (uint64_t x, uint32_t *out); 
 uint64_t biomcmc_hashint64_seed (uint64_t h, int seed);
 uint32_t biomcmc_hashint_64to32_seed (uint64_t x, int seed);

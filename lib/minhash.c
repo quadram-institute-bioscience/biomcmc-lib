@@ -14,11 +14,11 @@
 #include "minhash.h"
 
 /* almost identical to dna4bits[] from alignment[], but has forward and reverse */
-uint8_t  dna4bits[256][2] = {{0xff}}; /* DNA base to bitpattern translation, with 1st element set to arbitrary value */
+static uint8_t  dna4bits[256][2] = {{0xff}}; /* DNA base to bitpattern translation, with 1st element set to arbitrary value */
 
 void update_cm_sketch_from_fixedhash (cm_sketch cm, uint64_t hash_f, uint64_t hash_r);
-void fixedhash_values_from_16mer (int dnachar, uint64_t *hf, uint64_t *hr);
-void initialize_dna_to_bit_table (void);
+static void fixedhash_values_from_16mer (int dnachar, uint64_t *hf, uint64_t *hr);
+static void initialize_dna_to_bit_table (void);
 
 cm_sketch
 new_cm_sketch (int max_vector_size)
@@ -99,14 +99,14 @@ compare_cm_sketches (cm_sketch cm1, cm_sketch cm2, double *result)
   }
 }
 
-void
+static void
 fixedhash_values_from_16mer (int dnachar, uint64_t *hf, uint64_t *hr)
 {
   *hf = *hf << 4 | dna4bits[dnachar][0]; // forward
   *hr = *hf >> 4 | ((uint64_t)(dna4bits[dnachar][1]) << 60UL); // reverse
 }
 
-void
+static void
 initialize_dna_to_bit_table (void)
 {
   int i;
