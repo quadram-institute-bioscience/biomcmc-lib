@@ -78,13 +78,17 @@ compare_int_decreasing (const void *a, const void *b)
 int
 compare_uint64_increasing (const void *a, const void *b)
 {
-  return (*(uint64_t *) a - *(uint64_t *) b);
+  if (*(uint64_t *) b < *(uint64_t *) a) return 1;
+  if (*(uint64_t *) b > *(uint64_t *) a) return -1;
+  return 0;
 }
 
 int
 compare_uint64_decreasing (const void *a, const void *b)
 {
-  return (*(uint64_t *) b - *(uint64_t *) a);
+  if (*(uint64_t *) b > *(uint64_t *) a) return 1;
+  if (*(uint64_t *) b < *(uint64_t *) a) return -1;
+  return 0;
 }
 
 int
