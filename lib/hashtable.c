@@ -336,11 +336,14 @@ biomcmc_hashint_10 (uint32_t a)
 }
 
 int ulx_size = 12;
-uint64_t ulx[] = {
+static uint64_t ulx[] = {
   0x65d200ce55b19ad8UL, 0x4f2162926e40c299UL, 0x162dd799029970f8UL, // 0...2
   0x68b665e6872bd1f4UL, 0xb6cfcf9d79b51db2UL, 0x7a2b92ae912898c2UL, // 3...5
   0xff51afd7ed558ccdUL, 0xc4ceb9fe1a85ec53UL, 0x87c37b91114253d5UL, 0x4cf5ad432745937fUL, // 6...9 (murmurhash) 
-  0x52dce729UL, 0x38495ab5UL}; // 10...11 
+  0x52dce729UL, 0x38495ab5UL, // 10...11 
+  11400714785074694791ULL, 14029467366897019727ULL, 1609587929392839161ULL, // 12..14 used by xxhash
+  9650029242287828579ULL, 2870177450012600261ULL}; // 15..16 used by xxhash
+
 
 uint64_t 
 biomcmc_hashint64_1 (uint64_t key) /* 64 bits */
@@ -500,22 +503,22 @@ void biomcmc_murmurhash3 ( const void * key, const int len, const uint32_t seed,
   uint64_t k1 = 0, k2 = 0;
 
   switch(len & 15) {
-    case 15: k2 ^= (uint64_t)(tail[14]) << 48; break;
-    case 14: k2 ^= (uint64_t)(tail[13]) << 40; break;
-    case 13: k2 ^= (uint64_t)(tail[12]) << 32; break;
-    case 12: k2 ^= (uint64_t)(tail[11]) << 24; break;
-    case 11: k2 ^= (uint64_t)(tail[10]) << 16; break;
-    case 10: k2 ^= (uint64_t)(tail[ 9]) << 8;  break;
-    case  9: k2 ^= (uint64_t)(tail[ 8]) << 0;  break;
-             k2 *= ulx[9]; k2 = (k2 << 33) | (k2 >> 31); k2 *= ulx[8]; h2 ^= k2; break;
-
-    case  8: k1 ^= (uint64_t)(tail[ 7]) << 56; break;
-    case  7: k1 ^= (uint64_t)(tail[ 6]) << 48; break;
-    case  6: k1 ^= (uint64_t)(tail[ 5]) << 40; break;
-    case  5: k1 ^= (uint64_t)(tail[ 4]) << 32; break;
-    case  4: k1 ^= (uint64_t)(tail[ 3]) << 24; break;
-    case  3: k1 ^= (uint64_t)(tail[ 2]) << 16; break;
-    case  2: k1 ^= (uint64_t)(tail[ 1]) << 8;  break;
+    case 15: k2 ^= (uint64_t)(tail[14]) << 48;  __attribute__ ((fallthrough));
+    case 14: k2 ^= (uint64_t)(tail[13]) << 40;  __attribute__ ((fallthrough));
+    case 13: k2 ^= (uint64_t)(tail[12]) << 32;  __attribute__ ((fallthrough));
+    case 12: k2 ^= (uint64_t)(tail[11]) << 24;  __attribute__ ((fallthrough));
+    case 11: k2 ^= (uint64_t)(tail[10]) << 16;  __attribute__ ((fallthrough));
+    case 10: k2 ^= (uint64_t)(tail[ 9]) << 8;   __attribute__ ((fallthrough));
+    case  9: k2 ^= (uint64_t)(tail[ 8]) << 0;  
+             k2 *= ulx[9]; k2 = (k2 << 33) | (k2 >> 31); k2 *= ulx[8]; h2 ^= k2;
+  __attribute__ ((fallthrough));
+    case  8: k1 ^= (uint64_t)(tail[ 7]) << 56;  __attribute__ ((fallthrough));
+    case  7: k1 ^= (uint64_t)(tail[ 6]) << 48;  __attribute__ ((fallthrough));
+    case  6: k1 ^= (uint64_t)(tail[ 5]) << 40;  __attribute__ ((fallthrough));
+    case  5: k1 ^= (uint64_t)(tail[ 4]) << 32;  __attribute__ ((fallthrough));
+    case  4: k1 ^= (uint64_t)(tail[ 3]) << 24;  __attribute__ ((fallthrough));
+    case  3: k1 ^= (uint64_t)(tail[ 2]) << 16;  __attribute__ ((fallthrough));
+    case  2: k1 ^= (uint64_t)(tail[ 1]) << 8;  __attribute__ ((fallthrough));
     case  1: k1 ^= (uint64_t)(tail[ 0]) << 0; // equiv to "case 1"  
              k1 *= ulx[8]; k1 = (k1 << 31) | (k1 >> 33); k1 *= ulx[9]; h1 ^= k1; break;
   };
@@ -531,3 +534,88 @@ void biomcmc_murmurhash3 ( const void * key, const int len, const uint32_t seed,
   ((uint64_t*)out)[1] = h2;
 }
  // see also https://github.com/torvalds/linux/blob/master/lib/xxhash.c
+ 
+
+static uint64_t xxh64_round(uint64_t acc, const uint64_t input)
+{
+	acc += input * PRIME64_2;
+	acc = xxh_rotl64(acc, 31);
+	acc *= PRIME64_1;
+	return acc;
+}
+
+static uint64_t xxh64_merge_round(uint64_t acc, uint64_t val)
+{
+	val = xxh64_round(0, val);
+	acc ^= val;
+	acc = acc * PRIME64_1 + PRIME64_4;
+	return acc;
+}
+
+uint64_t xxh64(const void *input, const size_t len, const uint64_t seed)
+{
+	const uint8_t *p = (const uint8_t *)input;
+	const uint8_t *const b_end = p + len;
+	uint64_t h64;
+
+	if (len >= 32) {
+		const uint8_t *const limit = b_end - 32;
+		uint64_t v1 = seed + ulx[12]+ ulx[13];
+		uint64_t v2 = seed + ulx[13];
+		uint64_t v3 = seed + 0;
+		uint64_t v4 = seed - ulx[12];
+
+		do {
+			v1 = xxh64_round(v1, get_unaligned_le64(p));
+			p += 8;
+			v2 = xxh64_round(v2, get_unaligned_le64(p));
+			p += 8;
+			v3 = xxh64_round(v3, get_unaligned_le64(p));
+			p += 8;
+			v4 = xxh64_round(v4, get_unaligned_le64(p));
+			p += 8;
+		} while (p <= limit);
+
+		h64 = xxh_rotl64(v1, 1) + xxh_rotl64(v2, 7) +
+			xxh_rotl64(v3, 12) + xxh_rotl64(v4, 18);
+		h64 = xxh64_merge_round(h64, v1);
+		h64 = xxh64_merge_round(h64, v2);
+		h64 = xxh64_merge_round(h64, v3);
+		h64 = xxh64_merge_round(h64, v4);
+
+	} else {
+		h64  = seed + ulx[16];
+	}
+
+	h64 += (uint64_t)len;
+
+	while (p + 8 <= b_end) {
+		const uint64_t k1 = xxh64_round(0, get_unaligned_le64(p));
+
+		h64 ^= k1;
+		h64 = xxh_rotl64(h64, 27) * ulx[12] + ulx[15];
+		p += 8;
+	}
+
+	if (p + 4 <= b_end) {
+		h64 ^= (uint64_t)(get_unaligned_le32(p)) * ulx[12];
+		h64 = xxh_rotl64(h64, 23) * ulx[13] + ulx[14];
+		p += 4;
+	}
+
+	while (p < b_end) {
+		h64 ^= (*p) * ulx[16];
+		h64 = xxh_rotl64(h64, 11) * ulx[12];
+		p++;
+	}
+
+	h64 ^= h64 >> 33;
+	h64 *= PRIME64_2;
+	h64 ^= h64 >> 29;
+	h64 *= PRIME64_3;
+	h64 ^= h64 >> 32;
+
+	return h64;
+}
+EXPORT_SYMBOL(xxh64);
+
