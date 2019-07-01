@@ -382,7 +382,7 @@ rng_set_lfib4 (rng_swb_struct *r, uint32_t seed)
   s2 = seed;
 
   r->n = 0;
-  s1 = biomcmc_hashint_7 (seed); /* arbitrary shuffling */
+  s1 = biomcmc_hashint_salted (seed, /*salt*/ 7); /* arbitrary shuffling */
   for (i = 0; i < 32; i++) { rng_get_cong (&s2); rng_get_cong (&s1); rng_get_brent (&s1); }
 
   rng_set_marsaglia (m, s1);
@@ -442,7 +442,7 @@ rng_set_well1024 (rng_well1024_struct *r, uint32_t seed)
 
   if (!seed) seed = 3519793928UL;
 
-  s1 = biomcmc_hashint_8 (seed);
+  s1 = biomcmc_hashint_salted (seed, /*salt*/ 8);
   s2 = rng_get_shr (&s1); 
   for (i = 0; i < 32; i++) r->x[i] = rng_get_shr (&s1) ^ rng_get_std31 (&s2);
   seed = rng_randomize_array_32bits (r->x, 32, seed, false); /* increase randomness by concatenation */
@@ -466,7 +466,7 @@ rng_set_gamerand (uint32_t *game, uint32_t seed)
   if (!seed) seed = 7584631UL; 
 
   game[0] = seed; 
-  game[1] = biomcmc_hashint_9 (seed);
+  game[1] = biomcmc_hashint_salted (seed, /*salt*/ 9);
   for (i = 0; i < 32; i++) rng_get_brent (game + 1);
 }
 
@@ -482,7 +482,7 @@ void
 rng_set_marsaglia (uint32_t *m, uint32_t seed)
 { /* m[4] */
   m[0] = seed; 
-  m[1] = 1UL + biomcmc_hashint_9 (seed);
+  m[1] = 1UL + biomcmc_hashint_salted (seed, /*salt*/ 9);
   if (!m[0]) m[0] = 362436069UL;
   if (!m[1]) m[1] = 521288629UL; 
   
@@ -496,8 +496,8 @@ rng_set_marsaglia_constants (uint32_t *m, uint32_t s1, uint32_t s2)
 {
   /* we must choose two distinct marsaglia_constants[], from a pool of 81. We have 6400 possible streams, since one
    * constant we reserve for the diagonals. */
-  s1 = biomcmc_hashint_9 (s1); s1 %= 80;
-  s2 = biomcmc_hashint_9 (s2); s2 %= 80;
+  s1 = biomcmc_hashint_salted (s1, /*salt*/ 9); s1 %= 80;
+  s2 = biomcmc_hashint_salted (s2, /*salt*/ 9); s2 %= 80;
   if (s1 == s2) s2 = 80;
   m[2] = marsaglia_constants[s1];
   m[3] = marsaglia_constants[s2];
@@ -578,7 +578,7 @@ rng_twist_array_32bits (uint32_t *a, uint32_t n_a, uint32_t seed)
   uint32_t i, im, mars[4];
 
   /* initialize Marsaglia's Super-Duper generator */
-  mars[0] = biomcmc_hashint_8 (seed) + 1UL; 
+  mars[0] = biomcmc_hashint_salted (seed, /*salt*/ 8) + 1UL; 
   mars[1] = seed;
   mars[1] = rng_get_cong_many (mars + 1);
   rng_set_marsaglia_constants (mars, mars[0], mars[1]);
@@ -606,7 +606,7 @@ uint64_t
 rng_twist_array_64bits (uint64_t *a, uint32_t n_a, uint64_t seed)
 { /* modified from MT19937 (http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/emt.html) */
   uint32_t i, im;
-  uint64_t s1 = biomcmc_hashint64_1 (seed) + ((uint64_t) n_a);
+  uint64_t s1 = biomcmc_hashint64_salted (seed, /*salted*/ 1) + ((uint64_t) n_a);
 
   if (!a[0]) a[0] = (1ULL << 63);
   a[0] += rng_get_std61 (&seed);

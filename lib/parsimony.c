@@ -190,10 +190,10 @@ update_binary_parsimony_datamatrix_column_if_new (binary_parsimony_datamatrix mr
 
 uint32_t 
 hash_value_of_binary_parsimony_datamatrix_column (binary_parsimony_datamatrix mrp, int idx)
-{
+{ // very unoptimised, since s[i][idx] is 1,2,3 (less than 8 bits) ?
   int i;
-  uint32_t hashv = biomcmc_hashint_1 ((uint32_t) mrp->s[0][idx]);
-  for (i=1; i < mrp->ntax; i++) hashv = biomcmc_hashint_mix (hashv, (uint32_t) mrp->s[i-1][idx], (uint32_t) mrp->s[i][idx]);
+  uint32_t hashv = biomcmc_hashint_salted ((uint32_t) mrp->s[0][idx], /*salt*/ 1);
+  for (i=1; i < mrp->ntax; i++) hashv = biomcmc_hashint_mix_salted (hashv, (uint32_t) mrp->s[i][idx], /*salt*/ 2);
   return hashv;
 }
 

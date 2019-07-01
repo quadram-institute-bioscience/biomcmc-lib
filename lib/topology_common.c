@@ -16,9 +16,9 @@
 /*! \brief rescales original branches and stores distance from root into #fromroot[], using up to 6 distinct rescalings */
 double rescale_rooted_distances_for_patristic_distances (topology tree, double *fromroot, int mode, double tolerance);
 /*! \brief update internal bipartitions and reorder siblings by heavy child on left */
-unsigned int update_subtree_bipartitions (topol_node this);
+uint32_t update_subtree_bipartitions (topol_node this);
 /*! \brief tree traversal with preorder and postorder node tracking */
-unsigned int update_subtree_traversal (topology tree, topol_node this, int *postcount, int *undonecount);
+uint32_t update_subtree_traversal (topology tree, topol_node this, int *postcount, int *undonecount);
 /*! \brief Auxiliary function to topology_to_string_by_id() and toplogy_to_string_create_name(). */
 void topology_subtree_to_string_by_id (char *str, const topol_node node, double *blen, bool create_name);
 /*! \brief Auxiliary function to topology_to_string_by_name(). */
@@ -207,10 +207,10 @@ update_topology_traversal (topology tree)
   tree->traversal_updated = true;
 }
 
-unsigned int
+uint32_t
 update_subtree_bipartitions (topol_node this)
 {
-  unsigned int hash1 = 0x55555UL, hash2 = 0xefc6dUL; /* each tree has a (ideally) unique hash value */
+  uint32_t hash1 = 0x55555UL, hash2 = 0xefc6dUL; /* each tree has a (ideally) unique hash value */
   if (this->left->internal)  hash1 = update_subtree_bipartitions (this->left);
   else                       hash1 = this->left->id;
   if (this->right->internal) hash2 = update_subtree_bipartitions (this->right);
@@ -222,17 +222,17 @@ update_subtree_bipartitions (topol_node this)
     topol_node tmp = this->left; 
     this->left = this->right; 
     this->right = tmp;
-    hash1 = biomcmc_hashint_4 (hash1); /* there are 9 hash functions implemented; this is the 4-th */
+    hash1 = biomcmc_hashint_salted (hash1, /*salt*/ 4);
   }
-  else hash2 = biomcmc_hashint_4 (hash2); // only one of them is hashed (the lighter subtree, or the right leaf for cherries)
+  else hash2 = biomcmc_hashint_salted (hash2, /*salt*/ 4); // only one of them is hashed (the lighter subtree, or the right leaf for cherries)
   if (hash1 > hash2) return hash1 - hash2 + 1; /* avoid numbers out of range; the +1 is arbitrary here, just to avoid zero below */
   else               return hash2 - hash1 + 1;
 }
 
-unsigned int
+uint32_t
 update_subtree_traversal (topology tree, topol_node this, int *postcount, int *undonecount)
 {
-  unsigned int hash1 = 0x9d2dUL, hash2 = 0x8cab4UL; /* each tree has a (ideally) unique hash value */
+  uint32_t hash1 = 0x9d2dUL, hash2 = 0x8cab4UL; /* each tree has a (ideally) unique hash value */
   if (this->left->internal)  hash1 = update_subtree_traversal (tree, this->left, postcount, undonecount);
   else                       hash1 = this->left->id;
   if (this->right->internal) hash2 = update_subtree_traversal (tree, this->right, postcount, undonecount);
@@ -241,7 +241,7 @@ update_subtree_traversal (topology tree, topol_node this, int *postcount, int *u
   this->mid[0] = *postcount;
   tree->postorder[(*postcount)++] = this;
   if (!this->d_done) { this->mid[1] = *undonecount; tree->undone[(*undonecount)++] = this; }
-  return biomcmc_hashint_mix (hash1, hash2, *postcount);
+  return biomcmc_hashint_mix_salted (hash1, hash2 + (uint32_t) (*postcount), /*salt*/ 1);
 }
 
 bool

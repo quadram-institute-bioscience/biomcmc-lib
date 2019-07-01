@@ -76,7 +76,7 @@ update_cm_sketch_from_fixedhash (cm_sketch cm, uint64_t hash_f, uint64_t hash_r)
   else small_h = hash_r; 
 
   biomcmc_hashint64_to_vector (small_h, h32); // first four elements of h32[] are filled
-  small_h = biomcmc_hashint64_seed (small_h, 6); // 6 will give original murmur constants
+  small_h = biomcmc_hashint64_salted (small_h, 4); // avalanche used in xxhash 
   biomcmc_hashint64_to_vector (small_h, h32 + 4); // last four elements of h32[] are filled
   for (i=0; i < 8; i++) cm->freq[i][ (int) (h32[i]/cm->mod) ]++;  
   cm->count++;

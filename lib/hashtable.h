@@ -23,7 +23,7 @@
 #ifndef _biomcmc_hashtable_h_ 
 #define _biomcmc_hashtable_h_ 
 
-#include "bipartition.h" // includes lowlevel.h
+#include "hashfunctions.h"
 
 typedef struct hashtable_struct*      hashtable;
 typedef struct hashtable_item_struct* hashtable_item;
@@ -93,35 +93,5 @@ void  del_bip_hashtable (bip_hashtable ht);
 void bip_hashtable_insert (bip_hashtable ht, bipartition key);
 /*! \brief Return frequency of bipartition (count/maxfreq) or zero if not found. */
 double bip_hashtable_get_frequency (bip_hashtable ht, bipartition key);
-
-/* extra hash functions */
-uint32_t biomcmc_hashint_1 (uint32_t a);
-uint32_t biomcmc_hashint_2 (uint32_t a);
-uint32_t biomcmc_hashint_3 (uint32_t a);
-uint32_t biomcmc_hashint_4 (uint32_t a);
-uint32_t biomcmc_hashint_5 (uint32_t a);
-uint32_t biomcmc_hashint_6 (uint32_t a);
-uint32_t biomcmc_hashint_7 (uint32_t a);
-uint32_t biomcmc_hashint_8 (uint32_t a);
-uint32_t biomcmc_hashint_9 (uint32_t a);
-uint64_t biomcmc_hashint64_1 (uint64_t key);
-uint64_t biomcmc_hashint64_2 (uint64_t x);
-uint64_t biomcmc_hashint64_3 (uint64_t x);
-void biomcmc_hashint64_to_vector (uint64_t x, uint32_t *out); 
-uint64_t biomcmc_hashint64_seed (uint64_t h, int seed);
-uint32_t biomcmc_hashint_64to32_seed (uint64_t x, int seed);
-uint32_t biomcmc_hashint_64to32 (uint64_t key);
-uint32_t biomcmc_hashint_mix (uint32_t a, uint32_t b, uint32_t c);
-uint32_t biomcmc_hashstring_1 (unsigned char *str); /* CRC algortihm */
-uint32_t biomcmc_hashstring_2 (unsigned char *str); /* PJW algorithm */
-uint32_t biomcmc_hashstring_3 (unsigned char *str); /* dbj2 algorithm */
-uint32_t biomcmc_hashstring_4 (unsigned char *str); /* dbj2 algorithm with XOR */
-uint32_t biomcmc_hashstring_5 (unsigned char *str); /* sdbm algorithm */
-
-/*! \brief 32bits hash value for bipartition */
-uint32_t bipartition_hash (bipartition bip);
-
-/*! \brief murmurhash3 using 64bits to return 128 bits (4 ints) of hash into out[] */
-void biomcmc_murmurhash3 ( const void * key, const int len, const uint32_t seed, void * out);
 
 #endif

@@ -30,6 +30,7 @@
 #ifdef THESE_ARE_COMMENTS
 #include "lowlevel.h"            // called by char_vector, argtable, bipartition, prob_distribution 
 #include "char_vector.h"         // called by hashtable, random_number, nexus_common, empirical_frequency
+#include "hashfunction.h"        // called by hashtable 
 #include "hashtable.h"           // called by random_number_gen 
 #include "bipartition.h"         // called by hashtable
 #include "random_number_gen.h"   // called by random_number

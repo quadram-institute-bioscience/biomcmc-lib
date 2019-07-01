@@ -58,7 +58,7 @@ struct topology_struct
   topol_node *postorder;   /*! \brief pointers to all internal nodes in postorder (from last to first is preorder) */
   topol_node *undone;      /*! \brief pointers to outdated nodes in postorder (from last to first is preorder) */
   int n_undone;  /*! \brief number of outdated nodes (which need likelihood calc etc) in topology_struct::undone. */
-  unsigned int hashID1, hashID2; /*! \brief hash values of tree, ideally a unique value for each tree (collisions happen...) */
+  uint32_t hashID1, hashID2; /*! \brief hash values of tree, ideally a unique value for each tree (collisions happen...) */
   bool traversal_updated;  /*! \brief zero if postorder[] vector needs update, one if we can use postdorder[] to traverse tree  */ 
   int ref_counter;         /*! \brief number of references of topology (how many places are pointing to it) */
   char_vector taxlabel;    /*! \brief Taxon names (just a pointer; actual values are setup by ::newick_tree_struct or ::alignment_struct) */
