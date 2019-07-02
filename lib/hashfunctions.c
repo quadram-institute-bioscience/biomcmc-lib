@@ -63,34 +63,48 @@ biomcmc_hashint_salted (uint32_t a, int salt)
   return a;
 }
 
-uint32_t
-biomcmc_hashstring_salted (unsigned char *str, int salt)
+/* originally for char (1 byte) but can be used for uint32_t (4 bytes) or uint64_t (8 bytes) */
+uint32_t 
+biomcmc_hashbyte_salted (const void *str, size_t size, int salt)
 { // salt != seed, since main usage is to determine which hash function is used
-  uint32_t c, g, hash = 0;
+  uint8_t *c = (uint8_t*) str;
+  uint32_t g, hash = 0;
   switch(salt & 7) { // last 3 bits
+    case 6: /* FNV1 hash */
+      hash = 0x811C9DC5;
+      for (; (*c) && (size > 0); c++, size--) { 
+        hash += (hash<<1) + (hash<<4) + (hash<<7) + (hash<<8) + (hash<<24); hash ^= *c;
+      }; break;
+
+    case 5: // Jenkins's one_at_a_time hash
+      for (; (*c) && (size > 0); c++, size--) { hash += *c; hash += hash << 10; hash ^= hash >> 6; }
+      hash += hash << 3; hash ^= hash >> 11; hash += hash << 15; break;
+
     case 4: /* CRC algortihm: ASCII chars use 5-6 bits out of 8, this function worries more about the lowest 5 bits */
-      while ((c = *str++)) { /* extract high-order 5 bits (g), shift left by 5 bits, move g to low-order end and XOR into h */
-        g = hash & 0xf8000000; hash = ((hash << 5) ^ (g >> 27)) ^ c; 
+      /* extract high-order 5 bits (g), shift left by 5 bits, move g to low-order end and XOR into h */
+      for (; (*c) && (size > 0); c++, size--) {
+        g = hash & 0xf8000000; hash = ((hash << 5) ^ (g >> 27)) ^ *c; 
       }; break;
 
     case 3:/* PJW algorithm: like CR, worries more about lowest 5 */
-      while ((c = *str++)) { // top 4 bits are zero; shift 4 bits left, add c, get top 4 bits, if top 4 bits aren't zero, move them to low end 
-        hash = (hash << 4) + c; g = hash & 0xf0000000; 
+      // top 4 bits are zero; shift 4 bits left, add c, get top 4 bits, if top 4 bits aren't zero, move them to low end 
+      for (; (*c) && (size > 0); c++, size--) { 
+        hash = (hash << 4) + *c; g = hash & 0xf0000000; 
         if (g != 0) hash = (hash ^ (g >> 24)) ^ g; 
       }; break;
 
     case 2: /* dbj2 algorithm */
       hash = 5381;
-      while ((c = *str++)) hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
+      for (; (*c) && (size > 0); c++, size--) hash = ((hash << 5) + hash) + *c; /* hash * 33 + c */
       break;
 
     case 1: /* dbj2 algorithm with XOR */
       hash = 5381;
-      while ((c = *str++)) hash = ((hash << 5) + hash) ^ c; /* (hash * 33) XOR c */
+      for (; (*c) && (size > 0); c++, size--) hash = ((hash << 5) + hash) ^ *c; /* (hash * 33) XOR c */
       break;
 
     default: /* sdbm algorithm */
-      while ((c = *str++)) hash = c + (hash << 6) + (hash << 16) - hash;
+      for (; (*c) && (size > 0); c++, size--) hash = *c + (hash << 6) + (hash << 16) - hash;
       break;
   };
   return hash;
@@ -165,17 +179,6 @@ biomcmc_hashint64_mix_salted (uint64_t a, uint64_t b, int salt)
   return a;
 }
 
-void
-biomcmc_hashint64_to_vector (uint64_t x, uint32_t *out) /* 64 bits, splits into two 32bits blocks */
-{
-  uint32_t low = x;
-  uint32_t high = x >> 32UL;
-  out[0] =biomcmc_hashint_salted (low, 1);
-  out[1] =biomcmc_hashint_salted (low, 2);
-  out[2] =biomcmc_hashint_salted (high, 3);
-  out[3] =biomcmc_hashint_salted (high, 4);
-}
-
 uint32_t 
 biomcmc_hashint_64to32_seed (uint64_t x, int seed) /* 64 bits */
 { // published algo uses seed=0 or seed=3
@@ -206,8 +209,8 @@ bipartition_hash (bipartition bip)
 /*** MurmurHash3 from https://github.com/PeterScott/murmur3/  written originally by Austin Appleby and CC0 ***/
 
 uint64_t
-biomcmc_murmurhash3 ( const void * key, const int len, const uint32_t seed, void * out )
-{  /* out[] is 128 bits (4 x uint_32, for instance) */
+biomcmc_murmurhash3_128bits ( const void *key, const int len, const uint32_t seed, void *out)
+{  /* out[] is 128 bits (4 x uint_32, for instance), assumes 64bits machine  */
   const uint8_t * data = (const uint8_t*) key;
   const int nblocks = len / 16;
   int i;
@@ -259,6 +262,33 @@ biomcmc_murmurhash3 ( const void * key, const int len, const uint32_t seed, void
     ((uint64_t*)out)[1] = h2;
   }
   return biomcmc_hashint64_mix_salted (h1, h2, /*salt*/ 1);
+}
+
+// https://github.com/wolkykim/qlibc/blob/master/src/utilities/qhash.c
+uint32_t 
+biomcmc_murmurhash3_32bits (const void *data, size_t nbytes, const uint32_t seed)
+{ /* assumes 32 bits machine, and returns 32 bits */
+  const uint32_t c1 = 0xcc9e2d51;
+  const uint32_t c2 = 0x1b873593;
+  const int nblocks = nbytes / 4;
+  const uint32_t *blocks = (const uint32_t *) (data);
+  const uint8_t *tail = (const uint8_t *) (data + (nblocks * 4));
+  uint32_t k, h = seed;
+  int i;
+
+  for (i = 0; i < nblocks; i++) {
+    k = blocks[i]; k *= c1; k = (k << 15) | (k >> (32 - 15)); k *= c2;
+    h ^= k; h = (h << 13) | (h >> (32 - 13)); h = (h * 5) + 0xe6546b64;
+  }
+
+  k = 0;
+  switch (nbytes & 3) {
+    case 3: k ^= tail[2] << 16; __attribute__ ((fallthrough));
+    case 2: k ^= tail[1] << 8;  __attribute__ ((fallthrough));
+    case 1: k ^= tail[0]; k *= c1; k = (k << 15) | (k >> (32 - 15)); k *= c2; h ^= k; break;
+  };
+  h ^= nbytes; h ^= h >> 16; h *= 0x85ebca6b; h ^= h >> 13; h *= 0xc2b2ae35; h ^= h >> 16;
+  return h;
 }
 
 // https://github.com/torvalds/linux/blob/master/lib/xxhash.c and https://github.com/Cyan4973/smhasher/blob/master/xxhash.c

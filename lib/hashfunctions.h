@@ -21,19 +21,21 @@
 #include "bipartition.h" // includes lowlevel.h
 
 uint32_t biomcmc_hashint_salted (uint32_t a, int salt);
-uint32_t biomcmc_hashstring_salted (unsigned char *str, int salt);
+uint32_t biomcmc_hashbyte_salted (const void *str, size_t size, int salt);
 uint64_t biomcmc_hashint64_salted (uint64_t k, int salt);
 uint32_t biomcmc_hashint_mix_salted (uint32_t a, uint32_t b, int salt);
 uint64_t biomcmc_hashint64_mix_salted (uint64_t a, uint64_t b, int salt);
 
-void biomcmc_hashint64_to_vector (uint64_t x, uint32_t *out); 
 uint32_t biomcmc_hashint_64to32_seed (uint64_t x, int seed);
 uint32_t biomcmc_hashint_64to32 (uint64_t key);
 /*! \brief 32bits hash value for bipartition */
 uint32_t bipartition_hash (bipartition bip);
 
-/*! \brief murmurhash3 using 64bits to return 128 bits (4 ints) of hash into out[] and also 64 bits as return value */
-uint64_t biomcmc_murmurhash3 ( const void * key, const int len, const uint32_t seed, void * out);
+/*! \brief murmurhash3 using 64bits to return 128 bits (4 ints) of hash into out[] and also 64 bits as return value 
+ * The 64bits is the format used internally (for speed), but the input can be a vector of any size (>1 byte) */
+uint64_t biomcmc_murmurhash3_128bits ( const void *key, const int len, const uint32_t seed, void *out);
+/*! \brief murmurhash3 using 32bits to return 32 bits of hash as return value */
+uint32_t biomcmc_murmurhash3_32bits (const void *data, size_t nbytes, const uint32_t seed);
 /*! \brief xxhash function for 64 bits */
 uint64_t biomcmc_xxh64 (const void *input, const size_t len, const uint64_t seed);
 

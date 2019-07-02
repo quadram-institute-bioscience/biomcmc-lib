@@ -11,29 +11,25 @@
  * details (file "COPYING" or http://www.gnu.org/copyleft/gpl.html).
  */
 
-/*! \file minhash.h 
- *  \brief Min-count and MinHash sketches for DNA sequences
+/*! \file kmerhash.h 
+ *  \brief k-mer handling of DNA sequences, with hash transformation  
  *
  */
 
-#ifndef _biomcmc_minhash_h_
-#define _biomcmc_minhash_h_
+#ifndef _biomcmc_kmerhash_h_
+#define _biomcmc_kmerhash_h_
 
 #include "alignment.h"
 
-typedef struct cm_sketch_struct* cm_sketch;
+typedef struct kmerhash_struct* kmerhash;
 
-struct cm_sketch_struct
+struct kmerhash_struct 
 {
-  int size, count;
-  uint32_t mod;
-  int **freq;
+  uint64_t *forward, *reverse; 
 };
 
-cm_sketch new_cm_sketch (int max_vector_size);
-void del_cm_sketch (cm_sketch cm);
-/*! \brief min-count sketch of fixedhash (numeric representation of 16mers) */
-cm_sketch new_fixedhash_sketch_from_dna (char *dna, int dna_length, int sketch_size);
-void compare_cm_sketches (cm_sketch cm1, cm_sketch cm2, double *result);
+kmerhash new_kmerhash ();
+void del_kmerhash (kmerhash kmer);
+void accumulate_kmers_from_dna (char *dna, int dna_length, void (*reduce)(kmerhash, void *), void *reduce_params);
 
 #endif
