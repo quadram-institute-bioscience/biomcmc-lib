@@ -19,6 +19,10 @@
 /* similar to char2bit[] from alignment[], but has forward and reverse */
 static uint8_t dna_in_4_bits[256][2] = {{0xff}}; /* DNA base to bitpattern translation, with 1st element set to arbitrary value */
 static uint8_t dna_in_2_bits[256][2] = {{0xff}}; /* no ambigous chars/indels, represented by 4 (0100 in bits) */
+static uint64_t _mask_forward[] = {0xffffUL, 0xffffffffUL, 0xffffffffffffUL};
+static uint8_t _shift_reverse[] = {48, 32, 16};
+static uint8_t _n_bit_masks = 3;
+static uint8_t _kmer_size[] = {4, 8, 12, 16, 20, 24, 32};
 
 static void initialize_dna_to_bit_tables (void);
 
@@ -34,8 +38,12 @@ new_kmerhash_from_dna_sequence (char *dna, size_t dna_length, bool dense)
   for (i=0; i < kmer->n_f; i++) kmer->forward[i] = kmer->reverse[i] = 0UL;
 
   kmer->dense = dense;
-  kmer->n_hash = 4;
-  kmer->n_kmer = 3;
+  kmer->n_hash = 7;
+  kmer->n_kmer = 4;
+  kmer->nsites_kmer = (uint8_t*) biomcmc_malloc (kmer->n_hash * sizeof (uint8_t));
+  if (kmer->dense) for (i = 0; i < kmer->n_hash; i++) kmer->nsites_kmer[i] = 2 * _kmer_size[i]; 
+  else             for (i = 0; i < kmer->n_hash; i++) kmer->nsites_kmer[i] = _kmer_size[i]; 
+
   kmer->hash = (uint64_t*) biomcmc_malloc (kmer->n_hash * sizeof (uint64_t*));
   kmer->kmer = (uint64_t*) biomcmc_malloc (kmer->n_kmer * sizeof (uint64_t*));
   for (i=0; i < kmer->n_hash; i++) kmer->hash[i] = 0UL;
@@ -55,13 +63,14 @@ del_kmerhash (kmerhash kmer)
   if (kmer->reverse) free (kmer->reverse);
   if (kmer->hash) free (kmer->hash);
   if (kmer->kmer) free (kmer->kmer);
+  if (kmer->nsites_kmer) free (kmer->nsites_kmer);
   free (kmer);
 }
 
 bool
 kmerhash_iterator (kmerhash kmer)
 {
-  unsigned int n_ops = 1, dnachar;
+  unsigned int i, dnachar;
   uint64_t hf, hr;
   if (kmer->i == kmer->n_dna) return false;
 
@@ -70,7 +79,6 @@ kmerhash_iterator (kmerhash kmer)
     while ((kmer->i < kmer->n_dna) && (dna_in_2_bits[(int)(kmer->dna[kmer->i])][0] > 3)) kmer->i++;
     if (kmer->i == kmer->n_dna) return false;
     dnachar = (int) kmer->dna[kmer->i];
-    n_ops = 2;
     //ABCD->BCDE: forward [C D] [A B] --> [D E] [B C] , reverse: [b a] [d c] -->  [c b] [e d]
     kmer->forward[1] = kmer->forward[1] << 2 | kmer->forward[0] >> 62UL;  // forward[1] at left of forward[0]
     kmer->forward[0] = kmer->forward[0] << 2 | dna_in_2_bits[dnachar][0]; // forward[0] receives new value
@@ -87,31 +95,44 @@ kmerhash_iterator (kmerhash kmer)
     kmer->reverse[1] = kmer->reverse[1] >> 4 | ((uint64_t)(dna_in_4_bits[dnachar][1]) << 60UL);
   } // else if (dense)
   kmer->i++;
-  if (kmer->i < (4 * n_ops)) kmerhash_iterator (kmer); //do not update hashes, just fill forward[] and reverse[] 
+  if (kmer->i < (4 * kmer->nsites_kmer[0])) kmerhash_iterator (kmer); //do not update hashes, just fill forward[] and reverse[] 
 
-  // 16 bits: 4-mer (or 8-mer if dense)
-  hf = kmer->forward[0] & 0xffffUL; hr = kmer->reverse[1] >> 48;
-  if (hr < hf) hf = hr;
-  kmer->kmer[0] = hf;
-  kmer->hash[0] = biomcmc_xxh64 (&hf, 2, 171); // 171 is just a seed
-
-  if (kmer->i >= (8 * n_ops)) { // 32 bits: 8-mer (or 16-mer if dense)
-    hf = kmer->forward[0] & 0xffffffffUL; hr = kmer->reverse[1] >> 32;
-    if (hr < hf) hf = hr;
-    kmer->kmer[1] = hf;
-    kmer->hash[1] = biomcmc_xxh64 (&hf, 4, 317);
+  for (i=0; i < _n_bit_masks; i++) {
+    if (kmer->i >= kmer->nsites_kmer[i]) { 
+      hf = kmer->forward[0] & _mask_forward[i]; hr = kmer->reverse[1] >> _shift_reverse[i];
+      if (hr < hf) hf = hr;
+      kmer->kmer[i] = hf;
+      kmer->hash[i] = biomcmc_xxh64 (&hf, 4, 313 * i); // 313 is just a seed
+    }
   }
 
-  if (kmer->i >= (16 * n_ops)) { // 64 bits: 16-mer (or 32-mer if dense)
-    kmer->kmer[2] = kmer->forward[0]; 
-    if (kmer->kmer[2] > kmer->reverse[1]) kmer->kmer[2] = kmer->reverse[1];
-    kmer->hash[2] = biomcmc_xxh64 (&(kmer->kmer[2]), 8, 635);
+  if (kmer->i >= kmer->nsites_kmer[i]) { // 64 bits: 16-mer (or 32-mer if dense)
+    kmer->kmer[i] = kmer->forward[0]; 
+    if (kmer->kmer[i] > kmer->reverse[1]) kmer->kmer[i] = kmer->reverse[1];
+    kmer->hash[i] = biomcmc_xxh64 (&(kmer->kmer[i]), 8, 635);
   }
+  i++;
 
-  if (kmer->i >= (32 * n_ops)) { // 128 bits: 32-mer (or 64-mer if dense) --> no equiv k-mer
-    if (kmer->forward[0] < kmer->reverse[1]) kmer->hash[3] = biomcmc_xxh64 (kmer->forward, 16, 9); // 9 must be the same seed 
-    else if ((kmer->forward[0] == kmer->reverse[1]) && (kmer->forward[1] < kmer->reverse[0])) kmer->hash[3] = biomcmc_xxh64 (kmer->forward, 16, 9);
-    else kmer->hash[3] = biomcmc_xxh64 (kmer->reverse, 16, 9);
+  if (kmer->i >= kmer->nsites_kmer[i]) { // 80 bits: 20-mer (or 40-mer if dense) --> no equiv k-mer
+    if (kmer->forward[0] < kmer->reverse[1]) kmer->hash[i] = biomcmc_xxh64 (kmer->forward, 20, 423); // 423 must be the same seed 
+    else if ((kmer->forward[0] == kmer->reverse[1]) && ((kmer->forward[1] & _mask_forward[0]) < (kmer->reverse[0] & _mask_forward[0])) )
+      kmer->hash[i] = biomcmc_xxh64 (kmer->forward, 20, 423);
+    else kmer->hash[i] = biomcmc_xxh64 (kmer->reverse, 20, 423);
+  } 
+  i++;
+
+  if (kmer->i >= kmer->nsites_kmer[i]) { // 96 bits: 24-mer (or 48-mer if dense) --> no equiv k-mer
+    if (kmer->forward[0] < kmer->reverse[1]) kmer->hash[i] = biomcmc_xxh64 (kmer->forward, 24, 725);
+    else if ((kmer->forward[0] == kmer->reverse[1]) && ((kmer->forward[1] & _mask_forward[1]) < (kmer->reverse[0] & _mask_forward[1])) )
+      kmer->hash[i] = biomcmc_xxh64 (kmer->forward, 24, 725);
+    else kmer->hash[i] = biomcmc_xxh64 (kmer->reverse, 24, 725);
+  } 
+  i++;
+
+  if (kmer->i >= kmer->nsites_kmer[i]) { // 128 bits: 32-mer (or 64-mer if dense) --> no equiv k-mer
+    if (kmer->forward[0] < kmer->reverse[1]) kmer->hash[i] = biomcmc_xxh64 (kmer->forward, 16, 9); // 9 must be the same seed 
+    else if ((kmer->forward[0] == kmer->reverse[1]) && (kmer->forward[1] < kmer->reverse[0])) kmer->hash[i] = biomcmc_xxh64 (kmer->forward, 16, 9);
+    else kmer->hash[i] = biomcmc_xxh64 (kmer->reverse, 16, 9);
   } 
   return true;
 }

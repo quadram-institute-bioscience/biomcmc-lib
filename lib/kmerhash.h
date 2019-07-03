@@ -31,7 +31,9 @@ struct kmerhash_struct
   char *dna;
   size_t i, n_dna;
   bool dense; /*! \brief 4bits per base (false) or 2bits (true) */
+  uint8_t *nsites_kmer;
 };
+// TODO: create ref_counter 
 
 kmerhash new_kmerhash_from_dna_sequence (char *dna, size_t dna_length, bool dense);
 void del_kmerhash (kmerhash kmer);
