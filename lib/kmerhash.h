@@ -26,10 +26,15 @@ typedef struct kmerhash_struct* kmerhash;
 struct kmerhash_struct 
 {
   uint64_t *forward, *reverse; 
+  uint64_t *hash, *kmer;   /*! \brief hash = 4mer, 8mer, 16mer, and 32mer hashed ; kmer = 4mer, 8mer, 16mer original */
+  int n_f, n_hash, n_kmer; /*! \brief n_f = 2 (128bits), n_hash = 4, n_kmer = 3 */
+  char *dna;
+  size_t i, n_dna;
+  bool dense; /*! \brief 4bits per base (false) or 2bits (true) */
 };
 
-kmerhash new_kmerhash ();
+kmerhash new_kmerhash_from_dna_sequence (char *dna, size_t dna_length, bool dense);
 void del_kmerhash (kmerhash kmer);
-void accumulate_kmers_from_dna (char *dna, int dna_length, void (*reduce)(kmerhash, void *), void *reduce_params);
+bool kmerhash_iterator (kmerhash kmer);
 
 #endif
