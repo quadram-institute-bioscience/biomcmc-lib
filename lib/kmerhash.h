@@ -23,14 +23,14 @@
 
 typedef struct kmer_params_struct* kmer_params;
 typedef struct kmerhash_struct* kmerhash;
-typedef enum {kmer_class_fast, kmer_class_genome, kmer_class_full} kmer_class;
-const char *kmer_class_string[] = {"fast", "genome", "full"};
+typedef enum {kmer_class_fast, kmer_class_genome, kmer_class_short, kmer_class_full} enum_kmer_class;
+const char *kmer_class_string[] = {"faster (fewer hashes)", "genome analysis", "phylogenetics (short kmers)", "full"};
 // maybe string must be declared extern here and defined in .c 
 
 struct kmer_params_struct
 {
   uint64_t mask1[6] = {0xffffUL, 0xffffffUL, 0xffffffffUL, 0xffffffffffUL, 0xffffffffffffUL, 0xffffffffffffffffUL}; // 4, 6, 8, 10, 12, 16 4bits
-  uint8_t shift1[6] = {      48,         40,           32,             24,               16,                    0};
+  uint8_t  shift[6] = {      48,         40,           32,             24,               16,                    0};
   uint64_t mask2[4] = {0xffffUL, 0xffffffffUL, 0xffffffffffffUL, 0xffffffffffffffffUL};
   uint8_t  size[10] = {4, 6, 8, 10, 12, 16, 20, 24, 28, 32};
   bool dense=false;
@@ -49,7 +49,6 @@ struct kmerhash_struct
   bool dense; /*! \brief 4bits per base (false) or 2bits (true) */
   int ref_counter;
 };
-
 
 
 kmerhash new_kmerhash (bool dense);

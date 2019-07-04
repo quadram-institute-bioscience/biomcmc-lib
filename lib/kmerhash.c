@@ -27,11 +27,43 @@ static uint8_t _kmer_size[] = {4, 8, 12, 16, 20, 24, 32};
 static void initialize_dna_to_bit_tables (void);
 
 kmer_params
-new_kmer_params (bool mode)
+new_kmer_params (enum_kmer_class mode)
 {
   kmer_params p = (kmer_params) biomcmc_malloc (sizeof (struct kmer_params_struct));
   p.ref_counter = 1;
-  // use enum here
+
+  switch (mode) {
+    case kmer_class_fast:
+      int j, i1[] = {0,2,4,5}, i2[] = {1,3};
+      p->n1 = 4; p->n2 = 2; p->dense = false;
+      for (j=0; j < p->n1; j++) {
+        p->mask1[j] = p->mask1[ i1[j] ];
+        p->shift[j] = p->shift[ i1[j] ];
+        p->size[j] = p->size[ i1[j] ];
+      }
+      for (j=0; j < p->n2; j++) {
+        p->mask2[j] = p->mask2[ i2[j] ];
+        p->size[j] = p->size[ i2[j] + 6 ]; // the first 6 are from mask1 (first element of 128bit vector)
+      }
+      break;
+    case kmer_class_genome:
+      int j, i1[] = {1,2,3,5};
+      p->n1 = 4; p->n2 = 1; p->dense = true;
+      for (j=0; j < p->n1; j++) {
+        p->mask1[j] = p->mask1[ i1[j] ];
+        p->shift[j] = p->shift[ i1[j] ];
+        p->size[j] = 2 * p->size[ i1[j] ];
+      }
+      p->mask2[j] = p->mask2[ 1 ];
+      p->size[j] = p->size[ 7 ];
+      break;
+    case kmer_class_short:
+      int j;
+      p->n1 = 5; p->n2 = 0; p->dense = false; 
+      break;
+    default: break;
+  };
+
   return p;
 }
 
