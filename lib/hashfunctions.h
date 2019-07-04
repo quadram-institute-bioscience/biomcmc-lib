@@ -33,10 +33,12 @@ uint32_t bipartition_hash (bipartition bip);
 
 /*! \brief murmurhash3 using 64bits to return 128 bits (4 ints) of hash into out[] and also 64 bits as return value 
  * The 64bits is the format used internally (for speed), but the input can be a vector of any size (>1 byte) */
-uint64_t biomcmc_murmurhash3_128bits ( const void *key, const int len, const uint32_t seed, void *out);
+uint64_t biomcmc_murmurhash3_128bits ( const void *key, const size_t len, const uint32_t seed, void *out);
+/*! \brief convenience function for calling mumurhash_128bits without an output vector */
+uint64_t biomcmc_murmurhash3_64bits ( const void *key, const size_t len, const uint32_t seed);
 /*! \brief murmurhash3 using 32bits to return 32 bits of hash as return value */
 uint32_t biomcmc_murmurhash3_32bits (const void *data, size_t nbytes, const uint32_t seed);
 /*! \brief xxhash function for 64 bits */
-uint64_t biomcmc_xxh64 (const void *input, const size_t len, const uint64_t seed);
+uint64_t biomcmc_xxh64 (const void *input, const size_t len, const uint32_t seed);
 
 #endif

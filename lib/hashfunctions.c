@@ -209,7 +209,13 @@ bipartition_hash (bipartition bip)
 /*** MurmurHash3 from https://github.com/PeterScott/murmur3/  written originally by Austin Appleby and CC0 ***/
 
 uint64_t
-biomcmc_murmurhash3_128bits ( const void *key, const int len, const uint32_t seed, void *out)
+biomcmc_murmurhash3_64bits (const void *key, const size_t len, const uint32_t seed)
+{
+  return biomcmc_murmurhash3_128bits (key, len, seed, NULL);
+}
+
+uint64_t
+biomcmc_murmurhash3_128bits (const void *key, const size_t len, const uint32_t seed, void *out)
 {  /* out[] is 128 bits (4 x uint_32, for instance), assumes 64bits machine  */
   const uint8_t * data = (const uint8_t*) key;
   const int nblocks = len / 16;
@@ -266,7 +272,7 @@ biomcmc_murmurhash3_128bits ( const void *key, const int len, const uint32_t see
 
 // https://github.com/wolkykim/qlibc/blob/master/src/utilities/qhash.c
 uint32_t 
-biomcmc_murmurhash3_32bits (const void *data, size_t nbytes, const uint32_t seed)
+biomcmc_murmurhash3_32bits (const void *data, const size_t nbytes, const uint32_t seed)
 { /* assumes 32 bits machine, and returns 32 bits */
   const uint32_t c1 = 0xcc9e2d51;
   const uint32_t c2 = 0x1b873593;
@@ -393,18 +399,18 @@ static uint64_t xxh64_merge_round (uint64_t acc, uint64_t val)
 }
 
 uint64_t 
-biomcmc_xxh64 (const void *input, const size_t len, const uint64_t seed)
+biomcmc_xxh64 (const void *input, const size_t len, const uint32_t seed)
 {
 	const uint8_t *p = (const uint8_t *) input;
 	const uint8_t *const b_end = p + len;
-	uint64_t h64;
+	uint64_t h64 = (uint64_t) seed;
 
   if (len > 31) {
     const uint8_t *const limit = b_end - 32;
-    uint64_t v1 = seed + ulx[12]+ ulx[13];
-    uint64_t v2 = seed + ulx[13];
-    uint64_t v3 = seed + 0;
-    uint64_t v4 = seed - ulx[12];
+    uint64_t v1 = h64 + ulx[12]+ ulx[13];
+    uint64_t v2 = h64 + ulx[13];
+    uint64_t v3 = h64 + 0;
+    uint64_t v4 = h64 - ulx[12];
 
     do {
       v1 = xxh64_round(v1, xxh_get_unaligned_le64(p)); p += 8;
@@ -419,7 +425,7 @@ biomcmc_xxh64 (const void *input, const size_t len, const uint64_t seed)
     h64 = xxh64_merge_round (h64, v3);
     h64 = xxh64_merge_round (h64, v4);
   } else {
-    h64  = seed + ulx[16];
+    h64  += ulx[16];
   }
 
   h64 += (uint64_t) len;

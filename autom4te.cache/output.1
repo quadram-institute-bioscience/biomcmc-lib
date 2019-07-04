@@ -13878,7 +13878,7 @@ if test x"$debugit" = x"yes"; then
     
 $as_echo "@%:@define BIOMCMC_DEBUG /**/" >>confdefs.h
 
-    AM_CFLAGS="${AM_CFLAGS} -g -W -Wall -Werror -Wno-uninitialized -O0"
+    AM_CFLAGS="${AM_CFLAGS} -g -pg -W -Wall -Werror -Wno-uninitialized -O0"
 else
     AM_CFLAGS="${AM_CFLAGS} -funroll-loops -fomit-frame-pointer -finline-functions -O4"
 fi
