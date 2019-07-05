@@ -130,7 +130,7 @@ biomcmc_hashint64_salted (uint64_t k, int salt)
     case 2: // Lemire's blog post about concatenating two 32 bits
       k = ((ulx[0] * low + ulx[1] * high + ulx[2]) >> 32) | ((ulx[3] * low + ulx[4] * high + ulx[5]) & 0xFFFFFFFF00000000UL);
       break;
-    case 1:
+    case 1: // two 32bits
       k = (k+0x479ab41d)+(k<<8); k = (k^0xe4aa10ce)^(k>>5);  k = (k+0x9942f0a6)-(k<<14); k = (k^0x5aedd67d)^(k>>3); k = (k+0x17bea992)+(k<<7);
       b = (b+0x7ed55d16)+(b<<12); b = (b^0xc761c23c)^(b>>19); b = (b+0x165667b1)+(b<<5); // k=half-avalanche, b=full-avalanche
       b = (b+0xd3a2646c)^(b<<9);  b = (b+0xfd7046c5)+(b<<3);  b = (b^0xb55a4f09)^(b>>16);

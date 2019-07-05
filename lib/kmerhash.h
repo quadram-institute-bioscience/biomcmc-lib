@@ -29,12 +29,12 @@ const char *kmer_class_string[] = {"faster (fewer hashes)", "genome analysis", "
 
 struct kmer_params_struct
 {
-  uint64_t mask1[6] = {0xffffUL, 0xffffffUL, 0xffffffffUL, 0xffffffffffUL, 0xffffffffffffUL, 0xffffffffffffffffUL}; // 4, 6, 8, 10, 12, 16 4bits
-  uint8_t  shift[6] = {      48,         40,           32,             24,               16,                    0};
-  uint64_t mask2[4] = {0xffffUL, 0xffffffffUL, 0xffffffffffffUL, 0xffffffffffffffffUL};
-  uint8_t  size[10] = {4, 6, 8, 10, 12, 16, 20, 24, 28, 32};
-  bool dense=false;
-  uint8_t n1 = 6, n2 = 4; // if n2 == 0 then do not use second element (128 bits)
+  uint64_t mask1[7], mask2[7]; 
+  uint8_t n1, n2, shift1[7], shift2[7], size[14], nbytes[14]; // size = how many bases are stored (if dense, x2); nbytes = how many bytes (uint8_t) fit 
+  uint32_t seed[14]; 
+  uint64_t (*hashfunction) (const void *, const size_t, const uint32_t);
+  bool dense; /*! \brief 4bits per base (false) or 2bits (true) */
+  enum_kmer_class kmer_class_mode;
   int ref_counter;
 };
 
@@ -42,16 +42,16 @@ struct kmerhash_struct
 {
   kmer_params p;
   uint64_t forward[2], reverse[2]; 
-  uint64_t *hash, *kmer;   /*! \brief hash = 4mer, 8mer, 16mer, and 32mer hashed ; kmer = 4mer, 8mer, 16mer original */
-  int n_f, n_hash, n_kmer; /*! \brief n_f = 2 (128bits), n_hash = 4, n_kmer = 3 */
+  uint64_t *hash, *kmer;  /*! \brief hash = 4mer, 8mer, etc. hashed ; kmer = original bitstring OR its complement, masked */
+  int n_hash = 10, n_f = 2; /*! \brief n_f = 2 (128bits) */
   char *dna;
   size_t i, n_dna;
-  bool dense; /*! \brief 4bits per base (false) or 2bits (true) */
   int ref_counter;
 };
 
-
-kmerhash new_kmerhash (bool dense);
+kmer_params new_kmer_params (enum_kmer_class mode);
+void del_kmer_params (kmer_params p);
+kmerhash new_kmerhash (enum_kmer_class mode);
 void link_kmerhash_to_dna_sequence (kmerhash kmer, char *dna, size_t dna_length);
 void del_kmerhash (kmerhash kmer);
 bool kmerhash_iterator (kmerhash kmer);
