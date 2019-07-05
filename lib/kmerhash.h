@@ -43,7 +43,7 @@ struct kmerhash_struct
   kmer_params p;
   uint64_t forward[2], reverse[2]; 
   uint64_t *hash, *kmer;  /*! \brief hash = 4mer, 8mer, etc. hashed ; kmer = original bitstring OR its complement, masked */
-  int n_hash = 10, n_f = 2; /*! \brief n_f = 2 (128bits) */
+  int n_hash, n_f; /*! \brief n_f = 2 (128bits) */
   char *dna;
   size_t i, n_dna;
   int ref_counter;

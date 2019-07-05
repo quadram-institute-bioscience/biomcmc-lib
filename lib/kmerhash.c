@@ -19,10 +19,20 @@
 /* similar to char2bit[] from alignment[], but has forward and reverse */
 static uint8_t dna_in_4_bits[256][2] = {{0xff}}; /* DNA base to bitpattern translation, with 1st element set to arbitrary value */
 static uint8_t dna_in_2_bits[256][2] = {{0xff}}; /* no ambigous chars/indels, represented by 4 (0100 in bits) */
+
 static uint64_t _tbl_mask[] = {0xffffUL, 0xffffffUL, 0xffffffffUL, 0xffffffffffUL, 0xffffffffffffUL, 0xffffffffffffUL, 0xffffffffffffffffUL}; 
 static uint8_t _tbl_shift[] = {      48,         40,           32,             24,               16,                8,                    0};
 static uint8_t _tbl_nbyte[] = {       2,          3,            4,              5,                6,                7,                    8};
 static uint32_t _tbl_seed[] = {0x9040a6, 0x10bea992,   0x50edd67d,     0xb05a4f09,       0xf07046c5,       0x9c9445ab,           0xb2500f29};
+
+/* i1[] and i2[] (i.e. elements above to be used on first and second 64bits, respect. */
+static uint8_t _idx_mode[][2][7] = {
+   {{0,2,4,6,0,0,0}, {2,6,0,0,0,0,0}}, 
+   {{0,1,2,4,6,0,0}, {0,2,6,0,0,0,0}},
+   {{0,1,2,3,4,5,6}, {0,0,0,0,0,0,0}},
+   {{0,1,2,3,4,5,6}, {0,1,2,6,0,0,0}}
+};   
+
 
 static void initialize_dna_to_bit_tables (void);
 
@@ -31,8 +41,8 @@ new_kmer_params (enum_kmer_class mode)
 {
   int j, *i1, *i2, bases_per_byte = 2; // bases_per_byte is 4 if dense
   kmer_params p = (kmer_params) biomcmc_malloc (sizeof (struct kmer_params_struct));
-  p.ref_counter = 1;
-  p.hashfunction = &biomcmc_xxh64;
+  p->ref_counter = 1;
+  p->hashfunction = &biomcmc_xxh64;
 
   if (dna_in_4_bits[0][0] == 0xff) initialize_dna_to_bit_tables (); // run once per program
 
