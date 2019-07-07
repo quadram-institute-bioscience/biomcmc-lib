@@ -16,6 +16,7 @@
  *
  *  The idea is for biomcmc-lib is to be general for several sofware, including treesignal and super_sptree.
  *  This library started branching from the biomcmc library from the guenomu software.
+ *  It includes the edlib library for sequence pairwise edit distance (http://martinsos.github.io/edlib)
  */
 
 #ifndef _biomcmc_h_
@@ -26,7 +27,7 @@
 #include "parsimony.h"
 #include "genetree.h"
 #include "topology_space.h"
-
+// extra libs not used yet: edlib hll
 #ifdef THESE_ARE_COMMENTS
 #include "lowlevel.h"            // called by char_vector, argtable, bipartition, prob_distribution 
 #include "char_vector.h"         // called by hashtable, random_number, nexus_common, empirical_frequency

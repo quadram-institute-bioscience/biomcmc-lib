@@ -19,7 +19,11 @@ common_src     = hashtable.c lowlevel.c random_number_gen.c random_number.c nexu
 
 
 noinst_LTLIBRARIES = libbiomcmc.la # convenience lib (not installed globally)
-#lib_LTLIBRARIES = libbiomcmc.la  # libtools 
+#lib_LTLIBRARIES = libbiomcmc.la  libedlib.la # libtools 
 #otherincludedir = $(includedir)/biomcmc
 #otherinclude_HEADERS = config.h $(common_headers) # if headers are here (=global) should not be on SOURCES (=local)
 libbiomcmc_la_SOURCES = $(common_src) $(common_headers) config.h # listed here s.t. any change triggers recompilation 
+#libbiomcmc_la_LIBADD   = libedlib.la
+#libedlib_la_SOURCES = edlib.cpp edlib.h
+#libedlib_la_CXXFLAGS =  -std=c++03 $(CXXFLAGS) #c++98 c++03 c++11
+

@@ -24,7 +24,8 @@
 typedef struct kmer_params_struct* kmer_params;
 typedef struct kmerhash_struct* kmerhash;
 typedef enum {kmer_class_fast, kmer_class_genome, kmer_class_short, kmer_class_full} enum_kmer_class;
-const char *kmer_class_string[] = {"faster (fewer hashes)", "genome analysis", "phylogenetics (short kmers)", "full"};
+
+extern const char *biomcmc_kmer_class_string[];
 // maybe string must be declared extern here and defined in .c 
 
 struct kmer_params_struct
@@ -41,7 +42,7 @@ struct kmer_params_struct
 struct kmerhash_struct 
 {
   kmer_params p;
-  uint64_t forward[2], reverse[2]; 
+  uint64_t *forward, *reverse; 
   uint64_t *hash, *kmer;  /*! \brief hash = 4mer, 8mer, etc. hashed ; kmer = original bitstring OR its complement, masked */
   int n_hash, n_f; /*! \brief n_f = 2 (128bits) */
   char *dna;

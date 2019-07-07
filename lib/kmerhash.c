@@ -16,6 +16,9 @@
 /** OBS: uint32_t d[2] --> d = [A B C D] [E F G H] (1 byte per letter) then 
  * uint8_t *x = d      --> x = [D] [C] [B] [A] [H] [G] [F] [E] (endianness)  **/
 
+/* global since defined extern in header (btw functions are declared 'extern' automatically in headers */
+const char *biomcmc_kmer_class_string[] = {"faster (fewer hashes)", "genome", "phylogenetics (short kmers)", "full"};
+
 /* similar to char2bit[] from alignment[], but has forward and reverse */
 static uint8_t dna_in_4_bits[256][2] = {{0xff}}; /* DNA base to bitpattern translation, with 1st element set to arbitrary value */
 static uint8_t dna_in_2_bits[256][2] = {{0xff}}; /* no ambigous chars/indels, represented by 4 (0100 in bits) */
@@ -32,14 +35,14 @@ static uint8_t _idx_mode[][2][7] = {
    {{0,1,2,3,4,5,6}, {0,0,0,0,0,0,0}},
    {{0,1,2,3,4,5,6}, {0,1,2,6,0,0,0}}
 };   
-
+static uint8_t _n_idx[][2] = {{4,2},{5,3}, {7,0}, {7,4}}; // how many elems from _idx_mode[] are used
 
 static void initialize_dna_to_bit_tables (void);
 
 kmer_params
 new_kmer_params (enum_kmer_class mode)
 {
-  int j, *i1, *i2, bases_per_byte = 2; // bases_per_byte is 4 if dense
+  uint8_t  i, j, row, bases_per_byte = 2; // bases_per_byte is 4 if dense
   kmer_params p = (kmer_params) biomcmc_malloc (sizeof (struct kmer_params_struct));
   p->ref_counter = 1;
   p->hashfunction = &biomcmc_xxh64;
@@ -48,48 +51,28 @@ new_kmer_params (enum_kmer_class mode)
 
   p->kmer_class_mode = mode;
   switch (mode) {
-    case kmer_class_fast:
-      int local_i1[] = {0,2,4,6}, local_i2[] = {2,6}; // indexes are based on _tbl_ above, static allocation
-      i1 = &local_i1; i2 = &local_i2;
-      p->n1 = 4; p->n2 = 2; 
-      p->dense = false; bases_per_byte = 2; 
-      break;
-
-    case kmer_class_genome:
-      int local_i1[] = {0,1,2,4,6}, local_i2[] = {0,2,6};
-      i1 = &local_i1; i2 = &local_i2;
-      p->n1 = 5; p->n2 = 3; 
-      p->dense = true; bases_per_byte = 4;
-      break;
-
-    case kmer_class_short:
-      int local_i1[] = {0,1,2,3,4,5,6}, local_i2[] = {0}; 
-      i1 = &local_i1; i2 = &local_i2;
-      p->n1 = 7; p->n2 = 0; // zero makes sure it's not called
-      p->dense = false; bases_per_byte = 2;
-      break;
-
-    default: 
-      int local_i1[] = {0,1,2,3,4,5,6}, local_i2[] = {0,1,2,6};
-      i1 = &local_i1; i2 = &local_i2;
-      p->n1 = 7; p->n2 = 4; 
-      p->dense = false; bases_per_byte = 2; 
-      break;
+    case kmer_class_fast:   row = 0; p->dense = false; bases_per_byte = 2; break;
+    case kmer_class_genome: row = 1; p->dense = true;  bases_per_byte = 4; break;
+    case kmer_class_short:  row = 2; p->dense = false; bases_per_byte = 2; break;
+    default:                row = 3; p->dense = false; bases_per_byte = 2; 
   };
 
+  p->n1 = (uint8_t) _n_idx[row][0]; p->n2 = (uint8_t) _n_idx[row][1]; 
   for (j=0; j < p->n1; j++) {
-    p->mask1[j]  =  _tbl_mask[ i1[j] ];
-    p->shift1[j] = _tbl_shift[ i1[j] ];
-    p->seed[j]   =  _tbl_seed[ i1[j] ];
-    p->nbytes[j] = _tbl_nbyte[ i1[j] ];
-    p->size[j]  =  _tbl_nbyte[ i1[j] ] * bases_per_byte;
+    i = _idx_mode[row][0][j];
+    p->mask1[j] = _tbl_mask[i];
+    p->shift1[j] = _tbl_shift[i];
+    p->seed[j] = _tbl_seed[i];
+    p->nbytes[j] = _tbl_nbyte[i];
+    p->size[j] = _tbl_nbyte[i] * bases_per_byte;
   }
   for (j=0; j < p->n2; j++) {
-    p->mask2[j]  =  _tbl_mask[ i2[j] ];
-    p->shift2[j] = _tbl_shift[ i2[j] ];
-    p->seed[j]  = (_tbl_seed[ i2[j] ] >> 2) + 0x420a1d; // very noise, so random
-    p->nbytes[j+p->n1] = _tbl_nbyte[ i2[j] ] + 8;
-    p->size[j+p->n1] =  (_tbl_nbyte[ i2[j] ] + 8) * bases_per_byte;
+    i = _idx_mode[row][1][j];
+    p->mask2[j] = _tbl_mask[i];
+    p->shift2[j] = _tbl_shift[i];
+    p->seed[j] = (_tbl_seed[i] >> 2) + 0x420a1d; // very noise, much random
+    p->nbytes[j+p->n1] = _tbl_nbyte[i] + 8;
+    p->size[j+p->n1] = (_tbl_nbyte[i] + 8) * bases_per_byte;
   }
   return p;
 }
@@ -120,9 +103,9 @@ new_kmerhash (enum_kmer_class mode)
   // else             for (i = 0; i < kmer->n_hash; i++) kmer->nsites_kmer[i] = _kmer_size[i]; 
 
   kmer->hash = (uint64_t*) biomcmc_malloc (kmer->n_hash * sizeof (uint64_t*));
-  kmer->kmer = (uint64_t*) biomcmc_malloc (kmer->n1 * sizeof (uint64_t*));
+  kmer->kmer = (uint64_t*) biomcmc_malloc (kmer->p->n1 * sizeof (uint64_t*));
   for (i=0; i < kmer->n_hash; i++) kmer->hash[i] = 0UL;
-  for (i=0; i < kmer->n1; i++) kmer->kmer[i] = 0UL;
+  for (i=0; i < kmer->p->n1; i++) kmer->kmer[i] = 0UL;
 
   kmer->dna = NULL;
   kmer->n_dna = 0; 
@@ -138,10 +121,9 @@ link_kmerhash_to_dna_sequence (kmerhash kmer, char *dna, size_t dna_length)
   kmer->dna = dna;
   kmer->n_dna = dna_length; 
   kmer->i = 0;
-  kmer->kmer = 0UL;
   for (i=0; i < kmer->n_f; i++) kmer->forward[i] = kmer->reverse[i] = 0UL;
   for (i=0; i < kmer->n_hash; i++) kmer->hash[i] = 0UL;
-  for (i=0; i < kmer->n1; i++) kmer->kmer[i] = 0UL;
+  for (i=0; i < kmer->p->n1; i++) kmer->kmer[i] = 0UL;
 }
 
 void
@@ -153,7 +135,7 @@ del_kmerhash (kmerhash kmer)
   if (kmer->reverse) free (kmer->reverse);
   if (kmer->hash) free (kmer->hash);
   if (kmer->kmer) free (kmer->kmer);
-  del_kmer_params (kmer->p)
+  del_kmer_params (kmer->p);
   free (kmer);
 }
 
@@ -162,7 +144,7 @@ kmerhash_iterator (kmerhash kmer)
 {
   unsigned int i, j, dnachar;
   uint64_t hf, hr;
-  uint8_t rev8b;
+  uint8_t *rev8b;
 
   if (kmer->i == kmer->n_dna) return false;
 
@@ -210,8 +192,8 @@ kmerhash_iterator (kmerhash kmer)
                ((kmer->forward[1] & kmer->p->mask2[i]) < (kmer->reverse[0] >> kmer->p->shift2[i])) )
         kmer->hash[j] = kmer->p->hashfunction (kmer->forward, kmer->p->nbytes[j], kmer->p->seed[j]);
       else { // 3. skip b from reverse[0]
-        rev8b = (uint8_t) kmer->reverse; // so that rev8b[3] is 3 bytes after start of reverse
-        kmer->hash[j] = kmer->p->hashfunction (rev8b + kmer->shift2[i], kmer->p->nbytes[j], kmer->p->seed[j]);
+        rev8b = (uint8_t*) kmer->reverse; // so that rev8b[3] is 3 bytes after start of reverse
+        kmer->hash[j] = kmer->p->hashfunction (rev8b + kmer->p->shift2[i], kmer->p->nbytes[j], kmer->p->seed[j]);
       }
     } // if dna[i] > min size for this operation
   }
