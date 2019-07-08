@@ -27,6 +27,8 @@
 #include "parsimony.h"
 #include "genetree.h"
 #include "topology_space.h"
+#include "distance_generator.h"
+
 // extra libs not used yet: edlib hll
 #ifdef THESE_ARE_COMMENTS
 #include "lowlevel.h"            // called by char_vector, argtable, bipartition, prob_distribution 
@@ -42,7 +44,7 @@
 #include "upgma.h"               // called by genetree 
 #include "reconciliation.h"      // opaque header/library, called by genetree
 #include "splitset_distances.h"  // opaque header/library, called by genetree
-#include "distance_matrix.h"     // called by alignment
+#include "distance_matrix.h"     // called by alignment, distance_generator
 #include "alignment.h"           // called by kmerhash
 #include "empirical_frequency.h" // called by nexus_common  
 #include "nexus_common.h"        // called by read_nexus_trees 
