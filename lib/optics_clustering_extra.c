@@ -220,88 +220,40 @@ int partition (double *oc->reach_distance,int low,int high)
 // https://github.com/Michael-Gkotsis/Local_Outlier_Factor
 int main(int argc, char *argv[])
 {
-
-  int dim = 0;          // Dimensions of Elements
-  int n = 0;            // n Elements
+/*
+  dim = 0; // Dimensions of Elements
+  n = 0;   // n Elements
+  kPoints; // Minimum points for a cluster to be created
+*/
   int i,j,d;            // i counter for n, j counter for Neighborhood Elements, d counter for dimensions
-  int kPoints;          // Minimum points for a cluster to be created
   int h,k;              // h counter for every other Element, k counter for files
-  char filename[40];    // The given file
-  clock_t start, end;   // Variables for counting execution time
-
   double reachDist = 0;
   double max;
-  int choise;// Choise holder for switch
   char c;
 
-  // Reading Dataset
-  FILE* Dataset;
-
-  printf("\n Give the DataSet file:");
-  scanf("%s", filename);
-
-  Dataset = fopen(filename, "r");
-  if (!Dataset)
-   {
-    printf("\n There is something wrong with the Dataset file! \n\n");
-    return -1;
-   }
-
-  dim = getColumns(Dataset); //Getting the dimensions of each Element of the Dataset
-  rewind(Dataset);
-
-
-  n = getRows(Dataset);       // Getting the Elements of the Dataset
-  rewind(Dataset);
-
-  printf("\n Elements:%d \n", n-1);
-  printf("\n Dimensions:%d \n", dim);
-  n--;
-  printf("Give the amount of K Points: ");   // kPoints
-  scanf("%d",&kPoints );
-
-  // All the necessary memory allocation
-  float *X;  // Array of Elements
   X = (float*)calloc(n*dim, sizeof(float));
-  float *kDistance;   // Array for holding k-Distances for the First Core point of a cluster
-  kDistance = (float*)calloc(n, sizeof(float));
-  float *distance;   // Array for holding Distances for each ELement with each other Element
+  kDistance = (float*)calloc(n, sizeof(float));  // Array for holding k-Distances for the First Core point of a cluster
   distance = (float*)calloc(n*n, sizeof(float));
-  unsigned int *Neighborhood; //Array for holding which element belong to which Neighborhood
-  Neighborhood =(int*) calloc(n*n, sizeof(int));
-  float *lrd; //Array for holding  Local Reachability Density for each element
-  lrd =(float *)calloc(n, sizeof(float));
-  unsigned int *NeighborhoodSize; //Array for holding the size of each Neighborhood
-  NeighborhoodSize = (int*)calloc(n,sizeof(int));
-  float *reachDistSum; //Array for holding the sum of reachability Distances for each element
-  reachDistSum = (float *)calloc(n,sizeof(float));
-  float *LOF;//Array for holding LOF value for each Element
-  LOF = (float *)calloc(n,sizeof(float));
-  float *NeighborhoodLrdSum; //Array for holding the sum of each Neighborhood lrd
-  NeighborhoodLrdSum =(float *) calloc(n,sizeof(float));
-  float *OrderedList;
+  Neighborhood =(int*) calloc(n*n, sizeof(int)); //Array for holding which element belong to which Neighborhood
+  lrd =(float *)calloc(n, sizeof(float)); //Array for holding  Local Reachability Density for each element
+  NeighborhoodSize = (int*)calloc(n,sizeof(int)); //Array for holding the size of each Neighborhood
+  reachDistSum = (float *)calloc(n,sizeof(float)); //Array for holding the sum of reachability Distances for each element
+  LOF = (float *)calloc(n,sizeof(float));//Array for holding LOF value for each Element
+  NeighborhoodLrdSum =(float *) calloc(n,sizeof(float)); //Array for holding the sum of each Neighborhood lrd
   OrderedList =(float*) calloc(n*dim,sizeof(float));
-  float *tmp2;
   tmp2 =(float*) calloc(n*dim,sizeof(float*));
-  float *tempDistance;   // Array for holding Distances for each ELement with each other Element
   tempDistance =(float*) calloc(n, sizeof(float));
 
-  for(i = n; i--;)
-   {
+  for(i = n; i--;) {
     kDistance[i] = 0;
     NeighborhoodLrdSum[i] = 0;
     reachDistSum[i] = 0;
     NeighborhoodSize[i] = 0;
     lrd[i] = 0;
    }
-  // Passing elements to Array X[n][dim]
-  X = getData(Dataset,n,dim,X);
 
   for(i = n; i--;) for(d = dim; d--;) OrderedList[i*dim + d] = X[i*dim + d];
-  fclose(Dataset);
-  start = clock();
-  /* ---------------------------------LOF-------------------------------------- */
-  //STEP 1  Finding the k-Distance of each element in the dataset
+  // STEP 1  Finding the k-Distance of each element in the dataset
   for(i = n; i--;) {
     distance[i*n + i] =  9999;
     tempDistance[i] = 99999;
