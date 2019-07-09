@@ -42,6 +42,7 @@ struct alignment_struct
   int *site_pattern;       /*! \brief pattern, in alignment_struct::character, to which original site belongs. */
   int *pattern_freq;       /*! \brief if sequences are aligned, this is the frequency of each pattern. */
   char *filename;          /*! \brief name of the original file, with extension removed */
+  int ref_counter;
 };
 
 /*! \brief Reads DNA alignment (guess format between FASTA and NEXUS) from file and store info in alignment_struct. */

@@ -91,6 +91,7 @@ read_fasta_alignment_from_file (char *seqfilename)
   align->site_pattern = NULL; 
   align->pattern_freq = NULL;
   align->npat = 0; /* number of site patterns only make sense if aligned (checked by alignment_create_sitepattern()) */
+  align->ref_counter = 1;
 
   /* start reading file */
   seqfile = biomcmc_fopen (seqfilename, "r");
@@ -286,6 +287,7 @@ new_alignment (int ntax, int nchar)
   align->taxshort      = NULL; /* allocated (or points to taxlabel) by alignment_shorten_taxa_names() */ 
   align->character     = new_char_vector_fixed_length (ntax, nchar); 
   align->taxlabel_hash = new_hashtable (ntax);
+  align->ref_counter = 1;
 
   return align;
 }
@@ -294,6 +296,7 @@ void
 del_alignment (alignment align)
 {
   if (!align) return;
+  if (--align->ref_counter) return;
   del_char_vector (align->character); 
   del_char_vector (align->taxlabel); 
   del_char_vector (align->taxshort); 

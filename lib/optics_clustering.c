@@ -20,12 +20,12 @@ new_optics_cluster (int n_samples)
   optics_cluster oc = (optics_cluster) biomcmc_malloc (sizeof (struct optics_cluster_struct));
 
   oc->n_samples = n_samples;
-  oc->cluster = (int *) biomcmc_malloc(n_samples * sizeof (int));
-  oc->order   = (int *) biomcmc_malloc (n_samples * sizeof (int));
-  oc->core   = (bool *) biomcmc_malloc (n_samples * sizeof (bool)); // 0 for order, 1 for core
-  oc->core_distance  = (double *) biomcmc_malloc(n_samples * sizeof (double)); // distance for each core sample
-  oc->reach_distance = (double *) biomcmc_malloc(n_samples * sizeof (double)); // reacheability distance for each sample
-  // optics_cluster_reset (oc); // not needed since called by run()
+  oc->n_clusters = 0;
+  oc->cluster = (int*) biomcmc_malloc (2 * n_samples * sizeof (int)); // malloc one big chunk
+  oc->order   = oc->cluster + n_samples; 
+  oc->core   = (bool*) biomcmc_malloc (n_samples * sizeof (bool)); // 0 for order, 1 for core
+  oc->reach_distance = (double*) biomcmc_malloc (2 * n_samples * sizeof (double)); // reacheability distance for each sample
+  oc->core_distance  = oc->reach_distance + n_samples;  // distance for each core sample
   return oc;
 }
 
@@ -33,11 +33,9 @@ void
 del_optics_cluster (optics_cluster oc)
 { 
   if (!oc) return;
-  if (oc->cluster) free (oc->cluster);
-  if (oc->order)   free (oc->order);
-  if (oc->core)    free (oc->core);
-  if (oc->core_distance)  free (oc->core_distance);
   if (oc->reach_distance) free (oc->reach_distance);
+  if (oc->core)    free (oc->core);
+  if (oc->cluster) free (oc->cluster);
   free (oc);
 }
 
@@ -48,10 +46,11 @@ optics_cluster_reset (optics_cluster oc)
   for(i = 0; i < oc->n_samples; i++) {
     oc->cluster[i] = -1;
     oc->order[i] = 0;
-    oc->core[i] = 0;
+    oc->core[i] = false;
     oc->core_distance[i] = DBL_MAX;
     oc->reach_distance[i] = DBL_MAX;
   }
+  oc->n_clusters = 0;
 }
 
 void
@@ -59,20 +58,22 @@ optics_cluster_run (optics_cluster oc, distance_generator dg, int minPoints, dou
 { /* minPoints: Minimum points for a cluster to be created
      clustDist: clustering distance: Minimum Distance for a point to be assigned to clusters
      minDist: generating distance: Minimum Distance for a point to be assigned to clusters  */
-  int i, j, h = 0, k, location, size, e = 0, cluster = 0;
-  double min;
+  int i, j, h = 0, k, location, size, e = 0, cluster = 0, *num_pts = NULL;
+  bool *visited = NULL, *seed = NULL, *n_belong = NULL, *belong = NULL;
+  double min, *distance = NULL, *tmp_reach_d = NULL, *ord_reach_d = NULL;
 
   if (oc->n_samples != dg->n_samples) biomcmc_error ("sample sizes differ between OPTICS structure and distance_generator()");
   if (minPoints < 2) minPoints = 2;
+  optics_cluster_reset (oc);
 
-  bool *visited  = (bool*) biomcmc_malloc(oc->n_samples * sizeof (bool));
-  bool *seed     = (bool*) biomcmc_malloc(oc->n_samples * sizeof (bool));
-  bool *n_belong = (bool*) biomcmc_malloc(oc->n_samples * sizeof (bool));
-  bool *belong   = (bool*) biomcmc_malloc(oc->n_samples * sizeof (bool));
-  int  *num_pts  = (int *) biomcmc_malloc(oc->n_samples * sizeof (int)); 
-  double *distance = (double *) biomcmc_malloc(oc->n_samples * sizeof (double));
-  double *tmp_reach_d = (double *) biomcmc_malloc(oc->n_samples * sizeof (double));
-  double *ord_reach_d = (double *) biomcmc_malloc(oc->n_samples * sizeof (double));
+  visited = (bool*) biomcmc_malloc (4 * oc->n_samples * sizeof (bool));  // alloc one big chunk
+  seed     = visited +     oc->n_samples; 
+  n_belong = visited + 2 * oc->n_samples;
+  belong   = visited + 3 * oc->n_samples;
+  num_pts  = (int*)  biomcmc_malloc (oc->n_samples * sizeof (int)); 
+  distance = (double*) biomcmc_malloc (3 * oc->n_samples * sizeof (double));
+  tmp_reach_d = distance +     oc->n_samples;
+  ord_reach_d = distance + 2 * oc->n_samples;
 
   for(i = 0; i < oc->n_samples; i++) {
     num_pts[i] = 0; seed[i] = visited[i] = false; 
@@ -103,11 +104,12 @@ optics_cluster_run (optics_cluster oc, distance_generator dg, int minPoints, dou
         }
         qsort (tmp_reach_d, e, sizeof (double), compare_double_increasing);
         oc->core_distance[h] = tmp_reach_d[minPoints - 1];
+        oc->core[h]++; // Leo hint
         h++;
         do {
           size = 0;
           min = DBL_MAX;
-          for(j = oc->n_samples - 1; j >=0; j--)  if(seed[j]) if (oc->reach_distance[j] < min) {
+          for (j = oc->n_samples - 1; j >=0; j--) if(seed[j]) if (oc->reach_distance[j] < min) {
             min = oc->reach_distance[j];
             location = j;
           }
@@ -116,7 +118,7 @@ optics_cluster_run (optics_cluster oc, distance_generator dg, int minPoints, dou
           ord_reach_d[h] = oc->reach_distance[location];
           num_pts[location] = 0;
           h++;
-          for(k = oc->n_samples-1; k >= 0;k--) {
+          for(k = oc->n_samples - 1; k >= 0; k--) {
             n_belong[k] = false; 
             distance[k] = 0.;
             if(k != location) {
@@ -130,7 +132,7 @@ optics_cluster_run (optics_cluster oc, distance_generator dg, int minPoints, dou
           num_pts[location]++;
           if(num_pts[location] >= minPoints) {
             e = 0;
-            for(k = oc->n_samples; k >=0; k--) if(n_belong[k]) {
+            for(k = oc->n_samples - 1; k >=0; k--) if(n_belong[k]) {
               if(seed[k]) {
                 double temp = oc->reach_distance[k];
                 oc->reach_distance[k] = distance_generator_get (dg, k, location); 
@@ -147,12 +149,12 @@ optics_cluster_run (optics_cluster oc, distance_generator dg, int minPoints, dou
             }
             qsort (tmp_reach_d, e, sizeof (double), compare_double_increasing);
             oc->core_distance[h] = tmp_reach_d[minPoints - 1];
+            oc->core[h]++; // Leo hint
           }
-          for(j = oc->n_samples-1; j >= 0; j--) if (seed[j]) size++;
+          for(j = oc->n_samples - 1; j >= 0; j--) if (seed[j]) size++;
         } while (size != 0);
       }
       else {
-        h++;
         oc->core_distance[h] = DBL_MAX;
       }
     }
@@ -166,13 +168,10 @@ optics_cluster_run (optics_cluster oc, distance_generator dg, int minPoints, dou
     else oc->cluster[j] = cluster;
   }
 
-  if (visited) free(visited);
-  if (seed) free(seed);
-  if (n_belong) free(n_belong);
-  if (belong) free(belong);
-  if (num_pts) free(num_pts);
-  if (distance) free(distance);
-  if (tmp_reach_d) free(tmp_reach_d);
-  if (ord_reach_d) free(ord_reach_d);
+  oc->n_clusters = cluster + 1; // cluster starts at zero, when we have _1_ cluster already
+
+  if (distance) free (distance); // the others are just pointers to blocks of these vectors
+  if (num_pts) free (num_pts);
+  if (visited) free (visited);
   return;
 }

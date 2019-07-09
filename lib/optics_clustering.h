@@ -19,7 +19,7 @@ typedef struct optics_cluster_struct* optics_cluster;
 
 struct optics_cluster_struct 
 {
-  int n_samples; 
+  int n_samples, n_clusters; 
   int *cluster, *order;
   bool *core;
   double *core_distance, *reach_distance;

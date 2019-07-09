@@ -55,7 +55,7 @@ double
 distance_generator_get_at_distance (distance_generator d, int i, int j, int which_distance)
 {
   if (i == j) return 0.;
-  if (which_distance >= d->n_distances) return -1.;
+  which_distance %= d->n_distances; // wrap around in case user gave too large which_distance
   if (j < i) { int tmp = i; i = j; j = tmp; } // upper diagonal: i<j in 2D[i][j] => 1D[j(j-1)/2 + i]
   int idx =  ((j * (j-1)) / 2 + i);
   if (! d->cached[idx]) {
