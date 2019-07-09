@@ -54,10 +54,10 @@ optics_cluster_reset (optics_cluster oc)
 }
 
 void
-optics_cluster_run (optics_cluster oc, distance_generator dg, int minPoints, double minDist, double clustDist)
+optics_cluster_run (optics_cluster oc, distance_generator dg, int minPoints, double epsilon, double clustDist)
 { /* minPoints: Minimum points for a cluster to be created
-     clustDist: clustering distance: Minimum Distance for a point to be assigned to clusters
-     minDist: generating distance: Minimum Distance for a point to be assigned to clusters  */
+     clustDist: for cluster assignment; ideal is to be decided from the reach_distance[]
+     epsilon: maximum radius to consider as neighbourhood (must be large, but */
   int i, j, h = 0, k, location, size, e = 0, cluster = 0, *num_pts = NULL;
   bool *visited = NULL, *seed = NULL, *n_belong = NULL, *belong = NULL;
   double min, *distance = NULL, *tmp_reach_d = NULL, *ord_reach_d = NULL;
@@ -65,6 +65,7 @@ optics_cluster_run (optics_cluster oc, distance_generator dg, int minPoints, dou
   if (oc->n_samples != dg->n_samples) biomcmc_error ("sample sizes differ between OPTICS structure and distance_generator()");
   if (minPoints < 2) minPoints = 2;
   optics_cluster_reset (oc);
+  if (clustDist > (epsilon - 1.e-5)) clustDist = epsilon - 1.e-5; // dists higher than epsilon are not considered
 
   visited = (bool*) biomcmc_malloc (4 * oc->n_samples * sizeof (bool));  // alloc one big chunk
   seed     = visited +     oc->n_samples; 
@@ -90,7 +91,7 @@ optics_cluster_run (optics_cluster oc, distance_generator dg, int minPoints, dou
         distance[j] = 0.; 
         if(j != i) {
           distance[j] = distance_generator_get (dg, i, j); 
-          if(distance[j] <= minDist) { belong[j] = true; num_pts[i]++;  }
+          if(distance[j] <= epsilon) { belong[j] = true; num_pts[i]++;  }
         }
       }
       num_pts[i]++;
@@ -98,13 +99,12 @@ optics_cluster_run (optics_cluster oc, distance_generator dg, int minPoints, dou
         e = 0;
         for(j = oc->n_samples - 1; j >= 0; j--) if (belong[j]) {
           oc->reach_distance[j] = distance_generator_get (dg, i, j); 
-          tmp_reach_d[e] = oc->reach_distance[j];
-          e++;
+          tmp_reach_d[e++] = oc->reach_distance[j];
           if(!visited[j]) seed[j] = true;
         }
         qsort (tmp_reach_d, e, sizeof (double), compare_double_increasing);
         oc->core_distance[h] = tmp_reach_d[minPoints - 1];
-        oc->core[h]++; // Leo hint
+        if (oc->core_distance[h] < epsilon) oc->core[i] = true; // Leo 
         h++;
         do {
           size = 0;
@@ -123,7 +123,7 @@ optics_cluster_run (optics_cluster oc, distance_generator dg, int minPoints, dou
             distance[k] = 0.;
             if(k != location) {
               distance[k] = distance_generator_get (dg, k, location); 
-              if(distance[k] <= minDist) { 
+              if(distance[k] <= epsilon) { 
                 n_belong[k] = true;
                 num_pts[location]++;
               }
@@ -137,19 +137,17 @@ optics_cluster_run (optics_cluster oc, distance_generator dg, int minPoints, dou
                 double temp = oc->reach_distance[k];
                 oc->reach_distance[k] = distance_generator_get (dg, k, location); 
                 if(temp < oc->reach_distance[k]) oc->reach_distance[k] = temp;
-                tmp_reach_d[e] = oc->reach_distance[k];
-                e++;
+                tmp_reach_d[e++] = oc->reach_distance[k];
               } 
               else {
                 oc->reach_distance[k] = distance_generator_get (dg, k, location); 
-                tmp_reach_d[e] = oc->reach_distance[k];
-                e++;
+                tmp_reach_d[e++] = oc->reach_distance[k];
                 if(!visited[k]) seed[k] = true;
               }
             }
             qsort (tmp_reach_d, e, sizeof (double), compare_double_increasing);
             oc->core_distance[h] = tmp_reach_d[minPoints - 1];
-            oc->core[h]++; // Leo hint
+            if (oc->core_distance[h] < epsilon) oc->core[location] = true; // Leo 
           }
           for(j = oc->n_samples - 1; j >= 0; j--) if (seed[j]) size++;
         } while (size != 0);
