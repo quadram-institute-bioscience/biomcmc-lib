@@ -14,7 +14,7 @@
 #define _biomcmc_distance_generator_h_
 
 #include "distance_matrix.h" // idea is to replace/extend distance_matrix 
-
+// TODO: how to extend to subsamples s.t. calling function doenst know but whole matrix is updated
 typedef struct distance_generator_struct* distance_generator;
 
 struct distance_generator_struct

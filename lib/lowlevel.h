@@ -34,6 +34,9 @@
 #include <sys/times.h>  /* speed profiling in clock ticks (e.g. times() ) [POSIX.1 (or GNU extension?)] */ 
 #include <sys/types.h>  /* pid_t for process ID, used together with unistd.h (may not be necessary) */
 #include <unistd.h>     /* getpid() function, used together with sys/types.h (may not be necessary) */
+//#include <sys/resource.h> // suggested by goptics (gpu), but don't seem needed
+//#include <sys/stat.h>     // suggested by goptics (gpu), but don't seem needed
+
 
 #include <libgen.h> /* standard XPG basename() - the one provided by string.h is a GNU extension, fails on macOSX*/
 
