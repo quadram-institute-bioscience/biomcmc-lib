@@ -27,12 +27,13 @@
 #include "parsimony.h"
 #include "genetree.h"
 #include "topology_space.h"
-#include "optics_clustering.h"
+#include "clustering_goptics.h"
+#include "quickselect_quantile.h"
 
 
 // extra libs not used yet: edlib hll
 #ifdef THESE_ARE_COMMENTS
-#include "lowlevel.h"            // called by char_vector, argtable, bipartition, prob_distribution 
+#include "lowlevel.h"            // called by char_vector, argtable, bipartition, prob_distribution, quickselect_quantile 
 #include "char_vector.h"         // called by hashtable, random_number, nexus_common, empirical_frequency
 #include "hashfunction.h"        // called by hashtable 
 #include "hashtable.h"           // called by random_number_gen 
@@ -46,7 +47,7 @@
 #include "reconciliation.h"      // opaque header/library, called by genetree
 #include "splitset_distances.h"  // opaque header/library, called by genetree
 #include "distance_matrix.h"     // called by alignment, distance_generator
-#include "distance_generator.h"  // called by optics_clustering
+#include "distance_generator.h"  // called by clustering_goptics 
 #include "alignment.h"           // called by kmerhash
 #include "empirical_frequency.h" // called by nexus_common  
 #include "nexus_common.h"        // called by read_nexus_trees 
