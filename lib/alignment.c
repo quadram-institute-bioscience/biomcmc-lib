@@ -406,10 +406,6 @@ alignment_create_sitepattern (alignment align)
   int s1, s2, seq, *index, nchar = align->nchar;
   bool equal;
 
-  /* vector char_vector::nchars is redundant for aligned sequences (all have same value) */
-  if (align->character->nchars) free (align->character->nchars);
-  align->character->nchars = NULL;
-
   /* only aligned sequences have vector site_pattern (if one needs original pattern at position */
   align->site_pattern = (int *) biomcmc_malloc (nchar * sizeof (int));
   index = (int *) biomcmc_malloc (nchar * sizeof (int)); 
