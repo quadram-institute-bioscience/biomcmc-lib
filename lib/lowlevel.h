@@ -51,6 +51,12 @@
 #define true  1U /*!< Boolean TRUE  */
 #define false 0U /*!< Boolean FALSE */
 
+#if defined(__GNUC__) && __GNUC__ >= 7
+ #define attribute_FALLTHROUGH __attribute__ ((fallthrough));
+#else
+ #define attribute_FALLTHROUGH ((void)0);
+#endif /* __GNUC__ >= 7 */
+
 #define MIN(x,y) (((x)<(y)) ? (x) : (y))
 #define MAX(x,y) (((x)>(y)) ? (x) : (y))
 #define MOD(a)   (((a)>0)   ? (a) :(-a))

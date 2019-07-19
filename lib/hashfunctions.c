@@ -236,22 +236,21 @@ biomcmc_murmurhash3_128bits (const void *key, const size_t len, const uint32_t s
   uint64_t k1 = 0, k2 = 0;
 
   switch(len & 15) {
-    case 15: k2 ^= (uint64_t)(tail[14]) << 48;  __attribute__ ((fallthrough));
-    case 14: k2 ^= (uint64_t)(tail[13]) << 40;  __attribute__ ((fallthrough));
-    case 13: k2 ^= (uint64_t)(tail[12]) << 32;  __attribute__ ((fallthrough));
-    case 12: k2 ^= (uint64_t)(tail[11]) << 24;  __attribute__ ((fallthrough));
-    case 11: k2 ^= (uint64_t)(tail[10]) << 16;  __attribute__ ((fallthrough));
-    case 10: k2 ^= (uint64_t)(tail[ 9]) << 8;   __attribute__ ((fallthrough));
+    case 15: k2 ^= (uint64_t)(tail[14]) << 48; attribute_FALLTHROUGH // macro defined in lowlevel.h since clang doesn't understand this __atribute
+    case 14: k2 ^= (uint64_t)(tail[13]) << 40; attribute_FALLTHROUGH
+    case 13: k2 ^= (uint64_t)(tail[12]) << 32; attribute_FALLTHROUGH
+    case 12: k2 ^= (uint64_t)(tail[11]) << 24; attribute_FALLTHROUGH
+    case 11: k2 ^= (uint64_t)(tail[10]) << 16; attribute_FALLTHROUGH
+    case 10: k2 ^= (uint64_t)(tail[ 9]) << 8;  attribute_FALLTHROUGH
     case  9: k2 ^= (uint64_t)(tail[ 8]) << 0;  
-             k2 *= ulx[9]; k2 = (k2 << 33) | (k2 >> 31); k2 *= ulx[8]; h2 ^= k2;
-             __attribute__ ((fallthrough));
-    case  8: k1 ^= (uint64_t)(tail[ 7]) << 56;  __attribute__ ((fallthrough));
-    case  7: k1 ^= (uint64_t)(tail[ 6]) << 48;  __attribute__ ((fallthrough));
-    case  6: k1 ^= (uint64_t)(tail[ 5]) << 40;  __attribute__ ((fallthrough));
-    case  5: k1 ^= (uint64_t)(tail[ 4]) << 32;  __attribute__ ((fallthrough));
-    case  4: k1 ^= (uint64_t)(tail[ 3]) << 24;  __attribute__ ((fallthrough));
-    case  3: k1 ^= (uint64_t)(tail[ 2]) << 16;  __attribute__ ((fallthrough));
-    case  2: k1 ^= (uint64_t)(tail[ 1]) << 8;   __attribute__ ((fallthrough));
+             k2 *= ulx[9]; k2 = (k2 << 33) | (k2 >> 31); k2 *= ulx[8]; h2 ^= k2; attribute_FALLTHROUGH
+    case  8: k1 ^= (uint64_t)(tail[ 7]) << 56; attribute_FALLTHROUGH
+    case  7: k1 ^= (uint64_t)(tail[ 6]) << 48; attribute_FALLTHROUGH
+    case  6: k1 ^= (uint64_t)(tail[ 5]) << 40; attribute_FALLTHROUGH
+    case  5: k1 ^= (uint64_t)(tail[ 4]) << 32; attribute_FALLTHROUGH
+    case  4: k1 ^= (uint64_t)(tail[ 3]) << 24; attribute_FALLTHROUGH
+    case  3: k1 ^= (uint64_t)(tail[ 2]) << 16; attribute_FALLTHROUGH
+    case  2: k1 ^= (uint64_t)(tail[ 1]) << 8;  attribute_FALLTHROUGH 
     case  1: k1 ^= (uint64_t)(tail[ 0]) << 0; // equiv to "case 1"  
              k1 *= ulx[8]; k1 = (k1 << 31) | (k1 >> 33); k1 *= ulx[9]; h1 ^= k1; break;
   };
@@ -289,8 +288,8 @@ biomcmc_murmurhash3_32bits (const void *data, const size_t nbytes, const uint32_
 
   k = 0;
   switch (nbytes & 3) {
-    case 3: k ^= tail[2] << 16; __attribute__ ((fallthrough));
-    case 2: k ^= tail[1] << 8;  __attribute__ ((fallthrough));
+    case 3: k ^= tail[2] << 16; attribute_FALLTHROUGH
+    case 2: k ^= tail[1] << 8;  attribute_FALLTHROUGH
     case 1: k ^= tail[0]; k *= c1; k = (k << 15) | (k >> (32 - 15)); k *= c2; h ^= k; break;
   };
   h ^= nbytes; h ^= h >> 16; h *= 0x85ebca6b; h ^= h >> 13; h *= 0xc2b2ae35; h ^= h >> 16;
