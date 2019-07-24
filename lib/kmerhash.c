@@ -28,7 +28,7 @@ static uint8_t _tbl_shift[] = {      48,         40,           32,             2
 static uint8_t _tbl_nbyte[] = {       2,          3,            4,              5,                6,                7,                    8};
 static uint32_t _tbl_seed[] = {0x9040a6, 0x10bea992,   0x50edd67d,     0xb05a4f09,       0xf07046c5,       0x9c9445ab,           0xb2500f29};
 
-/* i1[] and i2[] (i.e. elements above to be used on first and second 64bits, respect. */
+/* i1[] and i2[] (i.e. elements above to be used on first and second 64bits, respectively */
 static uint8_t _idx_mode[][2][7] = {
    {{0,2,4,6,0,0,0}, {2,6,0,0,0,0,0}}, 
    {{0,1,2,4,6,0,0}, {0,2,6,0,0,0,0}},
