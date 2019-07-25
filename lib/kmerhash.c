@@ -17,7 +17,7 @@
  * uint8_t *x = d      --> x = [D] [C] [B] [A] [H] [G] [F] [E] (endianness)  **/
 
 /* global since defined extern in header (btw functions are declared 'extern' automatically in headers */
-const char *biomcmc_kmer_class_string[] = {"faster (fewer hashes)", "genome", "phylogenetics (short kmers)", "full"};
+const char *biomcmc_kmer_class_string[] = {"fastest (2 hashes)", "faster (fewer hashes)", "genome", "phylogenetics (short kmers)", "full"};
 
 /* similar to char2bit[] from alignment[], but has forward and reverse */
 static uint8_t dna_in_4_bits[256][2] = {{0xff}}; /* DNA base to bitpattern translation, with 1st element set to arbitrary value */
@@ -30,12 +30,13 @@ static uint32_t _tbl_seed[] = {0x9040a6, 0x10bea992,   0x50edd67d,     0xb05a4f0
 
 /* i1[] and i2[] (i.e. elements above to be used on first and second 64bits, respectively */
 static uint8_t _idx_mode[][2][7] = {
+   {{2,6,0,0,0,0,0}, {0,0,0,0,0,0,0}}, 
    {{0,2,4,6,0,0,0}, {2,6,0,0,0,0,0}}, 
    {{0,1,2,4,6,0,0}, {0,2,6,0,0,0,0}},
    {{0,1,2,3,4,5,6}, {0,0,0,0,0,0,0}},
    {{0,1,2,3,4,5,6}, {0,1,2,6,0,0,0}}
 };   
-static uint8_t _n_idx[][2] = {{4,2},{5,3}, {7,0}, {7,4}}; // how many elems from _idx_mode[] are used
+static uint8_t _n_idx[][2] = {{2,0}, {4,2},{5,3}, {7,0}, {7,4}}; // how many elems from _idx_mode[] are used
 
 static void initialize_dna_to_bit_tables (void);
 
@@ -51,10 +52,11 @@ new_kmer_params (enum_kmer_class mode)
 
   p->kmer_class_mode = mode;
   switch (mode) {
-    case kmer_class_fast:   row = 0; p->dense = false; bases_per_byte = 2; break;
-    case kmer_class_genome: row = 1; p->dense = true;  bases_per_byte = 4; break;
-    case kmer_class_short:  row = 2; p->dense = false; bases_per_byte = 2; break;
-    default:                row = 3; p->dense = false; bases_per_byte = 2; 
+    case kmer_class_fastst: row = 0; p->dense = true;  bases_per_byte = 4; break;
+    case kmer_class_fast:   row = 1; p->dense = false; bases_per_byte = 2; break;
+    case kmer_class_genome: row = 2; p->dense = true;  bases_per_byte = 4; break;
+    case kmer_class_short:  row = 3; p->dense = false; bases_per_byte = 2; break;
+    default:                row = 4; p->dense = false; bases_per_byte = 2; 
   };
 
   p->n1 = (uint8_t) _n_idx[row][0]; p->n2 = (uint8_t) _n_idx[row][1]; 

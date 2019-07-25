@@ -23,7 +23,7 @@
 
 typedef struct kmer_params_struct* kmer_params;
 typedef struct kmerhash_struct* kmerhash;
-typedef enum {kmer_class_fast, kmer_class_genome, kmer_class_short, kmer_class_full} enum_kmer_class;
+typedef enum {kmer_class_fastst, kmer_class_fast, kmer_class_genome, kmer_class_short, kmer_class_full} enum_kmer_class;
 
 extern const char *biomcmc_kmer_class_string[];
 // maybe string must be declared extern here and defined in .c 
