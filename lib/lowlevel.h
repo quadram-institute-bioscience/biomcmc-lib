@@ -129,6 +129,9 @@ int compare_double_decreasing (const void *a, const void *b);
    number of characters read (not including the null terminator), or -1 on error or EOF. \endverbatim */
 int biomcmc_getline (char **lineptr, size_t *n, FILE *stream);
 
+/*! \brief edit distance between two sequences (slow), with option to allow one of sequences to terminate soon (o.w. global cost from end to end) */
+uint32_t biomcmc_levenshtein_distance (const char *s1, uint32_t n1, const char *s2, uint32_t n2, uint32_t cost_sub, uint32_t cost_indel, bool skip_borders);
+
 /* Hungarian method for bipartite matching (assignment) */
 hungarian new_hungarian (int size, bool is_double);
 void hungarian_reset (hungarian p);

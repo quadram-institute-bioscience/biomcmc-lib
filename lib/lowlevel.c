@@ -164,6 +164,39 @@ biomcmc_getline (char **lineptr, size_t *n, FILE *stream)
   return (read_pos - (*lineptr));
 }
 
+uint32_t
+biomcmc_levenshtein_distance (const char *s1, uint32_t n1, const char *s2, uint32_t n2, uint32_t cost_sub, uint32_t cost_indel, bool skip_borders)
+{
+  uint32_t i, j, indel, cost_change, **dist;
+  dist = (uint32_t**) biomcmc_malloc ((n1+1) * sizeof (uint32_t*));// notice one extra row and column
+  for (i = 0; i <= n1; i++) dist[i] = (uint32_t*) biomcmc_malloc ((n2+1) * sizeof (uint32_t));
+
+  for (i = 0; i <= n1; i++) dist[i][0] = i * cost_indel;
+  for (j = 0; j <= n2; j++) dist[0][j] = j * cost_indel;
+
+  for (i = 0; i < n1; i++) for (j = 0; j < n2; j++) {
+    if (s1[i] == s2[j]) cost_change = 0;
+    else cost_change = cost_sub;
+
+    dist[i+1][j+1] = dist[i][j] + cost_change;
+    indel = dist[i+1][j] + cost_indel; 
+    if (indel < dist[i+1][j+1]) dist[i+1][j+1] = indel;
+    indel = dist[i][j+1] + cost_indel;
+    if (indel < dist[i+1][j+1]) dist[i+1][j+1] = indel;
+  }
+  indel = dist[n1][n2];  // minimum distance
+
+  if (skip_borders) {
+    for (i = 0; i <= n1; i++) if (dist[i][n2] < indel) indel = dist[i][n2];
+    for (j = 0; j <= n2; j++) if (dist[n1][j] < indel) indel = dist[n1][j];
+  }
+  if (dist) {
+    for (i = n1;; i--) if (dist[i]) free (dist[i]); // unsigned int is always true
+    free (dist);
+  }
+  return indel;
+}
+
 /* The hungarian method below is copied from http://www.informatik.uni-freiburg.de/~stachnis/misc.html
  * The (edited) original message follows:
  *
