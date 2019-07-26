@@ -57,12 +57,22 @@ new_char_vector (int nstrings)
 
   vec->string = (char**)  biomcmc_malloc (nstrings * sizeof (char*));
   vec->nchars = (size_t*) biomcmc_malloc (nstrings * sizeof (size_t));
+  vec->alloc = NULL; // allocated only if needed (used with char_vector_append)
 
   for (i=0; i < nstrings; i++) {
     vec->string[i] = (char*) biomcmc_malloc (sizeof (char));
     vec->string[i][0] = '\0';
     vec->nchars[i] = 0;
   }
+  return vec;
+}
+
+char_vector
+new_char_vector_big (int nstrings)
+{
+  char_vector vec = new_char_vector (nstrings);
+  vec->alloc = (size_t*) biomcmc_malloc (nstrings * sizeof (size_t));
+  for (int i = 0; i < nstrings; i++) vec->alloc[i] = 0;
   return vec;
 }
 
@@ -90,6 +100,7 @@ new_char_vector_fixed_length (int nstrings, int nchars)
 
   vec->string = (char**)  biomcmc_malloc (nstrings * sizeof (char*));
   vec->nchars = (size_t*) biomcmc_malloc (nstrings * sizeof (size_t));
+  vec->alloc = NULL; // we don't worry about realloc(), careful not mix this function with 'append_big'
 
   for (i=0; i < nstrings; i++) {
     vec->string[i] = (char*) biomcmc_malloc ((nchars+1) * sizeof (char)); //ending '\0'
@@ -110,6 +121,7 @@ del_char_vector (char_vector vec)
     free (vec->string);
   }
   if (vec->nchars) free (vec->nchars);
+  if (vec->alloc)  free (vec->alloc);
   free (vec);
 }
 
@@ -122,8 +134,7 @@ char_vector_link_string_at_position (char_vector vec, char *string, int position
   vec->nchars[position] = strlen (string); /* Actually alloc'ed memory may be larger than this (next line fix it) */
   string = (char*) biomcmc_realloc ((char*)string, (vec->nchars[position]+1) * sizeof (char));
   vec->string[position] = string;
-  
-  // TODO: next_avail may be before position; should we assume char_vector is always increasing?
+  // next_avail may be before position; should we assume char_vector is always increasing?
   vec->next_avail = position+1;
 }
 
@@ -179,6 +190,49 @@ char_vector_append_string (char_vector vec, char *string)
   char_vector_append_string_at_position (vec, string, vec->next_avail-1);
 }
 
+#define kroundup32(x) (--(x), (x)|=(x)>>1, (x)|=(x)>>2, (x)|=(x)>>4, (x)|=(x)>>8, (x)|=(x)>>16, ++(x)) 
+void
+char_vector_append_string_big_at_position (char_vector vec, char *string, int position)
+{
+  size_t l, this_l, new_l;
+  if (!vec->alloc) char_vector_append_string_at_position (vec, string, position); // called the wrong function
+
+  string = string + strspn (string, " \t"); /* skip leading spaces */
+  l = strlen (string);
+  if (!l) return; /* do nothing with empty strings - like last line of some nexus alignments */
+  if (position < 0) position = 0; /* vec->next_avail works for add_string() but not here... */
+
+  if (position >= vec->nstrings) char_vector_expand_nstrings (vec, position+1);
+  this_l = vec->nchars[position];
+
+//  printf ("DEBUG:: %4lu %4lu -> %4lu %4lu  %4lu  < - before\n", l, this_l, l + this_l + 1, vec->alloc[position], vec->nchars[position]);
+  if ((l + this_l + 1) >= vec->alloc[position]) {
+    new_l = l + this_l + 1;
+    kroundup32(new_l); // defined above, finds next highest power of 2
+    vec->string[position] = (char*) biomcmc_realloc ((char*)vec->string[position], new_l * sizeof (char));
+    vec->alloc[position] = new_l;
+//    printf ("DEBUG:: %4lu %4lu %4lu  -   %4lu\n", l, this_l, vec->alloc[position], vec->nchars[position]);
+  }
+  vec->nchars[position] += l; // have current size, not allocated size (since here they are distinct)
+  strncpy (vec->string[position] + this_l, string, l + 1); /* l+1 will insert the ending null */
+}
+#undef kroundup32
+
+void
+char_vector_append_string_big (char_vector vec, char *string)
+{
+  char_vector_append_string_big_at_position (vec, string, vec->next_avail-1);
+}
+
+void
+char_vector_finalise_big (char_vector vec)
+{
+  for (int i = 0; i < vec->nstrings; i++) if (vec->alloc[i] > vec->nchars[i]) {
+    vec->string[i] = (char*) biomcmc_realloc ((char*)vec->string[i], vec->nchars[i] * sizeof (char));
+  }
+  if (vec->alloc) free (vec->alloc);
+}
+
 void
 char_vector_expand_nstrings (char_vector vec, int new_size)
 {
@@ -193,6 +247,10 @@ char_vector_expand_nstrings (char_vector vec, int new_size)
     vec->string[i] = (char*) biomcmc_malloc (sizeof (char));
     vec->string[i][0] = '\0';
     vec->nchars[i] = 0;
+  }
+  if (vec->alloc) {
+    vec->alloc = (size_t*) biomcmc_realloc ((size_t*) vec->alloc, new_size * sizeof (size_t));
+    for (i=vec->nstrings; i < new_size; i++) vec->alloc[i] = 0;
   }
   
   vec->nstrings = new_size;

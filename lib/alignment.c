@@ -86,7 +86,7 @@ read_fasta_alignment_from_file (char *seqfilename)
   align->n_charset = 0; /* FASTA files don't support partitioning */ 
   align->charset_start = align->charset_end = NULL;
   align->taxlabel      = new_char_vector (1); /* will increase dynamically */ 
-  align->character     = new_char_vector (1); /* will increase dynamically */ 
+  align->character     = new_char_vector_big (1); /* will increase dynamically, and realloc() will double when needed */ 
   align->is_aligned    = true; /* we will check after reading file */
   align->site_pattern = NULL; 
   align->pattern_freq = NULL;
@@ -104,15 +104,14 @@ read_fasta_alignment_from_file (char *seqfilename)
       else {
         line = remove_space_from_string (line);
         line = uppercase_string (line);
-        char_vector_append_string_at_position (align->character, line, align->taxlabel->next_avail-1);
+        char_vector_append_string_big_at_position (align->character, line, align->taxlabel->next_avail-1);
       }
     }
   }
   fclose (seqfile);
-
   if (line_read) free (line_read);
 
-
+  char_vector_finalise_big (align->character);
   if (align->taxlabel->nstrings != align->character->nstrings)
     biomcmc_error ("number of sequences and number of sequence names disagree in FASTA file \"%s\"\n", seqfilename);
   if (char_vector_remove_empty_strings (align->taxlabel)) /* store sequence length info in taxlabel->nchars[] */
@@ -512,7 +511,7 @@ alignment_create_sitepattern_alternative_implementation (alignment align)
 
 void
 alignment_shorten_taxa_names (alignment align)
-{
+{ 
   /* Specially in fasta files, the short version of a sequence name (e.g. "Ecoli") is followed by a longer description
    * (like "Escherichia coli W3110"); in such cases we must have both versions available: the short for printing the
    * tree in newick format and the long for finding the species tree (substring match) or printing the alignment. */

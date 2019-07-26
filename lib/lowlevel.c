@@ -108,7 +108,7 @@ compare_double_decreasing (const void *a, const void *b)
 }
 
 /* \brief size, in bytes, when extending the buffer of biomcmc_getline() */
-#define MIN_CHUNK 64
+#define MIN_CHUNK 128
 int
 biomcmc_getline (char **lineptr, size_t *n, FILE *stream)
 {
@@ -132,8 +132,7 @@ biomcmc_getline (char **lineptr, size_t *n, FILE *stream)
     /* We always want at least one char left in the buffer, since we always (unless we get an error while reading the 
      * first char) NUL-terminate the line buffer.  
      */
-    if ((*lineptr + *n) != (read_pos + nchars_avail)) 
-      biomcmc_error ("problem setting string size in biomcmc_getline()");
+    if ((*lineptr + *n) != (read_pos + nchars_avail))  biomcmc_error ("problem_1 setting string size in biomcmc_getline()");
     if (nchars_avail < 2) {
       if (*n > MIN_CHUNK) (*n) *= 2;
       else (*n) += MIN_CHUNK;
@@ -141,8 +140,7 @@ biomcmc_getline (char **lineptr, size_t *n, FILE *stream)
       nchars_avail = *n + *lineptr - read_pos;
       *lineptr = (char *) biomcmc_realloc ((char*) *lineptr, *n);
       read_pos = *n - nchars_avail + *lineptr;
-      if ((*lineptr + *n) != (read_pos + nchars_avail)) 
-        biomcmc_error ("problem setting string size in biomcmc_getline()");
+      if ((*lineptr + *n) != (read_pos + nchars_avail)) biomcmc_error ("problem_2 setting string size in biomcmc_getline()");
     }
 
     if (ferror (stream)) return -1;

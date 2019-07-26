@@ -28,6 +28,7 @@ struct char_vector_struct
 {
   char **string;  /*! \brief vector of strings */
   int nstrings;   /*! \brief how many strings */
+  size_t *alloc;  /*! \brief in some cases (e.g. huge fasta files) we need to reduce calls to realloc() */
   size_t *nchars; /*! \brief length of allocated memory for each string excluding the ending '\0' (the actual size in 
                     use needs strlen() or a call to char_vector_compress() over the structure )*/
   int ref_counter;/*! \brief how many times this char_vector_struct is being used */
@@ -36,6 +37,8 @@ struct char_vector_struct
 
 /*! \brief Create a vector of strings with initial size for each string of zero */
 char_vector new_char_vector (int nstrings);
+/*! \brief Create vector of strings, and preparing it to realloc() fewer times; used in conjunction with 'append_big' */
+char_vector new_char_vector_big (int nstrings);
 /*! \brief Create a vector of strings from subset of strings of another char_vector */
 char_vector new_char_vector_from_valid_strings_char_vector (char_vector vec, int *valid, int n_valid); 
 /*! \brief Create a vector of strings where each string is assigned an initial value of nchars */
@@ -55,9 +58,13 @@ void char_vector_add_string (char_vector vec, char *string);
 
 /*! \brief Append string at the end of existing string at location */
 void char_vector_append_string_at_position (char_vector vec, char *string, int position);
-
 /*! \brief Append string at the end of existing string at most recently used location */
 void char_vector_append_string (char_vector vec, char *string);
+
+/*! \brief Append strings like before, but doubling allocation space if insufficient (reduces calls to realloc() ) */
+void char_vector_append_string_big_at_position (char_vector vec, char *string, int position);
+void char_vector_append_string_big (char_vector vec, char *string);
+void char_vector_finalise_big (char_vector vec);
 
 /*! \brief Increase size of vector of strings (called automatically by other functions) */
 void char_vector_expand_nstrings (char_vector vec, int new_size);
