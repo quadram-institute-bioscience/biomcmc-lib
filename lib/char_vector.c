@@ -126,25 +126,24 @@ del_char_vector (char_vector vec)
 }
 
 void
-char_vector_link_string_at_position (char_vector vec, char *string, int position)
+char_vector_link_string_at_position (char_vector vec, const char *string, int position)
 {
   if (position >= vec->nstrings) char_vector_expand_nstrings (vec, position+1);
   if (vec->nchars[position]) free (vec->string[position]);
 
   vec->nchars[position] = strlen (string); /* Actually alloc'ed memory may be larger than this (next line fix it) */
   string = (char*) biomcmc_realloc ((char*)string, (vec->nchars[position]+1) * sizeof (char));
-  vec->string[position] = string;
+  vec->string[position] = (char*) string;
   // next_avail may be before position; should we assume char_vector is always increasing?
   vec->next_avail = position+1;
 }
 
 void
-char_vector_add_string_at_position (char_vector vec, char *string, int position)
+char_vector_add_string_at_position (char_vector vec, const char *string, int position)
 {
   size_t l;
-
-  string = string + strspn (string, " \t"); /* skip leading spaces */
-  l = strlen (string);
+  char *s = (char*) (string + strspn (string, " \t")); /* skip leading spaces */
+  l = strlen (s);
 
   if (!l) return; /* do nothing with empty strings - like last line of some nexus alignments */
   if (position >= vec->nstrings) char_vector_expand_nstrings (vec, position+1);
@@ -153,23 +152,22 @@ char_vector_add_string_at_position (char_vector vec, char *string, int position)
     vec->nchars[position] = l;
     vec->string[position] = (char*) biomcmc_realloc ((char*)vec->string[position], (l+1) * sizeof (char));
   }
-  strncpy (vec->string[position], string, l+1); /* l+1 will insert the ending null */
+  strncpy (vec->string[position], s, l+1); /* l+1 will insert the ending null */
   vec->next_avail = position+1;
 }
 
 void
-char_vector_add_string (char_vector vec, char *string)
+char_vector_add_string (char_vector vec, const char *string)
 {
   char_vector_add_string_at_position (vec, string, vec->next_avail);
 }
 
 void
-char_vector_append_string_at_position (char_vector vec, char *string, int position)
+char_vector_append_string_at_position (char_vector vec, const char *string, int position)
 {
   size_t l, this_l;
-  
-  string = string + strspn (string, " \t"); /* skip leading spaces */
-  l = strlen (string);
+  char *s = (char*) (string + strspn (string, " \t")); /* skip leading spaces */
+  l = strlen (s);
 
   if (!l) return; /* do nothing with empty strings - like last line of some nexus alignments */
   if (position < 0) position = 0; /* vec->next_avail works for add_string() but not here... */
@@ -181,24 +179,24 @@ char_vector_append_string_at_position (char_vector vec, char *string, int positi
     vec->nchars[position] = l + this_l;
     vec->string[position] = (char*) biomcmc_realloc ((char*)vec->string[position], (l + this_l + 1) * sizeof (char));
   }
-  strncpy (vec->string[position] + this_l, string, l + 1); /* l+1 will insert the ending null */
+  strncpy (vec->string[position] + this_l, s, l + 1); /* l+1 will insert the ending null */
 }
 
 void
-char_vector_append_string (char_vector vec, char *string)
+char_vector_append_string (char_vector vec, const char *string)
 {
   char_vector_append_string_at_position (vec, string, vec->next_avail-1);
 }
 
 #define kroundup32(x) (--(x), (x)|=(x)>>1, (x)|=(x)>>2, (x)|=(x)>>4, (x)|=(x)>>8, (x)|=(x)>>16, ++(x)) 
 void
-char_vector_append_string_big_at_position (char_vector vec, char *string, int position)
+char_vector_append_string_big_at_position (char_vector vec, const char *string, int position)
 {
   size_t l, this_l, new_l;
   if (!vec->alloc) char_vector_append_string_at_position (vec, string, position); // called the wrong function
 
-  string = string + strspn (string, " \t"); /* skip leading spaces */
-  l = strlen (string);
+  char *s = (char*) (string + strspn (string, " \t")); /* skip leading spaces */
+  l = strlen (s);
   if (!l) return; /* do nothing with empty strings - like last line of some nexus alignments */
   if (position < 0) position = 0; /* vec->next_avail works for add_string() but not here... */
 
@@ -214,12 +212,12 @@ char_vector_append_string_big_at_position (char_vector vec, char *string, int po
 //    printf ("DEBUG:: %4lu %4lu %4lu  -   %4lu\n", l, this_l, vec->alloc[position], vec->nchars[position]);
   }
   vec->nchars[position] += l; // have current size, not allocated size (since here they are distinct)
-  strncpy (vec->string[position] + this_l, string, l + 1); /* l+1 will insert the ending null */
+  strncpy (vec->string[position] + this_l, s, l + 1); /* l+1 will insert the ending null */
 }
 #undef kroundup32
 
 void
-char_vector_append_string_big (char_vector vec, char *string)
+char_vector_append_string_big (char_vector vec, const char *string)
 {
   char_vector_append_string_big_at_position (vec, string, vec->next_avail-1);
 }

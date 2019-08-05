@@ -48,22 +48,22 @@ char_vector new_char_vector_fixed_length (int nstrings, int nchars);
 void del_char_vector (char_vector vec);
 
 /*! \brief Link a previously allocated string (to avoid copying all characters) */
-void char_vector_link_string_at_position (char_vector vec, char *string, int position);
+void char_vector_link_string_at_position (char_vector vec, const char *string, int position);
 
 /*! \brief Add a new string (vector of characters) at specific location */
-void char_vector_add_string_at_position (char_vector vec, char *string, int position);
+void char_vector_add_string_at_position (char_vector vec, const char *string, int position);
 
 /*! \brief Add a new string (vector of characters) at next available location */
-void char_vector_add_string (char_vector vec, char *string);
+void char_vector_add_string (char_vector vec, const char *string);
 
 /*! \brief Append string at the end of existing string at location */
-void char_vector_append_string_at_position (char_vector vec, char *string, int position);
+void char_vector_append_string_at_position (char_vector vec, const char *string, int position);
 /*! \brief Append string at the end of existing string at most recently used location */
-void char_vector_append_string (char_vector vec, char *string);
+void char_vector_append_string (char_vector vec, const char *string);
 
 /*! \brief Append strings like before, but doubling allocation space if insufficient (reduces calls to realloc() ) */
-void char_vector_append_string_big_at_position (char_vector vec, char *string, int position);
-void char_vector_append_string_big (char_vector vec, char *string);
+void char_vector_append_string_big_at_position (char_vector vec, const char *string, int position);
+void char_vector_append_string_big (char_vector vec, const char *string);
 void char_vector_finalise_big (char_vector vec);
 
 /*! \brief Increase size of vector of strings (called automatically by other functions) */
