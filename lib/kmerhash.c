@@ -16,12 +16,10 @@
 /** OBS: uint32_t d[2] --> d = [A B C D] [E F G H] (1 byte per letter) then 
  * uint8_t *x = d      --> x = [D] [C] [B] [A] [H] [G] [F] [E] (endianness)  **/
 
-/* global since defined extern in header (btw functions are declared 'extern' automatically in headers */
-const char *biomcmc_kmer_class_string[] = {"fastest (2 hashes)", "faster (fewer hashes)", "genome", "phylogenetics (short kmers)", "full"};
-
 /* similar to char2bit[] from alignment[], but has forward and reverse */
 static uint8_t dna_in_4_bits[256][2] = {{0xff}}; /* DNA base to bitpattern translation, with 1st element set to arbitrary value */
 static uint8_t dna_in_2_bits[256][2] = {{0xff}}; /* no ambigous chars/indels, represented by 4 (0100 in bits) */
+static uint8_t dna_in_1_bits[256][2] = {{0xff}}; /* GC content */ 
 
 static uint64_t _tbl_mask[] = {0xffffUL, 0xffffffUL, 0xffffffffUL, 0xffffffffffUL, 0xffffffffffffUL, 0xffffffffffffUL, 0xffffffffffffffffUL}; 
 static uint8_t _tbl_shift[] = {      48,         40,           32,             24,               16,                8,                    0};
@@ -29,21 +27,25 @@ static uint8_t _tbl_nbyte[] = {       2,          3,            4,              
 static uint32_t _tbl_seed[] = {0x9040a6, 0x10bea992,   0x50edd67d,     0xb05a4f09,       0xf07046c5,       0x9c9445ab,           0xb2500f29};
 
 /* i1[] and i2[] (i.e. elements above to be used on first and second 64bits, respectively */
-static uint8_t _idx_mode[][2][7] = {
-   {{2,6,0,0,0,0,0}, {0,0,0,0,0,0,0}}, 
+static uint8_t _idx_mode[][2][7] = { // contains list of elements from _tbl above to be used, from 1st and 2nd 64bit blocks
+   {{2,6,0,0,0,0,0}, {0,0,0,0,0,0,0}},  
+   {{2,6,0,0,0,0,0}, {2,6,0,0,0,0,0}},  
    {{0,2,4,6,0,0,0}, {2,6,0,0,0,0,0}}, 
    {{0,1,2,4,6,0,0}, {0,2,6,0,0,0,0}},
    {{0,1,2,3,4,5,6}, {0,0,0,0,0,0,0}},
    {{0,1,2,3,4,5,6}, {0,1,2,6,0,0,0}}
 };   
-static uint8_t _n_idx[][2] = {{2,0}, {4,2},{5,3}, {7,0}, {7,4}}; // how many elems from _idx_mode[] are used
+static uint8_t _n_idx[][2] = {{2,0}, {2,2}, {4,2}, {5,3}, {7,0}, {7,4}}; // how many elems from _idx_mode[] are used
 
 static void initialize_dna_to_bit_tables (void);
 
+/* global since defined extern in header (btw functions are declared 'extern' automatically in headers */
+const char *biomcmc_kmer_class_string[] = {"fastest (2 kmer sizes)", "fast (6 kmer sizes)", "genome", "phylogenetics (short kmers)", "all 11 kmer sizes", "GC content kmers"};
+
 kmer_params
-new_kmer_params (enum_kmer_class mode)
+new_kmer_params (int mode)
 {
-  uint8_t  i, j, row, bases_per_byte = 2; // bases_per_byte is 4 if dense
+  uint8_t  i, j, row, bases_per_byte, _ba_pe_by[] = {2,4,8}; // bases_per_byte is 4 if dense
   kmer_params p = (kmer_params) biomcmc_malloc (sizeof (struct kmer_params_struct));
   p->ref_counter = 1;
   p->hashfunction = &biomcmc_xxh64;
@@ -51,13 +53,16 @@ new_kmer_params (enum_kmer_class mode)
   if (dna_in_4_bits[0][0] == 0xff) initialize_dna_to_bit_tables (); // run once per program
 
   p->kmer_class_mode = mode;
-  switch (mode) {
-    case kmer_class_fastst: row = 0; p->dense = true;  bases_per_byte = 4; break;
-    case kmer_class_fast:   row = 1; p->dense = false; bases_per_byte = 2; break;
-    case kmer_class_genome: row = 2; p->dense = true;  bases_per_byte = 4; break;
-    case kmer_class_short:  row = 3; p->dense = false; bases_per_byte = 2; break;
-    default:                row = 4; p->dense = false; bases_per_byte = 2; 
+  switch (mode) { // map each choice to a set of kmers and bitstring encoding (row relates to _idx_mode[] above)
+    case 0:  row = 0; p->dense = 1; break;
+    case 1:  row = 2; p->dense = 1; break;
+    case 2:  row = 3; p->dense = 0; break;
+    case 3:  
+    default: row = 4; p->dense = 1; break; 
+    case 4:  row = 5; p->dense = 0; break;
+    case 5:  row = 1; p->dense = 2; break;
   };
+  bases_per_byte = _ba_pe_by[p->dense];
 
   p->n1 = (uint8_t) _n_idx[row][0]; p->n2 = (uint8_t) _n_idx[row][1]; 
   for (j=0; j < p->n1; j++) {
@@ -72,7 +77,7 @@ new_kmer_params (enum_kmer_class mode)
     i = _idx_mode[row][1][j];
     p->mask2[j] = _tbl_mask[i];
     p->shift2[j] = _tbl_shift[i];
-    p->seed[j] = (_tbl_seed[i] >> 2) + 0x420a1d; // very noise, much random
+    p->seed[j] = (_tbl_seed[i] >> 2) + 0x420314a1d; // very noise, much random
     p->nbytes[j+p->n1] = _tbl_nbyte[i] + 8;
     p->size[j+p->n1] = (_tbl_nbyte[i] + 8) * bases_per_byte;
   }
@@ -88,7 +93,7 @@ del_kmer_params (kmer_params p)
 } 
 
 kmerhash
-new_kmerhash (enum_kmer_class mode)
+new_kmerhash (int mode)
 {
   int i;
   kmerhash kmer = (kmerhash) biomcmc_malloc (sizeof (struct kmerhash_struct));
@@ -151,12 +156,23 @@ kmerhash_iterator (kmerhash kmer)
   if (kmer->i == kmer->n_dna) return false;
 
   // assume for/rev are full, solve initial case later
-  if (kmer->p->dense) {
-    while ((kmer->i < kmer->n_dna) && (dna_in_2_bits[(int)(kmer->dna[kmer->i])][0] > 3)) kmer->i++;
+  if (kmer->p->dense == 2) { // AT vs GC comparison
+    while ((kmer->i < kmer->n_dna) && (dna_in_1_bits[(int)(kmer->dna[kmer->i])][0] > 1)) kmer->i++;
     if (kmer->i == kmer->n_dna) return false;
     dnachar = (int) kmer->dna[kmer->i];
     //ABCD->BCDE: forward [C D] [A B] --> [D E] [B C] , reverse: [b a] [d c] -->  [c b] [e d]
     if (kmer->p->n2) { // only if we need 2 uint64_t elements forward[1] and reverse[0] are used
+      kmer->forward[1] = kmer->forward[1] << 1 | kmer->forward[0] >> 63UL;  // forward[1] at left of forward[0]
+      kmer->reverse[0] = kmer->reverse[0] >> 1 | kmer->reverse[1] << 63UL;  // reverse[0] is at left
+    }
+    kmer->forward[0] = kmer->forward[0] << 1 | dna_in_1_bits[dnachar][0]; // forward[0] receives new value
+    kmer->reverse[1] = kmer->reverse[1] >> 1 | ((uint64_t)(dna_in_1_bits[dnachar][1]) << 63UL); // reverse[1] receives new value
+  }
+  else if (kmer->p->dense == 1) {
+    while ((kmer->i < kmer->n_dna) && (dna_in_2_bits[(int)(kmer->dna[kmer->i])][0] > 3)) kmer->i++;
+    if (kmer->i == kmer->n_dna) return false;
+    dnachar = (int) kmer->dna[kmer->i];
+    if (kmer->p->n2) { 
       kmer->forward[1] = kmer->forward[1] << 2 | kmer->forward[0] >> 62UL;  // forward[1] at left of forward[0]
       kmer->reverse[0] = kmer->reverse[0] >> 2 | kmer->reverse[1] << 62UL;  // reverse[0] is at left
     }
@@ -235,6 +251,10 @@ initialize_dna_to_bit_tables (void)
   dna_in_2_bits['G'][0] = 2;   dna_in_2_bits['G'][1] = 1;  /*  G  <-> C  */
   dna_in_2_bits['T'][0] = 3;   dna_in_2_bits['T'][1] = 0;  /*  T  <-> A  */
   dna_in_2_bits['U'][0] = 3;   dna_in_2_bits['U'][1] = 0;  /*  U  <-> A  */
+
+  for (i = 0; i < 256; i++) dna_in_1_bits[i][0] = dna_in_1_bits[i][1] = 4; // calling function must check if < 4
+  dna_in_1_bits['A'][0] = dna_in_1_bits['A'][1] = dna_in_1_bits['T'][0] = dna_in_1_bits['T'][1] = 0;  
+  dna_in_1_bits['C'][0] = dna_in_1_bits['C'][1] = dna_in_1_bits['G'][0] = dna_in_1_bits['G'][1] = 0;  
 }
 
 //for (j = 0; j < 16; j++) printf ("%d ", (int)((hash_f >> 4*j) & 15LL)); for (j = 0; j < 16; j++) printf ("%c", dna[i-j]);
