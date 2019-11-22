@@ -67,7 +67,7 @@ AC_ARG_ENABLE([debug],
 AC_MSG_RESULT([$debugit])
 if test x"$debugit" = x"yes"; then
     AC_DEFINE([BIOMCMC_DEBUG],[],[Debug Mode, with assert()-like error checking])
-    AM_CFLAGS="${AM_CFLAGS} -g -pg -W -Wall -Werror -Wno-uninitialized -O0"
+    AM_CFLAGS="${AM_CFLAGS} -g -pg -W -Wall -Werror -Wno-uninitialized -O1"
 else
     AC_DEFINE([NDEBUG],[],[not in debug mode, disabling all assert() macros])
     AM_CFLAGS="${AM_CFLAGS} -funroll-loops -fomit-frame-pointer -finline-functions -O4"
