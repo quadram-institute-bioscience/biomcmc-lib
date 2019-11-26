@@ -1,5 +1,18 @@
 # Biomcmc-lib 
 
+__Leonardo de Oliveira Martins<sup>1</sup>__
+<br>
+<sub>1. Quadram Institute Bioscience, Norwich Research Park, NR4 7UQ, UK</sub>
+
+## Table of Contents
+* [Introduction](#introduction)
+* [Installation](#installation)
+* [Algorithms](#algorithms)
+* [Assumptions and Limitations](#assumptions-and-limitations)
+  * [Rooting](#rooting)
+* [License](#license)
+
+## Introduction
 This library provides low level functions used by other phylogenetic programs. 
 It borrows many functions from the [guenomu software](https://bitbucket.org/leomrtns/guenomu/) for phylogenomic species tree inference and 
 extends some ideas from the [genefam-dist library](https://github.com/leomrtns/genefam-dist).
@@ -68,7 +81,10 @@ The trees can be in nexus or newick formats, and the sequences can be in nexus o
 tree t_1 [p = 0.51, P = 0.51] = [&W 0.51] ((((((((5,4),6),((2,1),3)),7),(9,8)),((((12,11),10),13),14)),(16,15)),((((((25,24),23),22),21),(20,19)),(18,17)));
 ```
 
-### The rooting saga
+### Rooting
+Rooting is always an issue in phylogenetics, and it can be used in two senses: as finding the biological ancestor of the
+sequences (which leads to a rooted tree), as well as the computational/semantic representation of such information.
+
 Most phylogenetic inference software work with or assume unrooted trees, but sometimes we want to know the root
 location. 
 On top of that there is no single way of storing trees as rooted or unrooted. To give an example of valid options:
@@ -89,8 +105,6 @@ taxa), or use midpoint/MAD/minimum variance to find the best root location for y
 
 In any case, it is good idea to always assume that the trees are unrooted unless explicitly stated otherwise.
 Irrespective of what the newick string tells you. 
-
-
 
 ## License 
 Copyright (C) 2019-today  [Leonardo de Oliveira Martins](https://github.com/leomrtns)
