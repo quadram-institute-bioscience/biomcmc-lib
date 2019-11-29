@@ -254,7 +254,7 @@ initialize_dna_to_bit_tables (void)
 
   for (i = 0; i < 256; i++) dna_in_1_bits[i][0] = dna_in_1_bits[i][1] = 4; // calling function must check if < 4
   dna_in_1_bits['A'][0] = dna_in_1_bits['A'][1] = dna_in_1_bits['T'][0] = dna_in_1_bits['T'][1] = 0;  
-  dna_in_1_bits['C'][0] = dna_in_1_bits['C'][1] = dna_in_1_bits['G'][0] = dna_in_1_bits['G'][1] = 0;  
+  dna_in_1_bits['C'][0] = dna_in_1_bits['C'][1] = dna_in_1_bits['G'][0] = dna_in_1_bits['G'][1] = 1;  
 }
 
 //for (j = 0; j < 16; j++) printf ("%d ", (int)((hash_f >> 4*j) & 15LL)); for (j = 0; j < 16; j++) printf ("%c", dna[i-j]);
