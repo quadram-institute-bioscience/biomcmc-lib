@@ -1,0 +1,5 @@
+<map id="read_newick_trees.h" name="read_newick_trees.h">
+<area shape="rect" id="node2" href="$newick__space_8h.html" title="Reads a list of trees in newick format and creates vector of topologies. " alt="" coords="19,80,135,107"/>
+<area shape="rect" id="node3" href="$topology__space_8h.html" title="Reads tree files in nexus format and creates a vector of topologies. " alt="" coords="15,155,139,181"/>
+<area shape="rect" id="node4" href="$biomcmc_8h.html" title="biomcmc library interface to external programs, specific to super_sptree repo. " alt="" coords="33,229,120,256"/>
+</map>

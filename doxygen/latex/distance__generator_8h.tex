@@ -1,0 +1,62 @@
+\hypertarget{distance__generator_8h}{}\subsection{distance\+\_\+generator.\+h File Reference}
+\label{distance__generator_8h}\index{distance\+\_\+generator.\+h@{distance\+\_\+generator.\+h}}
+
+
+distance calculation between generic objects,without generating full matrix beforehand  
+
+
+{\ttfamily \#include \char`\"{}distance\+\_\+matrix.\+h\char`\"{}}\newline
+Include dependency graph for distance\+\_\+generator.\+h\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{distance__generator_8h__incl}
+\end{center}
+\end{figure}
+This graph shows which files directly or indirectly include this file\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=187pt]{distance__generator_8h__dep__incl}
+\end{center}
+\end{figure}
+\subsubsection*{Data Structures}
+\begin{DoxyCompactItemize}
+\item 
+struct \hyperlink{structdistance__generator__struct}{distance\+\_\+generator\+\_\+struct}
+\end{DoxyCompactItemize}
+\subsubsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{distance__generator_8h_a199b15e30dbca7bb6d2f4fb8f7e13f9c}\label{distance__generator_8h_a199b15e30dbca7bb6d2f4fb8f7e13f9c}} 
+typedef struct \hyperlink{structdistance__generator__struct}{distance\+\_\+generator\+\_\+struct} $\ast$ {\bfseries distance\+\_\+generator}
+\end{DoxyCompactItemize}
+\subsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{distance__generator_8h_ad908f1218c2e31e549e34a9686f9f408}\label{distance__generator_8h_ad908f1218c2e31e549e34a9686f9f408}} 
+\hyperlink{structdistance__generator__struct}{distance\+\_\+generator} {\bfseries new\+\_\+distance\+\_\+generator} (int n\+\_\+samples, int n\+\_\+distances)
+\item 
+\mbox{\Hypertarget{distance__generator_8h_a70ef842b533194a7ef1334171935e11e}\label{distance__generator_8h_a70ef842b533194a7ef1334171935e11e}} 
+void {\bfseries del\+\_\+distance\+\_\+generator} (\hyperlink{structdistance__generator__struct}{distance\+\_\+generator} d)
+\item 
+\mbox{\Hypertarget{distance__generator_8h_a17475da6b045ddb3f019c30cf9eea89f}\label{distance__generator_8h_a17475da6b045ddb3f019c30cf9eea89f}} 
+double {\bfseries distance\+\_\+generator\+\_\+get\+\_\+at\+\_\+distance} (\hyperlink{structdistance__generator__struct}{distance\+\_\+generator} d, int i, int j, int which\+\_\+distance)
+\item 
+\mbox{\Hypertarget{distance__generator_8h_ae653fc52f2a6a3db63548c484a041385}\label{distance__generator_8h_ae653fc52f2a6a3db63548c484a041385}} 
+double {\bfseries distance\+\_\+generator\+\_\+get} (\hyperlink{structdistance__generator__struct}{distance\+\_\+generator} d, int i, int j)
+\item 
+\mbox{\Hypertarget{distance__generator_8h_a1250f80cf59fde9c5bf20ba467720866}\label{distance__generator_8h_a1250f80cf59fde9c5bf20ba467720866}} 
+void \hyperlink{distance__generator_8h_a1250f80cf59fde9c5bf20ba467720866}{distance\+\_\+generator\+\_\+set\+\_\+function\+\_\+data} (\hyperlink{structdistance__generator__struct}{distance\+\_\+generator} d, void($\ast$lowlevel\+\_\+dist\+\_\+funct)(void $\ast$, int, int, double $\ast$), void $\ast$extra\+\_\+data)
+\begin{DoxyCompactList}\small\item\em defines distance calculation function wrapper, and all extra data needed by wrapper; no check is done here, but wrapper should return at least as many distances sd n\+\_\+distances (wrapper functions can check) \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{distance__generator_8h_afbb17068a9677c5cfac04c8f2b05c99a}\label{distance__generator_8h_afbb17068a9677c5cfac04c8f2b05c99a}} 
+void \hyperlink{distance__generator_8h_afbb17068a9677c5cfac04c8f2b05c99a}{distance\+\_\+generator\+\_\+set\+\_\+which\+\_\+distance} (\hyperlink{structdistance__generator__struct}{distance\+\_\+generator} d, int which\+\_\+distance)
+\begin{DoxyCompactList}\small\item\em distance wrapper may return several distances, but only one is returned by get(); this sets which one (should be called before e.\+g. clustering) \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{distance__generator_8h_acf74f230963e2b57697f93815d1d1ed0}\label{distance__generator_8h_acf74f230963e2b57697f93815d1d1ed0}} 
+void {\bfseries distance\+\_\+generator\+\_\+reset} (\hyperlink{structdistance__generator__struct}{distance\+\_\+generator} d)
+\end{DoxyCompactItemize}
+
+
+\subsubsection{Detailed Description}
+distance calculation between generic objects,without generating full matrix beforehand 
+

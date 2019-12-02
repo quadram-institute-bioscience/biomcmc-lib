@@ -1,0 +1,299 @@
+\begin{theindex}
+
+  \item {add\+\_\+string\+\_\+with\+\_\+size\+\_\+to\+\_\+topology\+\_\+space}
+    \subitem {topology\+\_\+space.\+h}, \hyperpage{117}
+  \item {alignment.\+h}, \hyperpage{49}
+  \item {alignment\+\_\+struct}, \hyperpage{6}
+  \item {apply\+\_\+spr\+\_\+at\+\_\+nodes}
+    \subitem {topology\+\_\+common.\+h}, \hyperpage{111}
+  \item {apply\+\_\+spr\+\_\+at\+\_\+nodes\+\_\+not\+L\+C\+Aprune}
+    \subitem {topology\+\_\+common.\+h}, \hyperpage{111}
+  \item {arg\+\_\+date}, \hyperpage{8}
+  \item {arg\+\_\+dbl}, \hyperpage{8}
+  \item {arg\+\_\+end}, \hyperpage{9}
+  \item {arg\+\_\+file}, \hyperpage{10}
+  \item {arg\+\_\+hdr}, \hyperpage{10}
+  \item {arg\+\_\+int}, \hyperpage{11}
+  \item {arg\+\_\+lit}, \hyperpage{11}
+  \item {arg\+\_\+rem}, \hyperpage{12}
+  \item {arg\+\_\+rex}, \hyperpage{12}
+  \item {arg\+\_\+str}, \hyperpage{13}
+
+  \indexspace
+
+  \item {binary\+\_\+parsimony\+\_\+datamatrix\+\_\+struct}, 
+		\hyperpage{13}
+  \item {binary\+\_\+parsimony\+\_\+struct}, \hyperpage{14}
+  \item {biomcmc.\+h}, \hyperpage{51}
+  \item {biomcmc\+\_\+dexp\+\_\+dt}
+    \subitem {prob\+\_\+distribution.\+h}, \hyperpage{93}
+  \item {biomcmc\+\_\+error}
+    \subitem {lowlevel.\+c}, \hyperpage{81}
+    \subitem {lowlevel.\+h}, \hyperpage{86}
+  \item {biomcmc\+\_\+fopen}
+    \subitem {lowlevel.\+c}, \hyperpage{81}
+    \subitem {lowlevel.\+h}, \hyperpage{85}
+  \item {biomcmc\+\_\+getline}
+    \subitem {lowlevel.\+c}, \hyperpage{82}
+    \subitem {lowlevel.\+h}, \hyperpage{86}
+  \item {biomcmc\+\_\+malloc}
+    \subitem {lowlevel.\+c}, \hyperpage{80}
+    \subitem {lowlevel.\+h}, \hyperpage{85}
+  \item {biomcmc\+\_\+random\+\_\+number\+\_\+init}
+    \subitem {random\+\_\+number.\+h}, \hyperpage{99}
+  \item {biomcmc\+\_\+realloc}
+    \subitem {lowlevel.\+c}, \hyperpage{80}
+    \subitem {lowlevel.\+h}, \hyperpage{85}
+  \item {biomcmc\+\_\+rng\+\_\+struct}, \hyperpage{15}
+  \item {bip\+\_\+hashitem\+\_\+struct}, \hyperpage{16}
+  \item {bip\+\_\+hashtable\+\_\+struct}, \hyperpage{17}
+  \item {bipartition.\+h}, \hyperpage{52}
+    \subitem {new\+\_\+bipartition}, \hyperpage{55}
+  \item {bipartition\+\_\+struct}, \hyperpage{18}
+  \item {bipsize\+\_\+struct}, \hyperpage{19}
+
+  \indexspace
+
+  \item {char\+\_\+vector.\+c}, \hyperpage{56}
+    \subitem {index\+\_\+species\+\_\+gene\+\_\+char\+\_\+vectors}, 
+		\hyperpage{57}
+  \item {char\+\_\+vector.\+h}, \hyperpage{58}
+    \subitem {index\+\_\+species\+\_\+gene\+\_\+char\+\_\+vectors}, 
+		\hyperpage{60}
+  \item {char\+\_\+vector\+\_\+struct}, \hyperpage{19}
+  \item {charvec\+\_\+str}, \hyperpage{20}
+  \item {clustering\+\_\+goptics.\+h}, \hyperpage{61}
+  \item {Cmask}
+    \subitem {random\+\_\+number\+\_\+aux.\+h}, \hyperpage{101}
+  \item {copy\+\_\+topology\+\_\+from\+\_\+topology}
+    \subitem {topology\+\_\+common.\+h}, \hyperpage{109}
+
+  \indexspace
+
+  \item {discrete\+\_\+sample\+\_\+struct}, \hyperpage{20}
+  \item {distance\+\_\+generator.\+h}, \hyperpage{62}
+  \item {distance\+\_\+generator\+\_\+struct}, \hyperpage{20}
+  \item {distance\+\_\+matrix.\+h}, \hyperpage{63}
+    \subitem {zero\+\_\+all\+\_\+spdist\+\_\+matrix}, \hyperpage{65}
+  \item {distance\+\_\+matrix\+\_\+struct}, \hyperpage{21}
+  \item {dsample\+\_\+stack\+\_\+struct}, \hyperpage{21}
+
+  \indexspace
+
+  \item {edgearray\+\_\+item}, \hyperpage{22}
+  \item {element}, \hyperpage{22}
+  \item {empfreq\+\_\+double\+\_\+element}, \hyperpage{22}
+  \item {empfreq\+\_\+double\+\_\+struct}, \hyperpage{23}
+  \item {empfreq\+\_\+element}, \hyperpage{23}
+  \item {empfreq\+\_\+struct}, \hyperpage{24}
+  \item {empirical\+\_\+frequency.\+c}, \hyperpage{65}
+  \item {empirical\+\_\+frequency.\+h}, \hyperpage{67}
+  \item {estimate}
+    \subitem {hll\+\_\+estimate\+\_\+s}, \hyperpage{29}
+
+  \indexspace
+
+  \item {false}
+    \subitem {lowlevel.\+h}, \hyperpage{84}
+
+  \indexspace
+
+  \item {genetree.\+h}, \hyperpage{68}
+  \item {genetree\+\_\+struct}, \hyperpage{25}
+  \item {goptics\+\_\+cluster\+\_\+struct}, \hyperpage{26}
+  \item {graphviz\+\_\+file\+\_\+topology}
+    \subitem {topology\+\_\+common.\+h}, \hyperpage{110}
+
+  \indexspace
+
+  \item {hashfunctions.\+h}, \hyperpage{70}
+  \item {hashtable.\+h}, \hyperpage{72}
+  \item {hashtable\+\_\+item\+\_\+struct}, \hyperpage{26}
+  \item {hashtable\+\_\+struct}, \hyperpage{27}
+  \item {hll.\+h}, \hyperpage{74}
+    \subitem {hll\+\_\+add}, \hyperpage{76}
+    \subitem {hll\+\_\+create}, \hyperpage{75}
+    \subitem {hll\+\_\+estimate\+\_\+t}, \hyperpage{75}
+    \subitem {hll\+\_\+get\+\_\+estimate}, \hyperpage{77}
+    \subitem {hll\+\_\+hash\+\_\+function\+\_\+t}, \hyperpage{75}
+    \subitem {hll\+\_\+merge}, \hyperpage{77}
+    \subitem {hll\+\_\+release}, \hyperpage{76}
+    \subitem {hll\+\_\+reset}, \hyperpage{76}
+  \item {hll\+\_\+add}
+    \subitem {hll.\+h}, \hyperpage{76}
+  \item {hll\+\_\+create}
+    \subitem {hll.\+h}, \hyperpage{75}
+  \item {hll\+\_\+estimate}
+    \subitem {hll\+\_\+estimate\+\_\+s}, \hyperpage{29}
+  \item {hll\+\_\+estimate\+\_\+s}, \hyperpage{28}
+    \subitem {estimate}, \hyperpage{29}
+    \subitem {hll\+\_\+estimate}, \hyperpage{29}
+    \subitem {large\+\_\+range\+\_\+estimate}, \hyperpage{29}
+    \subitem {n\+\_\+buckets}, \hyperpage{28}
+    \subitem {n\+\_\+empty\+\_\+buckets}, \hyperpage{28}
+    \subitem {small\+\_\+range\+\_\+estimate}, \hyperpage{29}
+  \item {hll\+\_\+estimate\+\_\+t}
+    \subitem {hll.\+h}, \hyperpage{75}
+  \item {hll\+\_\+get\+\_\+estimate}
+    \subitem {hll.\+h}, \hyperpage{77}
+  \item {hll\+\_\+hash\+\_\+function\+\_\+t}
+    \subitem {hll.\+h}, \hyperpage{75}
+  \item {hll\+\_\+merge}
+    \subitem {hll.\+h}, \hyperpage{77}
+  \item {hll\+\_\+release}
+    \subitem {hll.\+h}, \hyperpage{76}
+  \item {hll\+\_\+reset}
+    \subitem {hll.\+h}, \hyperpage{76}
+  \item {hll\+\_\+s}, \hyperpage{29}
+  \item {hungarian\+\_\+struct}, \hyperpage{30}
+
+  \indexspace
+
+  \item {index\+\_\+species\+\_\+gene\+\_\+char\+\_\+vectors}
+    \subitem {char\+\_\+vector.\+c}, \hyperpage{57}
+    \subitem {char\+\_\+vector.\+h}, \hyperpage{60}
+
+  \indexspace
+
+  \item {k\+Table543}
+    \subitem {random\+\_\+number\+\_\+aux.\+h}, \hyperpage{101}
+  \item {kmer\+\_\+params\+\_\+struct}, \hyperpage{30}
+  \item {kmerhash.\+h}, \hyperpage{77}
+  \item {kmerhash\+\_\+struct}, \hyperpage{31}
+
+  \indexspace
+
+  \item {large\+\_\+range\+\_\+estimate}
+    \subitem {hll\+\_\+estimate\+\_\+s}, \hyperpage{29}
+  \item {longoptions}, \hyperpage{31}
+  \item {lowlevel.\+c}, \hyperpage{79}
+    \subitem {biomcmc\+\_\+error}, \hyperpage{81}
+    \subitem {biomcmc\+\_\+fopen}, \hyperpage{81}
+    \subitem {biomcmc\+\_\+getline}, \hyperpage{82}
+    \subitem {biomcmc\+\_\+malloc}, \hyperpage{80}
+    \subitem {biomcmc\+\_\+realloc}, \hyperpage{80}
+  \item {lowlevel.\+h}, \hyperpage{82}
+    \subitem {biomcmc\+\_\+error}, \hyperpage{86}
+    \subitem {biomcmc\+\_\+fopen}, \hyperpage{85}
+    \subitem {biomcmc\+\_\+getline}, \hyperpage{86}
+    \subitem {biomcmc\+\_\+malloc}, \hyperpage{85}
+    \subitem {biomcmc\+\_\+realloc}, \hyperpage{85}
+    \subitem {false}, \hyperpage{84}
+    \subitem {true}, \hyperpage{84}
+
+  \indexspace
+
+  \item {marsaglia\+\_\+constants}
+    \subitem {random\+\_\+number\+\_\+aux.\+h}, \hyperpage{101}
+
+  \indexspace
+
+  \item {n\+\_\+buckets}
+    \subitem {hll\+\_\+estimate\+\_\+s}, \hyperpage{28}
+  \item {n\+\_\+empty\+\_\+buckets}
+    \subitem {hll\+\_\+estimate\+\_\+s}, \hyperpage{28}
+  \item {new\+\_\+bipartition}
+    \subitem {bipartition.\+h}, \hyperpage{55}
+  \item {newick\+\_\+node\+\_\+struct}, \hyperpage{32}
+  \item {newick\+\_\+space.\+h}, \hyperpage{87}
+  \item {newick\+\_\+space\+\_\+struct}, \hyperpage{32}
+  \item {newick\+\_\+tree\+\_\+struct}, \hyperpage{34}
+  \item {nexus\+\_\+common.\+h}, \hyperpage{88}
+
+  \indexspace
+
+  \item {parsimony.\+h}, \hyperpage{90}
+  \item {point}, \hyperpage{34}
+  \item {Priority\+Queue}, \hyperpage{35}
+  \item {privhdr}, \hyperpage{35}
+  \item {prob\+\_\+distribution.\+h}, \hyperpage{91}
+    \subitem {biomcmc\+\_\+dexp\+\_\+dt}, \hyperpage{93}
+  \item {prob\+\_\+distribution\+\_\+aux.\+h}, \hyperpage{94}
+
+  \indexspace
+
+  \item {q\+Table543}
+    \subitem {random\+\_\+number\+\_\+aux.\+h}, \hyperpage{100}
+  \item {quickselect\+\_\+quantile.\+h}, \hyperpage{95}
+
+  \indexspace
+
+  \item {random\+\_\+number.\+h}, \hyperpage{96}
+    \subitem {biomcmc\+\_\+random\+\_\+number\+\_\+init}, 
+		\hyperpage{99}
+  \item {random\+\_\+number\+\_\+aux.\+h}, \hyperpage{99}
+    \subitem {Cmask}, \hyperpage{101}
+    \subitem {k\+Table543}, \hyperpage{101}
+    \subitem {marsaglia\+\_\+constants}, \hyperpage{101}
+    \subitem {q\+Table543}, \hyperpage{100}
+    \subitem {s\+Table76}, \hyperpage{100}
+  \item {read\+\_\+newick\+\_\+trees.\+h}, \hyperpage{102}
+  \item {reconciliation.\+h}, \hyperpage{103}
+  \item {reconciliation\+\_\+struct}, \hyperpage{36}
+  \item {rng\+\_\+diaconis\+\_\+struct}, \hyperpage{37}
+  \item {rng\+\_\+gfsr4\+\_\+struct}, \hyperpage{37}
+  \item {rng\+\_\+lfib4\+\_\+struct}, \hyperpage{38}
+  \item {rng\+\_\+mt19937\+\_\+struct}, \hyperpage{38}
+  \item {rng\+\_\+mt19937ar\+\_\+struct}, \hyperpage{39}
+  \item {rng\+\_\+swb\+\_\+struct}, \hyperpage{39}
+  \item {rng\+\_\+taus\+\_\+struct}, \hyperpage{40}
+  \item {rng\+\_\+tt800\+\_\+struct}, \hyperpage{40}
+  \item {rng\+\_\+well1024\+\_\+struct}, \hyperpage{40}
+  \item {rng\+\_\+xorshift\+\_\+struct}, \hyperpage{41}
+
+  \indexspace
+
+  \item {s\+Table76}
+    \subitem {random\+\_\+number\+\_\+aux.\+h}, \hyperpage{100}
+  \item {small\+\_\+range\+\_\+estimate}
+    \subitem {hll\+\_\+estimate\+\_\+s}, \hyperpage{29}
+  \item {spdist\+\_\+matrix\+\_\+struct}, \hyperpage{41}
+  \item {speciestree\+\_\+struct}, \hyperpage{42}
+  \item {splitset\+\_\+distances.\+h}, \hyperpage{105}
+  \item {splitset\+\_\+struct}, \hyperpage{43}
+
+  \indexspace
+
+  \item {T\+Rex}, \hyperpage{48}
+  \item {T\+Rex\+Match}, \hyperpage{49}
+  \item {tag\+T\+Rex\+Node}, \hyperpage{44}
+  \item {topol\+\_\+node\+\_\+struct}, \hyperpage{44}
+  \item {topology\+\_\+common.\+h}, \hyperpage{106}
+    \subitem {apply\+\_\+spr\+\_\+at\+\_\+nodes}, \hyperpage{111}
+    \subitem {apply\+\_\+spr\+\_\+at\+\_\+nodes\+\_\+not\+L\+C\+Aprune}, 
+		\hyperpage{111}
+    \subitem {copy\+\_\+topology\+\_\+from\+\_\+topology}, 
+		\hyperpage{109}
+    \subitem {graphviz\+\_\+file\+\_\+topology}, \hyperpage{110}
+    \subitem {topology\+\_\+to\+\_\+string\+\_\+by\+\_\+id}, 
+		\hyperpage{109}
+    \subitem {topology\+\_\+to\+\_\+string\+\_\+by\+\_\+name}, 
+		\hyperpage{110}
+    \subitem {topology\+\_\+to\+\_\+string\+\_\+create\+\_\+name}, 
+		\hyperpage{110}
+  \item {topology\+\_\+distance.\+h}, \hyperpage{112}
+  \item {topology\+\_\+randomise.\+h}, \hyperpage{114}
+  \item {topology\+\_\+space.\+h}, \hyperpage{115}
+    \subitem {add\+\_\+string\+\_\+with\+\_\+size\+\_\+to\+\_\+topology\+\_\+space}, 
+		\hyperpage{117}
+  \item {topology\+\_\+space\+\_\+struct}, \hyperpage{45}
+  \item {topology\+\_\+struct}, \hyperpage{46}
+  \item {topology\+\_\+to\+\_\+string\+\_\+by\+\_\+id}
+    \subitem {topology\+\_\+common.\+h}, \hyperpage{109}
+  \item {topology\+\_\+to\+\_\+string\+\_\+by\+\_\+name}
+    \subitem {topology\+\_\+common.\+h}, \hyperpage{110}
+  \item {topology\+\_\+to\+\_\+string\+\_\+create\+\_\+name}
+    \subitem {topology\+\_\+common.\+h}, \hyperpage{110}
+  \item {true}
+    \subitem {lowlevel.\+h}, \hyperpage{84}
+
+  \indexspace
+
+  \item {upgma.\+h}, \hyperpage{118}
+
+  \indexspace
+
+  \item {zero\+\_\+all\+\_\+spdist\+\_\+matrix}
+    \subitem {distance\+\_\+matrix.\+h}, \hyperpage{65}
+
+\end{theindex}

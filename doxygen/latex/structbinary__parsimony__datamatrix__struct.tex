@@ -1,0 +1,49 @@
+\hypertarget{structbinary__parsimony__datamatrix__struct}{}\subsection{binary\+\_\+parsimony\+\_\+datamatrix\+\_\+struct Struct Reference}
+\label{structbinary__parsimony__datamatrix__struct}\index{binary\+\_\+parsimony\+\_\+datamatrix\+\_\+struct@{binary\+\_\+parsimony\+\_\+datamatrix\+\_\+struct}}
+
+
+used by matrix representation with parsimony (01 10 11 sequences)  
+
+
+
+
+{\ttfamily \#include $<$parsimony.\+h$>$}
+
+\subsubsection*{Data Fields}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{structbinary__parsimony__datamatrix__struct_a424911f4f74135af958f97f25ceaf4ad}\label{structbinary__parsimony__datamatrix__struct_a424911f4f74135af958f97f25ceaf4ad}} 
+int {\bfseries ntax}
+\item 
+\mbox{\Hypertarget{structbinary__parsimony__datamatrix__struct_ad2e17453dc6a1835683753232d5b9412}\label{structbinary__parsimony__datamatrix__struct_ad2e17453dc6a1835683753232d5b9412}} 
+int {\bfseries nchar}
+\item 
+\mbox{\Hypertarget{structbinary__parsimony__datamatrix__struct_a673bd1a74e442138332c4c8321f54949}\label{structbinary__parsimony__datamatrix__struct_a673bd1a74e442138332c4c8321f54949}} 
+int \hyperlink{structbinary__parsimony__datamatrix__struct_a673bd1a74e442138332c4c8321f54949}{i}
+\begin{DoxyCompactList}\small\item\em number of taxa, distinct sites (patterns), and index to current (last) column \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structbinary__parsimony__datamatrix__struct_a137caa1e489a54f80fa6e517b6f9626d}\label{structbinary__parsimony__datamatrix__struct_a137caa1e489a54f80fa6e517b6f9626d}} 
+\hyperlink{lowlevel_8h_a97a80ca1602ebf2303258971a2c938e2}{bool} $\ast$$\ast$ \hyperlink{structbinary__parsimony__datamatrix__struct_a137caa1e489a54f80fa6e517b6f9626d}{s}
+\begin{DoxyCompactList}\small\item\em 1 (01) and 2 (10) are the two binary states, with 3 (11) being undetermined \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structbinary__parsimony__datamatrix__struct_a246a8e030ece949dc7a0c48946900258}\label{structbinary__parsimony__datamatrix__struct_a246a8e030ece949dc7a0c48946900258}} 
+int $\ast$ {\bfseries freq}
+\item 
+\mbox{\Hypertarget{structbinary__parsimony__datamatrix__struct_ac58346b932eae6dc2cc2ee8857076073}\label{structbinary__parsimony__datamatrix__struct_ac58346b932eae6dc2cc2ee8857076073}} 
+int \hyperlink{structbinary__parsimony__datamatrix__struct_ac58346b932eae6dc2cc2ee8857076073}{freq\+\_\+sum}
+\begin{DoxyCompactList}\small\item\em frequency of pattern. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structbinary__parsimony__datamatrix__struct_afb10c6a469cbf1acca33c37e234aa708}\label{structbinary__parsimony__datamatrix__struct_afb10c6a469cbf1acca33c37e234aa708}} 
+int $\ast$ \hyperlink{structbinary__parsimony__datamatrix__struct_afb10c6a469cbf1acca33c37e234aa708}{occupancy}
+\begin{DoxyCompactList}\small\item\em how many species represented by each bipartition \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structbinary__parsimony__datamatrix__struct_a4acbe9e6568767e51cabd060541f24e6}\label{structbinary__parsimony__datamatrix__struct_a4acbe9e6568767e51cabd060541f24e6}} 
+uint32\+\_\+t $\ast$ \hyperlink{structbinary__parsimony__datamatrix__struct_a4acbe9e6568767e51cabd060541f24e6}{col\+\_\+hash}
+\begin{DoxyCompactList}\small\item\em hash value of each column, to speed up comparisons \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structbinary__parsimony__datamatrix__struct_a2064ac0302bcbe428c83c5768fa266a7}\label{structbinary__parsimony__datamatrix__struct_a2064ac0302bcbe428c83c5768fa266a7}} 
+int \hyperlink{structbinary__parsimony__datamatrix__struct_a2064ac0302bcbe428c83c5768fa266a7}{ref\+\_\+counter}
+\begin{DoxyCompactList}\small\item\em how many places have a pointer to this instance \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsubsection{Detailed Description}
+used by matrix representation with parsimony (01 10 11 sequences) 
+
+The documentation for this struct was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+\hyperlink{parsimony_8h}{parsimony.\+h}\end{DoxyCompactItemize}

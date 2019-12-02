@@ -1,0 +1,7 @@
+<map id="distance_generator.h" name="distance_generator.h">
+<area shape="rect" id="node2" href="$distance__matrix_8h.html" title="distance matrix, that can be used in alignments and trees, and patristic&#45;distance based species dista..." alt="" coords="646,80,771,107"/>
+<area shape="rect" id="node3" href="$hashtable_8h.html" title="double hashing open&#45;address hash table using strings as key – also has distance matrix, that can be used in alignments and trees " alt="" coords="664,155,753,181"/>
+<area shape="rect" id="node4" href="$hashfunctions_8h.html" title="Collections of hash functions for 32 and 64 bits, including one&#45;liners, murmurhash, and xxhash. " alt="" coords="651,229,766,256"/>
+<area shape="rect" id="node5" href="$bipartition_8h.html" title="Unary/binary operators on arbitrarily&#45;sized bitstrings (strings of zeros and ones) like split biparti..." alt="" coords="664,304,753,331"/>
+<area shape="rect" id="node6" href="$lowlevel_8h.html" title="Lowest level header file. Header file for lowlevel.c. " alt="" coords="669,379,749,405"/>
+</map>

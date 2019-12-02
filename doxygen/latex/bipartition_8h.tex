@@ -1,0 +1,186 @@
+\hypertarget{bipartition_8h}{}\subsection{bipartition.\+h File Reference}
+\label{bipartition_8h}\index{bipartition.\+h@{bipartition.\+h}}
+
+
+Unary/binary operators on arbitrarily-\/sized bitstrings (strings of zeros and ones) like split bipartitions.  
+
+
+{\ttfamily \#include \char`\"{}lowlevel.\+h\char`\"{}}\newline
+Include dependency graph for bipartition.\+h\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{bipartition_8h__incl}
+\end{center}
+\end{figure}
+This graph shows which files directly or indirectly include this file\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{bipartition_8h__dep__incl}
+\end{center}
+\end{figure}
+\subsubsection*{Data Structures}
+\begin{DoxyCompactItemize}
+\item 
+struct \hyperlink{structbipartition__struct}{bipartition\+\_\+struct}
+\begin{DoxyCompactList}\small\item\em Bit-\/string representation of splits. \end{DoxyCompactList}\item 
+struct \hyperlink{structbipsize__struct}{bipsize\+\_\+struct}
+\end{DoxyCompactItemize}
+\subsubsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{bipartition_8h_a306abb015733891f436e9325a3e61716}\label{bipartition_8h_a306abb015733891f436e9325a3e61716}} 
+typedef struct \hyperlink{structbipartition__struct}{bipartition\+\_\+struct} $\ast$ {\bfseries bipartition}
+\item 
+\mbox{\Hypertarget{bipartition_8h_accfcdcb0fabd8a28ab1f40157117ebb6}\label{bipartition_8h_accfcdcb0fabd8a28ab1f40157117ebb6}} 
+typedef struct \hyperlink{structbipsize__struct}{bipsize\+\_\+struct} $\ast$ {\bfseries bipsize}
+\item 
+\mbox{\Hypertarget{bipartition_8h_a84eec7a8b7ee401120ae2970eb3c1260}\label{bipartition_8h_a84eec7a8b7ee401120ae2970eb3c1260}} 
+typedef \hyperlink{structbipartition__struct}{bipartition} $\ast$ {\bfseries tripartition}
+\end{DoxyCompactItemize}
+\subsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{structbipartition__struct}{bipartition} \hyperlink{bipartition_8h_a4046e91c94efca27e42476132b89edec}{new\+\_\+bipartition} (int size)
+\begin{DoxyCompactList}\small\item\em create a new bipartition (bitstring) capable of storing an arbitrary number of bits and initialize it to zero \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{bipartition_8h_a2a4524aef381ee0e194588bf5317439a}\label{bipartition_8h_a2a4524aef381ee0e194588bf5317439a}} 
+\hyperlink{structbipsize__struct}{bipsize} \hyperlink{bipartition_8h_a2a4524aef381ee0e194588bf5317439a}{new\+\_\+bipsize} (int size)
+\begin{DoxyCompactList}\small\item\em Create a new bipsize, which controls some bipartition sizes. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{bipartition_8h_a79971b17309d8b6dbbd64be3917f1221}\label{bipartition_8h_a79971b17309d8b6dbbd64be3917f1221}} 
+\hyperlink{structbipartition__struct}{bipartition} \hyperlink{bipartition_8h_a79971b17309d8b6dbbd64be3917f1221}{new\+\_\+bipartition\+\_\+copy\+\_\+from} (const \hyperlink{structbipartition__struct}{bipartition} from)
+\begin{DoxyCompactList}\small\item\em Create a new bipartition (allocate memory) and initialize it from another bipartition. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{bipartition_8h_ac0ba9762329edaf1307a4cb072d58a8c}\label{bipartition_8h_ac0ba9762329edaf1307a4cb072d58a8c}} 
+\hyperlink{structbipartition__struct}{bipartition} \hyperlink{bipartition_8h_ac0ba9762329edaf1307a4cb072d58a8c}{new\+\_\+bipartition\+\_\+from\+\_\+bipsize} (\hyperlink{structbipsize__struct}{bipsize} n)
+\begin{DoxyCompactList}\small\item\em create new bipartition that will share bipsize -- useful for bipartition vectors \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{bipartition_8h_a269368b8696695e9a0ab30a6807f7215}\label{bipartition_8h_a269368b8696695e9a0ab30a6807f7215}} 
+void \hyperlink{bipartition_8h_a269368b8696695e9a0ab30a6807f7215}{del\+\_\+bipartition} (\hyperlink{structbipartition__struct}{bipartition} bip)
+\begin{DoxyCompactList}\small\item\em free memory allocated by bipartition \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{bipartition_8h_a359a51341143b01a6596e07eb38599f8}\label{bipartition_8h_a359a51341143b01a6596e07eb38599f8}} 
+void \hyperlink{bipartition_8h_a359a51341143b01a6596e07eb38599f8}{del\+\_\+bipsize} (\hyperlink{structbipsize__struct}{bipsize} n)
+\begin{DoxyCompactList}\small\item\em free memory allocated by bipsize \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{bipartition_8h_ad9986d7d9721e342f51ccb973d8b05b8}\label{bipartition_8h_ad9986d7d9721e342f51ccb973d8b05b8}} 
+void \hyperlink{bipartition_8h_ad9986d7d9721e342f51ccb973d8b05b8}{bipsize\+\_\+resize} (\hyperlink{structbipsize__struct}{bipsize} n, int nbits)
+\begin{DoxyCompactList}\small\item\em update the valid number of bits and mask -- e.\+g. when replacing subtrees by leaves in reduced trees \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{bipartition_8h_ac1b35d621e3de681fc8adcc59376c15a}\label{bipartition_8h_ac1b35d621e3de681fc8adcc59376c15a}} 
+void \hyperlink{bipartition_8h_ac1b35d621e3de681fc8adcc59376c15a}{bipartition\+\_\+initialize} (\hyperlink{structbipartition__struct}{bipartition} bip, int position)
+\begin{DoxyCompactList}\small\item\em set all bits to zero except the one at position-\/th bit \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{bipartition_8h_a8de2a0287f3dc861078d5a5cb0691727}\label{bipartition_8h_a8de2a0287f3dc861078d5a5cb0691727}} 
+void \hyperlink{bipartition_8h_a8de2a0287f3dc861078d5a5cb0691727}{bipartition\+\_\+zero} (\hyperlink{structbipartition__struct}{bipartition} bip)
+\begin{DoxyCompactList}\small\item\em set all bits to zero \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{bipartition_8h_a733578f349b0cb8baea14357929467ba}\label{bipartition_8h_a733578f349b0cb8baea14357929467ba}} 
+void \hyperlink{bipartition_8h_a733578f349b0cb8baea14357929467ba}{bipartition\+\_\+set} (\hyperlink{structbipartition__struct}{bipartition} bip, int position)
+\begin{DoxyCompactList}\small\item\em simply set the bit at \char`\"{}position\char`\"{} to one, irrespective of other bits \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{bipartition_8h_a867384f907c2a4a937e1f4972a7d4528}\label{bipartition_8h_a867384f907c2a4a937e1f4972a7d4528}} 
+void {\bfseries bipartition\+\_\+set\+\_\+lowlevel} (\hyperlink{structbipartition__struct}{bipartition} bip, int i, int j)
+\item 
+\mbox{\Hypertarget{bipartition_8h_a5a6b3e6c15bddd9e824e4f6fabb4a367}\label{bipartition_8h_a5a6b3e6c15bddd9e824e4f6fabb4a367}} 
+void \hyperlink{bipartition_8h_a5a6b3e6c15bddd9e824e4f6fabb4a367}{bipartition\+\_\+unset} (\hyperlink{structbipartition__struct}{bipartition} bip, int position)
+\begin{DoxyCompactList}\small\item\em simply unset the bit at \char`\"{}position\char`\"{} (set to zero), irrespective of other bits \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{bipartition_8h_ab5dc5e89c9d653be234b0afa18efe892}\label{bipartition_8h_ab5dc5e89c9d653be234b0afa18efe892}} 
+void {\bfseries bipartition\+\_\+unset\+\_\+lowlevel} (\hyperlink{structbipartition__struct}{bipartition} bip, int i, int j)
+\item 
+\mbox{\Hypertarget{bipartition_8h_af43ee65be3d32162462e3db46bfa6c68}\label{bipartition_8h_af43ee65be3d32162462e3db46bfa6c68}} 
+void \hyperlink{bipartition_8h_af43ee65be3d32162462e3db46bfa6c68}{bipartition\+\_\+copy} (\hyperlink{structbipartition__struct}{bipartition} to, const \hyperlink{structbipartition__struct}{bipartition} from)
+\begin{DoxyCompactList}\small\item\em Copy contents from one bipartition to another. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{bipartition_8h_a08e2a6c72e1b56b0ba7a9305c9571827}\label{bipartition_8h_a08e2a6c72e1b56b0ba7a9305c9571827}} 
+void \hyperlink{bipartition_8h_a08e2a6c72e1b56b0ba7a9305c9571827}{bipartition\+\_\+\+OR} (\hyperlink{structbipartition__struct}{bipartition} result, const \hyperlink{structbipartition__struct}{bipartition} b1, const \hyperlink{structbipartition__struct}{bipartition} b2, \hyperlink{lowlevel_8h_a97a80ca1602ebf2303258971a2c938e2}{bool} update\+\_\+count)
+\begin{DoxyCompactList}\small\item\em Binary logical OR (\char`\"{}$\vert$\char`\"{}) between b1 and b2, where update\+\_\+count should be true if you need to know the resulting size (slow) or false if you don\textquotesingle{}t care or if b1 and b2 are disjoint (no common elements) \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{bipartition_8h_ac8c1099e5da96c71cd4862654a405042}\label{bipartition_8h_ac8c1099e5da96c71cd4862654a405042}} 
+void \hyperlink{bipartition_8h_ac8c1099e5da96c71cd4862654a405042}{bipartition\+\_\+\+A\+ND} (\hyperlink{structbipartition__struct}{bipartition} result, const \hyperlink{structbipartition__struct}{bipartition} b1, const \hyperlink{structbipartition__struct}{bipartition} b2, \hyperlink{lowlevel_8h_a97a80ca1602ebf2303258971a2c938e2}{bool} update\+\_\+count)
+\begin{DoxyCompactList}\small\item\em Binary logical A\+ND (\char`\"{}\&\char`\"{}) between b1 and b2, update\+\_\+count should be set to false only if you {\bfseries really} don\textquotesingle{}t need to know the number of active bits (e.\+g. sorting, bipartition comparison) \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{bipartition_8h_a42d8733818515fcce7867e3a5dd95def}\label{bipartition_8h_a42d8733818515fcce7867e3a5dd95def}} 
+void \hyperlink{bipartition_8h_a42d8733818515fcce7867e3a5dd95def}{bipartition\+\_\+\+A\+N\+D\+N\+OT} (\hyperlink{structbipartition__struct}{bipartition} result, const \hyperlink{structbipartition__struct}{bipartition} b1, const \hyperlink{structbipartition__struct}{bipartition} b2, \hyperlink{lowlevel_8h_a97a80ca1602ebf2303258971a2c938e2}{bool} update\+\_\+count)
+\begin{DoxyCompactList}\small\item\em Binary logical A\+ND (\char`\"{}\&\char`\"{}) between b1 and $\sim$b2 (N\+OT b2), that is, apply mask b1 on the inverse of b2. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{bipartition_8h_a78342af45538fc650831e5b65248fb5e}\label{bipartition_8h_a78342af45538fc650831e5b65248fb5e}} 
+void \hyperlink{bipartition_8h_a78342af45538fc650831e5b65248fb5e}{bipartition\+\_\+\+X\+OR} (\hyperlink{structbipartition__struct}{bipartition} result, const \hyperlink{structbipartition__struct}{bipartition} b1, const \hyperlink{structbipartition__struct}{bipartition} b2, \hyperlink{lowlevel_8h_a97a80ca1602ebf2303258971a2c938e2}{bool} update\+\_\+count)
+\begin{DoxyCompactList}\small\item\em Binary logical e\+Xclusive OR (\char`\"{}$^\wedge$\char`\"{}) between b1 and b2, update\+\_\+count should be set to false only if you {\bfseries really} don\textquotesingle{}t need to know the number of active bits (e.\+g. sorting, bipartition comparison) \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{bipartition_8h_abc77e0616198ac07ac5d8fe43193f661}\label{bipartition_8h_abc77e0616198ac07ac5d8fe43193f661}} 
+void \hyperlink{bipartition_8h_abc77e0616198ac07ac5d8fe43193f661}{bipartition\+\_\+\+X\+O\+R\+N\+OT} (\hyperlink{structbipartition__struct}{bipartition} result, const \hyperlink{structbipartition__struct}{bipartition} b1, const \hyperlink{structbipartition__struct}{bipartition} b2, \hyperlink{lowlevel_8h_a97a80ca1602ebf2303258971a2c938e2}{bool} update\+\_\+count)
+\begin{DoxyCompactList}\small\item\em Binary logical e\+Xclusive OR (\char`\"{}$^\wedge$\char`\"{}) between b1 and complement of b2 (that is, N\+OT b2\+: b1 $^\wedge$ $\sim$b2). Used when finding best disagreement (that in this case erases the complement --other side -- of agreement edge) \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{bipartition_8h_a2d1bb39a33b970546ac58ffcb046d8d6}\label{bipartition_8h_a2d1bb39a33b970546ac58ffcb046d8d6}} 
+void \hyperlink{bipartition_8h_a2d1bb39a33b970546ac58ffcb046d8d6}{bipartition\+\_\+\+N\+OT} (\hyperlink{structbipartition__struct}{bipartition} result, const \hyperlink{structbipartition__struct}{bipartition} bip)
+\begin{DoxyCompactList}\small\item\em Unary complement (\char`\"{}$\sim$\char`\"{}) of bipartition. Use with caution, since there is no mask for unused padded bits. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{bipartition_8h_af6cdc9daacc3e05c557f87f26cb2c157}\label{bipartition_8h_af6cdc9daacc3e05c557f87f26cb2c157}} 
+void \hyperlink{bipartition_8h_af6cdc9daacc3e05c557f87f26cb2c157}{bipartition\+\_\+count\+\_\+n\+\_\+ones} (const \hyperlink{structbipartition__struct}{bipartition} bip)
+\begin{DoxyCompactList}\small\item\em Count the number of active bits (equal to one). Used by \hyperlink{bipartition_8h_ac8c1099e5da96c71cd4862654a405042}{bipartition\+\_\+\+A\+N\+D()} and \hyperlink{bipartition_8h_a78342af45538fc650831e5b65248fb5e}{bipartition\+\_\+\+X\+O\+R()} when update\+\_\+count = true. Please use it parsimoniously since it is as slow as without bitstring representation. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{bipartition_8h_a2cad78ac8b8dcd7daa5372a2f3e6c696}\label{bipartition_8h_a2cad78ac8b8dcd7daa5372a2f3e6c696}} 
+void \hyperlink{bipartition_8h_a2cad78ac8b8dcd7daa5372a2f3e6c696}{bipartition\+\_\+to\+\_\+int\+\_\+vector} (const \hyperlink{structbipartition__struct}{bipartition} b, int $\ast$id, int vecsize)
+\begin{DoxyCompactList}\small\item\em fill vector id\mbox{[}\mbox{]} with positions of set bits, up to vecsize bits set \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{bipartition_8h_a47b6d2c862a9b02cada5eef6f3a96933}\label{bipartition_8h_a47b6d2c862a9b02cada5eef6f3a96933}} 
+\hyperlink{lowlevel_8h_a97a80ca1602ebf2303258971a2c938e2}{bool} \hyperlink{bipartition_8h_a47b6d2c862a9b02cada5eef6f3a96933}{bipartition\+\_\+is\+\_\+equal} (const \hyperlink{structbipartition__struct}{bipartition} b1, const \hyperlink{structbipartition__struct}{bipartition} b2)
+\begin{DoxyCompactList}\small\item\em Compare equality of two bipartitions. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{bipartition_8h_afeacfd040b535889cf72d43d74284b0d}\label{bipartition_8h_afeacfd040b535889cf72d43d74284b0d}} 
+\hyperlink{lowlevel_8h_a97a80ca1602ebf2303258971a2c938e2}{bool} \hyperlink{bipartition_8h_afeacfd040b535889cf72d43d74284b0d}{bipartition\+\_\+is\+\_\+equal\+\_\+bothsides} (const \hyperlink{structbipartition__struct}{bipartition} b1, const \hyperlink{structbipartition__struct}{bipartition} b2)
+\begin{DoxyCompactList}\small\item\em Compare if two bipartitions represent the same splits (or they are equal or one is the complement of the other) \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{bipartition_8h_a2d26658d417eca17423e332d7adddb8a}\label{bipartition_8h_a2d26658d417eca17423e332d7adddb8a}} 
+int \hyperlink{bipartition_8h_a2d26658d417eca17423e332d7adddb8a}{compare\+\_\+bipartitions\+\_\+increasing} (const void $\ast$a1, const void $\ast$a2)
+\begin{DoxyCompactList}\small\item\em Bipartitions comparison, to be used by sort() since returns integer and uses (void) \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{bipartition_8h_a04f310aa1b02d8ca7ad39bac31d446fd}\label{bipartition_8h_a04f310aa1b02d8ca7ad39bac31d446fd}} 
+int \hyperlink{bipartition_8h_a04f310aa1b02d8ca7ad39bac31d446fd}{compare\+\_\+bipartitions\+\_\+decreasing} (const void $\ast$a1, const void $\ast$a2)
+\begin{DoxyCompactList}\small\item\em Bipartitions comparison, to be used by sort() since returns integer and uses (void) \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{bipartition_8h_a5d7dac5bc657afaa96de811cfe9c6a92}\label{bipartition_8h_a5d7dac5bc657afaa96de811cfe9c6a92}} 
+\hyperlink{lowlevel_8h_a97a80ca1602ebf2303258971a2c938e2}{bool} \hyperlink{bipartition_8h_a5d7dac5bc657afaa96de811cfe9c6a92}{bipartition\+\_\+is\+\_\+larger} (const \hyperlink{structbipartition__struct}{bipartition} b1, const \hyperlink{structbipartition__struct}{bipartition} b2)
+\begin{DoxyCompactList}\small\item\em Compare sizes of two bipartitions, by number of active bits with ties broken by actual bitstrings. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{bipartition_8h_a1d7aa60b6f49f64b767ee913006b1da6}\label{bipartition_8h_a1d7aa60b6f49f64b767ee913006b1da6}} 
+void \hyperlink{bipartition_8h_a1d7aa60b6f49f64b767ee913006b1da6}{bipartition\+\_\+flip\+\_\+to\+\_\+smaller\+\_\+set} (\hyperlink{structbipartition__struct}{bipartition} bip)
+\begin{DoxyCompactList}\small\item\em invert ones and zeroes in loco when necessary to assure bipartition has more zeroes than ones \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{bipartition_8h_a33c95530b5714285d8ac0362c5231b2e}\label{bipartition_8h_a33c95530b5714285d8ac0362c5231b2e}} 
+\hyperlink{lowlevel_8h_a97a80ca1602ebf2303258971a2c938e2}{bool} \hyperlink{bipartition_8h_a33c95530b5714285d8ac0362c5231b2e}{bipartition\+\_\+is\+\_\+bit\+\_\+set} (const \hyperlink{structbipartition__struct}{bipartition} bip, int position)
+\begin{DoxyCompactList}\small\item\em Check if position-\/th bit is equal to one or not. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{bipartition_8h_a3c8c51e60cfaef58946fc3aaa66699f3}\label{bipartition_8h_a3c8c51e60cfaef58946fc3aaa66699f3}} 
+\hyperlink{lowlevel_8h_a97a80ca1602ebf2303258971a2c938e2}{bool} \hyperlink{bipartition_8h_a3c8c51e60cfaef58946fc3aaa66699f3}{bipartition\+\_\+contains\+\_\+bits} (const \hyperlink{structbipartition__struct}{bipartition} b1, const \hyperlink{structbipartition__struct}{bipartition} b2)
+\begin{DoxyCompactList}\small\item\em Check if first bipartition contains all elements of second bipartition (b2 is a subset of b1) \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{bipartition_8h_aacb095b009713c046c1a7b9e5a0327dc}\label{bipartition_8h_aacb095b009713c046c1a7b9e5a0327dc}} 
+void \hyperlink{bipartition_8h_aacb095b009713c046c1a7b9e5a0327dc}{bipartition\+\_\+print\+\_\+to\+\_\+stdout} (const \hyperlink{structbipartition__struct}{bipartition} b1)
+\begin{DoxyCompactList}\small\item\em Print to screen a bit representation of the bipartition (with number of ones at the end) \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{bipartition_8h_a806714fe6c29f4c91088507cf78b8905}\label{bipartition_8h_a806714fe6c29f4c91088507cf78b8905}} 
+void \hyperlink{bipartition_8h_a806714fe6c29f4c91088507cf78b8905}{bipartition\+\_\+replace\+\_\+bit\+\_\+in\+\_\+vector} (\hyperlink{structbipartition__struct}{bipartition} $\ast$bvec, int n\+\_\+b, int to, int from, \hyperlink{lowlevel_8h_a97a80ca1602ebf2303258971a2c938e2}{bool} reduce)
+\begin{DoxyCompactList}\small\item\em replace bit info, copying \textquotesingle{}from\textquotesingle{} one position \textquotesingle{}to\textquotesingle{} another; bool \char`\"{}update\char`\"{} indicates if afterwards size will be reduced \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{bipartition_8h_a04f73019b04e2b7283c4b1034d0ab656}\label{bipartition_8h_a04f73019b04e2b7283c4b1034d0ab656}} 
+void \hyperlink{bipartition_8h_a04f73019b04e2b7283c4b1034d0ab656}{bipartition\+\_\+resize\+\_\+vector} (\hyperlink{structbipartition__struct}{bipartition} $\ast$bvec, int n\+\_\+b)
+\begin{DoxyCompactList}\small\item\em apply mask to last element (useful after manipulations) and count number of bits \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{bipartition_8h_ab6400d669335c7cc5ac2e10907d64a9d}\label{bipartition_8h_ab6400d669335c7cc5ac2e10907d64a9d}} 
+\hyperlink{structbipartition__struct}{tripartition} \hyperlink{bipartition_8h_ab6400d669335c7cc5ac2e10907d64a9d}{new\+\_\+tripartition} (int nleaves)
+\begin{DoxyCompactList}\small\item\em tripartition of a node (a vector with 3 bipartitions, that should not be \textquotesingle{}flipped\textquotesingle{} to smaller set, however) \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{bipartition_8h_a7e55ab85d24252191edd3a1768e36816}\label{bipartition_8h_a7e55ab85d24252191edd3a1768e36816}} 
+void \hyperlink{bipartition_8h_a7e55ab85d24252191edd3a1768e36816}{del\+\_\+tripartition} (\hyperlink{structbipartition__struct}{tripartition} trip)
+\begin{DoxyCompactList}\small\item\em free tripartition space (just 3 bipartitions) \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{bipartition_8h_ace9a62f4146cce7467b70b179786a4ae}\label{bipartition_8h_ace9a62f4146cce7467b70b179786a4ae}} 
+void \hyperlink{bipartition_8h_ace9a62f4146cce7467b70b179786a4ae}{store\+\_\+tripartition\+\_\+from\+\_\+bipartitions} (\hyperlink{structbipartition__struct}{tripartition} tri, \hyperlink{structbipartition__struct}{bipartition} b1, \hyperlink{structbipartition__struct}{bipartition} b2)
+\begin{DoxyCompactList}\small\item\em from node, create tripartition from node-\/$>$left and node-\/$>$right (assuming bipartitions were not \textquotesingle{}flipped\textquotesingle{} yet) \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{bipartition_8h_a3c938956ea2a3cc95f0be413e9baa072}\label{bipartition_8h_a3c938956ea2a3cc95f0be413e9baa072}} 
+void \hyperlink{bipartition_8h_a3c938956ea2a3cc95f0be413e9baa072}{sort\+\_\+tripartition} (\hyperlink{structbipartition__struct}{tripartition} tri)
+\begin{DoxyCompactList}\small\item\em sort order of bipartitions s.\+t. smallest is first \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{bipartition_8h_a8eba8eccc761ee9486a4de679448dbc3}\label{bipartition_8h_a8eba8eccc761ee9486a4de679448dbc3}} 
+int \hyperlink{bipartition_8h_a8eba8eccc761ee9486a4de679448dbc3}{align\+\_\+tripartitions} (\hyperlink{structbipartition__struct}{tripartition} tp1, \hyperlink{structbipartition__struct}{tripartition} tp2, \hyperlink{structhungarian__struct}{hungarian} h)
+\begin{DoxyCompactList}\small\item\em match bipartitions between two nodes and return optimal score (min disagreement) \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{bipartition_8h_a8a07a32fc365d03a0ecdd94ecd88340f}\label{bipartition_8h_a8a07a32fc365d03a0ecdd94ecd88340f}} 
+\hyperlink{lowlevel_8h_a97a80ca1602ebf2303258971a2c938e2}{bool} \hyperlink{bipartition_8h_a8a07a32fc365d03a0ecdd94ecd88340f}{tripartition\+\_\+is\+\_\+equal} (\hyperlink{structbipartition__struct}{tripartition} tp1, \hyperlink{structbipartition__struct}{tripartition} tp2)
+\begin{DoxyCompactList}\small\item\em assuming tripartitions are ordered, check if nodes (represented by tripartitions) are the same \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsubsection{Detailed Description}
+Unary/binary operators on arbitrarily-\/sized bitstrings (strings of zeros and ones) like split bipartitions. 
+
+
+
+\subsubsection{Function Documentation}
+\mbox{\Hypertarget{bipartition_8h_a4046e91c94efca27e42476132b89edec}\label{bipartition_8h_a4046e91c94efca27e42476132b89edec}} 
+\index{bipartition.\+h@{bipartition.\+h}!new\+\_\+bipartition@{new\+\_\+bipartition}}
+\index{new\+\_\+bipartition@{new\+\_\+bipartition}!bipartition.\+h@{bipartition.\+h}}
+\paragraph{\texorpdfstring{new\+\_\+bipartition()}{new\_bipartition()}}
+{\footnotesize\ttfamily \hyperlink{structbipartition__struct}{bipartition} new\+\_\+bipartition (\begin{DoxyParamCaption}\item[{int}]{size }\end{DoxyParamCaption})}
+
+
+
+create a new bipartition (bitstring) capable of storing an arbitrary number of bits and initialize it to zero 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em size} & number of bits of desired bipartition \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+bipartition (opaquely a vector of long long ints) 
+\end{DoxyReturn}

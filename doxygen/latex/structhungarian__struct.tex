@@ -1,0 +1,67 @@
+\hypertarget{structhungarian__struct}{}\subsection{hungarian\+\_\+struct Struct Reference}
+\label{structhungarian__struct}\index{hungarian\+\_\+struct@{hungarian\+\_\+struct}}
+\subsubsection*{Data Fields}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{structhungarian__struct_a035c909caa99385d7de0a3121930ea97}\label{structhungarian__struct_a035c909caa99385d7de0a3121930ea97}} 
+int $\ast$$\ast$ {\bfseries cost}
+\item 
+\mbox{\Hypertarget{structhungarian__struct_add5775a6b09229dafbf70064ee507f8a}\label{structhungarian__struct_add5775a6b09229dafbf70064ee507f8a}} 
+int \hyperlink{structhungarian__struct_add5775a6b09229dafbf70064ee507f8a}{size}
+\begin{DoxyCompactList}\small\item\em cost matrix \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structhungarian__struct_aac743e34a5477355c52bf0385a1a834a}\label{structhungarian__struct_aac743e34a5477355c52bf0385a1a834a}} 
+int \hyperlink{structhungarian__struct_aac743e34a5477355c52bf0385a1a834a}{initial\+\_\+cost}
+\begin{DoxyCompactList}\small\item\em assignment size. Cost is a square matrix, so size should be an overestimate where \char`\"{}missing\char`\"{} nodes are added w/ cost zero \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structhungarian__struct_a585c79fc76d76c173a9b9ad93fb4a3a3}\label{structhungarian__struct_a585c79fc76d76c173a9b9ad93fb4a3a3}} 
+int \hyperlink{structhungarian__struct_a585c79fc76d76c173a9b9ad93fb4a3a3}{final\+\_\+cost}
+\begin{DoxyCompactList}\small\item\em sum of lowest input cost values for each column. The hungarian method rescales them so that minimum per column is zero \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structhungarian__struct_ad1aa7dc6487faaa08c5412aca4443f96}\label{structhungarian__struct_ad1aa7dc6487faaa08c5412aca4443f96}} 
+int $\ast$ \hyperlink{structhungarian__struct_ad1aa7dc6487faaa08c5412aca4443f96}{col\+\_\+mate}
+\begin{DoxyCompactList}\small\item\em our final cost is on rescaled cost matrix, therefore to restore the \char`\"{}classical\char`\"{} optimal cost one should sum it with initial\+\_\+cost \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structhungarian__struct_a3a1148ae045f0d79d9cf0f9af9ee672c}\label{structhungarian__struct_a3a1148ae045f0d79d9cf0f9af9ee672c}} 
+int $\ast$ {\bfseries unchosen\+\_\+row}
+\item 
+\mbox{\Hypertarget{structhungarian__struct_af2cbec1d573cd8e4ab960c9dff026e3a}\label{structhungarian__struct_af2cbec1d573cd8e4ab960c9dff026e3a}} 
+int $\ast$ {\bfseries slack\+\_\+row}
+\item 
+\mbox{\Hypertarget{structhungarian__struct_ae933db937fbf3cf6e0fec730cba07431}\label{structhungarian__struct_ae933db937fbf3cf6e0fec730cba07431}} 
+int $\ast$ {\bfseries row\+\_\+mate}
+\item 
+\mbox{\Hypertarget{structhungarian__struct_a6120eedc80441baa440621920d9d731f}\label{structhungarian__struct_a6120eedc80441baa440621920d9d731f}} 
+int $\ast$ {\bfseries parent\+\_\+row}
+\item 
+\mbox{\Hypertarget{structhungarian__struct_a7bacee8475c3d90d879d7b31aa4d1af9}\label{structhungarian__struct_a7bacee8475c3d90d879d7b31aa4d1af9}} 
+double $\ast$$\ast$ \hyperlink{structhungarian__struct_a7bacee8475c3d90d879d7b31aa4d1af9}{dcost}
+\begin{DoxyCompactList}\small\item\em col\+\_\+mate\mbox{[}row\mbox{]} with column match for row \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structhungarian__struct_a56543be8800d38b356c8832b3cb0d3f0}\label{structhungarian__struct_a56543be8800d38b356c8832b3cb0d3f0}} 
+double {\bfseries initial\+\_\+dcost}
+\item 
+\mbox{\Hypertarget{structhungarian__struct_a20d0397e071c5c2078e5d5787a03417d}\label{structhungarian__struct_a20d0397e071c5c2078e5d5787a03417d}} 
+double {\bfseries final\+\_\+dcost}
+\item 
+\mbox{\Hypertarget{structhungarian__struct_a9620ca241d63fadd87189bf117bad71a}\label{structhungarian__struct_a9620ca241d63fadd87189bf117bad71a}} 
+double $\ast$ \hyperlink{structhungarian__struct_a9620ca241d63fadd87189bf117bad71a}{row\+\_\+dec\+\_\+d}
+\begin{DoxyCompactList}\small\item\em costs when working with float numbers instead of integers \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structhungarian__struct_a664fb941cbe92edac9b53b3a73ab2bcf}\label{structhungarian__struct_a664fb941cbe92edac9b53b3a73ab2bcf}} 
+double $\ast$ {\bfseries col\+\_\+inc\+\_\+d}
+\item 
+\mbox{\Hypertarget{structhungarian__struct_ab950c557f9dfff879eb5ee24e6aacd02}\label{structhungarian__struct_ab950c557f9dfff879eb5ee24e6aacd02}} 
+double $\ast$ {\bfseries slack\+\_\+d}
+\item 
+\mbox{\Hypertarget{structhungarian__struct_a0800735b749c19f173bc7fcd308120a6}\label{structhungarian__struct_a0800735b749c19f173bc7fcd308120a6}} 
+int $\ast$ {\bfseries row\+\_\+dec}
+\item 
+\mbox{\Hypertarget{structhungarian__struct_a935949b5feabfb7ec7328c159c7a6bb6}\label{structhungarian__struct_a935949b5feabfb7ec7328c159c7a6bb6}} 
+int $\ast$ {\bfseries col\+\_\+inc}
+\item 
+\mbox{\Hypertarget{structhungarian__struct_ae000f8eb99f06115d85943377e0bbf97}\label{structhungarian__struct_ae000f8eb99f06115d85943377e0bbf97}} 
+int $\ast$ {\bfseries slack}
+\item 
+\mbox{\Hypertarget{structhungarian__struct_ac1f3d3ba3885b39457c4fe89b3fc0b81}\label{structhungarian__struct_ac1f3d3ba3885b39457c4fe89b3fc0b81}} 
+\hyperlink{lowlevel_8h_a97a80ca1602ebf2303258971a2c938e2}{bool} {\bfseries is\+\_\+double}
+\end{DoxyCompactItemize}
+
+
+The documentation for this struct was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+\hyperlink{lowlevel_8h}{lowlevel.\+h}\end{DoxyCompactItemize}

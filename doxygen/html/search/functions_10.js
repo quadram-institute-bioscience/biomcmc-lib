@@ -1,0 +1,20 @@
+var searchData=
+[
+  ['topology_5fapply_5fnni',['topology_apply_nni',['../topology__randomise_8h.html#ae5f8ee906bafa7328698de604008b802',1,'topology_randomise.c']]],
+  ['topology_5fapply_5frerooting',['topology_apply_rerooting',['../topology__randomise_8h.html#a632fe94e8fb3b671a716240b05887f2d',1,'topology_randomise.c']]],
+  ['topology_5fapply_5fshortspr',['topology_apply_shortspr',['../topology__randomise_8h.html#a784a6686a1b15ea4c3a95e7a077d6f0e',1,'topology_randomise.c']]],
+  ['topology_5fapply_5fshortspr_5fweighted',['topology_apply_shortspr_weighted',['../topology__randomise_8h.html#a1122af5bc2a6bbc5412bd0bb3fc54446',1,'topology_randomise.c']]],
+  ['topology_5fapply_5fspr',['topology_apply_spr',['../topology__randomise_8h.html#a57ab4071eee8501035a8ebd245a8d5f7',1,'topology_randomise.c']]],
+  ['topology_5fapply_5fspr_5fon_5fsubtree',['topology_apply_spr_on_subtree',['../topology__randomise_8h.html#a96f574bd85d2994dc9a370d7517c55d8',1,'topology_randomise.c']]],
+  ['topology_5fapply_5fspr_5funrooted',['topology_apply_spr_unrooted',['../topology__randomise_8h.html#ab7fbc8681f8e613d20b9f8b9cb6d9bba',1,'topology_randomise.c']]],
+  ['topology_5fis_5fequal',['topology_is_equal',['../topology__common_8h.html#a6835412616c6e3aee7a752664ab2d452',1,'topology_common.c']]],
+  ['topology_5fis_5fequal_5funrooted',['topology_is_equal_unrooted',['../topology__common_8h.html#abf57ef1d396f3f84fcaedda2529009fb',1,'topology_common.c']]],
+  ['topology_5fmalloc_5fblength',['topology_malloc_blength',['../topology__common_8h.html#afef9dfca253f6e961e349f289b10c7d8',1,'topology_common.h']]],
+  ['topology_5freset_5frandom_5fmove',['topology_reset_random_move',['../topology__common_8h.html#ae10e4d2ac03cd340e2bdbc955deeb98d',1,'topology_common.c']]],
+  ['topology_5fto_5fstring_5fby_5fid',['topology_to_string_by_id',['../topology__common_8h.html#a6db1cb85d5a57b3a3c91fe735861204a',1,'topology_common.c']]],
+  ['topology_5fto_5fstring_5fby_5fname',['topology_to_string_by_name',['../topology__common_8h.html#aa728f9d79edb4799b279bd837398b75d',1,'topology_common.c']]],
+  ['topology_5fto_5fstring_5fcreate_5fname',['topology_to_string_create_name',['../topology__common_8h.html#aa60cb33af89c2c7b74bb218eb9468bf3',1,'topology_common.c']]],
+  ['topology_5fundo_5frandom_5fmove',['topology_undo_random_move',['../topology__common_8h.html#ae95c8cdd4571f36a098d29b2a1d54f3d',1,'topology_common.c']]],
+  ['transpose_5fdistance_5fmatrix',['transpose_distance_matrix',['../distance__matrix_8h.html#a5ac533926151f08c78923a645ab11446',1,'distance_matrix.c']]],
+  ['tripartition_5fis_5fequal',['tripartition_is_equal',['../bipartition_8h.html#a8a07a32fc365d03a0ecdd94ecd88340f',1,'bipartition.c']]]
+];

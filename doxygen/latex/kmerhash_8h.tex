@@ -1,0 +1,70 @@
+\hypertarget{kmerhash_8h}{}\subsection{kmerhash.\+h File Reference}
+\label{kmerhash_8h}\index{kmerhash.\+h@{kmerhash.\+h}}
+
+
+k-\/mer handling of D\+NA sequences, with hash transformation  
+
+
+{\ttfamily \#include \char`\"{}alignment.\+h\char`\"{}}\newline
+Include dependency graph for kmerhash.\+h\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{kmerhash_8h__incl}
+\end{center}
+\end{figure}
+This graph shows which files directly or indirectly include this file\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=148pt]{kmerhash_8h__dep__incl}
+\end{center}
+\end{figure}
+\subsubsection*{Data Structures}
+\begin{DoxyCompactItemize}
+\item 
+struct \hyperlink{structkmer__params__struct}{kmer\+\_\+params\+\_\+struct}
+\item 
+struct \hyperlink{structkmerhash__struct}{kmerhash\+\_\+struct}
+\end{DoxyCompactItemize}
+\subsubsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{kmerhash_8h_a5169f8c940e8084e76583119f945c27a}\label{kmerhash_8h_a5169f8c940e8084e76583119f945c27a}} 
+typedef struct \hyperlink{structkmer__params__struct}{kmer\+\_\+params\+\_\+struct} $\ast$ {\bfseries kmer\+\_\+params}
+\item 
+\mbox{\Hypertarget{kmerhash_8h_a5550bea76a69cdf266bb833179dd4008}\label{kmerhash_8h_a5550bea76a69cdf266bb833179dd4008}} 
+typedef struct \hyperlink{structkmerhash__struct}{kmerhash\+\_\+struct} $\ast$ {\bfseries kmerhash}
+\end{DoxyCompactItemize}
+\subsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{kmerhash_8h_a648290e37a603d85c7162f383d4d5184}\label{kmerhash_8h_a648290e37a603d85c7162f383d4d5184}} 
+\hyperlink{structkmer__params__struct}{kmer\+\_\+params} {\bfseries new\+\_\+kmer\+\_\+params} (int mode)
+\item 
+\mbox{\Hypertarget{kmerhash_8h_a96c55272a247390bddb768ee956f0843}\label{kmerhash_8h_a96c55272a247390bddb768ee956f0843}} 
+void {\bfseries del\+\_\+kmer\+\_\+params} (\hyperlink{structkmer__params__struct}{kmer\+\_\+params} p)
+\item 
+\mbox{\Hypertarget{kmerhash_8h_ae6094dc29f1ef6535ab9a0290ccfba0a}\label{kmerhash_8h_ae6094dc29f1ef6535ab9a0290ccfba0a}} 
+\hyperlink{structkmerhash__struct}{kmerhash} {\bfseries new\+\_\+kmerhash} (int mode)
+\item 
+\mbox{\Hypertarget{kmerhash_8h_a18ef47efb9316ce467b7c63791f26ec6}\label{kmerhash_8h_a18ef47efb9316ce467b7c63791f26ec6}} 
+void {\bfseries link\+\_\+kmerhash\+\_\+to\+\_\+dna\+\_\+sequence} (\hyperlink{structkmerhash__struct}{kmerhash} kmer, char $\ast$dna, size\+\_\+t dna\+\_\+length)
+\item 
+\mbox{\Hypertarget{kmerhash_8h_a1db0ecbb6e3582966a021a8d29799802}\label{kmerhash_8h_a1db0ecbb6e3582966a021a8d29799802}} 
+void {\bfseries del\+\_\+kmerhash} (\hyperlink{structkmerhash__struct}{kmerhash} kmer)
+\item 
+\mbox{\Hypertarget{kmerhash_8h_a637be683e796bff4fabb929e7af2eeda}\label{kmerhash_8h_a637be683e796bff4fabb929e7af2eeda}} 
+\hyperlink{lowlevel_8h_a97a80ca1602ebf2303258971a2c938e2}{bool} {\bfseries kmerhash\+\_\+iterator} (\hyperlink{structkmerhash__struct}{kmerhash} kmer)
+\end{DoxyCompactItemize}
+\subsubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{kmerhash_8h_a8b6e8e3c9b081feb2a3e56e6de53f8ff}\label{kmerhash_8h_a8b6e8e3c9b081feb2a3e56e6de53f8ff}} 
+const char $\ast$ {\bfseries biomcmc\+\_\+kmer\+\_\+class\+\_\+string} \mbox{[}$\,$\mbox{]}
+\end{DoxyCompactItemize}
+
+
+\subsubsection{Detailed Description}
+k-\/mer handling of D\+NA sequences, with hash transformation 
+

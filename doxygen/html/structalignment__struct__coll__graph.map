@@ -1,0 +1,5 @@
+<map id="alignment_struct" name="alignment_struct">
+<area shape="rect" id="node2" href="$structchar__vector__struct.html" title="vector of strings (char vectors) of variable length " alt="" coords="5,95,136,121"/>
+<area shape="rect" id="node3" href="$structhashtable__struct.html" title="Hash table (vector indexed by strings). " alt="" coords="161,95,279,121"/>
+<area shape="rect" id="node4" href="$structhashtable__item__struct.html" title="key/value pair for hash table " alt="" coords="145,5,295,32"/>
+</map>

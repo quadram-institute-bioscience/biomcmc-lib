@@ -1,0 +1,66 @@
+\hypertarget{read__newick__trees_8h}{}\subsection{read\+\_\+newick\+\_\+trees.\+h File Reference}
+\label{read__newick__trees_8h}\index{read\+\_\+newick\+\_\+trees.\+h@{read\+\_\+newick\+\_\+trees.\+h}}
+
+
+Low-\/level functions for reading newick strings.  
+
+
+{\ttfamily \#include \char`\"{}topology\+\_\+distance.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}nexus\+\_\+common.\+h\char`\"{}}\newline
+Include dependency graph for read\+\_\+newick\+\_\+trees.\+h\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{read__newick__trees_8h__incl}
+\end{center}
+\end{figure}
+This graph shows which files directly or indirectly include this file\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=187pt]{read__newick__trees_8h__dep__incl}
+\end{center}
+\end{figure}
+\subsubsection*{Data Structures}
+\begin{DoxyCompactItemize}
+\item 
+struct \hyperlink{structnewick__node__struct}{newick\+\_\+node\+\_\+struct}
+\begin{DoxyCompactList}\small\item\em newick trees have minimal information, unlike \hyperlink{structtopology__struct}{topology\+\_\+struct} \end{DoxyCompactList}\item 
+struct \hyperlink{structnewick__tree__struct}{newick\+\_\+tree\+\_\+struct}
+\end{DoxyCompactItemize}
+\subsubsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{read__newick__trees_8h_a17eff5f5c07a12cad4a872a8f17f1d48}\label{read__newick__trees_8h_a17eff5f5c07a12cad4a872a8f17f1d48}} 
+typedef struct \hyperlink{structnewick__node__struct}{newick\+\_\+node\+\_\+struct} $\ast$ {\bfseries newick\+\_\+node}
+\item 
+\mbox{\Hypertarget{read__newick__trees_8h_a85503f4d822790af9454dffbdbf92da8}\label{read__newick__trees_8h_a85503f4d822790af9454dffbdbf92da8}} 
+typedef struct \hyperlink{structnewick__tree__struct}{newick\+\_\+tree\+\_\+struct} $\ast$ {\bfseries newick\+\_\+tree}
+\end{DoxyCompactItemize}
+\subsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{read__newick__trees_8h_a00f92762292f167cbfbdd44a551ab915}\label{read__newick__trees_8h_a00f92762292f167cbfbdd44a551ab915}} 
+\hyperlink{structnewick__tree__struct}{newick\+\_\+tree} \hyperlink{read__newick__trees_8h_a00f92762292f167cbfbdd44a551ab915}{new\+\_\+newick\+\_\+tree} (int nleaves)
+\begin{DoxyCompactList}\small\item\em Allocates memory for \hyperlink{structnewick__tree__struct}{newick\+\_\+tree\+\_\+struct}. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{read__newick__trees_8h_a1ef0c8916f83b5468835e754ff163b7b}\label{read__newick__trees_8h_a1ef0c8916f83b5468835e754ff163b7b}} 
+void \hyperlink{read__newick__trees_8h_a1ef0c8916f83b5468835e754ff163b7b}{del\+\_\+newick\+\_\+tree} (\hyperlink{structnewick__tree__struct}{newick\+\_\+tree} T)
+\begin{DoxyCompactList}\small\item\em Frees memory used by tree. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{read__newick__trees_8h_a942dbdba070e3936bbea94269070d3cb}\label{read__newick__trees_8h_a942dbdba070e3936bbea94269070d3cb}} 
+void \hyperlink{read__newick__trees_8h_a942dbdba070e3936bbea94269070d3cb}{copy\+\_\+topology\+\_\+from\+\_\+newick\+\_\+tree} (\hyperlink{structtopology__struct}{topology} tree, \hyperlink{structnewick__tree__struct}{newick\+\_\+tree} nwk\+\_\+tree, \hyperlink{lowlevel_8h_a97a80ca1602ebf2303258971a2c938e2}{bool} create\+\_\+tree\+\_\+taxlabel)
+\begin{DoxyCompactList}\small\item\em Copy information from newick\+\_\+tree struct to \hyperlink{structtopology__struct}{topology\+\_\+struct}; newick\+\_\+space copies taxlabels but topology\+\_\+space (from nexus files) share the taxlabel and thus don\textquotesingle{}t copy from \hyperlink{structnewick__tree__struct}{newick\+\_\+tree\+\_\+struct}. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{read__newick__trees_8h_ae74ba79f809568d031c2e23b70520149}\label{read__newick__trees_8h_ae74ba79f809568d031c2e23b70520149}} 
+\hyperlink{structnewick__tree__struct}{newick\+\_\+tree} \hyperlink{read__newick__trees_8h_ae74ba79f809568d031c2e23b70520149}{new\+\_\+newick\+\_\+tree\+\_\+from\+\_\+string} (char $\ast$external\+\_\+string)
+\begin{DoxyCompactList}\small\item\em Creates newick\+\_\+tree structure. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{read__newick__trees_8h_a340cb8e9eebf86519b2373059146c065}\label{read__newick__trees_8h_a340cb8e9eebf86519b2373059146c065}} 
+\hyperlink{structnewick__node__struct}{newick\+\_\+node} \hyperlink{read__newick__trees_8h_a340cb8e9eebf86519b2373059146c065}{subtree\+\_\+newick\+\_\+tree} (\hyperlink{structnewick__tree__struct}{newick\+\_\+tree} tree, char $\ast$lsptr, char $\ast$rsptr, int $\ast$node\+\_\+id, \hyperlink{structnewick__node__struct}{newick\+\_\+node} up)
+\begin{DoxyCompactList}\small\item\em Recursive function that creates a node based on parenthetic structure. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{read__newick__trees_8h_a75d85e08fe5c0f6e7466af8b11b0684a}\label{read__newick__trees_8h_a75d85e08fe5c0f6e7466af8b11b0684a}} 
+int \hyperlink{read__newick__trees_8h_a75d85e08fe5c0f6e7466af8b11b0684a}{number\+\_\+of\+\_\+leaves\+\_\+in\+\_\+newick} (char $\ast$$\ast$string, int $\ast$number\+\_\+branches)
+\begin{DoxyCompactList}\small\item\em Counts the number of leaves and resolves (one) trifurcation of tree string. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsubsection{Detailed Description}
+Low-\/level functions for reading newick strings. 
+
+Currently does not check for duplicated trees, or same leaf names on a tree 

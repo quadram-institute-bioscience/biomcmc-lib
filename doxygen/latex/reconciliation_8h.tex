@@ -1,0 +1,48 @@
+\hypertarget{reconciliation_8h}{}\subsection{reconciliation.\+h File Reference}
+\label{reconciliation_8h}\index{reconciliation.\+h@{reconciliation.\+h}}
+
+
+low-\/level file for gene tree and species tree reconciliation. This file is hidden from user and contains the L\+C\+A-\/based reconciliation distances.  
+
+
+{\ttfamily \#include \char`\"{}genetree.\+h\char`\"{}}\newline
+Include dependency graph for reconciliation.\+h\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{reconciliation_8h__incl}
+\end{center}
+\end{figure}
+This graph shows which files directly or indirectly include this file\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=184pt]{reconciliation_8h__dep__incl}
+\end{center}
+\end{figure}
+\subsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{reconciliation_8h_a4e43d27ac7571ea9ff7249f8ff2ca7d2}\label{reconciliation_8h_a4e43d27ac7571ea9ff7249f8ff2ca7d2}} 
+\hyperlink{structreconciliation__struct}{reconciliation} \hyperlink{reconciliation_8h_a4e43d27ac7571ea9ff7249f8ff2ca7d2}{new\+\_\+reconciliation} (int gene\+\_\+nleaves, int sp\+\_\+nleaves)
+\begin{DoxyCompactList}\small\item\em Allocate space for new \hyperlink{structreconciliation__struct}{reconciliation\+\_\+struct} (other functions defined in topology\+\_\+mrca.\+c) \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{reconciliation_8h_a0af77d1572501544af818118413a48dd}\label{reconciliation_8h_a0af77d1572501544af818118413a48dd}} 
+\hyperlink{structreconciliation__struct}{reconciliation} \hyperlink{reconciliation_8h_a0af77d1572501544af818118413a48dd}{new\+\_\+reconciliation\+\_\+from\+\_\+reconciliation} (int gene\+\_\+nleaves, int sp\+\_\+nleaves, \hyperlink{structreconciliation__struct}{reconciliation} from)
+\begin{DoxyCompactList}\small\item\em Create new reconciliation struct and copy values (except species tree info) from another struct. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{reconciliation_8h_a7ea99a5f35402402814684554d873ff2}\label{reconciliation_8h_a7ea99a5f35402402814684554d873ff2}} 
+void \hyperlink{reconciliation_8h_a7ea99a5f35402402814684554d873ff2}{del\+\_\+reconciliation} (\hyperlink{structreconciliation__struct}{reconciliation} r)
+\begin{DoxyCompactList}\small\item\em release allocated memory for \hyperlink{structreconciliation__struct}{reconciliation\+\_\+struct} \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{reconciliation_8h_accc5e78e8e66699960a1cb629d967e26}\label{reconciliation_8h_accc5e78e8e66699960a1cb629d967e26}} 
+void \hyperlink{reconciliation_8h_accc5e78e8e66699960a1cb629d967e26}{initialize\+\_\+reconciliation\+\_\+sp\+\_\+count} (\hyperlink{structreconciliation__struct}{reconciliation} rec, int n\+\_\+sp, int n\+\_\+idx)
+\begin{DoxyCompactList}\small\item\em Fill rec-\/$>$sp\+\_\+count\mbox{[}\mbox{]} with the number of representatives of each species (idexed by rec-\/$>$sp\+\_\+id\mbox{[}\mbox{]}) \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{reconciliation_8h_a41510c89f1d063d405eac3db5df97479}\label{reconciliation_8h_a41510c89f1d063d405eac3db5df97479}} 
+void \hyperlink{reconciliation_8h_a41510c89f1d063d405eac3db5df97479}{initialize\+\_\+reconciliation\+\_\+from\+\_\+new\+\_\+species\+\_\+tree} (\hyperlink{structgenetree__struct}{genetree} gtre, \hyperlink{structspeciestree__struct}{speciestree} sptre)
+\begin{DoxyCompactList}\small\item\em transform indexes found in index\+\_\+sptaxa\+\_\+to\+\_\+genetaxa() to pointers to species nodes \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{reconciliation_8h_ac111f700f45f29cb39ecdd14b7903297}\label{reconciliation_8h_ac111f700f45f29cb39ecdd14b7903297}} 
+void \hyperlink{reconciliation_8h_ac111f700f45f29cb39ecdd14b7903297}{reconciliation\+\_\+gene\+\_\+tree\+\_\+reconcile} (\hyperlink{structgenetree__struct}{genetree} gtre, \hyperlink{structspeciestree__struct}{speciestree} sptre)
+\begin{DoxyCompactList}\small\item\em Find reconciliation map between gene and species trees. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsubsection{Detailed Description}
+low-\/level file for gene tree and species tree reconciliation. This file is hidden from user and contains the L\+C\+A-\/based reconciliation distances. 
+

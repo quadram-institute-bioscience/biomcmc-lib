@@ -1,0 +1,26 @@
+var searchData=
+[
+  ['s',['s',['../structbinary__parsimony__datamatrix__struct.html#a137caa1e489a54f80fa6e517b6f9626d',1,'binary_parsimony_datamatrix_struct']]],
+  ['save_5ftopology_5fspace_5fto_5ftrprobs_5ffile',['save_topology_space_to_trprobs_file',['../topology__space_8h.html#af756d62d1010e19c2b6b8db87e9d52cf',1,'topology_space.c']]],
+  ['score',['score',['../structbinary__parsimony__struct.html#a8002f973d4c738ceb44ff459833965b2',1,'binary_parsimony_struct']]],
+  ['site_5fpattern',['site_pattern',['../structalignment__struct.html#ab599779f0254908bf21a78a503ee71bf',1,'alignment_struct']]],
+  ['size',['size',['../structhashtable__struct.html#a0fb42778e1d783631e499751ba367b06',1,'hashtable_struct::size()'],['../structhungarian__struct.html#add5775a6b09229dafbf70064ee507f8a',1,'hungarian_struct::size()']]],
+  ['size_5fdiff',['size_diff',['../structreconciliation__struct.html#aeb4f07f6c681cb938ecf5c8679555549',1,'reconciliation_struct']]],
+  ['small_5frange_5festimate',['small_range_estimate',['../structhll__estimate__s.html#acfa1e2f8075ca50adcbc6cfec4a86e28',1,'hll_estimate_s']]],
+  ['sort_5ftripartition',['sort_tripartition',['../bipartition_8h.html#a3c938956ea2a3cc95f0be413e9baa072',1,'bipartition.c']]],
+  ['sp_5fcount',['sp_count',['../structreconciliation__struct.html#a2b5f260452d8240e46afd2604b975e14',1,'reconciliation_struct']]],
+  ['sp_5fid',['sp_id',['../structreconciliation__struct.html#a58d7c66720179b77ae0aa54911d11c1f',1,'reconciliation_struct']]],
+  ['sp_5fsize',['sp_size',['../structreconciliation__struct.html#a89ac1a00c6c775cb5769396e832e58ef',1,'reconciliation_struct']]],
+  ['spdist_5fmatrix_5fstruct',['spdist_matrix_struct',['../structspdist__matrix__struct.html',1,'']]],
+  ['species_5fpresent',['species_present',['../structspdist__matrix__struct.html#adf10eb5aea5957e231a5032c1f1c412e',1,'spdist_matrix_struct']]],
+  ['speciestree_5fstruct',['speciestree_struct',['../structspeciestree__struct.html',1,'']]],
+  ['split',['split',['../structtopol__node__struct.html#aab1db55910dcf5f4e8b3d451aa0a8422',1,'topol_node_struct']]],
+  ['splitset_5fdistances_2eh',['splitset_distances.h',['../splitset__distances_8h.html',1,'']]],
+  ['splitset_5fstruct',['splitset_struct',['../structsplitset__struct.html',1,'']]],
+  ['spnames_5forder',['spnames_order',['../structspeciestree__struct.html#a70069c66ad4062e05d0b6a6641866729',1,'speciestree_struct']]],
+  ['stable543',['sTable543',['../random__number__aux_8h.html#acfe84e71977f167668562b4897f3e439',1,'random_number_aux.h']]],
+  ['stable76',['sTable76',['../random__number__aux_8h.html#a8b4eacb54ca8b772cecbc032e1985de2',1,'random_number_aux.h']]],
+  ['store_5flikelihood_5finfo_5fat_5fleaf',['store_likelihood_info_at_leaf',['../alignment_8h.html#a0d5562e7469a65589c80e20dc561e3ce',1,'alignment.c']]],
+  ['store_5ftripartition_5ffrom_5fbipartitions',['store_tripartition_from_bipartitions',['../bipartition_8h.html#ace9a62f4146cce7467b70b179786a4ae',1,'bipartition.c']]],
+  ['subtree_5fnewick_5ftree',['subtree_newick_tree',['../read__newick__trees_8h.html#a340cb8e9eebf86519b2373059146c065',1,'read_newick_trees.c']]]
+];

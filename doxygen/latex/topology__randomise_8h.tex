@@ -1,0 +1,64 @@
+\hypertarget{topology__randomise_8h}{}\subsection{topology\+\_\+randomise.\+h File Reference}
+\label{topology__randomise_8h}\index{topology\+\_\+randomise.\+h@{topology\+\_\+randomise.\+h}}
+
+
+Creation of random topologies and modification of existing ones through branch swapping.  
+
+
+{\ttfamily \#include \char`\"{}topology\+\_\+distance.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}prob\+\_\+distribution.\+h\char`\"{}}\newline
+Include dependency graph for topology\+\_\+randomise.\+h\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{topology__randomise_8h__incl}
+\end{center}
+\end{figure}
+This graph shows which files directly or indirectly include this file\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=257pt]{topology__randomise_8h__dep__incl}
+\end{center}
+\end{figure}
+\subsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{topology__randomise_8h_a86c6ffd23f769a00290ecea0559fcfdd}\label{topology__randomise_8h_a86c6ffd23f769a00290ecea0559fcfdd}} 
+void \hyperlink{topology__randomise_8h_a86c6ffd23f769a00290ecea0559fcfdd}{randomise\+\_\+topology} (\hyperlink{structtopology__struct}{topology} tree)
+\begin{DoxyCompactList}\small\item\em low level function that generates a random tree (equiv. to random refinement of a star topology) \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{topology__randomise_8h_a402a34347aa4c49383725257126e8e36}\label{topology__randomise_8h_a402a34347aa4c49383725257126e8e36}} 
+void \hyperlink{topology__randomise_8h_a402a34347aa4c49383725257126e8e36}{quasi\+\_\+randomise\+\_\+topology} (\hyperlink{structtopology__struct}{topology} tree, int sample\+\_\+type)
+\begin{DoxyCompactList}\small\item\em generates a random topology if sample\+\_\+type==0, but can reuse some info later to create a \char`\"{}correlated\char`\"{} tree \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{topology__randomise_8h_a8559a8154c6a9e38d85bd2f7a1188e4a}\label{topology__randomise_8h_a8559a8154c6a9e38d85bd2f7a1188e4a}} 
+void \hyperlink{topology__randomise_8h_a8559a8154c6a9e38d85bd2f7a1188e4a}{create\+\_\+parent\+\_\+node\+\_\+from\+\_\+children} (\hyperlink{structtopology__struct}{topology} tree, int parent, int lchild, int rchild)
+\begin{DoxyCompactList}\small\item\em create internal node with given children (children coalesce into parent node) \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{topology__randomise_8h_a632fe94e8fb3b671a716240b05887f2d}\label{topology__randomise_8h_a632fe94e8fb3b671a716240b05887f2d}} 
+void \hyperlink{topology__randomise_8h_a632fe94e8fb3b671a716240b05887f2d}{topology\+\_\+apply\+\_\+rerooting} (\hyperlink{structtopology__struct}{topology} tree, \hyperlink{lowlevel_8h_a97a80ca1602ebf2303258971a2c938e2}{bool} update\+\_\+done)
+\begin{DoxyCompactList}\small\item\em random rerooting \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{topology__randomise_8h_a784a6686a1b15ea4c3a95e7a077d6f0e}\label{topology__randomise_8h_a784a6686a1b15ea4c3a95e7a077d6f0e}} 
+void \hyperlink{topology__randomise_8h_a784a6686a1b15ea4c3a95e7a077d6f0e}{topology\+\_\+apply\+\_\+shortspr} (\hyperlink{structtopology__struct}{topology} tree, \hyperlink{lowlevel_8h_a97a80ca1602ebf2303258971a2c938e2}{bool} update\+\_\+done)
+\begin{DoxyCompactList}\small\item\em recursive S\+PR over all internal nodes, assuming common prob of swap per node \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{topology__randomise_8h_a1122af5bc2a6bbc5412bd0bb3fc54446}\label{topology__randomise_8h_a1122af5bc2a6bbc5412bd0bb3fc54446}} 
+void \hyperlink{topology__randomise_8h_a1122af5bc2a6bbc5412bd0bb3fc54446}{topology\+\_\+apply\+\_\+shortspr\+\_\+weighted} (\hyperlink{structtopology__struct}{topology} tree, double $\ast$prob, \hyperlink{lowlevel_8h_a97a80ca1602ebf2303258971a2c938e2}{bool} update\+\_\+done)
+\begin{DoxyCompactList}\small\item\em recursive S\+PR over all internal nodes, using prob\mbox{[}\mbox{]} vector as rough guide of error rate for node \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{topology__randomise_8h_a96f574bd85d2994dc9a370d7517c55d8}\label{topology__randomise_8h_a96f574bd85d2994dc9a370d7517c55d8}} 
+void \hyperlink{topology__randomise_8h_a96f574bd85d2994dc9a370d7517c55d8}{topology\+\_\+apply\+\_\+spr\+\_\+on\+\_\+subtree} (\hyperlink{structtopology__struct}{topology} tree, \hyperlink{structtopol__node__struct}{topol\+\_\+node} lca, \hyperlink{lowlevel_8h_a97a80ca1602ebf2303258971a2c938e2}{bool} update\+\_\+done)
+\begin{DoxyCompactList}\small\item\em random Subtree Prune-\/and-\/\+Regraft branch swapping for subtree below lca node \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{topology__randomise_8h_a57ab4071eee8501035a8ebd245a8d5f7}\label{topology__randomise_8h_a57ab4071eee8501035a8ebd245a8d5f7}} 
+void \hyperlink{topology__randomise_8h_a57ab4071eee8501035a8ebd245a8d5f7}{topology\+\_\+apply\+\_\+spr} (\hyperlink{structtopology__struct}{topology} tree, \hyperlink{lowlevel_8h_a97a80ca1602ebf2303258971a2c938e2}{bool} update\+\_\+done)
+\begin{DoxyCompactList}\small\item\em random Subtree Prune-\/and-\/\+Regraft branch swapping \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{topology__randomise_8h_ab7fbc8681f8e613d20b9f8b9cb6d9bba}\label{topology__randomise_8h_ab7fbc8681f8e613d20b9f8b9cb6d9bba}} 
+void \hyperlink{topology__randomise_8h_ab7fbc8681f8e613d20b9f8b9cb6d9bba}{topology\+\_\+apply\+\_\+spr\+\_\+unrooted} (\hyperlink{structtopology__struct}{topology} tree, \hyperlink{lowlevel_8h_a97a80ca1602ebf2303258971a2c938e2}{bool} update\+\_\+done)
+\begin{DoxyCompactList}\small\item\em random Subtree Prune-\/and-\/\+Regraft branch swapping generalized (neglecting root) \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{topology__randomise_8h_ae5f8ee906bafa7328698de604008b802}\label{topology__randomise_8h_ae5f8ee906bafa7328698de604008b802}} 
+void \hyperlink{topology__randomise_8h_ae5f8ee906bafa7328698de604008b802}{topology\+\_\+apply\+\_\+nni} (\hyperlink{structtopology__struct}{topology} tree, \hyperlink{lowlevel_8h_a97a80ca1602ebf2303258971a2c938e2}{bool} update\+\_\+done)
+\begin{DoxyCompactList}\small\item\em random Nearest Neighbor Interchange branch swapping (S\+PR where regraft node is close to prune node) \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{topology__randomise_8h_a2785fdf50bfbb77e54ae2e495972c9e8}\label{topology__randomise_8h_a2785fdf50bfbb77e54ae2e495972c9e8}} 
+\hyperlink{lowlevel_8h_a97a80ca1602ebf2303258971a2c938e2}{bool} \hyperlink{topology__randomise_8h_a2785fdf50bfbb77e54ae2e495972c9e8}{cant\+\_\+apply\+\_\+swap} (\hyperlink{structtopology__struct}{topology} tree)
+\begin{DoxyCompactList}\small\item\em check if it is possible to apply S\+P\+R/\+N\+NI without rerooting (used by \hyperlink{topology__randomise_8h_a57ab4071eee8501035a8ebd245a8d5f7}{topology\+\_\+apply\+\_\+spr()} and M\+C\+MC functions) \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsubsection{Detailed Description}
+Creation of random topologies and modification of existing ones through branch swapping. 
+

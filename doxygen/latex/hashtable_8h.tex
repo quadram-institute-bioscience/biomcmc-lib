@@ -1,0 +1,81 @@
+\hypertarget{hashtable_8h}{}\subsection{hashtable.\+h File Reference}
+\label{hashtable_8h}\index{hashtable.\+h@{hashtable.\+h}}
+
+
+double hashing open-\/address hash table using strings as key -- also has distance matrix, that can be used in alignments and trees  
+
+
+{\ttfamily \#include \char`\"{}hashfunctions.\+h\char`\"{}}\newline
+Include dependency graph for hashtable.\+h\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{hashtable_8h__incl}
+\end{center}
+\end{figure}
+This graph shows which files directly or indirectly include this file\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{hashtable_8h__dep__incl}
+\end{center}
+\end{figure}
+\subsubsection*{Data Structures}
+\begin{DoxyCompactItemize}
+\item 
+struct \hyperlink{structhashtable__item__struct}{hashtable\+\_\+item\+\_\+struct}
+\begin{DoxyCompactList}\small\item\em key/value pair for hash table \end{DoxyCompactList}\item 
+struct \hyperlink{structhashtable__struct}{hashtable\+\_\+struct}
+\begin{DoxyCompactList}\small\item\em Hash table (vector indexed by strings). \end{DoxyCompactList}\item 
+struct \hyperlink{structbip__hashtable__struct}{bip\+\_\+hashtable\+\_\+struct}
+\begin{DoxyCompactList}\small\item\em Hash table of bipartitions (see \hyperlink{structhashtable__struct_ae77d63df7a927e68de61d431d5bc0ddc}{hashtable.\+h} for original version, with string keys and integer values) \end{DoxyCompactList}\item 
+struct \hyperlink{structbip__hashitem__struct}{bip\+\_\+hashitem\+\_\+struct}
+\begin{DoxyCompactList}\small\item\em key (bipartition) and value (frequency) pair for hash table of bipartitions \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsubsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{hashtable_8h_a3d036a0dfb1997b3455c3fc740dce82d}\label{hashtable_8h_a3d036a0dfb1997b3455c3fc740dce82d}} 
+typedef struct \hyperlink{structhashtable__struct}{hashtable\+\_\+struct} $\ast$ {\bfseries hashtable}
+\item 
+\mbox{\Hypertarget{hashtable_8h_ad3ec0b15ea411a6fd676a92a2c6a0d5e}\label{hashtable_8h_ad3ec0b15ea411a6fd676a92a2c6a0d5e}} 
+typedef struct \hyperlink{structhashtable__item__struct}{hashtable\+\_\+item\+\_\+struct} $\ast$ {\bfseries hashtable\+\_\+item}
+\item 
+\mbox{\Hypertarget{hashtable_8h_a0511173069218769fecd6e1b18c7675e}\label{hashtable_8h_a0511173069218769fecd6e1b18c7675e}} 
+typedef struct \hyperlink{structbip__hashtable__struct}{bip\+\_\+hashtable\+\_\+struct} $\ast$ {\bfseries bip\+\_\+hashtable}
+\item 
+\mbox{\Hypertarget{hashtable_8h_ada62ee45becf6894f882a7ebb1113da8}\label{hashtable_8h_ada62ee45becf6894f882a7ebb1113da8}} 
+typedef struct \hyperlink{structbip__hashitem__struct}{bip\+\_\+hashitem\+\_\+struct} $\ast$ {\bfseries bip\+\_\+hashitem}
+\end{DoxyCompactItemize}
+\subsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{hashtable_8h_a140828121784faeb2f807c3ec86ba8cc}\label{hashtable_8h_a140828121784faeb2f807c3ec86ba8cc}} 
+void \hyperlink{hashtable_8h_a140828121784faeb2f807c3ec86ba8cc}{insert\+\_\+hashtable} (\hyperlink{structhashtable__struct}{hashtable} ht, char $\ast$key, int value)
+\begin{DoxyCompactList}\small\item\em Insert key/value pair into hashtable. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{hashtable_8h_a6dee2263fe140e25a63dc95cae2764c9}\label{hashtable_8h_a6dee2263fe140e25a63dc95cae2764c9}} 
+int \hyperlink{hashtable_8h_a6dee2263fe140e25a63dc95cae2764c9}{lookup\+\_\+hashtable} (\hyperlink{structhashtable__struct}{hashtable} ht, char $\ast$key)
+\begin{DoxyCompactList}\small\item\em Return location (value) of corresponding key (string) or negative value if not found. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{hashtable_8h_a6079cd50df581eacf89332c086316a7c}\label{hashtable_8h_a6079cd50df581eacf89332c086316a7c}} 
+\hyperlink{structhashtable__struct}{hashtable} \hyperlink{hashtable_8h_a6079cd50df581eacf89332c086316a7c}{new\+\_\+hashtable} (int size)
+\begin{DoxyCompactList}\small\item\em Create new hashtable of size elements. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{hashtable_8h_ad1c181b652169a42ba74613ee5dedf64}\label{hashtable_8h_ad1c181b652169a42ba74613ee5dedf64}} 
+void \hyperlink{hashtable_8h_ad1c181b652169a42ba74613ee5dedf64}{del\+\_\+hashtable} (\hyperlink{structhashtable__struct}{hashtable} ht)
+\begin{DoxyCompactList}\small\item\em Free hashtable space. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{hashtable_8h_a66c9267dd95b438668c5eefaa248a1be}\label{hashtable_8h_a66c9267dd95b438668c5eefaa248a1be}} 
+\hyperlink{structbip__hashtable__struct}{bip\+\_\+hashtable} \hyperlink{hashtable_8h_a66c9267dd95b438668c5eefaa248a1be}{new\+\_\+bip\+\_\+hashtable} (int size)
+\begin{DoxyCompactList}\small\item\em Create new hashtable of size bipartitions. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{hashtable_8h_a6ab4da20b42d0420083b0547ee2fa68e}\label{hashtable_8h_a6ab4da20b42d0420083b0547ee2fa68e}} 
+void \hyperlink{hashtable_8h_a6ab4da20b42d0420083b0547ee2fa68e}{del\+\_\+bip\+\_\+hashtable} (\hyperlink{structbip__hashtable__struct}{bip\+\_\+hashtable} ht)
+\begin{DoxyCompactList}\small\item\em Free bipartition hashtable space. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{hashtable_8h_a96ec589b598bc49a608caca5b6e1f320}\label{hashtable_8h_a96ec589b598bc49a608caca5b6e1f320}} 
+void \hyperlink{hashtable_8h_a96ec589b598bc49a608caca5b6e1f320}{bip\+\_\+hashtable\+\_\+insert} (\hyperlink{structbip__hashtable__struct}{bip\+\_\+hashtable} ht, \hyperlink{structbipartition__struct}{bipartition} key)
+\begin{DoxyCompactList}\small\item\em Insert key (bipartition) into bipartition hashtable, adding one to its count (freq). \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{hashtable_8h_a97657feb09deabd8e6f2ac124f816b01}\label{hashtable_8h_a97657feb09deabd8e6f2ac124f816b01}} 
+double \hyperlink{hashtable_8h_a97657feb09deabd8e6f2ac124f816b01}{bip\+\_\+hashtable\+\_\+get\+\_\+frequency} (\hyperlink{structbip__hashtable__struct}{bip\+\_\+hashtable} ht, \hyperlink{structbipartition__struct}{bipartition} key)
+\begin{DoxyCompactList}\small\item\em Return frequency of bipartition (count/maxfreq) or zero if not found. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsubsection{Detailed Description}
+double hashing open-\/address hash table using strings as key -- also has distance matrix, that can be used in alignments and trees 
+
+Hash tables allow us to search for the position of a key (taxa name) without scanning the whole vector (like in sequencial search). This code is derived from the software D\+C\+M3, released under the G\+PL license (Copyright (C) 2004 The University of Texas at Austin). 

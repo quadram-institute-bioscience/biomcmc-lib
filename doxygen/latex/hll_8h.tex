@@ -1,0 +1,170 @@
+\hypertarget{hll_8h}{}\subsection{hll.\+h File Reference}
+\label{hll_8h}\index{hll.\+h@{hll.\+h}}
+
+
+Hyper\+Log\+Log functions, based on code by Ivan Vitjuk \href{https://github.com/ivitjuk/libhll}{\tt https\+://github.\+com/ivitjuk/libhll} under an I\+SC License.  
+
+
+{\ttfamily \#include \char`\"{}hashfunctions.\+h\char`\"{}}\newline
+Include dependency graph for hll.\+h\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{hll_8h__incl}
+\end{center}
+\end{figure}
+\subsubsection*{Data Structures}
+\begin{DoxyCompactItemize}
+\item 
+struct \hyperlink{structhll__estimate__s}{hll\+\_\+estimate\+\_\+s}
+\end{DoxyCompactItemize}
+\subsubsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{hll_8h_af52266394d1d59494f6f2a0276727956}\label{hll_8h_af52266394d1d59494f6f2a0276727956}} 
+typedef struct \hyperlink{structhll__s}{hll\+\_\+s} {\bfseries hll\+\_\+t}
+\item 
+typedef struct \hyperlink{structhll__estimate__s}{hll\+\_\+estimate\+\_\+s} \hyperlink{hll_8h_af3d44b090c21b883db098285e43c7245}{hll\+\_\+estimate\+\_\+t}
+\item 
+typedef uint64\+\_\+t($\ast$ \hyperlink{hll_8h_a4810b852ed49962affc0136b06664f06}{hll\+\_\+hash\+\_\+function\+\_\+t}) (const char $\ast$, size\+\_\+t)
+\end{DoxyCompactItemize}
+\subsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{structhll__s}{hll\+\_\+t} $\ast$ \hyperlink{hll_8h_a1dfd551a4fd52b7956b6a6e22de6bb11}{hll\+\_\+create} (size\+\_\+t bucket\+\_\+bits)
+\item 
+void \hyperlink{hll_8h_a9029aef259a530d70638f60a0f95049d}{hll\+\_\+reset} (\hyperlink{structhll__s}{hll\+\_\+t} $\ast$hll)
+\item 
+void \hyperlink{hll_8h_a7978633d80ac55aa8b99c3d5acda0625}{hll\+\_\+release} (\hyperlink{structhll__s}{hll\+\_\+t} $\ast$hll)
+\item 
+void \hyperlink{hll_8h_a422812657b3fdd360f25ad2606bfcd2f}{hll\+\_\+add} (const \hyperlink{structhll__s}{hll\+\_\+t} $\ast$hll, const char $\ast$data, size\+\_\+t data\+\_\+len)
+\item 
+int \hyperlink{hll_8h_a812c5a2ec32a010a8a158510468d3256}{hll\+\_\+merge} (const \hyperlink{structhll__s}{hll\+\_\+t} $\ast$hll1, const \hyperlink{structhll__s}{hll\+\_\+t} $\ast$hll2)
+\item 
+\mbox{\Hypertarget{hll_8h_aab607ab1c482b8f0386ac512f5712dd6}\label{hll_8h_aab607ab1c482b8f0386ac512f5712dd6}} 
+int {\bfseries hll\+\_\+set\+\_\+hash\+\_\+function} (\hyperlink{structhll__s}{hll\+\_\+t} $\ast$hll, \hyperlink{hll_8h_a4810b852ed49962affc0136b06664f06}{hll\+\_\+hash\+\_\+function\+\_\+t} hash\+\_\+function)
+\item 
+int \hyperlink{hll_8h_a0fae4c7f7a04303927f8b8977d3130e0}{hll\+\_\+get\+\_\+estimate} (const \hyperlink{structhll__s}{hll\+\_\+t} $\ast$hll, \hyperlink{hll_8h_af3d44b090c21b883db098285e43c7245}{hll\+\_\+estimate\+\_\+t} $\ast$estimate)
+\end{DoxyCompactItemize}
+
+
+\subsubsection{Detailed Description}
+Hyper\+Log\+Log functions, based on code by Ivan Vitjuk \href{https://github.com/ivitjuk/libhll}{\tt https\+://github.\+com/ivitjuk/libhll} under an I\+SC License. 
+
+
+
+\subsubsection{Typedef Documentation}
+\mbox{\Hypertarget{hll_8h_af3d44b090c21b883db098285e43c7245}\label{hll_8h_af3d44b090c21b883db098285e43c7245}} 
+\index{hll.\+h@{hll.\+h}!hll\+\_\+estimate\+\_\+t@{hll\+\_\+estimate\+\_\+t}}
+\index{hll\+\_\+estimate\+\_\+t@{hll\+\_\+estimate\+\_\+t}!hll.\+h@{hll.\+h}}
+\paragraph{\texorpdfstring{hll\+\_\+estimate\+\_\+t}{hll\_estimate\_t}}
+{\footnotesize\ttfamily typedef struct \hyperlink{structhll__estimate__s}{hll\+\_\+estimate\+\_\+s} \hyperlink{hll_8h_af3d44b090c21b883db098285e43c7245}{hll\+\_\+estimate\+\_\+t}}
+
+Estimation result type \mbox{\Hypertarget{hll_8h_a4810b852ed49962affc0136b06664f06}\label{hll_8h_a4810b852ed49962affc0136b06664f06}} 
+\index{hll.\+h@{hll.\+h}!hll\+\_\+hash\+\_\+function\+\_\+t@{hll\+\_\+hash\+\_\+function\+\_\+t}}
+\index{hll\+\_\+hash\+\_\+function\+\_\+t@{hll\+\_\+hash\+\_\+function\+\_\+t}!hll.\+h@{hll.\+h}}
+\paragraph{\texorpdfstring{hll\+\_\+hash\+\_\+function\+\_\+t}{hll\_hash\_function\_t}}
+{\footnotesize\ttfamily typedef uint64\+\_\+t($\ast$ hll\+\_\+hash\+\_\+function\+\_\+t) (const char $\ast$, size\+\_\+t)}
+
+Hash function type
+
+Even though hash funtion is expected to return a 64bit value, only 32 bits of entropy will be used. 
+
+\subsubsection{Function Documentation}
+\mbox{\Hypertarget{hll_8h_a1dfd551a4fd52b7956b6a6e22de6bb11}\label{hll_8h_a1dfd551a4fd52b7956b6a6e22de6bb11}} 
+\index{hll.\+h@{hll.\+h}!hll\+\_\+create@{hll\+\_\+create}}
+\index{hll\+\_\+create@{hll\+\_\+create}!hll.\+h@{hll.\+h}}
+\paragraph{\texorpdfstring{hll\+\_\+create()}{hll\_create()}}
+{\footnotesize\ttfamily \hyperlink{structhll__s}{hll\+\_\+t}$\ast$ hll\+\_\+create (\begin{DoxyParamCaption}\item[{size\+\_\+t}]{bucket\+\_\+bits }\end{DoxyParamCaption})}
+
+Create H\+LL data structure
+
+
+\begin{DoxyParams}{Parameters}
+{\em bucket\+\_\+bits} & -\/ Number of bits to use for the buckets. Actual number of buckets will be 2$^\wedge$bucket\+\_\+bits. Must be 4 $<$= bucket\+\_\+bits $<$= 16. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+H\+LL data type or 0 on error. Error can be memory allocation failure or invalid bucket\+\_\+bits value. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{hll_8h_a9029aef259a530d70638f60a0f95049d}\label{hll_8h_a9029aef259a530d70638f60a0f95049d}} 
+\index{hll.\+h@{hll.\+h}!hll\+\_\+reset@{hll\+\_\+reset}}
+\index{hll\+\_\+reset@{hll\+\_\+reset}!hll.\+h@{hll.\+h}}
+\paragraph{\texorpdfstring{hll\+\_\+reset()}{hll\_reset()}}
+{\footnotesize\ttfamily void hll\+\_\+reset (\begin{DoxyParamCaption}\item[{\hyperlink{structhll__s}{hll\+\_\+t} $\ast$}]{hll }\end{DoxyParamCaption})}
+
+Reset state of the estimator
+
+
+\begin{DoxyParams}{Parameters}
+{\em hll} & -\/ H\+LL data type \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{hll_8h_a7978633d80ac55aa8b99c3d5acda0625}\label{hll_8h_a7978633d80ac55aa8b99c3d5acda0625}} 
+\index{hll.\+h@{hll.\+h}!hll\+\_\+release@{hll\+\_\+release}}
+\index{hll\+\_\+release@{hll\+\_\+release}!hll.\+h@{hll.\+h}}
+\paragraph{\texorpdfstring{hll\+\_\+release()}{hll\_release()}}
+{\footnotesize\ttfamily void hll\+\_\+release (\begin{DoxyParamCaption}\item[{\hyperlink{structhll__s}{hll\+\_\+t} $\ast$}]{hll }\end{DoxyParamCaption})}
+
+Release H\+LL type previously allocated with \hyperlink{hll_8h_a1dfd551a4fd52b7956b6a6e22de6bb11}{hll\+\_\+create()}.
+
+
+\begin{DoxyParams}{Parameters}
+{\em hll} & -\/ H\+LL data type \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{hll_8h_a422812657b3fdd360f25ad2606bfcd2f}\label{hll_8h_a422812657b3fdd360f25ad2606bfcd2f}} 
+\index{hll.\+h@{hll.\+h}!hll\+\_\+add@{hll\+\_\+add}}
+\index{hll\+\_\+add@{hll\+\_\+add}!hll.\+h@{hll.\+h}}
+\paragraph{\texorpdfstring{hll\+\_\+add()}{hll\_add()}}
+{\footnotesize\ttfamily void hll\+\_\+add (\begin{DoxyParamCaption}\item[{const \hyperlink{structhll__s}{hll\+\_\+t} $\ast$}]{hll,  }\item[{const char $\ast$}]{data,  }\item[{size\+\_\+t}]{data\+\_\+len }\end{DoxyParamCaption})}
+
+Add a sample to the H\+LL estimator
+
+
+\begin{DoxyParams}{Parameters}
+{\em hll} & -\/ H\+LL data type \\
+\hline
+{\em data} & -\/ Sample to be added to the estimator (underlying data type is not important) \\
+\hline
+{\em data\+\_\+len} & -\/ Lenght of the data sample in bytes \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{hll_8h_a812c5a2ec32a010a8a158510468d3256}\label{hll_8h_a812c5a2ec32a010a8a158510468d3256}} 
+\index{hll.\+h@{hll.\+h}!hll\+\_\+merge@{hll\+\_\+merge}}
+\index{hll\+\_\+merge@{hll\+\_\+merge}!hll.\+h@{hll.\+h}}
+\paragraph{\texorpdfstring{hll\+\_\+merge()}{hll\_merge()}}
+{\footnotesize\ttfamily int hll\+\_\+merge (\begin{DoxyParamCaption}\item[{const \hyperlink{structhll__s}{hll\+\_\+t} $\ast$}]{hll1,  }\item[{const \hyperlink{structhll__s}{hll\+\_\+t} $\ast$}]{hll2 }\end{DoxyParamCaption})}
+
+Merge data from two H\+L\+Ls
+
+Data from hll2 will be merged into hll2
+
+
+\begin{DoxyParams}{Parameters}
+{\em hll1} & -\/ First H\+LL data type \\
+\hline
+{\em hll2} & -\/ Second H\+LL data type \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+1 on success, 0 on failure. Fails when number of buckets are not compatible. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{hll_8h_a0fae4c7f7a04303927f8b8977d3130e0}\label{hll_8h_a0fae4c7f7a04303927f8b8977d3130e0}} 
+\index{hll.\+h@{hll.\+h}!hll\+\_\+get\+\_\+estimate@{hll\+\_\+get\+\_\+estimate}}
+\index{hll\+\_\+get\+\_\+estimate@{hll\+\_\+get\+\_\+estimate}!hll.\+h@{hll.\+h}}
+\paragraph{\texorpdfstring{hll\+\_\+get\+\_\+estimate()}{hll\_get\_estimate()}}
+{\footnotesize\ttfamily int hll\+\_\+get\+\_\+estimate (\begin{DoxyParamCaption}\item[{const \hyperlink{structhll__s}{hll\+\_\+t} $\ast$}]{hll,  }\item[{\hyperlink{hll_8h_af3d44b090c21b883db098285e43c7245}{hll\+\_\+estimate\+\_\+t} $\ast$}]{estimate }\end{DoxyParamCaption})}
+
+Get the estimated cardinality based on the data added to the estimator
+
+
+\begin{DoxyParams}{Parameters}
+{\em hll} & -\/ H\+LL data type \\
+\hline
+{\em estimate} & -\/ Result of the estimation \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+1 on success, 0 on failure. Fails only on N\+U\+LL input parameters. 
+\end{DoxyReturn}

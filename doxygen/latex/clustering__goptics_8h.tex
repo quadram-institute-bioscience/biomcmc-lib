@@ -1,0 +1,53 @@
+\hypertarget{clustering__goptics_8h}{}\subsection{clustering\+\_\+goptics.\+h File Reference}
+\label{clustering__goptics_8h}\index{clustering\+\_\+goptics.\+h@{clustering\+\_\+goptics.\+h}}
+
+
+O\+P\+T\+I\+CS algorithm based on \href{https://github.com/guineri/GOPTICS}{\tt https\+://github.\+com/guineri/\+G\+O\+P\+T\+I\+CS}.  
+
+
+{\ttfamily \#include \char`\"{}distance\+\_\+generator.\+h\char`\"{}}\newline
+Include dependency graph for clustering\+\_\+goptics.\+h\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{clustering__goptics_8h__incl}
+\end{center}
+\end{figure}
+This graph shows which files directly or indirectly include this file\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=184pt]{clustering__goptics_8h__dep__incl}
+\end{center}
+\end{figure}
+\subsubsection*{Data Structures}
+\begin{DoxyCompactItemize}
+\item 
+struct \hyperlink{structgoptics__cluster__struct}{goptics\+\_\+cluster\+\_\+struct}
+\end{DoxyCompactItemize}
+\subsubsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{clustering__goptics_8h_a2dc42240fd521593576575db239a9ab4}\label{clustering__goptics_8h_a2dc42240fd521593576575db239a9ab4}} 
+typedef struct \hyperlink{structgoptics__cluster__struct}{goptics\+\_\+cluster\+\_\+struct} $\ast$ {\bfseries goptics\+\_\+cluster}
+\end{DoxyCompactItemize}
+\subsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{clustering__goptics_8h_a7557f763a43b78acea3f92363440a8ec}\label{clustering__goptics_8h_a7557f763a43b78acea3f92363440a8ec}} 
+\hyperlink{structgoptics__cluster__struct}{goptics\+\_\+cluster} {\bfseries new\+\_\+goptics\+\_\+cluster} (\hyperlink{structdistance__generator__struct}{distance\+\_\+generator} dg, int min\+\_\+points, double epsilon)
+\item 
+\mbox{\Hypertarget{clustering__goptics_8h_a74fd5bce22679ffce1333eeaa27d304a}\label{clustering__goptics_8h_a74fd5bce22679ffce1333eeaa27d304a}} 
+\hyperlink{structgoptics__cluster__struct}{goptics\+\_\+cluster} {\bfseries new\+\_\+goptics\+\_\+cluster\+\_\+run} (\hyperlink{structdistance__generator__struct}{distance\+\_\+generator} dg, int min\+\_\+points, double epsilon)
+\item 
+\mbox{\Hypertarget{clustering__goptics_8h_a05d76232aa2127e922dcfe8cae698454}\label{clustering__goptics_8h_a05d76232aa2127e922dcfe8cae698454}} 
+void {\bfseries del\+\_\+goptics\+\_\+cluster} (\hyperlink{structgoptics__cluster__struct}{goptics\+\_\+cluster} gop)
+\item 
+\mbox{\Hypertarget{clustering__goptics_8h_a46d134c3cf060665a350d0459d14994c}\label{clustering__goptics_8h_a46d134c3cf060665a350d0459d14994c}} 
+void {\bfseries assign\+\_\+goptics\+\_\+clusters} (\hyperlink{structgoptics__cluster__struct}{goptics\+\_\+cluster} gop, double cluster\+\_\+eps)
+\end{DoxyCompactItemize}
+
+
+\subsubsection{Detailed Description}
+O\+P\+T\+I\+CS algorithm based on \href{https://github.com/guineri/GOPTICS}{\tt https\+://github.\+com/guineri/\+G\+O\+P\+T\+I\+CS}. 
+

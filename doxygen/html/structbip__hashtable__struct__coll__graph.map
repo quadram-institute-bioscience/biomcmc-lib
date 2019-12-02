@@ -1,0 +1,5 @@
+<map id="bip_hashtable_struct" name="bip_hashtable_struct">
+<area shape="rect" id="node2" href="$structbip__hashitem__struct.html" title="key (bipartition) and value (frequency) pair for hash table of bipartitions " alt="" coords="7,184,146,211"/>
+<area shape="rect" id="node3" href="$structbipartition__struct.html" title="Bit&#45;string representation of splits. " alt="" coords="17,95,136,121"/>
+<area shape="rect" id="node4" href="$structbipsize__struct.html" title="bipsize_struct" alt="" coords="25,5,128,32"/>
+</map>

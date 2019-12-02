@@ -1,0 +1,22 @@
+<map id="prob_distribution.h" name="prob_distribution.h">
+<area shape="rect" id="node2" href="$char__vector_8h.html" title="list of strings (each string is a vector of chars) " alt="" coords="300,80,401,107"/>
+<area shape="rect" id="node14" href="$topology__randomise_8h.html" title="Creation of random topologies and modification of existing ones through branch swapping. " alt="" coords="324,379,473,405"/>
+<area shape="rect" id="node21" href="$prob__distribution__aux_8h.html" title="Auxiliary (low level) functions for prob_distribution.c. " alt="" coords="594,80,750,107"/>
+<area shape="rect" id="node3" href="$nexus__common_8h.html" title="File handling functions for nexus format in general. " alt="" coords="57,229,183,256"/>
+<area shape="rect" id="node10" href="$empirical__frequency_8h.html" title="Creates a histogram of a vector, ordered by frequency. " alt="" coords="201,155,351,181"/>
+<area shape="rect" id="node20" href="$char__vector_8c.html" title="vector of strings (species names, leaf names, etc.) " alt="" coords="375,155,476,181"/>
+<area shape="rect" id="node4" href="$alignment_8h.html" title="File handling functions and calculation of distances for sequence data in nexus format. " alt="" coords="35,304,125,331"/>
+<area shape="rect" id="node7" href="$read__newick__trees_8h.html" title="Low&#45;level functions for reading newick strings. " alt="" coords="106,379,249,405"/>
+<area shape="rect" id="node5" href="$kmerhash_8h.html" title="k&#45;mer handling of DNA sequences, with hash transformation " alt="" coords="5,453,96,480"/>
+<area shape="rect" id="node6" href="$biomcmc_8h.html" title="biomcmc library interface to external programs, specific to super_sptree repo. " alt="" coords="171,603,258,629"/>
+<area shape="rect" id="node8" href="$newick__space_8h.html" title="Reads a list of trees in newick format and creates vector of topologies. " alt="" coords="121,453,237,480"/>
+<area shape="rect" id="node9" href="$topology__space_8h.html" title="Reads tree files in nexus format and creates a vector of topologies. " alt="" coords="91,528,215,555"/>
+<area shape="rect" id="node11" href="$topology__common_8h.html" title="General&#45;purpose topology structures created from nexus_tree_struct (and low&#45;level functions) ..." alt="" coords="207,229,345,256"/>
+<area shape="rect" id="node19" href="$empirical__frequency_8c.html" title="histogram of vectors, ordered by frequency. Also calculates MAP (modal) values. " alt="" coords="369,229,519,256"/>
+<area shape="rect" id="node12" href="$topology__distance_8h.html" title="branch length operations on topologies, including patristic distances " alt="" coords="213,304,352,331"/>
+<area shape="rect" id="node13" href="$parsimony_8h.html" title="binary and multistate parsimony matrices, together with bipartition extraction for MRP ..." alt="" coords="240,528,333,555"/>
+<area shape="rect" id="node15" href="$upgma_8h.html" title="UPGMA and bioNJ from (onedimensional representation of) distance matrices. " alt="" coords="363,453,435,480"/>
+<area shape="rect" id="node16" href="$genetree_8h.html" title="gene tree and species tree structures, for reconciliation etc. This is the high&#45;level file with globa..." alt="" coords="357,528,440,555"/>
+<area shape="rect" id="node17" href="$reconciliation_8h.html" title="low&#45;level file for gene tree and species tree reconciliation. This file is hidden from user and conta..." alt="" coords="344,603,453,629"/>
+<area shape="rect" id="node18" href="$splitset__distances_8h.html" title="Low&#45;level functions that use only the split bipartitions of topologies – treating them as unrooted u..." alt="" coords="329,677,468,704"/>
+</map>

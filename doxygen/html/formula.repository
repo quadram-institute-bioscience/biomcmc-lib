@@ -1,0 +1,16 @@
+\form#0:$ E[X] = \alpha/\beta $
+\form#1:$ \log(1 + x)$
+\form#2:$\log(1+x)-x$
+\form#3:$ \exp(x) - 1$
+\form#4:$|x| \ll 1 $
+\form#5:$2^14$
+\form#6:$2^{14}$
+\form#7:$10^{14}$
+\form#8:$10^{35}$
+\form#9:$N_1$
+\form#10:$\approx 10^{-15}$
+\form#11:$n < 10^{15}$
+\form#12:$\approx 10^{-9}$
+\form#13:$n < 4 10^9$
+\form#14:$L$
+\form#15:$ 2L-1$

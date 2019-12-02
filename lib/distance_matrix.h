@@ -13,6 +13,7 @@
 
 /*! \file distance_matrix.h
  *  \brief distance matrix, that can be used in alignments and trees, and patristic-distance based species distances
+ *
  *  These functions don't know about trees/topologies: topology_common.c creates the actual patristic distances, and
  *  downstream software or genetree.h should decide how to use this information
  */

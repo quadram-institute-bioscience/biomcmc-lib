@@ -1,0 +1,17 @@
+<map id="topology_space.h" name="topology_space.h">
+<area shape="rect" id="node2" href="$newick__space_8h.html" title="Reads a list of trees in newick format and creates vector of topologies. " alt="" coords="504,80,620,107"/>
+<area shape="rect" id="node3" href="$read__newick__trees_8h.html" title="Low&#45;level functions for reading newick strings. " alt="" coords="491,155,633,181"/>
+<area shape="rect" id="node4" href="$topology__distance_8h.html" title="branch length operations on topologies, including patristic distances " alt="" coords="439,229,578,256"/>
+<area shape="rect" id="node32" href="$nexus__common_8h.html" title="File handling functions for nexus format in general. " alt="" coords="578,304,703,331"/>
+<area shape="rect" id="node5" href="$topology__common_8h.html" title="General&#45;purpose topology structures created from nexus_tree_struct (and low&#45;level functions) ..." alt="" coords="415,304,554,331"/>
+<area shape="rect" id="node6" href="$bipartition_8h.html" title="Unary/binary operators on arbitrarily&#45;sized bitstrings (strings of zeros and ones) like split biparti..." alt="" coords="505,901,595,928"/>
+<area shape="rect" id="node24" href="$distance__matrix_8h.html" title="distance matrix, that can be used in alignments and trees, and patristic&#45;distance based species dista..." alt="" coords="447,453,573,480"/>
+<area shape="rect" id="node27" href="$empirical__frequency_8h.html" title="Creates a histogram of a vector, ordered by frequency. " alt="" coords="522,379,671,405"/>
+<area shape="rect" id="node7" href="$lowlevel_8h.html" title="Lowest level header file. Header file for lowlevel.c. " alt="" coords="669,976,749,1003"/>
+<area shape="rect" id="node25" href="$hashtable_8h.html" title="double hashing open&#45;address hash table using strings as key – also has distance matrix, that can be used in alignments and trees " alt="" coords="505,752,595,779"/>
+<area shape="rect" id="node26" href="$hashfunctions_8h.html" title="Collections of hash functions for 32 and 64 bits, including one&#45;liners, murmurhash, and xxhash. " alt="" coords="493,827,607,853"/>
+<area shape="rect" id="node28" href="$char__vector_8h.html" title="list of strings (each string is a vector of chars) " alt="" coords="627,453,729,480"/>
+<area shape="rect" id="node29" href="$prob__distribution_8h.html" title="Probability distribution functions and auxiliary mathematical functions from statistical package R..." alt="" coords="594,528,722,555"/>
+<area shape="rect" id="node30" href="$random__number_8h.html" title="Random number generation, with algorithms from the Gnu Scientific Library (GSL) and motivation from t..." alt="" coords="537,603,664,629"/>
+<area shape="rect" id="node31" href="$random__number__gen_8h_source.html" title="random_number_gen.h" alt="" coords="517,677,671,704"/>
+</map>

@@ -1,0 +1,11 @@
+<map id="genetree_struct" name="genetree_struct">
+<area shape="rect" id="node2" href="$structsplitset__struct.html" title="splitset_struct" alt="" coords="13,273,117,300"/>
+<area shape="rect" id="node3" href="$structhungarian__struct.html" title="hungarian_struct" alt="" coords="5,95,124,121"/>
+<area shape="rect" id="node4" href="$structbipartition__struct.html" title="Bit&#45;string representation of splits. " alt="" coords="223,95,341,121"/>
+<area shape="rect" id="node9" href="$structtopol__node__struct.html" title="Information of a node (binary tree). " alt="" coords="306,273,431,300"/>
+<area shape="rect" id="node5" href="$structbipsize__struct.html" title="bipsize_struct" alt="" coords="231,5,333,32"/>
+<area shape="rect" id="node6" href="$structspeciestree__struct.html" title="speciestree_struct" alt="" coords="285,553,415,580"/>
+<area shape="rect" id="node7" href="$structtopology__struct.html" title="Binary unrooted topology (rooted at leaf with ID zero) " alt="" coords="205,452,316,479"/>
+<area shape="rect" id="node8" href="$structchar__vector__struct.html" title="vector of strings (char vectors) of variable length " alt="" coords="141,273,271,300"/>
+<area shape="rect" id="node10" href="$structreconciliation__struct.html" title="mapping between gene tree nodes (this) and (external) species tree nodes " alt="" coords="394,503,533,529"/>
+</map>

@@ -1,0 +1,55 @@
+\hypertarget{structbiomcmc__rng__struct}{}\subsection{biomcmc\+\_\+rng\+\_\+struct Struct Reference}
+\label{structbiomcmc__rng__struct}\index{biomcmc\+\_\+rng\+\_\+struct@{biomcmc\+\_\+rng\+\_\+struct}}
+
+
+Random number structure (combined Tausworthe algorithm)  
+
+
+
+
+{\ttfamily \#include $<$random\+\_\+number.\+h$>$}
+
+
+
+Collaboration diagram for biomcmc\+\_\+rng\+\_\+struct\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=286pt]{structbiomcmc__rng__struct__coll__graph}
+\end{center}
+\end{figure}
+\subsubsection*{Data Fields}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{structbiomcmc__rng__struct_a8d4d5fdf7a1c52aabb06b39446c3ed93}\label{structbiomcmc__rng__struct_a8d4d5fdf7a1c52aabb06b39446c3ed93}} 
+\hyperlink{structrng__taus__struct}{rng\+\_\+taus\+\_\+struct} {\bfseries taus}
+\item 
+\mbox{\Hypertarget{structbiomcmc__rng__struct_a0d35534d56f6c0b57d76495319e8f219}\label{structbiomcmc__rng__struct_a0d35534d56f6c0b57d76495319e8f219}} 
+\hyperlink{structrng__mt19937__struct}{rng\+\_\+mt19937\+\_\+struct} \hyperlink{structbiomcmc__rng__struct_a0d35534d56f6c0b57d76495319e8f219}{mt}
+\begin{DoxyCompactList}\small\item\em Tausworthe linear feedback shift-\/register from G\+SL. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structbiomcmc__rng__struct_ae26faaf87d679a2b9236ba303471cee2}\label{structbiomcmc__rng__struct_ae26faaf87d679a2b9236ba303471cee2}} 
+uint64\+\_\+t \hyperlink{structbiomcmc__rng__struct_ae26faaf87d679a2b9236ba303471cee2}{bit32}
+\begin{DoxyCompactList}\small\item\em 64 bits Mersenne Twister from Matsumoto\textquotesingle{}s webpage \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structbiomcmc__rng__struct_ae0279edd5e5e20a4784ef67a6e57a638}\label{structbiomcmc__rng__struct_ae0279edd5e5e20a4784ef67a6e57a638}} 
+\hyperlink{lowlevel_8h_a97a80ca1602ebf2303258971a2c938e2}{bool} \hyperlink{structbiomcmc__rng__struct_ae0279edd5e5e20a4784ef67a6e57a638}{have\+\_\+bit32}
+\begin{DoxyCompactList}\small\item\em temporary values when only 32 bits are necessary \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structbiomcmc__rng__struct_a387dd92d4bb3218530d7187fdb23a113}\label{structbiomcmc__rng__struct_a387dd92d4bb3218530d7187fdb23a113}} 
+double \hyperlink{structbiomcmc__rng__struct_a387dd92d4bb3218530d7187fdb23a113}{rnorm32}
+\begin{DoxyCompactList}\small\item\em when using 32 bits we first check if we have one stored \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structbiomcmc__rng__struct_a7e321a23ca5d7305a54374bf98358148}\label{structbiomcmc__rng__struct_a7e321a23ca5d7305a54374bf98358148}} 
+double {\bfseries rnorm64}
+\item 
+\mbox{\Hypertarget{structbiomcmc__rng__struct_a2d50ad99ab3615eb6ada4f176dc00f7d}\label{structbiomcmc__rng__struct_a2d50ad99ab3615eb6ada4f176dc00f7d}} 
+\hyperlink{lowlevel_8h_a97a80ca1602ebf2303258971a2c938e2}{bool} \hyperlink{structbiomcmc__rng__struct_a2d50ad99ab3615eb6ada4f176dc00f7d}{have\+\_\+rnorm32}
+\begin{DoxyCompactList}\small\item\em stored standard normal random values with 32 and 52 bits of precision \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structbiomcmc__rng__struct_ad38ad14ad51ed51b49315cc944dc9bee}\label{structbiomcmc__rng__struct_ad38ad14ad51ed51b49315cc944dc9bee}} 
+\hyperlink{lowlevel_8h_a97a80ca1602ebf2303258971a2c938e2}{bool} {\bfseries have\+\_\+rnorm64}
+\end{DoxyCompactItemize}
+
+
+\subsubsection{Detailed Description}
+Random number structure (combined Tausworthe algorithm) 
+
+The documentation for this struct was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+\hyperlink{random__number_8h}{random\+\_\+number.\+h}\end{DoxyCompactItemize}

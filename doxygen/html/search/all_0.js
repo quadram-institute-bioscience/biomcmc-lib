@@ -1,0 +1,24 @@
+var searchData=
+[
+  ['a1',['a1',['../structhashtable__struct.html#a563092db06242cc9e284954b01c3b133',1,'hashtable_struct::a1()'],['../structbip__hashtable__struct.html#a0ff51403063e40a6c0e50c011450eaef',1,'bip_hashtable_struct::a1()']]],
+  ['a2',['a2',['../structhashtable__struct.html#af183bbfbf1e17f0f82ac0ea623f383e3',1,'hashtable_struct']]],
+  ['add_5fstring_5fwith_5fsize_5fto_5ftopology_5fspace',['add_string_with_size_to_topology_space',['../topology__space_8h.html#a9812241b6bfd3354ba325212ee599a08',1,'topology_space.c']]],
+  ['add_5ftopology_5fto_5ftopology_5fspace_5fif_5fdistinct',['add_topology_to_topology_space_if_distinct',['../topology__space_8h.html#a6691c5176f14a3754257c979c786cbfa',1,'topology_space.c']]],
+  ['align_5ftripartitions',['align_tripartitions',['../bipartition_8h.html#a8eba8eccc761ee9486a4de679448dbc3',1,'bipartition.c']]],
+  ['alignment_2eh',['alignment.h',['../alignment_8h.html',1,'']]],
+  ['alignment_5fstruct',['alignment_struct',['../structalignment__struct.html',1,'']]],
+  ['alloc',['alloc',['../structchar__vector__struct.html#a39397f4d8dec3ecb96bb34929256296f',1,'char_vector_struct']]],
+  ['apply_5fspr_5fat_5fnodes',['apply_spr_at_nodes',['../topology__common_8h.html#ac0b9b2dacd758c4a9a79075fd582e824',1,'topology_common.c']]],
+  ['apply_5fspr_5fat_5fnodes_5flcaprune',['apply_spr_at_nodes_LCAprune',['../topology__common_8h.html#a62e09c235d771e69aee2993e79e9731c',1,'topology_common.c']]],
+  ['apply_5fspr_5fat_5fnodes_5fnotlcaprune',['apply_spr_at_nodes_notLCAprune',['../topology__common_8h.html#aa3d4404bbf462e60510a35810d617d3f',1,'topology_common.c']]],
+  ['arg_5fdate',['arg_date',['../structarg__date.html',1,'']]],
+  ['arg_5fdbl',['arg_dbl',['../structarg__dbl.html',1,'']]],
+  ['arg_5fend',['arg_end',['../structarg__end.html',1,'']]],
+  ['arg_5ffile',['arg_file',['../structarg__file.html',1,'']]],
+  ['arg_5fhdr',['arg_hdr',['../structarg__hdr.html',1,'']]],
+  ['arg_5fint',['arg_int',['../structarg__int.html',1,'']]],
+  ['arg_5flit',['arg_lit',['../structarg__lit.html',1,'']]],
+  ['arg_5frem',['arg_rem',['../structarg__rem.html',1,'']]],
+  ['arg_5frex',['arg_rex',['../structarg__rex.html',1,'']]],
+  ['arg_5fstr',['arg_str',['../structarg__str.html',1,'']]]
+];

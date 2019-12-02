@@ -1,0 +1,147 @@
+\hypertarget{random__number__aux_8h}{}\subsection{random\+\_\+number\+\_\+aux.\+h File Reference}
+\label{random__number__aux_8h}\index{random\+\_\+number\+\_\+aux.\+h@{random\+\_\+number\+\_\+aux.\+h}}
+
+
+Variables and structures local to random\+\_\+number.\+c (should be opaque to user)  
+
+
+\subsubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+uint64\+\_\+t \hyperlink{random__number__aux_8h_a8b4eacb54ca8b772cecbc032e1985de2}{s\+Table76} \mbox{[}44\mbox{]}\mbox{[}5\mbox{]}
+\begin{DoxyCompactList}\small\item\em Five-\/element streams for L\textquotesingle{}ecuyer\textquotesingle{}s combined L\+F\+SR (Tausworthe) generator. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{random__number__aux_8h_acfe84e71977f167668562b4897f3e439}\label{random__number__aux_8h_acfe84e71977f167668562b4897f3e439}} 
+uint64\+\_\+t \hyperlink{random__number__aux_8h_acfe84e71977f167668562b4897f3e439}{s\+Table543} \mbox{[}106\mbox{]}\mbox{[}4\mbox{]}
+\begin{DoxyCompactList}\small\item\em Four-\/element streams for L\textquotesingle{}ecuyer\textquotesingle{}s combined L\+F\+SR (Tausworthe) generator. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{random__number__aux_8h_ab3d5b98003dd00af3d5037ab6f21c23b}\label{random__number__aux_8h_ab3d5b98003dd00af3d5037ab6f21c23b}} 
+uint64\+\_\+t {\bfseries q\+Table76} \mbox{[}2\mbox{]}\mbox{[}5\mbox{]} = \{ \{1\+U\+L\+L, 7\+U\+L\+L, 24\+U\+L\+L, 3\+U\+L\+L, 5\+U\+L\+L\}, \{1\+U\+L\+L, 24\+U\+L\+L, 3\+U\+L\+L, 5\+U\+L\+L, 3\+U\+L\+L\} \}
+\item 
+\mbox{\Hypertarget{random__number__aux_8h_a12d06376d55cdbec5a600ebb6390fa0f}\label{random__number__aux_8h_a12d06376d55cdbec5a600ebb6390fa0f}} 
+uint64\+\_\+t {\bfseries k\+Table76} \mbox{[}2\mbox{]}\mbox{[}5\mbox{]} = \{ \{63\+U\+L\+L, 57\+U\+L\+L, 55\+U\+L\+L, 52\+U\+L\+L, 47\+U\+L\+L\}, \{63\+U\+L\+L, 55\+U\+L\+L, 52\+U\+L\+L, 47\+U\+L\+L, 41\+U\+L\+L\} \}
+\item 
+uint64\+\_\+t {\bfseries q\+Table543} \mbox{[}4\mbox{]}\mbox{[}4\mbox{]}
+\item 
+uint64\+\_\+t {\bfseries k\+Table543} \mbox{[}4\mbox{]}\mbox{[}4\mbox{]}
+\item 
+uint64\+\_\+t {\bfseries Cmask} \mbox{[}28\mbox{]}
+\item 
+uint32\+\_\+t {\bfseries marsaglia\+\_\+constants} \mbox{[}81\mbox{]}
+\end{DoxyCompactItemize}
+
+
+\subsubsection{Detailed Description}
+Variables and structures local to random\+\_\+number.\+c (should be opaque to user) 
+
+
+
+\subsubsection{Variable Documentation}
+\mbox{\Hypertarget{random__number__aux_8h_a8b4eacb54ca8b772cecbc032e1985de2}\label{random__number__aux_8h_a8b4eacb54ca8b772cecbc032e1985de2}} 
+\index{random\+\_\+number\+\_\+aux.\+h@{random\+\_\+number\+\_\+aux.\+h}!s\+Table76@{s\+Table76}}
+\index{s\+Table76@{s\+Table76}!random\+\_\+number\+\_\+aux.\+h@{random\+\_\+number\+\_\+aux.\+h}}
+\paragraph{\texorpdfstring{s\+Table76}{sTable76}}
+{\footnotesize\ttfamily uint64\+\_\+t s\+Table76\mbox{[}44\mbox{]}\mbox{[}5\mbox{]}}
+
+{\bfseries Initial value\+:}
+\begin{DoxyCode}
+= \{
+  
+   \{9ULL, 34ULL, 5ULL, 26ULL, 18ULL\},  \{9ULL, 32ULL, 5ULL, 31ULL, 6ULL\},   \{9ULL, 25ULL, 5ULL, 37ULL, 22ULL
+      \},
+   \{10ULL, 24ULL, 5ULL, 7ULL, 12ULL\},  \{12ULL, 17ULL, 5ULL, 14ULL, 8ULL\},  \{12ULL, 40ULL, 5ULL, 16ULL, 22
+      ULL\}, 
+   \{12ULL, 26ULL, 5ULL, 34ULL, 23ULL\}, \{17ULL, 27ULL, 5ULL, 13ULL, 9ULL\},  \{17ULL, 8ULL, 5ULL, 37ULL, 19ULL
+      \},
+   \{20ULL, 41ULL, 5ULL, 14ULL, 6ULL\},  \{22ULL, 40ULL, 5ULL, 4ULL, 18ULL\},  \{22ULL, 19ULL, 5ULL, 14ULL, 19
+      ULL\},
+   \{22ULL, 41ULL, 5ULL, 16ULL, 6ULL\},  \{22ULL, 16ULL, 5ULL, 32ULL, 4ULL\},  \{26ULL, 9ULL, 5ULL, 11ULL, 14ULL
+      \},
+   \{26ULL, 19ULL, 5ULL, 29ULL, 3ULL\},  \{44ULL, 20ULL, 5ULL, 8ULL, 6ULL\},   \{44ULL, 31ULL, 5ULL, 22ULL, 14
+      ULL\},
+   \{53ULL, 8ULL, 5ULL, 23ULL, 17ULL\},  \{53ULL, 12ULL, 5ULL, 31ULL, 18ULL\},
+   
+   \{10ULL, 5ULL, 29ULL, 23ULL, 8ULL\},  \{12ULL, 5ULL, 11ULL, 16ULL, 15ULL\}, \{17ULL, 5ULL, 16ULL, 6ULL, 7ULL\}
+      ,
+   \{17ULL, 5ULL, 19ULL, 16ULL, 14ULL\}, \{18ULL, 5ULL, 37ULL, 7ULL, 3ULL\},   \{19ULL, 5ULL, 31ULL, 15ULL, 13
+      ULL\},
+   \{20ULL, 5ULL, 11ULL, 13ULL, 6ULL\},  \{22ULL, 5ULL, 17ULL, 10ULL, 11ULL\}, \{23ULL, 5ULL, 37ULL, 13ULL, 7ULL
+      \},
+   \{24ULL, 5ULL, 7ULL, 16ULL, 8ULL\},   \{26ULL, 5ULL, 22ULL, 4ULL, 9ULL\},   \{26ULL, 5ULL, 26ULL, 13ULL, 12
+      ULL\},
+   \{26ULL, 5ULL, 31ULL, 14ULL, 13ULL\}, \{36ULL, 5ULL, 32ULL, 16ULL, 8ULL\},  \{36ULL, 5ULL, 32ULL, 21ULL, 8ULL
+      \},
+   \{39ULL, 5ULL, 19ULL, 6ULL, 8ULL\},   \{43ULL, 5ULL, 14ULL, 20ULL, 15ULL\}, \{44ULL, 5ULL, 14ULL, 15ULL, 15
+      ULL\},
+   \{44ULL, 5ULL, 29ULL, 6ULL, 13ULL\},  \{44ULL, 5ULL, 34ULL, 25ULL, 9ULL\},  \{45ULL, 5ULL, 16ULL, 21ULL, 8ULL
+      \},
+   \{51ULL, 5ULL, 28ULL, 3ULL, 12ULL\},  \{53ULL, 5ULL, 26ULL, 16ULL, 8ULL\},  \{54ULL, 5ULL, 28ULL, 13ULL, 3ULL
+      \}
+\}
+\end{DoxyCode}
+
+
+Five-\/element streams for L\textquotesingle{}ecuyer\textquotesingle{}s combined L\+F\+SR (Tausworthe) generator. 
+
+\mbox{\Hypertarget{random__number__aux_8h_acd8133203c248c01c193d0d6104734b3}\label{random__number__aux_8h_acd8133203c248c01c193d0d6104734b3}} 
+\index{random\+\_\+number\+\_\+aux.\+h@{random\+\_\+number\+\_\+aux.\+h}!q\+Table543@{q\+Table543}}
+\index{q\+Table543@{q\+Table543}!random\+\_\+number\+\_\+aux.\+h@{random\+\_\+number\+\_\+aux.\+h}}
+\paragraph{\texorpdfstring{q\+Table543}{qTable543}}
+{\footnotesize\ttfamily uint64\+\_\+t q\+Table543\mbox{[}4\mbox{]}\mbox{[}4\mbox{]}}
+
+{\bfseries Initial value\+:}
+\begin{DoxyCode}
+= \{
+   \{31ULL, 1ULL, 19ULL, 22ULL\}, \{31ULL, 11ULL, 19ULL, 22ULL\}, \{1ULL, 19ULL, 7ULL, 24ULL\}, \{31ULL, 19ULL, 24
+      ULL, 21ULL\}
+\}
+\end{DoxyCode}
+\mbox{\Hypertarget{random__number__aux_8h_aa334198a309b95aedb18d929aef7494c}\label{random__number__aux_8h_aa334198a309b95aedb18d929aef7494c}} 
+\index{random\+\_\+number\+\_\+aux.\+h@{random\+\_\+number\+\_\+aux.\+h}!k\+Table543@{k\+Table543}}
+\index{k\+Table543@{k\+Table543}!random\+\_\+number\+\_\+aux.\+h@{random\+\_\+number\+\_\+aux.\+h}}
+\paragraph{\texorpdfstring{k\+Table543}{kTable543}}
+{\footnotesize\ttfamily uint64\+\_\+t k\+Table543\mbox{[}4\mbox{]}\mbox{[}4\mbox{]}}
+
+{\bfseries Initial value\+:}
+\begin{DoxyCode}
+= \{
+   \{63ULL, 60ULL, 58ULL, 57ULL\}, \{63ULL, 60ULL, 58ULL, 57ULL\}, \{63ULL, 58ULL, 57ULL, 55ULL\}, \{63ULL, 58ULL,
+       55ULL, 47ULL\}
+\}
+\end{DoxyCode}
+\mbox{\Hypertarget{random__number__aux_8h_a6331f8c72f1fded63a53fd280388d557}\label{random__number__aux_8h_a6331f8c72f1fded63a53fd280388d557}} 
+\index{random\+\_\+number\+\_\+aux.\+h@{random\+\_\+number\+\_\+aux.\+h}!Cmask@{Cmask}}
+\index{Cmask@{Cmask}!random\+\_\+number\+\_\+aux.\+h@{random\+\_\+number\+\_\+aux.\+h}}
+\paragraph{\texorpdfstring{Cmask}{Cmask}}
+{\footnotesize\ttfamily uint64\+\_\+t Cmask\mbox{[}28\mbox{]}}
+
+{\bfseries Initial value\+:}
+\begin{DoxyCode}
+= \{
+  0xfffffffff0000000ULL, 0xfffffffff8000000ULL, 0xfffffffffc000000ULL, 0xfffffffffe000000ULL, 
+  0xffffffffff000000ULL, 0xffffffffff800000ULL, 0xffffffffffc00000ULL, 0xffffffffffe00000ULL, 
+  0xfffffffffff00000ULL, 0xfffffffffff80000ULL, 0xfffffffffffc0000ULL, 0xfffffffffffe0000ULL, 
+  0xffffffffffff0000ULL, 0xffffffffffff8000ULL, 0xffffffffffffc000ULL, 0xffffffffffffe000ULL, 
+  0xfffffffffffff000ULL, 0xfffffffffffff800ULL, 0xfffffffffffffc00ULL, 0xfffffffffffffe00ULL, 
+  0xffffffffffffff00ULL, 0xffffffffffffff80ULL, 0xffffffffffffffc0ULL, 0xffffffffffffffe0ULL, 
+  0xfffffffffffffff0ULL, 0xfffffffffffffff8ULL, 0xfffffffffffffffcULL, 0xfffffffffffffffeULL  
+\}
+\end{DoxyCode}
+\mbox{\Hypertarget{random__number__aux_8h_abfd8b513a80592f1a69c5adf475c7c36}\label{random__number__aux_8h_abfd8b513a80592f1a69c5adf475c7c36}} 
+\index{random\+\_\+number\+\_\+aux.\+h@{random\+\_\+number\+\_\+aux.\+h}!marsaglia\+\_\+constants@{marsaglia\+\_\+constants}}
+\index{marsaglia\+\_\+constants@{marsaglia\+\_\+constants}!random\+\_\+number\+\_\+aux.\+h@{random\+\_\+number\+\_\+aux.\+h}}
+\paragraph{\texorpdfstring{marsaglia\+\_\+constants}{marsaglia\_constants}}
+{\footnotesize\ttfamily uint32\+\_\+t marsaglia\+\_\+constants\mbox{[}81\mbox{]}}
+
+{\bfseries Initial value\+:}
+\begin{DoxyCode}
+= \{
+  18000, 18030, 18273, 18513, 18879, 19074, 19098, 19164, 19215, 19584, 19599, 19950, 20088, 20508, 20544, 
+      20664, 20814,
+  20970, 21153, 21243, 21423, 21723, 21954, 22125, 22188, 22293, 22860, 22938, 22965, 22974, 23109, 23124, 
+      23163, 23208,
+  23508, 23520, 23553, 23658, 23865, 24114, 24219, 24660, 24699, 24864, 24948, 25023, 25308, 25443, 26004, 
+      26088, 26154,
+  26550, 26679, 26838, 27183, 27258, 27753, 27795, 27810, 27834, 27960, 28320, 28380, 28689, 28710, 28794, 
+      28854, 28959,
+  28980, 29013, 29379, 29889, 30135, 30345, 30459, 30714, 30903, 30963, 31059, 31083, 36969
+\}
+\end{DoxyCode}

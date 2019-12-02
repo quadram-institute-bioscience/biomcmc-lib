@@ -1,0 +1,14 @@
+<map id="kmerhash.h" name="kmerhash.h">
+<area shape="rect" id="node2" href="$alignment_8h.html" title="File handling functions and calculation of distances for sequence data in nexus format. " alt="" coords="515,80,604,107"/>
+<area shape="rect" id="node3" href="$distance__matrix_8h.html" title="distance matrix, that can be used in alignments and trees, and patristic&#45;distance based species dista..." alt="" coords="417,229,542,256"/>
+<area shape="rect" id="node24" href="$nexus__common_8h.html" title="File handling functions for nexus format in general. " alt="" coords="578,155,703,181"/>
+<area shape="rect" id="node4" href="$hashtable_8h.html" title="double hashing open&#45;address hash table using strings as key – also has distance matrix, that can be used in alignments and trees " alt="" coords="549,603,639,629"/>
+<area shape="rect" id="node5" href="$hashfunctions_8h.html" title="Collections of hash functions for 32 and 64 bits, including one&#45;liners, murmurhash, and xxhash. " alt="" coords="547,677,662,704"/>
+<area shape="rect" id="node6" href="$bipartition_8h.html" title="Unary/binary operators on arbitrarily&#45;sized bitstrings (strings of zeros and ones) like split biparti..." alt="" coords="576,752,665,779"/>
+<area shape="rect" id="node7" href="$lowlevel_8h.html" title="Lowest level header file. Header file for lowlevel.c. " alt="" coords="669,827,749,853"/>
+<area shape="rect" id="node25" href="$char__vector_8h.html" title="list of strings (each string is a vector of chars) " alt="" coords="654,304,755,331"/>
+<area shape="rect" id="node29" href="$empirical__frequency_8h.html" title="Creates a histogram of a vector, ordered by frequency. " alt="" coords="566,229,715,256"/>
+<area shape="rect" id="node26" href="$prob__distribution_8h.html" title="Probability distribution functions and auxiliary mathematical functions from statistical package R..." alt="" coords="594,379,722,405"/>
+<area shape="rect" id="node27" href="$random__number_8h.html" title="Random number generation, with algorithms from the Gnu Scientific Library (GSL) and motivation from t..." alt="" coords="537,453,664,480"/>
+<area shape="rect" id="node28" href="$random__number__gen_8h_source.html" title="random_number_gen.h" alt="" coords="517,528,671,555"/>
+</map>

@@ -1,0 +1,64 @@
+\hypertarget{structtopol__node__struct}{}\subsection{topol\+\_\+node\+\_\+struct Struct Reference}
+\label{structtopol__node__struct}\index{topol\+\_\+node\+\_\+struct@{topol\+\_\+node\+\_\+struct}}
+
+
+Information of a node (binary tree).  
+
+
+
+
+{\ttfamily \#include $<$topology\+\_\+common.\+h$>$}
+
+
+
+Collaboration diagram for topol\+\_\+node\+\_\+struct\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=220pt]{structtopol__node__struct__coll__graph}
+\end{center}
+\end{figure}
+\subsubsection*{Data Fields}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{structtopol__node__struct_a747d302eeeec71b6c656e097e3a1658b}\label{structtopol__node__struct_a747d302eeeec71b6c656e097e3a1658b}} 
+\hyperlink{structtopol__node__struct}{topol\+\_\+node} {\bfseries up}
+\item 
+\mbox{\Hypertarget{structtopol__node__struct_a0f2d377e06066861d52e5a55c4a057a5}\label{structtopol__node__struct_a0f2d377e06066861d52e5a55c4a057a5}} 
+\hyperlink{structtopol__node__struct}{topol\+\_\+node} {\bfseries right}
+\item 
+\mbox{\Hypertarget{structtopol__node__struct_ac89c082b65b84e5822126f95552e9aa4}\label{structtopol__node__struct_ac89c082b65b84e5822126f95552e9aa4}} 
+\hyperlink{structtopol__node__struct}{topol\+\_\+node} {\bfseries left}
+\item 
+\mbox{\Hypertarget{structtopol__node__struct_a2c32701d91360029c423c9a3d166eabf}\label{structtopol__node__struct_a2c32701d91360029c423c9a3d166eabf}} 
+\hyperlink{structtopol__node__struct}{topol\+\_\+node} {\bfseries sister}
+\item 
+\mbox{\Hypertarget{structtopol__node__struct_aa59aaa71c57b79b7737eb72973485a0a}\label{structtopol__node__struct_aa59aaa71c57b79b7737eb72973485a0a}} 
+int \hyperlink{structtopol__node__struct_aa59aaa71c57b79b7737eb72973485a0a}{id}
+\begin{DoxyCompactList}\small\item\em Parent, children and sister nodes. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structtopol__node__struct_a0163a947756838115a3da8590fd88e46}\label{structtopol__node__struct_a0163a947756838115a3da8590fd88e46}} 
+int {\bfseries level}
+\item 
+\mbox{\Hypertarget{structtopol__node__struct_a11adf7521b107205fafb609d23c75d52}\label{structtopol__node__struct_a11adf7521b107205fafb609d23c75d52}} 
+int \hyperlink{structtopol__node__struct_a11adf7521b107205fafb609d23c75d52}{mid} \mbox{[}5\mbox{]}
+\begin{DoxyCompactList}\small\item\em Node ID (values smaller than nleaves indicate leaves) and distance from root. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structtopol__node__struct_a0d9191d12975f8876bf490ab1ae9285b}\label{structtopol__node__struct_a0d9191d12975f8876bf490ab1ae9285b}} 
+\hyperlink{lowlevel_8h_a97a80ca1602ebf2303258971a2c938e2}{bool} \hyperlink{structtopol__node__struct_a0d9191d12975f8876bf490ab1ae9285b}{internal}
+\begin{DoxyCompactList}\small\item\em Mapping between nodes and postorder vectors \mbox{[}0,1\mbox{]} (postorder, undone); idx for deep coal \mbox{[}2,3\mbox{]} and losses \mbox{[}4\mbox{]}. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structtopol__node__struct_abb2445a6e496485e310620d4cb23fc3f}\label{structtopol__node__struct_abb2445a6e496485e310620d4cb23fc3f}} 
+\hyperlink{lowlevel_8h_a97a80ca1602ebf2303258971a2c938e2}{bool} \hyperlink{structtopol__node__struct_abb2445a6e496485e310620d4cb23fc3f}{u\+\_\+done}
+\begin{DoxyCompactList}\small\item\em If internal node, T\+R\+UE; if leaf, F\+A\+L\+SE. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structtopol__node__struct_a8a18b8003f8534d99a5b9936b652c8a4}\label{structtopol__node__struct_a8a18b8003f8534d99a5b9936b652c8a4}} 
+\hyperlink{lowlevel_8h_a97a80ca1602ebf2303258971a2c938e2}{bool} \hyperlink{structtopol__node__struct_a8a18b8003f8534d99a5b9936b652c8a4}{d\+\_\+done}
+\begin{DoxyCompactList}\small\item\em Has the topology up this edge (eq. to node) changed? (needed in likelihood calc) \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structtopol__node__struct_aab1db55910dcf5f4e8b3d451aa0a8422}\label{structtopol__node__struct_aab1db55910dcf5f4e8b3d451aa0a8422}} 
+\hyperlink{structbipartition__struct}{bipartition} \hyperlink{structtopol__node__struct_aab1db55910dcf5f4e8b3d451aa0a8422}{split}
+\begin{DoxyCompactList}\small\item\em Has the topology down this edge (eq. to node) changed? (needed in likelihood calc) \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsubsection{Detailed Description}
+Information of a node (binary tree). 
+
+The documentation for this struct was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+\hyperlink{topology__common_8h}{topology\+\_\+common.\+h}\end{DoxyCompactItemize}

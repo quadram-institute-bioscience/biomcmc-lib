@@ -1,0 +1,119 @@
+\hypertarget{char__vector_8c}{}\subsection{char\+\_\+vector.\+c File Reference}
+\label{char__vector_8c}\index{char\+\_\+vector.\+c@{char\+\_\+vector.\+c}}
+
+
+vector of strings (species names, leaf names, etc.)  
+
+
+{\ttfamily \#include \char`\"{}char\+\_\+vector.\+h\char`\"{}}\newline
+Include dependency graph for char\+\_\+vector.\+c\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{char__vector_8c__incl}
+\end{center}
+\end{figure}
+\subsubsection*{Data Structures}
+\begin{DoxyCompactItemize}
+\item 
+struct \hyperlink{structcharvec__str}{charvec\+\_\+str}
+\end{DoxyCompactItemize}
+\subsubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{char__vector_8c_af808c6880732c15dd7210159c486ff82}\label{char__vector_8c_af808c6880732c15dd7210159c486ff82}} 
+\#define {\bfseries kroundup32}(x)~(-\/-\/(x), (x)$\vert$=(x)$>$$>$1, (x)$\vert$=(x)$>$$>$2, (x)$\vert$=(x)$>$$>$4, (x)$\vert$=(x)$>$$>$8, (x)$\vert$=(x)$>$$>$16, ++(x))
+\end{DoxyCompactItemize}
+\subsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{char__vector_8c_a1baadabbd509958e072a02c9fd20282d}\label{char__vector_8c_a1baadabbd509958e072a02c9fd20282d}} 
+int {\bfseries compare\+\_\+charvecstr\+\_\+decreasing} (const void $\ast$a, const void $\ast$b)
+\item 
+\mbox{\Hypertarget{char__vector_8c_a390bd1b724ff0b3aa14dbc0f3e3314c5}\label{char__vector_8c_a390bd1b724ff0b3aa14dbc0f3e3314c5}} 
+int {\bfseries compare\+\_\+charvecstr\+\_\+lexicographic} (const void $\ast$a, const void $\ast$b)
+\item 
+\mbox{\Hypertarget{char__vector_8c_a36f481d0543cf3ce10d4bc1c42da9fce}\label{char__vector_8c_a36f481d0543cf3ce10d4bc1c42da9fce}} 
+\hyperlink{structchar__vector__struct}{char\+\_\+vector} \hyperlink{char__vector_8c_a36f481d0543cf3ce10d4bc1c42da9fce}{new\+\_\+char\+\_\+vector} (int nstrings)
+\begin{DoxyCompactList}\small\item\em Create a vector of strings with initial size for each string of zero. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{char__vector_8c_ac54181d27629788a3e27f2b828ae6b7c}\label{char__vector_8c_ac54181d27629788a3e27f2b828ae6b7c}} 
+\hyperlink{structchar__vector__struct}{char\+\_\+vector} \hyperlink{char__vector_8c_ac54181d27629788a3e27f2b828ae6b7c}{new\+\_\+char\+\_\+vector\+\_\+big} (int nstrings)
+\begin{DoxyCompactList}\small\item\em Create vector of strings, and preparing it to realloc() fewer times; used in conjunction with \textquotesingle{}append\+\_\+big\textquotesingle{}. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{char__vector_8c_aadce8775fbc20432da9bb26065d438bd}\label{char__vector_8c_aadce8775fbc20432da9bb26065d438bd}} 
+\hyperlink{structchar__vector__struct}{char\+\_\+vector} \hyperlink{char__vector_8c_aadce8775fbc20432da9bb26065d438bd}{new\+\_\+char\+\_\+vector\+\_\+from\+\_\+valid\+\_\+strings\+\_\+char\+\_\+vector} (\hyperlink{structchar__vector__struct}{char\+\_\+vector} vec, int $\ast$valid, int n\+\_\+valid)
+\begin{DoxyCompactList}\small\item\em Create a vector of strings from subset of strings of another char\+\_\+vector. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{char__vector_8c_aa9f15b2b4f004f607e7adc9c7c076568}\label{char__vector_8c_aa9f15b2b4f004f607e7adc9c7c076568}} 
+\hyperlink{structchar__vector__struct}{char\+\_\+vector} \hyperlink{char__vector_8c_aa9f15b2b4f004f607e7adc9c7c076568}{new\+\_\+char\+\_\+vector\+\_\+fixed\+\_\+length} (int nstrings, int nchars)
+\begin{DoxyCompactList}\small\item\em Create a vector of strings where each string is assigned an initial value of nchars. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{char__vector_8c_ab5793c24b02a77e3983267369de42df9}\label{char__vector_8c_ab5793c24b02a77e3983267369de42df9}} 
+void \hyperlink{char__vector_8c_ab5793c24b02a77e3983267369de42df9}{del\+\_\+char\+\_\+vector} (\hyperlink{structchar__vector__struct}{char\+\_\+vector} vec)
+\begin{DoxyCompactList}\small\item\em Delete vector of strings only after nobody is using it. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{char__vector_8c_a60c2f8e65e393bea3750f3a647e704a8}\label{char__vector_8c_a60c2f8e65e393bea3750f3a647e704a8}} 
+void \hyperlink{char__vector_8c_a60c2f8e65e393bea3750f3a647e704a8}{char\+\_\+vector\+\_\+link\+\_\+string\+\_\+at\+\_\+position} (\hyperlink{structchar__vector__struct}{char\+\_\+vector} vec, const char $\ast$string, int position)
+\begin{DoxyCompactList}\small\item\em Link a previously allocated string (to avoid copying all characters) \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{char__vector_8c_a8c0ae925a72cbee9733998a99109667c}\label{char__vector_8c_a8c0ae925a72cbee9733998a99109667c}} 
+void \hyperlink{char__vector_8c_a8c0ae925a72cbee9733998a99109667c}{char\+\_\+vector\+\_\+add\+\_\+string\+\_\+at\+\_\+position} (\hyperlink{structchar__vector__struct}{char\+\_\+vector} vec, const char $\ast$string, int position)
+\begin{DoxyCompactList}\small\item\em Add a new string (vector of characters) at specific location. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{char__vector_8c_ae45bc42b402d2389bcb1dfef736bfe0b}\label{char__vector_8c_ae45bc42b402d2389bcb1dfef736bfe0b}} 
+void \hyperlink{char__vector_8c_ae45bc42b402d2389bcb1dfef736bfe0b}{char\+\_\+vector\+\_\+add\+\_\+string} (\hyperlink{structchar__vector__struct}{char\+\_\+vector} vec, const char $\ast$string)
+\begin{DoxyCompactList}\small\item\em Add a new string (vector of characters) at next available location. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{char__vector_8c_a5e8e36faace92faa8fa6b572205159d1}\label{char__vector_8c_a5e8e36faace92faa8fa6b572205159d1}} 
+void \hyperlink{char__vector_8c_a5e8e36faace92faa8fa6b572205159d1}{char\+\_\+vector\+\_\+append\+\_\+string\+\_\+at\+\_\+position} (\hyperlink{structchar__vector__struct}{char\+\_\+vector} vec, const char $\ast$string, int position)
+\begin{DoxyCompactList}\small\item\em Append string at the end of existing string at location. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{char__vector_8c_ab33f21fe78327658e035e6ed0e69e7bd}\label{char__vector_8c_ab33f21fe78327658e035e6ed0e69e7bd}} 
+void \hyperlink{char__vector_8c_ab33f21fe78327658e035e6ed0e69e7bd}{char\+\_\+vector\+\_\+append\+\_\+string} (\hyperlink{structchar__vector__struct}{char\+\_\+vector} vec, const char $\ast$string)
+\begin{DoxyCompactList}\small\item\em Append string at the end of existing string at most recently used location. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{char__vector_8c_a13107fb84cca2e3ef7a4bcfa7a12ac62}\label{char__vector_8c_a13107fb84cca2e3ef7a4bcfa7a12ac62}} 
+void \hyperlink{char__vector_8c_a13107fb84cca2e3ef7a4bcfa7a12ac62}{char\+\_\+vector\+\_\+append\+\_\+string\+\_\+big\+\_\+at\+\_\+position} (\hyperlink{structchar__vector__struct}{char\+\_\+vector} vec, const char $\ast$string, int position)
+\begin{DoxyCompactList}\small\item\em Append strings like before, but doubling allocation space if insufficient (reduces calls to realloc() ) \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{char__vector_8c_aabb37a91468498e1d957a97265af82f4}\label{char__vector_8c_aabb37a91468498e1d957a97265af82f4}} 
+void {\bfseries char\+\_\+vector\+\_\+append\+\_\+string\+\_\+big} (\hyperlink{structchar__vector__struct}{char\+\_\+vector} vec, const char $\ast$string)
+\item 
+\mbox{\Hypertarget{char__vector_8c_adead2adb31107ea801bcb35500760968}\label{char__vector_8c_adead2adb31107ea801bcb35500760968}} 
+void {\bfseries char\+\_\+vector\+\_\+finalise\+\_\+big} (\hyperlink{structchar__vector__struct}{char\+\_\+vector} vec)
+\item 
+\mbox{\Hypertarget{char__vector_8c_a49e07c436cc8b227d49b0033ea0ade01}\label{char__vector_8c_a49e07c436cc8b227d49b0033ea0ade01}} 
+void \hyperlink{char__vector_8c_a49e07c436cc8b227d49b0033ea0ade01}{char\+\_\+vector\+\_\+expand\+\_\+nstrings} (\hyperlink{structchar__vector__struct}{char\+\_\+vector} vec, int new\+\_\+size)
+\begin{DoxyCompactList}\small\item\em Increase size of vector of strings (called automatically by other functions) \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{char__vector_8c_af0dff4c21127fb84f098c90b25da7f57}\label{char__vector_8c_af0dff4c21127fb84f098c90b25da7f57}} 
+void \hyperlink{char__vector_8c_af0dff4c21127fb84f098c90b25da7f57}{char\+\_\+vector\+\_\+reorder\+\_\+strings\+\_\+from\+\_\+external\+\_\+order} (\hyperlink{structchar__vector__struct}{char\+\_\+vector} vec, int $\ast$order)
+\begin{DoxyCompactList}\small\item\em update order of strings in vector based on a vector of new positions \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{char__vector_8c_af643e161413e7e5609ea4fd6d8b9a339}\label{char__vector_8c_af643e161413e7e5609ea4fd6d8b9a339}} 
+int \hyperlink{char__vector_8c_af643e161413e7e5609ea4fd6d8b9a339}{char\+\_\+vector\+\_\+remove\+\_\+empty\+\_\+strings} (\hyperlink{structchar__vector__struct}{char\+\_\+vector} vec)
+\begin{DoxyCompactList}\small\item\em Reduce size of vector of strings by removing empty strings (returns number of empty strings) \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{char__vector_8c_aef03793195d0812db94a8e3e72d5f970}\label{char__vector_8c_aef03793195d0812db94a8e3e72d5f970}} 
+int \hyperlink{char__vector_8c_aef03793195d0812db94a8e3e72d5f970}{char\+\_\+vector\+\_\+remove\+\_\+duplicate\+\_\+strings} (\hyperlink{structchar__vector__struct}{char\+\_\+vector} vec)
+\begin{DoxyCompactList}\small\item\em Remove identical strings and resizes \hyperlink{structchar__vector__struct}{char\+\_\+vector\+\_\+struct}. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{char__vector_8c_ad39fe4da934e84c0ee80c911dc097d90}\label{char__vector_8c_ad39fe4da934e84c0ee80c911dc097d90}} 
+void \hyperlink{char__vector_8c_ad39fe4da934e84c0ee80c911dc097d90}{char\+\_\+vector\+\_\+reduce\+\_\+to\+\_\+valid\+\_\+strings} (\hyperlink{structchar__vector__struct}{char\+\_\+vector} vec, int $\ast$valid, int n\+\_\+valid)
+\begin{DoxyCompactList}\small\item\em reduce char\+\_\+string\+\_\+struct to only those elements indexed by valid\mbox{[}\mbox{]} \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{char__vector_8c_af4c02ca811d97b2ecf75290dc59ca085}\label{char__vector_8c_af4c02ca811d97b2ecf75290dc59ca085}} 
+void \hyperlink{char__vector_8c_af4c02ca811d97b2ecf75290dc59ca085}{char\+\_\+vector\+\_\+reorder\+\_\+by\+\_\+size\+\_\+or\+\_\+lexicographically} (\hyperlink{structchar__vector__struct}{char\+\_\+vector} vec, \hyperlink{lowlevel_8h_a97a80ca1602ebf2303258971a2c938e2}{bool} lexico, int $\ast$order)
+\begin{DoxyCompactList}\small\item\em Order \hyperlink{structchar__vector__struct}{char\+\_\+vector\+\_\+struct} elements from longer string to smaller, or lexicographically; can be used after calling \hyperlink{nexus__common_8h_a70de40a0b5802b9872d5eb6578adf2ae}{new\+\_\+char\+\_\+vector\+\_\+from\+\_\+file()} but if topology etc. are associated to it, then order\mbox{[}\mbox{]} must be externally defined and will have new locations, to keep track of changes. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{char__vector_8c_a2f2d3371e5c7aa994ef5d9a8af923333}\label{char__vector_8c_a2f2d3371e5c7aa994ef5d9a8af923333}} 
+\hyperlink{lowlevel_8h_a97a80ca1602ebf2303258971a2c938e2}{bool} \hyperlink{char__vector_8c_a2f2d3371e5c7aa994ef5d9a8af923333}{char\+\_\+vector\+\_\+link\+\_\+address\+\_\+if\+\_\+identical} (\hyperlink{structchar__vector__struct}{char\+\_\+vector} $\ast$v1, \hyperlink{structchar__vector__struct}{char\+\_\+vector} $\ast$v2)
+\begin{DoxyCompactList}\small\item\em If the two char\+\_\+vectors are identical (same strings in same order), then delete one and make it point to the other one. \end{DoxyCompactList}\item 
+void \hyperlink{char__vector_8c_a69440499315ab425fb2849e816ab3034}{index\+\_\+species\+\_\+gene\+\_\+char\+\_\+vectors} (\hyperlink{structchar__vector__struct}{char\+\_\+vector} species, \hyperlink{structchar__vector__struct}{char\+\_\+vector} gene, int $\ast$sp\+\_\+idx\+\_\+in\+\_\+gene, int $\ast$order\+\_\+external)
+\begin{DoxyCompactList}\small\item\em find occurences of species-\/$>$string\mbox{[}\mbox{]} inside gene-\/$>$string\mbox{[}\mbox{]} filling indexes in sp\+\_\+idx\+\_\+in\+\_\+gene. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{char__vector_8c_a1b81b79044fa296f110a4eb8671e5924}\label{char__vector_8c_a1b81b79044fa296f110a4eb8671e5924}} 
+void {\bfseries update\+\_\+species\+\_\+count\+\_\+from\+\_\+gene\+\_\+char\+\_\+vector} (\hyperlink{structchar__vector__struct}{char\+\_\+vector} species, \hyperlink{structchar__vector__struct}{char\+\_\+vector} gene, int $\ast$sp\+\_\+count)
+\end{DoxyCompactItemize}
+
+
+\subsubsection{Detailed Description}
+vector of strings (species names, leaf names, etc.) 
+
+
+
+\subsubsection{Function Documentation}
+\mbox{\Hypertarget{char__vector_8c_a69440499315ab425fb2849e816ab3034}\label{char__vector_8c_a69440499315ab425fb2849e816ab3034}} 
+\index{char\+\_\+vector.\+c@{char\+\_\+vector.\+c}!index\+\_\+species\+\_\+gene\+\_\+char\+\_\+vectors@{index\+\_\+species\+\_\+gene\+\_\+char\+\_\+vectors}}
+\index{index\+\_\+species\+\_\+gene\+\_\+char\+\_\+vectors@{index\+\_\+species\+\_\+gene\+\_\+char\+\_\+vectors}!char\+\_\+vector.\+c@{char\+\_\+vector.\+c}}
+\paragraph{\texorpdfstring{index\+\_\+species\+\_\+gene\+\_\+char\+\_\+vectors()}{index\_species\_gene\_char\_vectors()}}
+{\footnotesize\ttfamily void index\+\_\+species\+\_\+gene\+\_\+char\+\_\+vectors (\begin{DoxyParamCaption}\item[{\hyperlink{structchar__vector__struct}{char\+\_\+vector}}]{species,  }\item[{\hyperlink{structchar__vector__struct}{char\+\_\+vector}}]{gene,  }\item[{int $\ast$}]{sp\+\_\+idx\+\_\+in\+\_\+gene,  }\item[{int $\ast$}]{order\+\_\+external }\end{DoxyParamCaption})}
+
+
+
+find occurences of species-\/$>$string\mbox{[}\mbox{]} inside gene-\/$>$string\mbox{[}\mbox{]} filling indexes in sp\+\_\+idx\+\_\+in\+\_\+gene. 
+
+The species are taxon names which may be associated with topologies or alignments, such that we can not reorder its elements here (without also modifing e.\+g. tree leaves). But ordering from longer to shorter is essential for pattern finding, so it is assumed that the char\+\_\+vector is already sorted U\+N\+L\+E\+SS user provides the ordering. 

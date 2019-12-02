@@ -1,0 +1,23 @@
+var searchData=
+[
+  ['n',['n',['../structbipartition__struct.html#a55bed1bfc645016d5f4e67fc3a5d1915',1,'bipartition_struct']]],
+  ['n_5fbuckets',['n_buckets',['../structhll__estimate__s.html#a6124b7e8334b402dc3f7d2855642767b',1,'hll_estimate_s']]],
+  ['n_5fcharset',['n_charset',['../structalignment__struct.html#a18e5ad5b8fc356f20affd880be869405',1,'alignment_struct']]],
+  ['n_5fempty_5fbuckets',['n_empty_buckets',['../structhll__estimate__s.html#a0c7a468e18e2b31792f28f300dddc83f',1,'hll_estimate_s']]],
+  ['n_5fg',['n_g',['../structsplitset__struct.html#af7ba4428e2049a8f8c50215fc8c9e3b5',1,'splitset_struct']]],
+  ['n_5fhash',['n_hash',['../structkmerhash__struct.html#a7b70ba55ef5a3b80903d066bf5e541b6',1,'kmerhash_struct']]],
+  ['n_5fones',['n_ones',['../structbipartition__struct.html#a9ab91a7d30c2e9b39f379886be39f949',1,'bipartition_struct']]],
+  ['n_5fundone',['n_undone',['../structtopology__struct.html#a9b8d78548796d309bedaccabce5ef3e2',1,'topology_struct']]],
+  ['nchars',['nchars',['../structchar__vector__struct.html#aa5ae13a11f045c77d3cbb6aca95ed09f',1,'char_vector_struct']]],
+  ['ndcos',['ndcos',['../structreconciliation__struct.html#ae0fbab68a1f81b74d8e8b35110924c91',1,'reconciliation_struct']]],
+  ['ndup_5fd',['ndup_d',['../structreconciliation__struct.html#a9be3553faaa8bb74b66ce418eaaa736b',1,'reconciliation_struct']]],
+  ['ndup_5fu',['ndup_u',['../structreconciliation__struct.html#a69c92c622f67b5fd696cc0e0dca9ca9f',1,'reconciliation_struct']]],
+  ['ndups',['ndups',['../structreconciliation__struct.html#a201c9966439f65c1bbf38eaf55cd0a3e',1,'reconciliation_struct']]],
+  ['next_5favail',['next_avail',['../structchar__vector__struct.html#a766400c8be83bfabb2395c245d4c4505',1,'char_vector_struct']]],
+  ['nleaves',['nleaves',['../structtopology__struct.html#a792c38326b5188ea14cf166b7013f05b',1,'topology_struct']]],
+  ['nlos_5fd',['nlos_d',['../structreconciliation__struct.html#a26d88a04957a59b6c5223f4beb223a34',1,'reconciliation_struct']]],
+  ['nlos_5fu',['nlos_u',['../structreconciliation__struct.html#af78500445bc598675adbdda9afa2356a',1,'reconciliation_struct']]],
+  ['nloss',['nloss',['../structreconciliation__struct.html#a9d66971cc3093b68a6145b174e07586a',1,'reconciliation_struct']]],
+  ['nnodes',['nnodes',['../structnewick__tree__struct.html#a1e1324fe64965530222840f6b77c5312',1,'newick_tree_struct::nnodes()'],['../structtopology__struct.html#a7eab86ca5fc4e2c0df67b39065eaed95',1,'topology_struct::nnodes()']]],
+  ['nstrings',['nstrings',['../structchar__vector__struct.html#a542bc685f5dc47dd26a75e0e6c74f5f6',1,'char_vector_struct']]]
+];

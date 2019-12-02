@@ -1,0 +1,28 @@
+<map id="hashtable.h" name="hashtable.h">
+<area shape="rect" id="node2" href="$distance__matrix_8h.html" title="distance matrix, that can be used in alignments and trees, and patristic&#45;distance based species dista..." alt="" coords="479,379,604,405"/>
+<area shape="rect" id="node19" href="$random__number__gen_8h_source.html" title="random_number_gen.h" alt="" coords="236,80,391,107"/>
+<area shape="rect" id="node3" href="$alignment_8h.html" title="File handling functions and calculation of distances for sequence data in nexus format. " alt="" coords="426,528,515,555"/>
+<area shape="rect" id="node6" href="$topology__common_8h.html" title="General&#45;purpose topology structures created from nexus_tree_struct (and low&#45;level functions) ..." alt="" coords="216,453,355,480"/>
+<area shape="rect" id="node17" href="$distance__generator_8h.html" title="distance calculation between generic objects,without generating full matrix beforehand ..." alt="" coords="539,528,682,555"/>
+<area shape="rect" id="node4" href="$kmerhash_8h.html" title="k&#45;mer handling of DNA sequences, with hash transformation " alt="" coords="469,677,560,704"/>
+<area shape="rect" id="node5" href="$biomcmc_8h.html" title="biomcmc library interface to external programs, specific to super_sptree repo. " alt="" coords="369,827,455,853"/>
+<area shape="rect" id="node7" href="$topology__distance_8h.html" title="branch length operations on topologies, including patristic distances " alt="" coords="211,528,349,555"/>
+<area shape="rect" id="node8" href="$parsimony_8h.html" title="binary and multistate parsimony matrices, together with bipartition extraction for MRP ..." alt="" coords="232,752,325,779"/>
+<area shape="rect" id="node9" href="$topology__randomise_8h.html" title="Creation of random topologies and modification of existing ones through branch swapping. " alt="" coords="92,603,241,629"/>
+<area shape="rect" id="node14" href="$read__newick__trees_8h.html" title="Low&#45;level functions for reading newick strings. " alt="" coords="317,603,459,629"/>
+<area shape="rect" id="node10" href="$upgma_8h.html" title="UPGMA and bioNJ from (onedimensional representation of) distance matrices. " alt="" coords="131,677,203,704"/>
+<area shape="rect" id="node11" href="$genetree_8h.html" title="gene tree and species tree structures, for reconciliation etc. This is the high&#45;level file with globa..." alt="" coords="125,752,208,779"/>
+<area shape="rect" id="node12" href="$reconciliation_8h.html" title="low&#45;level file for gene tree and species tree reconciliation. This file is hidden from user and conta..." alt="" coords="112,827,221,853"/>
+<area shape="rect" id="node13" href="$splitset__distances_8h.html" title="Low&#45;level functions that use only the split bipartitions of topologies – treating them as unrooted u..." alt="" coords="97,901,236,928"/>
+<area shape="rect" id="node15" href="$newick__space_8h.html" title="Reads a list of trees in newick format and creates vector of topologies. " alt="" coords="329,677,445,704"/>
+<area shape="rect" id="node16" href="$topology__space_8h.html" title="Reads tree files in nexus format and creates a vector of topologies. " alt="" coords="350,752,474,779"/>
+<area shape="rect" id="node18" href="$clustering__goptics_8h.html" title="OPTICS algorithm based on https://github.com/guineri/GOPTICS. " alt="" coords="540,603,679,629"/>
+<area shape="rect" id="node20" href="$random__number_8h.html" title="Random number generation, with algorithms from the Gnu Scientific Library (GSL) and motivation from t..." alt="" coords="209,155,335,181"/>
+<area shape="rect" id="node21" href="$prob__distribution_8h.html" title="Probability distribution functions and auxiliary mathematical functions from statistical package R..." alt="" coords="176,229,304,256"/>
+<area shape="rect" id="node22" href="$char__vector_8h.html" title="list of strings (each string is a vector of chars) " alt="" coords="303,304,404,331"/>
+<area shape="rect" id="node27" href="$prob__distribution__aux_8h.html" title="Auxiliary (low level) functions for prob_distribution.c. " alt="" coords="122,304,278,331"/>
+<area shape="rect" id="node23" href="$nexus__common_8h.html" title="File handling functions for nexus format in general. " alt="" coords="379,453,504,480"/>
+<area shape="rect" id="node24" href="$empirical__frequency_8h.html" title="Creates a histogram of a vector, ordered by frequency. " alt="" coords="129,379,279,405"/>
+<area shape="rect" id="node26" href="$char__vector_8c.html" title="vector of strings (species names, leaf names, etc.) " alt="" coords="303,379,404,405"/>
+<area shape="rect" id="node25" href="$empirical__frequency_8c.html" title="histogram of vectors, ordered by frequency. Also calculates MAP (modal) values. " alt="" coords="43,453,192,480"/>
+</map>

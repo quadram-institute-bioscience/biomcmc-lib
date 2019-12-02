@@ -1,0 +1,73 @@
+\hypertarget{structreconciliation__struct}{}\subsection{reconciliation\+\_\+struct Struct Reference}
+\label{structreconciliation__struct}\index{reconciliation\+\_\+struct@{reconciliation\+\_\+struct}}
+
+
+mapping between gene tree nodes (this) and (external) species tree nodes  
+
+
+
+
+{\ttfamily \#include $<$genetree.\+h$>$}
+
+
+
+Collaboration diagram for reconciliation\+\_\+struct\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=225pt]{structreconciliation__struct__coll__graph}
+\end{center}
+\end{figure}
+\subsubsection*{Data Fields}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{structreconciliation__struct_ac47989dd9997713d7024c27654fff1a9}\label{structreconciliation__struct_ac47989dd9997713d7024c27654fff1a9}} 
+\hyperlink{structtopol__node__struct}{topol\+\_\+node} $\ast$ {\bfseries map\+\_\+d}
+\item 
+\mbox{\Hypertarget{structreconciliation__struct_af30cb9a5323cff3cf6c16e020c2ea6ae}\label{structreconciliation__struct_af30cb9a5323cff3cf6c16e020c2ea6ae}} 
+\hyperlink{structtopol__node__struct}{topol\+\_\+node} $\ast$ \hyperlink{structreconciliation__struct_af30cb9a5323cff3cf6c16e020c2ea6ae}{map\+\_\+u}
+\begin{DoxyCompactList}\small\item\em Mapping of all nodes from gene to species (the first gene\+::nnodes are fixed) \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structreconciliation__struct_a58d7c66720179b77ae0aa54911d11c1f}\label{structreconciliation__struct_a58d7c66720179b77ae0aa54911d11c1f}} 
+int $\ast$ \hyperlink{structreconciliation__struct_a58d7c66720179b77ae0aa54911d11c1f}{sp\+\_\+id}
+\begin{DoxyCompactList}\small\item\em Mapping of all nodes from gene to species, assuming gene tree is upside down (unrooted T\+E\+S\+T\+I\+NG version) \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structreconciliation__struct_a2b5f260452d8240e46afd2604b975e14}\label{structreconciliation__struct_a2b5f260452d8240e46afd2604b975e14}} 
+int $\ast$ \hyperlink{structreconciliation__struct_a2b5f260452d8240e46afd2604b975e14}{sp\+\_\+count}
+\begin{DoxyCompactList}\small\item\em mapping of gene (this tolopogy) leaf to ID of taxon in species tree \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structreconciliation__struct_a89ac1a00c6c775cb5769396e832e58ef}\label{structreconciliation__struct_a89ac1a00c6c775cb5769396e832e58ef}} 
+int \hyperlink{structreconciliation__struct_a89ac1a00c6c775cb5769396e832e58ef}{sp\+\_\+size}
+\begin{DoxyCompactList}\small\item\em how many copies of each species are present in this gene (used by deepcoal) \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structreconciliation__struct_aeb4f07f6c681cb938ecf5c8679555549}\label{structreconciliation__struct_aeb4f07f6c681cb938ecf5c8679555549}} 
+int \hyperlink{structreconciliation__struct_aeb4f07f6c681cb938ecf5c8679555549}{size\+\_\+diff}
+\begin{DoxyCompactList}\small\item\em effective number of species present in gene family \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structreconciliation__struct_a407dc24ff413c06e6cf323f7e94916f1}\label{structreconciliation__struct_a407dc24ff413c06e6cf323f7e94916f1}} 
+int $\ast$ \hyperlink{structreconciliation__struct_a407dc24ff413c06e6cf323f7e94916f1}{dup}
+\begin{DoxyCompactList}\small\item\em twice the difference in number of leaves between gene tree and (reduced/effective) species tree \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structreconciliation__struct_a9be3553faaa8bb74b66ce418eaaa736b}\label{structreconciliation__struct_a9be3553faaa8bb74b66ce418eaaa736b}} 
+int $\ast$ \hyperlink{structreconciliation__struct_a9be3553faaa8bb74b66ce418eaaa736b}{ndup\+\_\+d}
+\begin{DoxyCompactList}\small\item\em indexes of duplication nodes on gene tree, and number of such nodes (unused for now) \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structreconciliation__struct_a69c92c622f67b5fd696cc0e0dca9ca9f}\label{structreconciliation__struct_a69c92c622f67b5fd696cc0e0dca9ca9f}} 
+int $\ast$ \hyperlink{structreconciliation__struct_a69c92c622f67b5fd696cc0e0dca9ca9f}{ndup\+\_\+u}
+\begin{DoxyCompactList}\small\item\em number of duplications below node (edge above node, since struct assume node == edge above it) \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structreconciliation__struct_a26d88a04957a59b6c5223f4beb223a34}\label{structreconciliation__struct_a26d88a04957a59b6c5223f4beb223a34}} 
+int $\ast$ \hyperlink{structreconciliation__struct_a26d88a04957a59b6c5223f4beb223a34}{nlos\+\_\+d}
+\begin{DoxyCompactList}\small\item\em number of duplications above node (edge upside down, thus \char`\"{}children\char`\"{} are \textquotesingle{}up\textquotesingle{} and \textquotesingle{}sister\textquotesingle{}) \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structreconciliation__struct_af78500445bc598675adbdda9afa2356a}\label{structreconciliation__struct_af78500445bc598675adbdda9afa2356a}} 
+int $\ast$ \hyperlink{structreconciliation__struct_af78500445bc598675adbdda9afa2356a}{nlos\+\_\+u}
+\begin{DoxyCompactList}\small\item\em number of losses below node and edge above node \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structreconciliation__struct_a201c9966439f65c1bbf38eaf55cd0a3e}\label{structreconciliation__struct_a201c9966439f65c1bbf38eaf55cd0a3e}} 
+int \hyperlink{structreconciliation__struct_a201c9966439f65c1bbf38eaf55cd0a3e}{ndups}
+\begin{DoxyCompactList}\small\item\em number of losses above node, including edge above it \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structreconciliation__struct_a9d66971cc3093b68a6145b174e07586a}\label{structreconciliation__struct_a9d66971cc3093b68a6145b174e07586a}} 
+int \hyperlink{structreconciliation__struct_a9d66971cc3093b68a6145b174e07586a}{nloss}
+\begin{DoxyCompactList}\small\item\em minimum number of duplications over all possible rootings, acc. to \hyperlink{structreconciliation__struct_a407dc24ff413c06e6cf323f7e94916f1}{reconciliation\+\_\+struct\+::dup} \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structreconciliation__struct_ae0fbab68a1f81b74d8e8b35110924c91}\label{structreconciliation__struct_ae0fbab68a1f81b74d8e8b35110924c91}} 
+int \hyperlink{structreconciliation__struct_ae0fbab68a1f81b74d8e8b35110924c91}{ndcos}
+\begin{DoxyCompactList}\small\item\em number of losses corresponding to rooting (edge) that minimizes duplications \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsubsection{Detailed Description}
+mapping between gene tree nodes (this) and (external) species tree nodes 
+
+The documentation for this struct was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+\hyperlink{genetree_8h}{genetree.\+h}\end{DoxyCompactItemize}

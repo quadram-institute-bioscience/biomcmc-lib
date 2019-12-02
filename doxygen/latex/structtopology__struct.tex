@@ -1,0 +1,88 @@
+\hypertarget{structtopology__struct}{}\subsection{topology\+\_\+struct Struct Reference}
+\label{structtopology__struct}\index{topology\+\_\+struct@{topology\+\_\+struct}}
+
+
+Binary unrooted topology (rooted at leaf with ID zero)  
+
+
+
+
+{\ttfamily \#include $<$topology\+\_\+common.\+h$>$}
+
+
+
+Collaboration diagram for topology\+\_\+struct\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=336pt]{structtopology__struct__coll__graph}
+\end{center}
+\end{figure}
+\subsubsection*{Data Fields}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{structtopology__struct_a352f502c9d84b575472264872ffb15f9}\label{structtopology__struct_a352f502c9d84b575472264872ffb15f9}} 
+\hyperlink{structtopol__node__struct}{topol\+\_\+node} $\ast$ {\bfseries nodelist}
+\item 
+\mbox{\Hypertarget{structtopology__struct_acff9f1279985bba8c925f23e3e1b402f}\label{structtopology__struct_acff9f1279985bba8c925f23e3e1b402f}} 
+double $\ast$ \hyperlink{structtopology__struct_acff9f1279985bba8c925f23e3e1b402f}{blength}
+\begin{DoxyCompactList}\small\item\em vector of nodes (the first $L$ are the leaves). \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structtopology__struct_a4e06620b64c11507e0970dce07de138e}\label{structtopology__struct_a4e06620b64c11507e0970dce07de138e}} 
+int \hyperlink{structtopology__struct_a4e06620b64c11507e0970dce07de138e}{id}
+\begin{DoxyCompactList}\small\item\em Branch lengths, with mean, min, max vectors for topology\+\_\+space. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structtopology__struct_a1b636052614bfd03729f580bed52c429}\label{structtopology__struct_a1b636052614bfd03729f580bed52c429}} 
+\hyperlink{structtopol__node__struct}{topol\+\_\+node} \hyperlink{structtopology__struct_a1b636052614bfd03729f580bed52c429}{root}
+\begin{DoxyCompactList}\small\item\em topology ID (should be updated by hand, e.\+g. by functions in topology\+\_\+space.\+c) \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structtopology__struct_a792c38326b5188ea14cf166b7013f05b}\label{structtopology__struct_a792c38326b5188ea14cf166b7013f05b}} 
+int \hyperlink{structtopology__struct_a792c38326b5188ea14cf166b7013f05b}{nleaves}
+\begin{DoxyCompactList}\small\item\em Pointer to root node. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structtopology__struct_a7eab86ca5fc4e2c0df67b39065eaed95}\label{structtopology__struct_a7eab86ca5fc4e2c0df67b39065eaed95}} 
+int \hyperlink{structtopology__struct_a7eab86ca5fc4e2c0df67b39065eaed95}{nnodes}
+\begin{DoxyCompactList}\small\item\em Number of leaves $L$. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structtopology__struct_ade334ca8a90127e831eb67326bf159f5}\label{structtopology__struct_ade334ca8a90127e831eb67326bf159f5}} 
+\hyperlink{structtopol__node__struct}{topol\+\_\+node} \hyperlink{structtopology__struct_ade334ca8a90127e831eb67326bf159f5}{undo\+\_\+prune}
+\begin{DoxyCompactList}\small\item\em Number of nodes, including leaves ( $ 2L-1$ for a binary rooted tree). \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structtopology__struct_a935865d3894e0918dbf7e9b6d74ee74d}\label{structtopology__struct_a935865d3894e0918dbf7e9b6d74ee74d}} 
+\hyperlink{structtopol__node__struct}{topol\+\_\+node} \hyperlink{structtopology__struct_a935865d3894e0918dbf7e9b6d74ee74d}{undo\+\_\+regraft}
+\begin{DoxyCompactList}\small\item\em How to revert most recent S\+PR move (prune node). \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structtopology__struct_a69d8ce96ed99816f3cff56af36c9b44e}\label{structtopology__struct_a69d8ce96ed99816f3cff56af36c9b44e}} 
+\hyperlink{lowlevel_8h_a97a80ca1602ebf2303258971a2c938e2}{bool} \hyperlink{structtopology__struct_a69d8ce96ed99816f3cff56af36c9b44e}{undo\+\_\+lca}
+\begin{DoxyCompactList}\small\item\em How to revert most recent S\+PR move (regraft node). \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structtopology__struct_a4a4ec9adb1812fa74c50b1355ed43711}\label{structtopology__struct_a4a4ec9adb1812fa74c50b1355ed43711}} 
+\hyperlink{structtopol__node__struct}{topol\+\_\+node} $\ast$ \hyperlink{structtopology__struct_a4a4ec9adb1812fa74c50b1355ed43711}{postorder}
+\begin{DoxyCompactList}\small\item\em revert S\+PR move is lca type or not \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structtopology__struct_af2564b454d8c1c3a92f91d116a40cb9f}\label{structtopology__struct_af2564b454d8c1c3a92f91d116a40cb9f}} 
+\hyperlink{structtopol__node__struct}{topol\+\_\+node} $\ast$ \hyperlink{structtopology__struct_af2564b454d8c1c3a92f91d116a40cb9f}{undone}
+\begin{DoxyCompactList}\small\item\em pointers to all internal nodes in postorder (from last to first is preorder) \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structtopology__struct_a9b8d78548796d309bedaccabce5ef3e2}\label{structtopology__struct_a9b8d78548796d309bedaccabce5ef3e2}} 
+int \hyperlink{structtopology__struct_a9b8d78548796d309bedaccabce5ef3e2}{n\+\_\+undone}
+\begin{DoxyCompactList}\small\item\em pointers to outdated nodes in postorder (from last to first is preorder) \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structtopology__struct_a3755c32316ecb1418cd5403ac49bfc8a}\label{structtopology__struct_a3755c32316ecb1418cd5403ac49bfc8a}} 
+uint32\+\_\+t \hyperlink{structtopology__struct_a3755c32316ecb1418cd5403ac49bfc8a}{hash\+I\+D1}
+\begin{DoxyCompactList}\small\item\em number of outdated nodes (which need likelihood calc etc) in \hyperlink{structtopology__struct_af2564b454d8c1c3a92f91d116a40cb9f}{topology\+\_\+struct\+::undone}. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structtopology__struct_a075093f506de0dbe33c4f4385d429d46}\label{structtopology__struct_a075093f506de0dbe33c4f4385d429d46}} 
+uint32\+\_\+t {\bfseries hash\+I\+D2}
+\item 
+\mbox{\Hypertarget{structtopology__struct_ac0951ef0fe8bb99631fef979d11c93c7}\label{structtopology__struct_ac0951ef0fe8bb99631fef979d11c93c7}} 
+\hyperlink{lowlevel_8h_a97a80ca1602ebf2303258971a2c938e2}{bool} \hyperlink{structtopology__struct_ac0951ef0fe8bb99631fef979d11c93c7}{traversal\+\_\+updated}
+\begin{DoxyCompactList}\small\item\em hash values of tree, ideally a unique value for each tree (collisions happen...) \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structtopology__struct_af34229c1a7f6312c4ca98c05b12aacc2}\label{structtopology__struct_af34229c1a7f6312c4ca98c05b12aacc2}} 
+int \hyperlink{structtopology__struct_af34229c1a7f6312c4ca98c05b12aacc2}{ref\+\_\+counter}
+\begin{DoxyCompactList}\small\item\em zero if postorder\mbox{[}\mbox{]} vector needs update, one if we can use postdorder\mbox{[}\mbox{]} to traverse tree \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structtopology__struct_a5b607230aba25816247ff1a6de879364}\label{structtopology__struct_a5b607230aba25816247ff1a6de879364}} 
+\hyperlink{structchar__vector__struct}{char\+\_\+vector} \hyperlink{structtopology__struct_a5b607230aba25816247ff1a6de879364}{taxlabel}
+\begin{DoxyCompactList}\small\item\em number of references of topology (how many places are pointing to it) \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structtopology__struct_aaa2d082ac0e89064cfef0295cad42192}\label{structtopology__struct_aaa2d082ac0e89064cfef0295cad42192}} 
+int $\ast$ \hyperlink{structtopology__struct_aaa2d082ac0e89064cfef0295cad42192}{index}
+\begin{DoxyCompactList}\small\item\em Taxon names (just a pointer; actual values are setup by \hyperlink{structnewick__tree__struct}{newick\+\_\+tree\+\_\+struct} or \hyperlink{structalignment__struct}{alignment\+\_\+struct}) \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structtopology__struct_a9ef01e28228f17731ab9fdb9ea98cb4f}\label{structtopology__struct_a9ef01e28228f17731ab9fdb9ea98cb4f}} 
+\hyperlink{lowlevel_8h_a97a80ca1602ebf2303258971a2c938e2}{bool} \hyperlink{structtopology__struct_a9ef01e28228f17731ab9fdb9ea98cb4f}{quasirandom}
+\begin{DoxyCompactList}\small\item\em sandbox vector used in spr moves / quasirandom tree shuffle just to avoid recurrent allocation \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsubsection{Detailed Description}
+Binary unrooted topology (rooted at leaf with ID zero) 
+
+The documentation for this struct was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+\hyperlink{topology__common_8h}{topology\+\_\+common.\+h}\end{DoxyCompactItemize}

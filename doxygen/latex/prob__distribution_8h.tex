@@ -1,0 +1,153 @@
+\hypertarget{prob__distribution_8h}{}\subsection{prob\+\_\+distribution.\+h File Reference}
+\label{prob__distribution_8h}\index{prob\+\_\+distribution.\+h@{prob\+\_\+distribution.\+h}}
+
+
+Probability distribution functions and auxiliary mathematical functions from statistical package R.  
+
+
+{\ttfamily \#include \char`\"{}lowlevel.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}random\+\_\+number.\+h\char`\"{}}\newline
+Include dependency graph for prob\+\_\+distribution.\+h\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{prob__distribution_8h__incl}
+\end{center}
+\end{figure}
+This graph shows which files directly or indirectly include this file\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{prob__distribution_8h__dep__incl}
+\end{center}
+\end{figure}
+\subsubsection*{Data Structures}
+\begin{DoxyCompactItemize}
+\item 
+struct \hyperlink{structdiscrete__sample__struct}{discrete\+\_\+sample\+\_\+struct}
+\end{DoxyCompactItemize}
+\subsubsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{prob__distribution_8h_a97894f80e8538bd09fb2d0e3506fa358}\label{prob__distribution_8h_a97894f80e8538bd09fb2d0e3506fa358}} 
+typedef struct \hyperlink{structdiscrete__sample__struct}{discrete\+\_\+sample\+\_\+struct} $\ast$ {\bfseries discrete\+\_\+sample}
+\end{DoxyCompactItemize}
+\subsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{prob__distribution_8h_a73fd29df2d61da07ed6bfc6f0fe2b531}\label{prob__distribution_8h_a73fd29df2d61da07ed6bfc6f0fe2b531}} 
+void \hyperlink{prob__distribution_8h_a73fd29df2d61da07ed6bfc6f0fe2b531}{biomcmc\+\_\+discrete\+\_\+gamma} (double alpha, double beta, double $\ast$rate, int nrates)
+\begin{DoxyCompactList}\small\item\em Ziheng Yang\textquotesingle{}s gamma discretization of rates. \end{DoxyCompactList}\item 
+double \hyperlink{prob__distribution_8h_a88c8490d706f874d7914a49e2ca57725}{biomcmc\+\_\+dexp\+\_\+dt} (double d, double lambda, double m, \hyperlink{lowlevel_8h_a97a80ca1602ebf2303258971a2c938e2}{bool} log\+\_\+p)
+\begin{DoxyCompactList}\small\item\em pdf of discrete truncated exponential (d is discrete, m is maximum value) \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{prob__distribution_8h_a6d3934571fa5cc2765140ca91fed1f5b}\label{prob__distribution_8h_a6d3934571fa5cc2765140ca91fed1f5b}} 
+double \hyperlink{prob__distribution_8h_a6d3934571fa5cc2765140ca91fed1f5b}{biomcmc\+\_\+pexp\+\_\+dt} (double d, double lambda, double m, \hyperlink{lowlevel_8h_a97a80ca1602ebf2303258971a2c938e2}{bool} log\+\_\+p)
+\begin{DoxyCompactList}\small\item\em cdf of discrete truncated exponential (d is discrete, m is maximum value)\+: calculates P(D $<$= d) \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{prob__distribution_8h_a9f9e09d86eb2e838a03a920ecc8ca9d1}\label{prob__distribution_8h_a9f9e09d86eb2e838a03a920ecc8ca9d1}} 
+double \hyperlink{prob__distribution_8h_a9f9e09d86eb2e838a03a920ecc8ca9d1}{biomcmc\+\_\+qexp\+\_\+dt} (double p, double lambda, double m, \hyperlink{lowlevel_8h_a97a80ca1602ebf2303258971a2c938e2}{bool} log\+\_\+p)
+\begin{DoxyCompactList}\small\item\em quantile of discrete truncated exponential, that is, finds d s.\+t. P(D $<$= d) $>$= p \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{prob__distribution_8h_a4e3e58f056e950b2dd28b851a03b480b}\label{prob__distribution_8h_a4e3e58f056e950b2dd28b851a03b480b}} 
+double \hyperlink{prob__distribution_8h_a4e3e58f056e950b2dd28b851a03b480b}{biomcmc\+\_\+dgamma} (double x, double alpha, double beta, \hyperlink{lowlevel_8h_a97a80ca1602ebf2303258971a2c938e2}{bool} log\+\_\+p)
+\begin{DoxyCompactList}\small\item\em gamma density \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{prob__distribution_8h_a03ca8bc4bf4d793a9491652b9b948fa9}\label{prob__distribution_8h_a03ca8bc4bf4d793a9491652b9b948fa9}} 
+double \hyperlink{prob__distribution_8h_a03ca8bc4bf4d793a9491652b9b948fa9}{biomcmc\+\_\+qgamma} (double p, double alpha, double beta, \hyperlink{lowlevel_8h_a97a80ca1602ebf2303258971a2c938e2}{bool} log\+\_\+p)
+\begin{DoxyCompactList}\small\item\em gamma quantile (inverse C\+DF) \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{prob__distribution_8h_afbd4bb7864ab888bd1028f91e3a06a05}\label{prob__distribution_8h_afbd4bb7864ab888bd1028f91e3a06a05}} 
+double \hyperlink{prob__distribution_8h_afbd4bb7864ab888bd1028f91e3a06a05}{biomcmc\+\_\+pgamma} (double x, double alpha, double beta, \hyperlink{lowlevel_8h_a97a80ca1602ebf2303258971a2c938e2}{bool} log\+\_\+p)
+\begin{DoxyCompactList}\small\item\em computes the cummulative distribution function for the gamma distribution with shape parameter alpha and rate parameter beta, s.\+t. $ E[X] = \alpha/\beta $. The same as the (lower) incomplete gamma function. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{prob__distribution_8h_a62f8429632008f0bbd6189cdb40ac348}\label{prob__distribution_8h_a62f8429632008f0bbd6189cdb40ac348}} 
+double {\bfseries biomcmc\+\_\+dnorm} (double x, double mu, double sigma, \hyperlink{lowlevel_8h_a97a80ca1602ebf2303258971a2c938e2}{bool} log\+\_\+p)
+\item 
+\mbox{\Hypertarget{prob__distribution_8h_a8aaef10dee497c6190c6a879194df2ba}\label{prob__distribution_8h_a8aaef10dee497c6190c6a879194df2ba}} 
+double {\bfseries biomcmc\+\_\+qnorm} (double p, double mu, double sigma, \hyperlink{lowlevel_8h_a97a80ca1602ebf2303258971a2c938e2}{bool} log\+\_\+p)
+\item 
+\mbox{\Hypertarget{prob__distribution_8h_a7f7ad72dce1e22c3955f36220c0c97ae}\label{prob__distribution_8h_a7f7ad72dce1e22c3955f36220c0c97ae}} 
+double {\bfseries biomcmc\+\_\+pnorm} (double x, double mu, double sigma, \hyperlink{lowlevel_8h_a97a80ca1602ebf2303258971a2c938e2}{bool} log\+\_\+p)
+\item 
+\mbox{\Hypertarget{prob__distribution_8h_a83ed55030da96560d9911ec8467561ca}\label{prob__distribution_8h_a83ed55030da96560d9911ec8467561ca}} 
+double {\bfseries biomcmc\+\_\+dlnorm} (double x, double meanlog, double sdlog, \hyperlink{lowlevel_8h_a97a80ca1602ebf2303258971a2c938e2}{bool} log\+\_\+p)
+\item 
+\mbox{\Hypertarget{prob__distribution_8h_a87057af5495b4cf1b47825be7103bed3}\label{prob__distribution_8h_a87057af5495b4cf1b47825be7103bed3}} 
+double {\bfseries biomcmc\+\_\+qlnorm} (double p, double meanlog, double sdlog, \hyperlink{lowlevel_8h_a97a80ca1602ebf2303258971a2c938e2}{bool} log\+\_\+p)
+\item 
+\mbox{\Hypertarget{prob__distribution_8h_abb5c9ac409793cdd4c1904fddaf30c3c}\label{prob__distribution_8h_abb5c9ac409793cdd4c1904fddaf30c3c}} 
+double {\bfseries biomcmc\+\_\+plnorm} (double x, double meanlog, double sdlog, \hyperlink{lowlevel_8h_a97a80ca1602ebf2303258971a2c938e2}{bool} log\+\_\+p)
+\item 
+\mbox{\Hypertarget{prob__distribution_8h_ae12b7e30b5f53414cd2442f019d7c2dd}\label{prob__distribution_8h_ae12b7e30b5f53414cd2442f019d7c2dd}} 
+double {\bfseries biomcmc\+\_\+dpois} (double x, double lambda, \hyperlink{lowlevel_8h_a97a80ca1602ebf2303258971a2c938e2}{bool} log\+\_\+p)
+\item 
+\mbox{\Hypertarget{prob__distribution_8h_a4dab97c31eb644182e8d517aeebdf272}\label{prob__distribution_8h_a4dab97c31eb644182e8d517aeebdf272}} 
+double {\bfseries biomcmc\+\_\+qpois} (double p, double lambda, \hyperlink{lowlevel_8h_a97a80ca1602ebf2303258971a2c938e2}{bool} log\+\_\+p)
+\item 
+\mbox{\Hypertarget{prob__distribution_8h_a123b7ab4e4d9aa54bdc6b6d33db05e9e}\label{prob__distribution_8h_a123b7ab4e4d9aa54bdc6b6d33db05e9e}} 
+double {\bfseries biomcmc\+\_\+ppois} (double x, double lambda, \hyperlink{lowlevel_8h_a97a80ca1602ebf2303258971a2c938e2}{bool} log\+\_\+p)
+\item 
+\mbox{\Hypertarget{prob__distribution_8h_a0608aa98208da0150444253b4fb5d924}\label{prob__distribution_8h_a0608aa98208da0150444253b4fb5d924}} 
+double {\bfseries biomcmc\+\_\+rng\+\_\+gamma} (double alpha, double beta)
+\item 
+\mbox{\Hypertarget{prob__distribution_8h_aadba5497e04e9f5457828b0c381c9cc9}\label{prob__distribution_8h_aadba5497e04e9f5457828b0c381c9cc9}} 
+double \hyperlink{prob__distribution_8h_aadba5497e04e9f5457828b0c381c9cc9}{biomcmc\+\_\+rng\+\_\+norm} (double mu, double sigma)
+\begin{DoxyCompactList}\small\item\em Returns a random number from a Normal distribution N(mu, sigma$^\wedge$2) using 52 bits of precision. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{prob__distribution_8h_acd2748dc39115fca65d43af9a872481a}\label{prob__distribution_8h_acd2748dc39115fca65d43af9a872481a}} 
+double {\bfseries biomcmc\+\_\+rng\+\_\+lnorm} (double meanlog, double sdlog)
+\item 
+\mbox{\Hypertarget{prob__distribution_8h_a676f8a3bd210cf4866352a6de3610533}\label{prob__distribution_8h_a676f8a3bd210cf4866352a6de3610533}} 
+double {\bfseries biomcmc\+\_\+rng\+\_\+pois} (double mu)
+\item 
+\mbox{\Hypertarget{prob__distribution_8h_a82eb3462c75be07d719e34eee13ded3e}\label{prob__distribution_8h_a82eb3462c75be07d719e34eee13ded3e}} 
+double {\bfseries biomcmc\+\_\+lgammafn} (double x, int $\ast$sgn)
+\item 
+\mbox{\Hypertarget{prob__distribution_8h_a3f7c83cbd1b3a3614a3bbc689459d431}\label{prob__distribution_8h_a3f7c83cbd1b3a3614a3bbc689459d431}} 
+double {\bfseries biomcmc\+\_\+gammafn} (double x)
+\item 
+\mbox{\Hypertarget{prob__distribution_8h_a26c9720b4ab62ddfdd79d895eabe6228}\label{prob__distribution_8h_a26c9720b4ab62ddfdd79d895eabe6228}} 
+double \hyperlink{prob__distribution_8h_a26c9720b4ab62ddfdd79d895eabe6228}{biomcmc\+\_\+log1p} (double x)
+\begin{DoxyCompactList}\small\item\em compute the relative error logarithm $ \log(1 + x)$ (C99 standard) \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{prob__distribution_8h_ae2e2c04e796a50f34dd4733fff2a0cfe}\label{prob__distribution_8h_ae2e2c04e796a50f34dd4733fff2a0cfe}} 
+double \hyperlink{prob__distribution_8h_ae2e2c04e796a50f34dd4733fff2a0cfe}{biomcmc\+\_\+log1pmx} (double x)
+\begin{DoxyCompactList}\small\item\em accurate calculation of $\log(1+x)-x$, particularly for small x \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{prob__distribution_8h_a7a8f5ff734e5bd99c42feab68d987616}\label{prob__distribution_8h_a7a8f5ff734e5bd99c42feab68d987616}} 
+double \hyperlink{prob__distribution_8h_a7a8f5ff734e5bd99c42feab68d987616}{biomcmc\+\_\+expm1} (double x)
+\begin{DoxyCompactList}\small\item\em compute $ \exp(x) - 1$ accurately also when x is close to zero, i.\+e. $|x| \ll 1 $ \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{prob__distribution_8h_a1dc125c51e53403a651f7276f6c302e1}\label{prob__distribution_8h_a1dc125c51e53403a651f7276f6c302e1}} 
+\hyperlink{structdiscrete__sample__struct}{discrete\+\_\+sample} {\bfseries new\+\_\+discrete\+\_\+sample\+\_\+from\+\_\+frequencies} (double $\ast$prob, size\+\_\+t size)
+\item 
+\mbox{\Hypertarget{prob__distribution_8h_a3565720f993b7e9072dc9b2188d03be9}\label{prob__distribution_8h_a3565720f993b7e9072dc9b2188d03be9}} 
+void {\bfseries del\+\_\+discrete\+\_\+sample} (\hyperlink{structdiscrete__sample__struct}{discrete\+\_\+sample} g)
+\item 
+\mbox{\Hypertarget{prob__distribution_8h_a116f5d23fb7146de98ae4c909fca0c0f}\label{prob__distribution_8h_a116f5d23fb7146de98ae4c909fca0c0f}} 
+size\+\_\+t {\bfseries biomcmc\+\_\+rng\+\_\+discrete} (\hyperlink{structdiscrete__sample__struct}{discrete\+\_\+sample} g)
+\item 
+\mbox{\Hypertarget{prob__distribution_8h_a47a7d08ece437027b8ac3e7565204e1c}\label{prob__distribution_8h_a47a7d08ece437027b8ac3e7565204e1c}} 
+double {\bfseries biomcmc\+\_\+discrete\+\_\+sample\+\_\+pdf} (\hyperlink{structdiscrete__sample__struct}{discrete\+\_\+sample} g, size\+\_\+t k)
+\item 
+\mbox{\Hypertarget{prob__distribution_8h_a3a72ec6bb4c6a3f1e27eac7ffb819658}\label{prob__distribution_8h_a3a72ec6bb4c6a3f1e27eac7ffb819658}} 
+double {\bfseries biomcmc\+\_\+logspace\+\_\+add} (double logx, double logy)
+\item 
+\mbox{\Hypertarget{prob__distribution_8h_a76ecfdb1a63044d807a8866028deea5a}\label{prob__distribution_8h_a76ecfdb1a63044d807a8866028deea5a}} 
+double {\bfseries biomcmc\+\_\+logspace\+\_\+sub} (double logx, double logy)
+\item 
+\mbox{\Hypertarget{prob__distribution_8h_accfc39840db06eef9e7f9a70acef6636}\label{prob__distribution_8h_accfc39840db06eef9e7f9a70acef6636}} 
+\hyperlink{lowlevel_8h_a97a80ca1602ebf2303258971a2c938e2}{bool} \hyperlink{prob__distribution_8h_accfc39840db06eef9e7f9a70acef6636}{biomcmc\+\_\+isfinite} (double x)
+\begin{DoxyCompactList}\small\item\em check if number is between minus infinity and plus infinity, or NaN \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsubsection{Detailed Description}
+Probability distribution functions and auxiliary mathematical functions from statistical package R. 
+
+Code derived from the \href{http://www.r-project.org/}{\tt R project for Statistical Computing} version 2.\+9.\+1, available under the G\+PL license. It might be possible to use directly the standalone mathematical library \char`\"{}\+Rmath.\+h\char`\"{} from the R project instead of our implementation. The advantage would be a library updated more often than mine, at the cost of delegating to the guenomu user the installation and maintenance of the extra libraries (like G\+SL, for instance). In Debian this library can be installed through the package \char`\"{}r-\/mathlib\char`\"{}. The original R library checks for several built-\/in compiler functions (like log1p(e) for calculating log(e+1) ) but I simply assume the compiler has none and reimplement them. The C\+D\+Fs always assume the lower tail (upper tails must use 1. -\/ lower tail) or equivalent.
+
+The code for the discrete sampling comes from the G\+NU Scientific Library version 1.\+14 
+
+\subsubsection{Function Documentation}
+\mbox{\Hypertarget{prob__distribution_8h_a88c8490d706f874d7914a49e2ca57725}\label{prob__distribution_8h_a88c8490d706f874d7914a49e2ca57725}} 
+\index{prob\+\_\+distribution.\+h@{prob\+\_\+distribution.\+h}!biomcmc\+\_\+dexp\+\_\+dt@{biomcmc\+\_\+dexp\+\_\+dt}}
+\index{biomcmc\+\_\+dexp\+\_\+dt@{biomcmc\+\_\+dexp\+\_\+dt}!prob\+\_\+distribution.\+h@{prob\+\_\+distribution.\+h}}
+\paragraph{\texorpdfstring{biomcmc\+\_\+dexp\+\_\+dt()}{biomcmc\_dexp\_dt()}}
+{\footnotesize\ttfamily double biomcmc\+\_\+dexp\+\_\+dt (\begin{DoxyParamCaption}\item[{double}]{d,  }\item[{double}]{lambda,  }\item[{double}]{m,  }\item[{\hyperlink{lowlevel_8h_a97a80ca1602ebf2303258971a2c938e2}{bool}}]{log\+\_\+p }\end{DoxyParamCaption})}
+
+
+
+pdf of discrete truncated exponential (d is discrete, m is maximum value) 
+
+pdf of discrete truncated exponential (d is discrete, m is maximum value) 

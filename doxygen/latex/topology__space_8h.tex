@@ -1,0 +1,84 @@
+\hypertarget{topology__space_8h}{}\subsection{topology\+\_\+space.\+h File Reference}
+\label{topology__space_8h}\index{topology\+\_\+space.\+h@{topology\+\_\+space.\+h}}
+
+
+Reads tree files in nexus format and creates a vector of topologies.  
+
+
+{\ttfamily \#include \char`\"{}newick\+\_\+space.\+h\char`\"{}}\newline
+Include dependency graph for topology\+\_\+space.\+h\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{topology__space_8h__incl}
+\end{center}
+\end{figure}
+This graph shows which files directly or indirectly include this file\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=173pt]{topology__space_8h__dep__incl}
+\end{center}
+\end{figure}
+\subsubsection*{Data Structures}
+\begin{DoxyCompactItemize}
+\item 
+struct \hyperlink{structtopology__space__struct}{topology\+\_\+space\+\_\+struct}
+\begin{DoxyCompactList}\small\item\em Collection of topologies from tree file. When topologies have no branch lengths we store only unique topologies. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsubsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{topology__space_8h_a98480ee0db3ab3c62ea9089fd6c3ea08}\label{topology__space_8h_a98480ee0db3ab3c62ea9089fd6c3ea08}} 
+typedef struct \hyperlink{structtopology__space__struct}{topology\+\_\+space\+\_\+struct} $\ast$ {\bfseries topology\+\_\+space}
+\end{DoxyCompactItemize}
+\subsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{topology__space_8h_a9812241b6bfd3354ba325212ee599a08}{add\+\_\+string\+\_\+with\+\_\+size\+\_\+to\+\_\+topology\+\_\+space} (\hyperlink{structtopology__space__struct}{topology\+\_\+space} $\ast$tsp\+\_\+address, char $\ast$long\+\_\+string, size\+\_\+t string\+\_\+size, \hyperlink{lowlevel_8h_a97a80ca1602ebf2303258971a2c938e2}{bool} use\+\_\+root\+\_\+location)
+\begin{DoxyCompactList}\small\item\em Read tree in newick format until char string\+\_\+size, returning updated topolgy\+\_\+space. Auxiliary for python module. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{topology__space_8h_a6691c5176f14a3754257c979c786cbfa}\label{topology__space_8h_a6691c5176f14a3754257c979c786cbfa}} 
+void \hyperlink{topology__space_8h_a6691c5176f14a3754257c979c786cbfa}{add\+\_\+topology\+\_\+to\+\_\+topology\+\_\+space\+\_\+if\+\_\+distinct} (\hyperlink{structtopology__struct}{topology} topol, \hyperlink{structtopology__space__struct}{topology\+\_\+space} tsp, double tree\+\_\+weight, \hyperlink{lowlevel_8h_a97a80ca1602ebf2303258971a2c938e2}{bool} use\+\_\+root\+\_\+location)
+\begin{DoxyCompactList}\small\item\em Add topology to topology\+\_\+space only if unrooted version is distinct, updating freqs, trees\mbox{[}\mbox{]} etc. Aux for python module. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{topology__space_8h_a6aeb6f6740d6ed2cdf14eaffb7f6bb23}\label{topology__space_8h_a6aeb6f6740d6ed2cdf14eaffb7f6bb23}} 
+\hyperlink{structtopology__space__struct}{topology\+\_\+space} \hyperlink{topology__space_8h_a6aeb6f6740d6ed2cdf14eaffb7f6bb23}{read\+\_\+topology\+\_\+space\+\_\+from\+\_\+file} (char $\ast$seqfilename, \hyperlink{structhashtable__struct}{hashtable} external\+\_\+taxhash, \hyperlink{lowlevel_8h_a97a80ca1602ebf2303258971a2c938e2}{bool} use\+\_\+root\+\_\+location)
+\begin{DoxyCompactList}\small\item\em Read tree file and store info in \hyperlink{structtopology__space__struct}{topology\+\_\+space\+\_\+struct} with possible external hashtable to impose the leaf ordering. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{topology__space_8h_a67141711b4fca49610bd8386ee4a0281}\label{topology__space_8h_a67141711b4fca49610bd8386ee4a0281}} 
+\hyperlink{structtopology__space__struct}{topology\+\_\+space} \hyperlink{topology__space_8h_a67141711b4fca49610bd8386ee4a0281}{read\+\_\+topology\+\_\+space\+\_\+from\+\_\+file\+\_\+with\+\_\+burnin\+\_\+thin} (char $\ast$seqfilename, \hyperlink{structhashtable__struct}{hashtable} external\+\_\+taxhash, int burnin, int thin, \hyperlink{lowlevel_8h_a97a80ca1602ebf2303258971a2c938e2}{bool} use\+\_\+root\+\_\+location)
+\begin{DoxyCompactList}\small\item\em lower level function where we can specify burnin and thinning factor, in iterations \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{topology__space_8h_a97f05e898158a85af830c2d392e0d372}\label{topology__space_8h_a97f05e898158a85af830c2d392e0d372}} 
+void \hyperlink{topology__space_8h_a97f05e898158a85af830c2d392e0d372}{merge\+\_\+topology\+\_\+spaces} (\hyperlink{structtopology__space__struct}{topology\+\_\+space} ts1, \hyperlink{structtopology__space__struct}{topology\+\_\+space} ts2, double weight\+\_\+ts1, \hyperlink{lowlevel_8h_a97a80ca1602ebf2303258971a2c938e2}{bool} use\+\_\+root\+\_\+location)
+\begin{DoxyCompactList}\small\item\em merge trees from two topology\+\_\+space objects, assuming names hashtable is the same \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{topology__space_8h_a02669c01364154bb8666a3ab8b1290e5}\label{topology__space_8h_a02669c01364154bb8666a3ab8b1290e5}} 
+void {\bfseries sort\+\_\+topology\+\_\+space\+\_\+by\+\_\+frequency} (\hyperlink{structtopology__space__struct}{topology\+\_\+space} tsp, double $\ast$external\+\_\+freqs)
+\item 
+\mbox{\Hypertarget{topology__space_8h_af756d62d1010e19c2b6b8db87e9d52cf}\label{topology__space_8h_af756d62d1010e19c2b6b8db87e9d52cf}} 
+void \hyperlink{topology__space_8h_af756d62d1010e19c2b6b8db87e9d52cf}{save\+\_\+topology\+\_\+space\+\_\+to\+\_\+trprobs\+\_\+file} (\hyperlink{structtopology__space__struct}{topology\+\_\+space} tsp, char $\ast$filename, double credible)
+\begin{DoxyCompactList}\small\item\em Save topology\+\_\+space to a file, in format nexus w/ trprobs, up to \char`\"{}credible\char`\"{} cummul frequency. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{topology__space_8h_afe56b9362ac66dcd3f91f7571e8331ab}\label{topology__space_8h_afe56b9362ac66dcd3f91f7571e8331ab}} 
+int \hyperlink{topology__space_8h_afe56b9362ac66dcd3f91f7571e8331ab}{estimate\+\_\+treesize\+\_\+from\+\_\+file} (char $\ast$seqfilename)
+\begin{DoxyCompactList}\small\item\em Quickly counts the number of leaves in a tree file, without storing any info. Assumes file and trees are well-\/formed. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{topology__space_8h_ad2d4a28cd52c004895e09d95165b3a82}\label{topology__space_8h_ad2d4a28cd52c004895e09d95165b3a82}} 
+\hyperlink{structtopology__space__struct}{topology\+\_\+space} \hyperlink{topology__space_8h_ad2d4a28cd52c004895e09d95165b3a82}{new\+\_\+topology\+\_\+space} (void)
+\begin{DoxyCompactList}\small\item\em Allocates memory for \hyperlink{structtopology__space__struct}{topology\+\_\+space\+\_\+struct} (set of trees present in nexus file). \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{topology__space_8h_a82636048ffc42d4cf8cd4f5f6c162322}\label{topology__space_8h_a82636048ffc42d4cf8cd4f5f6c162322}} 
+void \hyperlink{topology__space_8h_a82636048ffc42d4cf8cd4f5f6c162322}{del\+\_\+topology\+\_\+space} (\hyperlink{structtopology__space__struct}{topology\+\_\+space} tsp)
+\begin{DoxyCompactList}\small\item\em Free memory from \hyperlink{structtopology__space__struct}{topology\+\_\+space\+\_\+struct}. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsubsection{Detailed Description}
+Reads tree files in nexus format and creates a vector of topologies. 
+
+The \hyperlink{structtopology__space__struct}{topology\+\_\+space\+\_\+struct} is distinct from the \hyperlink{structnewick__space__struct}{newick\+\_\+space\+\_\+struct} since all trees here must share same char\+\_\+vector (newick spaces can have general, uncomparable trees), and also since we store the distribution of trees (that is, each tree will have a frequency/representativity associated to it, as typical from Bayesian analyes). 
+
+\subsubsection{Function Documentation}
+\mbox{\Hypertarget{topology__space_8h_a9812241b6bfd3354ba325212ee599a08}\label{topology__space_8h_a9812241b6bfd3354ba325212ee599a08}} 
+\index{topology\+\_\+space.\+h@{topology\+\_\+space.\+h}!add\+\_\+string\+\_\+with\+\_\+size\+\_\+to\+\_\+topology\+\_\+space@{add\+\_\+string\+\_\+with\+\_\+size\+\_\+to\+\_\+topology\+\_\+space}}
+\index{add\+\_\+string\+\_\+with\+\_\+size\+\_\+to\+\_\+topology\+\_\+space@{add\+\_\+string\+\_\+with\+\_\+size\+\_\+to\+\_\+topology\+\_\+space}!topology\+\_\+space.\+h@{topology\+\_\+space.\+h}}
+\paragraph{\texorpdfstring{add\+\_\+string\+\_\+with\+\_\+size\+\_\+to\+\_\+topology\+\_\+space()}{add\_string\_with\_size\_to\_topology\_space()}}
+{\footnotesize\ttfamily void add\+\_\+string\+\_\+with\+\_\+size\+\_\+to\+\_\+topology\+\_\+space (\begin{DoxyParamCaption}\item[{\hyperlink{structtopology__space__struct}{topology\+\_\+space} $\ast$}]{tsp,  }\item[{char $\ast$}]{long\+\_\+string,  }\item[{size\+\_\+t}]{string\+\_\+size,  }\item[{\hyperlink{lowlevel_8h_a97a80ca1602ebf2303258971a2c938e2}{bool}}]{use\+\_\+root\+\_\+location }\end{DoxyParamCaption})}
+
+
+
+Read tree in newick format until char string\+\_\+size, returning updated topolgy\+\_\+space. Auxiliary for python module. 
+
+Read tree in newick format until char string\+\_\+size, returning updated topolgy\+\_\+space. Auxiliary for python module. 

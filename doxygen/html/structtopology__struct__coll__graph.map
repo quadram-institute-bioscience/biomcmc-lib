@@ -1,0 +1,6 @@
+<map id="topology_struct" name="topology_struct">
+<area shape="rect" id="node2" href="$structchar__vector__struct.html" title="vector of strings (char vectors) of variable length " alt="" coords="5,200,136,227"/>
+<area shape="rect" id="node3" href="$structtopol__node__struct.html" title="Information of a node (binary tree). " alt="" coords="160,200,285,227"/>
+<area shape="rect" id="node4" href="$structbipartition__struct.html" title="Bit&#45;string representation of splits. " alt="" coords="163,95,282,121"/>
+<area shape="rect" id="node5" href="$structbipsize__struct.html" title="bipsize_struct" alt="" coords="171,5,274,32"/>
+</map>

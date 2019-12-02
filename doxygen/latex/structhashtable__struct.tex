@@ -1,0 +1,61 @@
+\hypertarget{structhashtable__struct}{}\subsection{hashtable\+\_\+struct Struct Reference}
+\label{structhashtable__struct}\index{hashtable\+\_\+struct@{hashtable\+\_\+struct}}
+
+
+Hash table (vector indexed by strings).  
+
+
+
+
+{\ttfamily \#include $<$hashtable.\+h$>$}
+
+
+
+Collaboration diagram for hashtable\+\_\+struct\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=193pt]{structhashtable__struct__coll__graph}
+\end{center}
+\end{figure}
+\subsubsection*{Data Fields}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{structhashtable__struct_a0fb42778e1d783631e499751ba367b06}\label{structhashtable__struct_a0fb42778e1d783631e499751ba367b06}} 
+int \hyperlink{structhashtable__struct_a0fb42778e1d783631e499751ba367b06}{size}
+\begin{DoxyCompactList}\small\item\em Table size. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structhashtable__struct_a861882ffbcb186d96f90b82d1dc39f40}\label{structhashtable__struct_a861882ffbcb186d96f90b82d1dc39f40}} 
+int \hyperlink{structhashtable__struct_a861882ffbcb186d96f90b82d1dc39f40}{probelength}
+\begin{DoxyCompactList}\small\item\em Number of collisions before empty slot is found. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structhashtable__struct_ae77d63df7a927e68de61d431d5bc0ddc}\label{structhashtable__struct_ae77d63df7a927e68de61d431d5bc0ddc}} 
+uint32\+\_\+t \hyperlink{structhashtable__struct_ae77d63df7a927e68de61d431d5bc0ddc}{h}
+\begin{DoxyCompactList}\small\item\em Value set by hash(). Used in hash1() and hash2() to avoid calling hash() again. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structhashtable__struct_a563092db06242cc9e284954b01c3b133}\label{structhashtable__struct_a563092db06242cc9e284954b01c3b133}} 
+uint32\+\_\+t \hyperlink{structhashtable__struct_a563092db06242cc9e284954b01c3b133}{a1}
+\begin{DoxyCompactList}\small\item\em Random values used in hash functions. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structhashtable__struct_af183bbfbf1e17f0f82ac0ea623f383e3}\label{structhashtable__struct_af183bbfbf1e17f0f82ac0ea623f383e3}} 
+uint32\+\_\+t \hyperlink{structhashtable__struct_af183bbfbf1e17f0f82ac0ea623f383e3}{a2}
+\begin{DoxyCompactList}\small\item\em Random values used in hash functions. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structhashtable__struct_a3d65fc5f5625a3c950ae177599c1a4dc}\label{structhashtable__struct_a3d65fc5f5625a3c950ae177599c1a4dc}} 
+uint32\+\_\+t \hyperlink{structhashtable__struct_a3d65fc5f5625a3c950ae177599c1a4dc}{b1}
+\begin{DoxyCompactList}\small\item\em Random values used in hash functions. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structhashtable__struct_a7c912d95360bc525d15b5a7cd7906ce3}\label{structhashtable__struct_a7c912d95360bc525d15b5a7cd7906ce3}} 
+uint32\+\_\+t \hyperlink{structhashtable__struct_a7c912d95360bc525d15b5a7cd7906ce3}{b2}
+\begin{DoxyCompactList}\small\item\em Random values used in hash functions. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structhashtable__struct_af1b180f0885b6077b7eeb60fa8267058}\label{structhashtable__struct_af1b180f0885b6077b7eeb60fa8267058}} 
+uint32\+\_\+t \hyperlink{structhashtable__struct_af1b180f0885b6077b7eeb60fa8267058}{P}
+\begin{DoxyCompactList}\small\item\em Random values used in hash functions. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structhashtable__struct_ae8753bc6e120a945558de12c7fc53fd6}\label{structhashtable__struct_ae8753bc6e120a945558de12c7fc53fd6}} 
+\hyperlink{structhashtable__item__struct}{hashtable\+\_\+item} $\ast$ \hyperlink{structhashtable__struct_ae8753bc6e120a945558de12c7fc53fd6}{table}
+\begin{DoxyCompactList}\small\item\em Vector with key/value pairs. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structhashtable__struct_a83abeb291046d5560c2e1612c70c86d0}\label{structhashtable__struct_a83abeb291046d5560c2e1612c70c86d0}} 
+int \hyperlink{structhashtable__struct_a83abeb291046d5560c2e1612c70c86d0}{ref\+\_\+counter}
+\begin{DoxyCompactList}\small\item\em Counter of how many external references (structures sharing this hashtable) to avoid deletion. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsubsection{Detailed Description}
+Hash table (vector indexed by strings). 
+
+The documentation for this struct was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+\hyperlink{hashtable_8h}{hashtable.\+h}\end{DoxyCompactItemize}

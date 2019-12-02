@@ -1,0 +1,8 @@
+<map id="nexus_common.h" name="nexus_common.h">
+<area shape="rect" id="node2" href="$alignment_8h.html" title="File handling functions and calculation of distances for sequence data in nexus format. " alt="" coords="5,80,95,107"/>
+<area shape="rect" id="node5" href="$read__newick__trees_8h.html" title="Low&#45;level functions for reading newick strings. " alt="" coords="119,80,261,107"/>
+<area shape="rect" id="node3" href="$kmerhash_8h.html" title="k&#45;mer handling of DNA sequences, with hash transformation " alt="" coords="10,229,101,256"/>
+<area shape="rect" id="node4" href="$biomcmc_8h.html" title="biomcmc library interface to external programs, specific to super_sptree repo. " alt="" coords="77,304,164,331"/>
+<area shape="rect" id="node6" href="$newick__space_8h.html" title="Reads a list of trees in newick format and creates vector of topologies. " alt="" coords="131,155,247,181"/>
+<area shape="rect" id="node7" href="$topology__space_8h.html" title="Reads tree files in nexus format and creates a vector of topologies. " alt="" coords="127,229,251,256"/>
+</map>

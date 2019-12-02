@@ -1,0 +1,174 @@
+\hypertarget{lowlevel_8c}{}\subsection{lowlevel.\+c File Reference}
+\label{lowlevel_8c}\index{lowlevel.\+c@{lowlevel.\+c}}
+
+
+Lowest level basic functions, that should be available to all other modules.  
+
+
+{\ttfamily \#include \char`\"{}lowlevel.\+h\char`\"{}}\newline
+Include dependency graph for lowlevel.\+c\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{lowlevel_8c__incl}
+\end{center}
+\end{figure}
+\subsubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{lowlevel_8c_a6abf9044f0f099d035e869de71420b20}\label{lowlevel_8c_a6abf9044f0f099d035e869de71420b20}} 
+\#define {\bfseries M\+I\+N\+\_\+\+C\+H\+U\+NK}~128
+\end{DoxyCompactItemize}
+\subsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{lowlevel_8c_ad86ea3efe7e0d748eebfb276862cdaf4}\label{lowlevel_8c_ad86ea3efe7e0d748eebfb276862cdaf4}} 
+void {\bfseries hungarian\+\_\+solve\+\_\+integer} (\hyperlink{structhungarian__struct}{hungarian} p, int this\+\_\+size)
+\item 
+\mbox{\Hypertarget{lowlevel_8c_a5d9e1128e39f3df861d48570be995edd}\label{lowlevel_8c_a5d9e1128e39f3df861d48570be995edd}} 
+void {\bfseries hungarian\+\_\+solve\+\_\+double} (\hyperlink{structhungarian__struct}{hungarian} p, int this\+\_\+size)
+\item 
+void $\ast$ \hyperlink{lowlevel_8c_a03489792a53cd9a8143d22acb41d3ccb}{biomcmc\+\_\+malloc} (size\+\_\+t size)
+\begin{DoxyCompactList}\small\item\em Memory-\/safe malloc() function. \end{DoxyCompactList}\item 
+void $\ast$ \hyperlink{lowlevel_8c_a556c75ab0ff3b636f3ec6e6274b56c2b}{biomcmc\+\_\+realloc} (void $\ast$ptr, size\+\_\+t size)
+\begin{DoxyCompactList}\small\item\em Memory-\/safe realloc() function. \end{DoxyCompactList}\item 
+F\+I\+LE $\ast$ \hyperlink{lowlevel_8c_a05917fb802b4b01a7fa7c231ece428bc}{biomcmc\+\_\+fopen} (const char $\ast$path, const char $\ast$mode)
+\begin{DoxyCompactList}\small\item\em Memory-\/safe fopen() function. \end{DoxyCompactList}\item 
+void \hyperlink{lowlevel_8c_ae53e20539b8f993356c474ee5ce9d015}{biomcmc\+\_\+error} (const char $\ast$template,...)
+\begin{DoxyCompactList}\small\item\em Prints error message and quits program. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{lowlevel_8c_a575ea7031ae39728b5dcc166498218ce}\label{lowlevel_8c_a575ea7031ae39728b5dcc166498218ce}} 
+int \hyperlink{lowlevel_8c_a575ea7031ae39728b5dcc166498218ce}{compare\+\_\+int\+\_\+increasing} (const void $\ast$a, const void $\ast$b)
+\begin{DoxyCompactList}\small\item\em Comparison between integers, doubles, etc. used by qsort() \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{lowlevel_8c_ab6d93198c2c14cc938796a33e219c6bb}\label{lowlevel_8c_ab6d93198c2c14cc938796a33e219c6bb}} 
+int {\bfseries compare\+\_\+int\+\_\+decreasing} (const void $\ast$a, const void $\ast$b)
+\item 
+\mbox{\Hypertarget{lowlevel_8c_a4f8f19647e583ee495e985f9e72cb0a7}\label{lowlevel_8c_a4f8f19647e583ee495e985f9e72cb0a7}} 
+int {\bfseries compare\+\_\+uint64\+\_\+increasing} (const void $\ast$a, const void $\ast$b)
+\item 
+\mbox{\Hypertarget{lowlevel_8c_a70c52b239445db188b9d2b32b5c1114d}\label{lowlevel_8c_a70c52b239445db188b9d2b32b5c1114d}} 
+int {\bfseries compare\+\_\+uint64\+\_\+decreasing} (const void $\ast$a, const void $\ast$b)
+\item 
+\mbox{\Hypertarget{lowlevel_8c_a64de9b12e94da118604945de339eda37}\label{lowlevel_8c_a64de9b12e94da118604945de339eda37}} 
+int {\bfseries compare\+\_\+double\+\_\+increasing} (const void $\ast$a, const void $\ast$b)
+\item 
+\mbox{\Hypertarget{lowlevel_8c_a440b400b97864cd223027647e5e0b44c}\label{lowlevel_8c_a440b400b97864cd223027647e5e0b44c}} 
+int {\bfseries compare\+\_\+double\+\_\+decreasing} (const void $\ast$a, const void $\ast$b)
+\item 
+int \hyperlink{lowlevel_8c_ac4ffb7e3af9f25f385ca591c747013a1}{biomcmc\+\_\+getline} (char $\ast$$\ast$lineptr, size\+\_\+t $\ast$n, F\+I\+LE $\ast$stream)
+\begin{DoxyCompactList}\small\item\em read file line-\/by-\/line (like homonymous function from G\+NU C library) \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{lowlevel_8c_a3fa10d1d23cc57ad3d456984707aef9d}\label{lowlevel_8c_a3fa10d1d23cc57ad3d456984707aef9d}} 
+uint32\+\_\+t \hyperlink{lowlevel_8c_a3fa10d1d23cc57ad3d456984707aef9d}{biomcmc\+\_\+levenshtein\+\_\+distance} (const char $\ast$s1, uint32\+\_\+t n1, const char $\ast$s2, uint32\+\_\+t n2, uint32\+\_\+t cost\+\_\+sub, uint32\+\_\+t cost\+\_\+indel, \hyperlink{lowlevel_8h_a97a80ca1602ebf2303258971a2c938e2}{bool} skip\+\_\+borders)
+\begin{DoxyCompactList}\small\item\em edit distance between two sequences (slow), with option to allow one of sequences to terminate soon (o.\+w. global cost from end to end) \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{lowlevel_8c_a7d1522e9cdf0cd1f4059f3f2b287b4da}\label{lowlevel_8c_a7d1522e9cdf0cd1f4059f3f2b287b4da}} 
+void {\bfseries hungarian\+\_\+reset} (\hyperlink{structhungarian__struct}{hungarian} p)
+\item 
+\mbox{\Hypertarget{lowlevel_8c_a89954b440edd0eaf326075a1f891c9b0}\label{lowlevel_8c_a89954b440edd0eaf326075a1f891c9b0}} 
+\hyperlink{structhungarian__struct}{hungarian} {\bfseries new\+\_\+hungarian} (int size, \hyperlink{lowlevel_8h_a97a80ca1602ebf2303258971a2c938e2}{bool} is\+\_\+double)
+\item 
+\mbox{\Hypertarget{lowlevel_8c_a39b23a43e1079a5cd58256e346a0edfe}\label{lowlevel_8c_a39b23a43e1079a5cd58256e346a0edfe}} 
+void {\bfseries hungarian\+\_\+update\+\_\+cost} (\hyperlink{structhungarian__struct}{hungarian} p, int row, int col, void $\ast$cost)
+\item 
+\mbox{\Hypertarget{lowlevel_8c_aac087a93e346f2757e12a4475fbe7593}\label{lowlevel_8c_aac087a93e346f2757e12a4475fbe7593}} 
+void {\bfseries del\+\_\+hungarian} (\hyperlink{structhungarian__struct}{hungarian} p)
+\item 
+\mbox{\Hypertarget{lowlevel_8c_a14bb6fe5805097bce51c6037c68650b4}\label{lowlevel_8c_a14bb6fe5805097bce51c6037c68650b4}} 
+void {\bfseries hungarian\+\_\+solve} (\hyperlink{structhungarian__struct}{hungarian} p, int this\+\_\+size)
+\end{DoxyCompactItemize}
+
+
+\subsubsection{Detailed Description}
+Lowest level basic functions, that should be available to all other modules. 
+
+
+
+\subsubsection{Function Documentation}
+\mbox{\Hypertarget{lowlevel_8c_a03489792a53cd9a8143d22acb41d3ccb}\label{lowlevel_8c_a03489792a53cd9a8143d22acb41d3ccb}} 
+\index{lowlevel.\+c@{lowlevel.\+c}!biomcmc\+\_\+malloc@{biomcmc\+\_\+malloc}}
+\index{biomcmc\+\_\+malloc@{biomcmc\+\_\+malloc}!lowlevel.\+c@{lowlevel.\+c}}
+\paragraph{\texorpdfstring{biomcmc\+\_\+malloc()}{biomcmc\_malloc()}}
+{\footnotesize\ttfamily void$\ast$ biomcmc\+\_\+malloc (\begin{DoxyParamCaption}\item[{size\+\_\+t}]{size }\end{DoxyParamCaption})}
+
+
+
+Memory-\/safe malloc() function. 
+
+Allocates size bytes and returns a pointer to the allocated memory. An error message is thrown in case of failure. 
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em size} & allocated size, in bytes \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+pointer to newly allocated memory 
+\end{DoxyReturn}
+\mbox{\Hypertarget{lowlevel_8c_a556c75ab0ff3b636f3ec6e6274b56c2b}\label{lowlevel_8c_a556c75ab0ff3b636f3ec6e6274b56c2b}} 
+\index{lowlevel.\+c@{lowlevel.\+c}!biomcmc\+\_\+realloc@{biomcmc\+\_\+realloc}}
+\index{biomcmc\+\_\+realloc@{biomcmc\+\_\+realloc}!lowlevel.\+c@{lowlevel.\+c}}
+\paragraph{\texorpdfstring{biomcmc\+\_\+realloc()}{biomcmc\_realloc()}}
+{\footnotesize\ttfamily void$\ast$ biomcmc\+\_\+realloc (\begin{DoxyParamCaption}\item[{void $\ast$}]{ptr,  }\item[{size\+\_\+t}]{size }\end{DoxyParamCaption})}
+
+
+
+Memory-\/safe realloc() function. 
+
+Changes the size of the memory block pointed to by ptr to size bytes. An error message is thrown in case of failure. 
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em size} & allocated size, in bytes \\
+\hline
+\mbox{\tt in,out}  & {\em ptr} & pointer to previously allocated memory \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+pointer to newly allocated memory 
+\end{DoxyReturn}
+\mbox{\Hypertarget{lowlevel_8c_a05917fb802b4b01a7fa7c231ece428bc}\label{lowlevel_8c_a05917fb802b4b01a7fa7c231ece428bc}} 
+\index{lowlevel.\+c@{lowlevel.\+c}!biomcmc\+\_\+fopen@{biomcmc\+\_\+fopen}}
+\index{biomcmc\+\_\+fopen@{biomcmc\+\_\+fopen}!lowlevel.\+c@{lowlevel.\+c}}
+\paragraph{\texorpdfstring{biomcmc\+\_\+fopen()}{biomcmc\_fopen()}}
+{\footnotesize\ttfamily F\+I\+LE$\ast$ biomcmc\+\_\+fopen (\begin{DoxyParamCaption}\item[{const char $\ast$}]{path,  }\item[{const char $\ast$}]{mode }\end{DoxyParamCaption})}
+
+
+
+Memory-\/safe fopen() function. 
+
+Opens the file whose name is the string pointed to by path and associates a stream with it. An error message is thrown in case of failure. 
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em path} & file name \\
+\hline
+\mbox{\tt in}  & {\em mode} & opening mode (\char`\"{}r\char`\"{} for reading, \char`\"{}w\char`\"{} for writing, etc) \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+pointer to file stream 
+\end{DoxyReturn}
+\mbox{\Hypertarget{lowlevel_8c_ae53e20539b8f993356c474ee5ce9d015}\label{lowlevel_8c_ae53e20539b8f993356c474ee5ce9d015}} 
+\index{lowlevel.\+c@{lowlevel.\+c}!biomcmc\+\_\+error@{biomcmc\+\_\+error}}
+\index{biomcmc\+\_\+error@{biomcmc\+\_\+error}!lowlevel.\+c@{lowlevel.\+c}}
+\paragraph{\texorpdfstring{biomcmc\+\_\+error()}{biomcmc\_error()}}
+{\footnotesize\ttfamily void biomcmc\+\_\+error (\begin{DoxyParamCaption}\item[{const char $\ast$}]{template,  }\item[{}]{... }\end{DoxyParamCaption})}
+
+
+
+Prints error message and quits program. 
+
+similar to fprintf (stderr, ...), but exits after printing the message 
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em template} & va\+\_\+list following same format as printf() \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+exits program 
+\end{DoxyReturn}
+\mbox{\Hypertarget{lowlevel_8c_ac4ffb7e3af9f25f385ca591c747013a1}\label{lowlevel_8c_ac4ffb7e3af9f25f385ca591c747013a1}} 
+\index{lowlevel.\+c@{lowlevel.\+c}!biomcmc\+\_\+getline@{biomcmc\+\_\+getline}}
+\index{biomcmc\+\_\+getline@{biomcmc\+\_\+getline}!lowlevel.\+c@{lowlevel.\+c}}
+\paragraph{\texorpdfstring{biomcmc\+\_\+getline()}{biomcmc\_getline()}}
+{\footnotesize\ttfamily int biomcmc\+\_\+getline (\begin{DoxyParamCaption}\item[{char $\ast$$\ast$}]{lineptr,  }\item[{size\+\_\+t $\ast$}]{n,  }\item[{F\+I\+LE $\ast$}]{stream }\end{DoxyParamCaption})}
+
+
+
+read file line-\/by-\/line (like homonymous function from G\+NU C library) 
+
+This implementation is originally from the Cvs\+Gui project (\href{http://www.wincvs.org/}{\tt http\+://www.\+wincvs.\+org/}). The explanation from the original file adapted to our system follows\+: \begin{DoxyVerb}Read up to (and including) a newline ("\n") from STREAM into *LINEPTR and null-terminate it. *LINEPTR is a pointer 
+returned from malloc (or NULL), pointing to *N characters of space.  It is realloc'd as necessary.  Return the 
+number of characters read (not including the null terminator), or -1 on error or EOF. \end{DoxyVerb}
+ 

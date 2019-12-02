@@ -1,0 +1,13 @@
+<map id="alignment.h" name="alignment.h">
+<area shape="rect" id="node2" href="$distance__matrix_8h.html" title="distance matrix, that can be used in alignments and trees, and patristic&#45;distance based species dista..." alt="" coords="417,155,542,181"/>
+<area shape="rect" id="node23" href="$nexus__common_8h.html" title="File handling functions for nexus format in general. " alt="" coords="578,80,703,107"/>
+<area shape="rect" id="node3" href="$hashtable_8h.html" title="double hashing open&#45;address hash table using strings as key – also has distance matrix, that can be used in alignments and trees " alt="" coords="549,528,639,555"/>
+<area shape="rect" id="node4" href="$hashfunctions_8h.html" title="Collections of hash functions for 32 and 64 bits, including one&#45;liners, murmurhash, and xxhash. " alt="" coords="547,603,662,629"/>
+<area shape="rect" id="node5" href="$bipartition_8h.html" title="Unary/binary operators on arbitrarily&#45;sized bitstrings (strings of zeros and ones) like split biparti..." alt="" coords="576,677,665,704"/>
+<area shape="rect" id="node6" href="$lowlevel_8h.html" title="Lowest level header file. Header file for lowlevel.c. " alt="" coords="669,752,749,779"/>
+<area shape="rect" id="node24" href="$char__vector_8h.html" title="list of strings (each string is a vector of chars) " alt="" coords="654,229,755,256"/>
+<area shape="rect" id="node28" href="$empirical__frequency_8h.html" title="Creates a histogram of a vector, ordered by frequency. " alt="" coords="566,155,715,181"/>
+<area shape="rect" id="node25" href="$prob__distribution_8h.html" title="Probability distribution functions and auxiliary mathematical functions from statistical package R..." alt="" coords="594,304,722,331"/>
+<area shape="rect" id="node26" href="$random__number_8h.html" title="Random number generation, with algorithms from the Gnu Scientific Library (GSL) and motivation from t..." alt="" coords="537,379,664,405"/>
+<area shape="rect" id="node27" href="$random__number__gen_8h_source.html" title="random_number_gen.h" alt="" coords="517,453,671,480"/>
+</map>

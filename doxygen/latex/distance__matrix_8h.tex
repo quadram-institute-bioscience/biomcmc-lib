@@ -1,0 +1,106 @@
+\hypertarget{distance__matrix_8h}{}\subsection{distance\+\_\+matrix.\+h File Reference}
+\label{distance__matrix_8h}\index{distance\+\_\+matrix.\+h@{distance\+\_\+matrix.\+h}}
+
+
+distance matrix, that can be used in alignments and trees, and patristic-\/distance based species distances  
+
+
+{\ttfamily \#include \char`\"{}hashtable.\+h\char`\"{}}\newline
+Include dependency graph for distance\+\_\+matrix.\+h\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{distance__matrix_8h__incl}
+\end{center}
+\end{figure}
+This graph shows which files directly or indirectly include this file\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{distance__matrix_8h__dep__incl}
+\end{center}
+\end{figure}
+\subsubsection*{Data Structures}
+\begin{DoxyCompactItemize}
+\item 
+struct \hyperlink{structdistance__matrix__struct}{distance\+\_\+matrix\+\_\+struct}
+\item 
+struct \hyperlink{structspdist__matrix__struct}{spdist\+\_\+matrix\+\_\+struct}
+\end{DoxyCompactItemize}
+\subsubsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{distance__matrix_8h_a9e145719317f4d9e5067479ec7d53bb8}\label{distance__matrix_8h_a9e145719317f4d9e5067479ec7d53bb8}} 
+typedef struct \hyperlink{structdistance__matrix__struct}{distance\+\_\+matrix\+\_\+struct} $\ast$ {\bfseries distance\+\_\+matrix}
+\item 
+\mbox{\Hypertarget{distance__matrix_8h_ad771eef7a2693d94a03fb0b80df60664}\label{distance__matrix_8h_ad771eef7a2693d94a03fb0b80df60664}} 
+typedef struct \hyperlink{structspdist__matrix__struct}{spdist\+\_\+matrix\+\_\+struct} $\ast$ {\bfseries spdist\+\_\+matrix}
+\end{DoxyCompactItemize}
+\subsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{distance__matrix_8h_a05c728b75adbababd8c6fd4de241912a}\label{distance__matrix_8h_a05c728b75adbababd8c6fd4de241912a}} 
+\hyperlink{structdistance__matrix__struct}{distance\+\_\+matrix} \hyperlink{distance__matrix_8h_a05c728b75adbababd8c6fd4de241912a}{new\+\_\+distance\+\_\+matrix} (int nseqs)
+\begin{DoxyCompactList}\small\item\em creates new matrix of pairwise distances \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{distance__matrix_8h_a32656dd2ef988382d7e7a3eb505d1522}\label{distance__matrix_8h_a32656dd2ef988382d7e7a3eb505d1522}} 
+void \hyperlink{distance__matrix_8h_a32656dd2ef988382d7e7a3eb505d1522}{zero\+\_\+lower\+\_\+distance\+\_\+matrix} (\hyperlink{structdistance__matrix__struct}{distance\+\_\+matrix} dist)
+\begin{DoxyCompactList}\small\item\em specially in gene/sptree distance methods (G\+L\+A\+SS, S\+T\+E\+AC, etc.) lower is used for means and upper for min. This function resets matrix elements \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{distance__matrix_8h_a5ac533926151f08c78923a645ab11446}\label{distance__matrix_8h_a5ac533926151f08c78923a645ab11446}} 
+void \hyperlink{distance__matrix_8h_a5ac533926151f08c78923a645ab11446}{transpose\+\_\+distance\+\_\+matrix} (\hyperlink{structdistance__matrix__struct}{distance\+\_\+matrix} dist)
+\begin{DoxyCompactList}\small\item\em invert lower and upper diagonals of matrix (since some functions like upgma expect upper, etc.) \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{distance__matrix_8h_a6c66792124e982cdb5202e1be10c24cf}\label{distance__matrix_8h_a6c66792124e982cdb5202e1be10c24cf}} 
+void \hyperlink{distance__matrix_8h_a6c66792124e982cdb5202e1be10c24cf}{del\+\_\+distance\+\_\+matrix} (\hyperlink{structdistance__matrix__struct}{distance\+\_\+matrix} dist)
+\begin{DoxyCompactList}\small\item\em releases memory allocated to distance\+\_\+matrix (this structure has no smart ref\+\_\+counter) \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{distance__matrix_8h_a9837e1b9bded4fd9e565e714713c390c}\label{distance__matrix_8h_a9837e1b9bded4fd9e565e714713c390c}} 
+\hyperlink{structspdist__matrix__struct}{spdist\+\_\+matrix} {\bfseries new\+\_\+spdist\+\_\+matrix} (int n\+\_\+species)
+\item 
+void \hyperlink{distance__matrix_8h_ae266042e13a382a1890a6fbff681b9f2}{zero\+\_\+all\+\_\+spdist\+\_\+matrix} (\hyperlink{structspdist__matrix__struct}{spdist\+\_\+matrix} dist)
+\item 
+\mbox{\Hypertarget{distance__matrix_8h_a2be42a346c2a1ba84b8e5694e7eb9893}\label{distance__matrix_8h_a2be42a346c2a1ba84b8e5694e7eb9893}} 
+void {\bfseries finalise\+\_\+spdist\+\_\+matrix} (\hyperlink{structspdist__matrix__struct}{spdist\+\_\+matrix} dist)
+\item 
+\mbox{\Hypertarget{distance__matrix_8h_a6ddbc5097dbe689d2c74ea5fbb56e173}\label{distance__matrix_8h_a6ddbc5097dbe689d2c74ea5fbb56e173}} 
+void {\bfseries finalise\+\_\+spdist\+\_\+matrix\+\_\+with\+\_\+rescaling} (\hyperlink{structspdist__matrix__struct}{spdist\+\_\+matrix} dist, double scale)
+\item 
+\mbox{\Hypertarget{distance__matrix_8h_a3b0ce1bc6fc8e338ca04435fe22b4459}\label{distance__matrix_8h_a3b0ce1bc6fc8e338ca04435fe22b4459}} 
+void {\bfseries complete\+\_\+missing\+\_\+spdist\+\_\+from\+\_\+global\+\_\+spdist} (\hyperlink{structspdist__matrix__struct}{spdist\+\_\+matrix} local, \hyperlink{structspdist__matrix__struct}{spdist\+\_\+matrix} global)
+\item 
+\mbox{\Hypertarget{distance__matrix_8h_ad8672a57540a96d4437a05a775282abe}\label{distance__matrix_8h_ad8672a57540a96d4437a05a775282abe}} 
+void {\bfseries copy\+\_\+spdist\+\_\+matrix\+\_\+to\+\_\+distance\+\_\+matrix\+\_\+upper} (\hyperlink{structspdist__matrix__struct}{spdist\+\_\+matrix} spd, \hyperlink{structdistance__matrix__struct}{distance\+\_\+matrix} dist, \hyperlink{lowlevel_8h_a97a80ca1602ebf2303258971a2c938e2}{bool} use\+\_\+means)
+\item 
+\mbox{\Hypertarget{distance__matrix_8h_a15093d39f1c6485ce09e1a7643ce6736}\label{distance__matrix_8h_a15093d39f1c6485ce09e1a7643ce6736}} 
+void {\bfseries del\+\_\+spdist\+\_\+matrix} (\hyperlink{structspdist__matrix__struct}{spdist\+\_\+matrix} dist)
+\item 
+\mbox{\Hypertarget{distance__matrix_8h_ad04d393e906484301674610590ae2dfe}\label{distance__matrix_8h_ad04d393e906484301674610590ae2dfe}} 
+void \hyperlink{distance__matrix_8h_ad04d393e906484301674610590ae2dfe}{fill\+\_\+species\+\_\+dists\+\_\+from\+\_\+gene\+\_\+dists} (\hyperlink{structdistance__matrix__struct}{distance\+\_\+matrix} spdist, \hyperlink{structdistance__matrix__struct}{distance\+\_\+matrix} gendist, int $\ast$sp\+\_\+id, \hyperlink{lowlevel_8h_a97a80ca1602ebf2303258971a2c938e2}{bool} use\+\_\+upper\+\_\+gene)
+\begin{DoxyCompactList}\small\item\em updates distances between species based on genes and gene-\/to-\/species mapping, with min on upper and mean on lower diagonal \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{distance__matrix_8h_ab5c7f9dfd23d5fab609c82e86a9a7f3d}\label{distance__matrix_8h_ab5c7f9dfd23d5fab609c82e86a9a7f3d}} 
+void \hyperlink{distance__matrix_8h_ab5c7f9dfd23d5fab609c82e86a9a7f3d}{update\+\_\+species\+\_\+dists\+\_\+from\+\_\+spdist} (\hyperlink{structdistance__matrix__struct}{distance\+\_\+matrix} global, \hyperlink{structdistance__matrix__struct}{distance\+\_\+matrix} local, int $\ast$spexist)
+\begin{DoxyCompactList}\small\item\em update global (over loci) species distances besed on local (within locus) species distances \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{distance__matrix_8h_a3302aeae38b037be76a360a5fb8d7898}\label{distance__matrix_8h_a3302aeae38b037be76a360a5fb8d7898}} 
+int {\bfseries prepare\+\_\+spdistmatrix\+\_\+from\+\_\+gene\+\_\+species\+\_\+map} (\hyperlink{structspdist__matrix__struct}{spdist\+\_\+matrix} spdist, int $\ast$sp\+\_\+id, int n\+\_\+sp\+\_\+id)
+\item 
+\mbox{\Hypertarget{distance__matrix_8h_a760f76e6dd06a82994c45dda3d450f37}\label{distance__matrix_8h_a760f76e6dd06a82994c45dda3d450f37}} 
+void {\bfseries fill\+\_\+spdistmatrix\+\_\+from\+\_\+gene\+\_\+dists} (\hyperlink{structspdist__matrix__struct}{spdist\+\_\+matrix} spdist, \hyperlink{structdistance__matrix__struct}{distance\+\_\+matrix} gendist, int $\ast$sp\+\_\+id, \hyperlink{lowlevel_8h_a97a80ca1602ebf2303258971a2c938e2}{bool} use\+\_\+upper\+\_\+gene)
+\item 
+\mbox{\Hypertarget{distance__matrix_8h_ac0bd82593abed577a8be45076f9697c6}\label{distance__matrix_8h_ac0bd82593abed577a8be45076f9697c6}} 
+void \hyperlink{distance__matrix_8h_ac0bd82593abed577a8be45076f9697c6}{fill\+\_\+spdistmatrix\+\_\+from\+\_\+gene\+\_\+dist\+\_\+vector} (\hyperlink{structspdist__matrix__struct}{spdist\+\_\+matrix} spdist, double $\ast$gdist, int n\+\_\+gdist, int $\ast$sp\+\_\+id)
+\begin{DoxyCompactList}\small\item\em initialise spdist\+\_\+matrix with patristic distances from gdist vector of size n\+\_\+gdist (1D) \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{distance__matrix_8h_a4610b2cfcc845942ae75c6f00e4d6bc5}\label{distance__matrix_8h_a4610b2cfcc845942ae75c6f00e4d6bc5}} 
+void {\bfseries update\+\_\+spdistmatrix\+\_\+from\+\_\+spdistmatrix} (\hyperlink{structspdist__matrix__struct}{spdist\+\_\+matrix} global, \hyperlink{structspdist__matrix__struct}{spdist\+\_\+matrix} local)
+\end{DoxyCompactItemize}
+
+
+\subsubsection{Detailed Description}
+distance matrix, that can be used in alignments and trees, and patristic-\/distance based species distances 
+
+These functions don\textquotesingle{}t know about trees/topologies\+: topology\+\_\+common.\+c creates the actual patristic distances, and downstream software or \hyperlink{genetree_8h}{genetree.\+h} should decide how to use this information 
+
+\subsubsection{Function Documentation}
+\mbox{\Hypertarget{distance__matrix_8h_ae266042e13a382a1890a6fbff681b9f2}\label{distance__matrix_8h_ae266042e13a382a1890a6fbff681b9f2}} 
+\index{distance\+\_\+matrix.\+h@{distance\+\_\+matrix.\+h}!zero\+\_\+all\+\_\+spdist\+\_\+matrix@{zero\+\_\+all\+\_\+spdist\+\_\+matrix}}
+\index{zero\+\_\+all\+\_\+spdist\+\_\+matrix@{zero\+\_\+all\+\_\+spdist\+\_\+matrix}!distance\+\_\+matrix.\+h@{distance\+\_\+matrix.\+h}}
+\paragraph{\texorpdfstring{zero\+\_\+all\+\_\+spdist\+\_\+matrix()}{zero\_all\_spdist\_matrix()}}
+{\footnotesize\ttfamily void zero\+\_\+all\+\_\+spdist\+\_\+matrix (\begin{DoxyParamCaption}\item[{\hyperlink{structspdist__matrix__struct}{spdist\+\_\+matrix}}]{dist }\end{DoxyParamCaption})}
+
+zero both mean\mbox{[}\mbox{]} and min\mbox{[}\mbox{]} since we only look at average (never min) across loci 
