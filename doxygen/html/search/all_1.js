@@ -82,5 +82,6 @@ var searchData=
   ['blength',['blength',['../structtopology__struct.html#acff9f1279985bba8c925f23e3e1b402f',1,'topology_struct']]],
   ['bool',['bool',['../lowlevel_8h.html#a97a80ca1602ebf2303258971a2c938e2',1,'lowlevel.h']]],
   ['branch_5flength',['branch_length',['../structnewick__node__struct.html#a9205ab7cce347279634f90af83d1e81d',1,'newick_node_struct']]],
-  ['bs',['bs',['../structbipartition__struct.html#a2cb01205ff03325f27f67237ec4945a2',1,'bipartition_struct']]]
+  ['bs',['bs',['../structbipartition__struct.html#a2cb01205ff03325f27f67237ec4945a2',1,'bipartition_struct']]],
+  ['biomcmc_2dlib_20source_20code_20documentation',['Biomcmc-lib source code documentation',['../index.html',1,'']]]
 ];
