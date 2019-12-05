@@ -66,7 +66,8 @@ del_dna_salted_hash_encoding (uint32_t** shash) {
     free (shash);
 }
 
-#define RoL(val, numbits) ((val) << (numbits)) ^ ((val) >> (32 - (numbits)))
+#define RoL(val, numbits) ((val) << (numbits)) | ((val) >> (32 - (numbits)))
+#define RoR(val, numbits) ((val) >> (numbits)) | ((val) << (32 - (numbits)))
 void
 roll_hash_add (uint32_t *h, const char dna_base, const uint8_t rol, const uint32_t* shashcode)
 {
@@ -75,16 +76,25 @@ roll_hash_add (uint32_t *h, const char dna_base, const uint8_t rol, const uint32
 }
 
 void // kmer_size can't be 0 or 32 
-roll_hash_replace (uint32_t *h, const char old_base, const char new_base, const uint8_t kmer_size, 
+roll_hash_replace_f (uint32_t *h, const char old_base, const char new_base, const uint8_t kmer_size, 
                    const uint8_t rol, const uint32_t* shashcode)
 {
-  uint8_t remain = (rol * (kmer_size-1)) & 31U; // since x % y = x & (y-1) // this can be calculated outside
-  *h ^= RoL(shashcode[(uint8_t) old_base], remain); // remove "leftmost" base 
-  *h =  RoL(*h, rol);
-  *h ^= shashcode[(uint8_t) new_base];
+    uint8_t remain = (rol * (kmer_size-1)) & 31U; // since x % y = x & (y-1) // this can be calculated outside
+    *h ^= RoL(shashcode[(uint8_t) old_base], remain); // remove "leftmost" base 
+    *h  = RoL(*h, rol);
+    *h ^= shashcode[(uint8_t) new_base];
 }
-
+void // kmer_size can't be 0 or 32 
+roll_hash_replace_r (uint32_t *h, const char old_base, const char new_base, const uint8_t kmer_size, 
+                   const uint8_t rol, const uint32_t* shashcode)
+{
+    uint8_t remain = (rol * (kmer_size-1)) & 31U; // since x % y = x & (y-1) // this can be calculated outside 
+    *h ^= shashcode[(uint8_t) old_base];
+    *h  = RoR(*h, rol);
+    *h ^= RoL(shashcode[(uint8_t) new_base], remain);  
+}
 #undef RoL
+#undef RoR
 
 int main (){
     uint8_t kmer_size = 7, rol = 5;
