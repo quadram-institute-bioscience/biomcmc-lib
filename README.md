@@ -116,6 +116,8 @@ In any case, it is good idea to always assume that the trees are unrooted unless
 Irrespective of what the newick string tells you. 
 
 ## License 
+SPDX-License-Identifier: GPL-3.0-or-later
+
 Copyright (C) 2019-today  [Leonardo de Oliveira Martins](https://github.com/leomrtns)
 
 biomcmc-lib is free software; you can redistribute it and/or modify it under the terms of the GNU General Public

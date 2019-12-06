@@ -1,14 +1,7 @@
-/* 
- * This file is part of biomcmc-lib, a low-level library for phylogenomic analysis.
+/*
+ * SPDX-License-Identifier: GPL-3.0-or-later
  * Copyright (C) 2019-today  Leonardo de Oliveira Martins [ leomrtns at gmail.com;  http://www.leomartins.org ]
- *
- * biomcmc is free software; you can redistribute it and/or modify it under the terms of the GNU General Public
- * License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later
- * version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied 
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more 
- * details (file "COPYING" or http://www.gnu.org/copyleft/gpl.html).
+ * This file is part of biomcmc-lib, a low-level library for phylogenomic analysis.
  */
 
 #include "rolling_hash.h"
@@ -44,34 +37,35 @@ static uint32_t prime_salt_list[] = { // 128 x 16 bits  +  128 x 24 bits
   0x47c545, 0x3e07b9, 0x2d85f3, 0x1ffa3f, 0x267e59, 0x4e212b, 0x16bd43, 0x68acf7, 0x92b48d, 0x80aca7, 0x65f191, 0x3164ad, 0xd1f6b,  0x106951, 0x30a847, 0x493d7b};
 
 uint32_t**
-new_dna_salted_hash_encoding (uint32_t salt) {
-    uint8_t i=255, j, tbl1, tbl2; 
-    uint32_t **shash = (uint32_t**) biomcmc_malloc (2 * sizeof (uint32_t*)); // opposite order as dna_in_2_bits[]
-    for (i = 0; i < 2; ++i) shash[i] = (uint32_t*) biomcmc_malloc (256 * sizeof (uint32_t));
-    /* notice do{}while() instead of for() since i is always < 256 */
-    i = 255; do { shash[0][i] = shash[1][i] = 4;} while (i--); // anything else is fifth state
-    
-    shash[0]['A'] = shash[0]['a'] = 0; shash[1]['A'] = shash[1]['a'] = 3;  /*  A  <-> T  */
-    shash[0]['C'] = shash[0]['c'] = 1; shash[1]['C'] = shash[1]['c'] = 2;  /*  C  <-> G  */
-    shash[0]['G'] = shash[0]['g'] = 2; shash[1]['G'] = shash[1]['g'] = 1;  /*  G  <-> C  */
-    shash[0]['T'] = shash[0]['t'] = 3; shash[1]['T'] = shash[1]['t'] = 0;  /*  T  <-> A  */
-    shash[0]['U'] = shash[0]['u'] = 3; shash[1]['U'] = shash[1]['u'] = 0;  /*  U  <-> A  */
-    
-    tbl1 = (salt & ((rand_hash_list_size >> 2) - 1)) << 2;  // 4 * ( salt % (list_size/4) )
-    tbl2 = (int) (salt / (rand_hash_list_size >> 2)) % prime_salt_list_size;
-    /** now we transform the indexes for their equiv. hash values; all have same salt */
-    for (j = 0; j < 2; ++j) {
-        i = 255; do { shash[j][i] = rand_hash_list[shash[j][i] + tbl1] + prime_salt_list[tbl2]; } while (i--);
-    }
-    return shash;
+new_dna_salted_hash_encoding (uint32_t salt) 
+{
+  uint8_t i=255, j, tbl1, tbl2; 
+  uint32_t **shash = (uint32_t**) biomcmc_malloc (2 * sizeof (uint32_t*)); // opposite order as dna_in_2_bits[]
+  for (i = 0; i < 2; ++i) shash[i] = (uint32_t*) biomcmc_malloc (256 * sizeof (uint32_t));
+  /* notice do{}while() instead of for() since i is always < 256 */
+  i = 255; do { shash[0][i] = shash[1][i] = 4;} while (i--); // anything else is fifth state
+
+  shash[0]['A'] = shash[0]['a'] = 0; shash[1]['A'] = shash[1]['a'] = 3;  /*  A  <-> T  */
+  shash[0]['C'] = shash[0]['c'] = 1; shash[1]['C'] = shash[1]['c'] = 2;  /*  C  <-> G  */
+  shash[0]['G'] = shash[0]['g'] = 2; shash[1]['G'] = shash[1]['g'] = 1;  /*  G  <-> C  */
+  shash[0]['T'] = shash[0]['t'] = 3; shash[1]['T'] = shash[1]['t'] = 0;  /*  T  <-> A  */
+  shash[0]['U'] = shash[0]['u'] = 3; shash[1]['U'] = shash[1]['u'] = 0;  /*  U  <-> A  */
+
+  tbl1 = (salt & ((rand_hash_list_size >> 2) - 1)) << 2;  // 4 * ( salt % (list_size/4) )
+  tbl2 = (int) (salt / (rand_hash_list_size >> 2)) % prime_salt_list_size;
+  /** now we transform the indexes for their equiv. hash values; all have same salt */
+  for (j = 0; j < 2; ++j) {
+    i = 255; do { shash[j][i] = rand_hash_list[shash[j][i] + tbl1] + prime_salt_list[tbl2]; } while (i--);
+  }
+  return shash;
 }
 
 void
 del_dna_salted_hash_encoding (uint32_t** shash) {
-    if (!shash) return;
-    if (shash[1]) free (shash[1]);
-    if (shash[0]) free (shash[0]);
-    free (shash);
+  if (!shash) return;
+  if (shash[1]) free (shash[1]);
+  if (shash[0]) free (shash[0]);
+  free (shash);
 }
 
 #define RoL(val, numbits) ((val) << (numbits)) | ((val) >> (32 - (numbits)))
@@ -84,193 +78,84 @@ roll_hash_add (uint32_t *h, const char dna_base, const uint8_t rol, const uint32
 }
 
 void // kmer_size can't be 0 or 32 
-roll_hash_replace_f (uint32_t *h, const char old_base, const char new_base, const uint8_t kmer_size, 
-                   const uint8_t rol, const uint32_t* shashcode)
+roll_hash_replace_f (uint32_t *h, const char old_base, const char new_base, const uint8_t kmer_size, const uint8_t rol, const uint32_t* shashcode)
 {
-    uint8_t remain = (rol * (kmer_size-1)) & 31U; // since x % y = x & (y-1) // this can be calculated outside
-    *h ^= RoL(shashcode[(uint8_t) old_base], remain); // remove "leftmost" base 
-    *h  = RoL(*h, rol);
-    *h ^= shashcode[(uint8_t) new_base];
+  uint8_t remain = (rol * (kmer_size-1)) & 31U; // since x % y = x & (y-1) // this can be calculated outside
+  *h ^= RoL(shashcode[(uint8_t) old_base], remain); // remove "leftmost" base 
+  *h  = RoL(*h, rol);
+  *h ^= shashcode[(uint8_t) new_base];
 }
 void // kmer_size can't be 0 or 32 
-roll_hash_replace_r (uint32_t *h, const char old_base, const char new_base, const uint8_t kmer_size, 
-                   const uint8_t rol, const uint32_t* shashcode)
+roll_hash_replace_r (uint32_t *h, const char old_base, const char new_base, const uint8_t kmer_size, const uint8_t rol, const uint32_t* shashcode)
 {
-    uint8_t remain = (rol * (kmer_size-1)) & 31U; // since x % y = x & (y-1) // this can be calculated outside 
-    *h ^= shashcode[(uint8_t) old_base];
-    *h  = RoR(*h, rol);
-    *h ^= RoL(shashcode[(uint8_t) new_base], remain);  
+  uint8_t remain = (rol * (kmer_size-1)) & 31U; // since x % y = x & (y-1) // this can be calculated outside 
+  *h ^= shashcode[(uint8_t) old_base];
+  *h  = RoR(*h, rol);
+  *h ^= RoL(shashcode[(uint8_t) new_base], remain);  
 }
 #undef RoL
 #undef RoR
 
-int main (){
-    uint8_t kmer_size = 7, rol = 5;
-    uint32_t h1, h2;
-    size_t i, j, seqlen = strlen (my_dna_seq);
-    uint32_t **shcode1, **shcode2;
-    shcode1 = new_dna_salted_hash_encoding (3);
-    shcode2 = new_dna_salted_hash_encoding (6);
-    h1 = shcode1[0][(uint8_t) my_dna_seq[0]];
-    h2 = shcode2[0][(uint8_t) my_dna_seq[0]];
-    
-    for (j = 1; j < kmer_size; ++j) roll_hash_add (&h1, my_dna_seq[j], rol, shcode1[0]);
-    for (j = 1; j < kmer_size; ++j) roll_hash_add (&h2, my_dna_seq[j], rol, shcode2[0]);
 
-    for (j = (size_t) kmer_size; j < seqlen; ++j) {
-        printf ("%3lu >>  ", j);
-        for (i=j - (size_t) kmer_size; i < j; i++) printf ("%c ", my_dna_seq[i]); 
-        printf (" >> %12u >> %12u\n",h1, h2); 
-        roll_hash_replace (&h1, my_dna_seq[j - kmer_size], my_dna_seq[j], kmer_size, rol, shcode1[0]); 
-        roll_hash_replace (&h2, my_dna_seq[j - kmer_size], my_dna_seq[j], kmer_size, rol, shcode2[0]); 
-    }
-    del_dna_salted_hash_encoding (shcode1);
-    del_dna_salted_hash_encoding (shcode2);
-}
-
-
-/** OBS: uint32_t d[2] --> d = [A B C D] [E F G H] (1 byte per letter) then 
- * uint8_t *x = d      --> x = [D] [C] [B] [A] [H] [G] [F] [E] (endianness)  **/
-
-/* similar to char2bit[] from alignment[], but has forward and reverse */
-static uint8_t dna_in_4_bits[256][2] = {{0xff}}; /* DNA base to bitpattern translation, with 1st element set to arbitrary value */
-static uint8_t dna_in_2_bits[256][2] = {{0xff}}; /* no ambigous chars/indels, represented by 4 (0100 in bits) */
-static uint8_t dna_in_1_bits[256][2] = {{0xff}}; /* GC content */ 
-
-static uint64_t _tbl_mask[] = {0xffffUL, 0xffffffUL, 0xffffffffUL, 0xffffffffffUL, 0xffffffffffffUL, 0xffffffffffffUL, 0xffffffffffffffffUL}; 
-static uint8_t _tbl_shift[] = {      48,         40,           32,             24,               16,                8,                    0};
-static uint8_t _tbl_nbyte[] = {       2,          3,            4,              5,                6,                7,                    8};
-static uint32_t _tbl_seed[] = {0x9040a6, 0x10bea992,   0x50edd67d,     0xb05a4f09,       0xf07046c5,       0x9c9445ab,           0xb2500f29};
-
-/* i1[] and i2[] (i.e. elements above to be used on first and second 64bits, respectively */
-static uint8_t _idx_mode[][2][7] = { // contains list of elements from _tbl above to be used, from 1st and 2nd 64bit blocks
-   {{2,6,0,0,0,0,0}, {0,0,0,0,0,0,0}},  
-   {{2,6,0,0,0,0,0}, {2,6,0,0,0,0,0}},  
-   {{0,2,4,6,0,0,0}, {2,6,0,0,0,0,0}}, 
-   {{0,1,2,4,6,0,0}, {0,2,6,0,0,0,0}},
-   {{0,1,2,3,4,5,6}, {0,0,0,0,0,0,0}},
-   {{0,1,2,3,4,5,6}, {0,1,2,6,0,0,0}}
-};   
-static uint8_t _n_idx[][2] = {{2,0}, {2,2}, {4,2}, {5,3}, {7,0}, {7,4}}; // how many elems from _idx_mode[] are used
-
-static void initialize_dna_to_bit_tables (void);
-
-/* global since defined extern in header (btw functions are declared 'extern' automatically in headers */
-const char *biomcmc_kmer_class_string[] = {"fastest (2 kmer sizes)", "fast (6 kmer sizes)", "genome", "phylogenetics (short kmers)", "all 11 kmer sizes", "GC content kmers"};
-
-kmer_params
-new_kmer_params (int mode)
+rolling_hash
+new_rolling_hash (uint8_t kmer_size, uint32_t salt)
 {
-  uint8_t  i, j, row, bases_per_byte, _ba_pe_by[] = {2,4,8}; // bases_per_byte is 4 if dense
-  kmer_params p = (kmer_params) biomcmc_malloc (sizeof (struct kmer_params_struct));
-  p->ref_counter = 1;
-  p->hashfunction = &biomcmc_xxh64;
-
-  if (dna_in_4_bits[0][0] == 0xff) initialize_dna_to_bit_tables (); // run once per program
-
-  p->kmer_class_mode = mode;
-  switch (mode) { // map each choice to a set of kmers and bitstring encoding (row relates to _idx_mode[] above)
-    case 0:  row = 0; p->dense = 1; break;
-    case 1:  row = 2; p->dense = 1; break;
-    case 2:  row = 3; p->dense = 0; break;
-    case 3:  
-    default: row = 4; p->dense = 1; break; 
-    case 4:  row = 5; p->dense = 0; break;
-    case 5:  row = 1; p->dense = 2; break;
-  };
-  bases_per_byte = _ba_pe_by[p->dense];
-
-  p->n1 = (uint8_t) _n_idx[row][0]; p->n2 = (uint8_t) _n_idx[row][1]; 
-  for (j=0; j < p->n1; j++) {
-    i = _idx_mode[row][0][j];
-    p->mask1[j] = _tbl_mask[i];
-    p->shift1[j] = _tbl_shift[i];
-    p->seed[j] = _tbl_seed[i];
-    p->nbytes[j] = _tbl_nbyte[i];
-    p->size[j] = _tbl_nbyte[i] * bases_per_byte;
-  }
-  for (j=0; j < p->n2; j++) {
-    i = _idx_mode[row][1][j];
-    p->mask2[j] = _tbl_mask[i];
-    p->shift2[j] = _tbl_shift[i];
-    p->seed[j] = (_tbl_seed[i] >> 2) + 0x420314a1d; // very noise, much random
-    p->nbytes[j+p->n1] = _tbl_nbyte[i] + 8;
-    p->size[j+p->n1] = (_tbl_nbyte[i] + 8) * bases_per_byte;
-  }
-  return p;
-}
-
-void
-del_kmer_params (kmer_params p)
-{
-  if (!p) return;
-  if (--p->ref_counter) return;
-  free (p);
-} 
-
-kmerhash
-new_kmerhash (int mode)
-{
-  int i;
-  kmerhash kmer = (kmerhash) biomcmc_malloc (sizeof (struct kmerhash_struct));
-  kmer->n_f = 2;
-  kmer->forward = (uint64_t*) biomcmc_malloc (kmer->n_f * sizeof (uint64_t*));
-  kmer->reverse = (uint64_t*) biomcmc_malloc (kmer->n_f * sizeof (uint64_t*));
-  for (i=0; i < kmer->n_f; i++) kmer->forward[i] = kmer->reverse[i] = 0UL;
-
-  kmer->p = new_kmer_params (mode);
-
-  kmer->n_hash = kmer->p->n1 + kmer->p->n2;
-  // p->size :: kmer->nsites_kmer = (uint8_t*) biomcmc_malloc (kmer->n_hash * sizeof (uint8_t));
-  // if (kmer->dense) for (i = 0; i < kmer->n_hash; i++) kmer->nsites_kmer[i] = 2 * _kmer_size[i]; 
-  // else             for (i = 0; i < kmer->n_hash; i++) kmer->nsites_kmer[i] = _kmer_size[i]; 
-
-  kmer->hash = (uint64_t*) biomcmc_malloc (kmer->n_hash * sizeof (uint64_t*));
-  kmer->kmer = (uint64_t*) biomcmc_malloc (kmer->p->n1 * sizeof (uint64_t*));
-  for (i=0; i < kmer->n_hash; i++) kmer->hash[i] = 0UL;
-  for (i=0; i < kmer->p->n1; i++) kmer->kmer[i] = 0UL;
-
-  kmer->dna = NULL;
-  kmer->n_dna = 0; 
-  kmer->i = 0;
-  kmer->ref_counter = 1;
+  rolling_hash rh = (rolling_hash) biomcmc_malloc (sizeof (struct rolling_hash_struct));
+  rh->salted_hashcode = new_dna_salted_hash_encoding (salt); 
+  rh->kmer[0] = rh->kmer[1] = 0;
+  rh->kmer_size = kmer_size;
+  if (kmer_size > 30) rh->kmer_size = 30;
+  if (kmer_size < 4) rh->kmer_size = 4;
+  rh->rol = (salt >> 3) & 15U + 1; /* rolling window size between 1 and 16 */
+// STOPHERE:: create rh->remain 
+  rh->canonical= 0; /* default direction is forward (zero), */
+  kmer->dna = NULL; /* pointer to DNA sequence */
+  kmer->n_dna = 0;  /* DNA sequence length */
+  kmer->i = 0;      /* current position on DNA sequence */
+  kmer->ref_counter = 1;  /* just in case this struct is shared */
   return kmer;
 }
 
-void
-link_kmerhash_to_dna_sequence (kmerhash kmer, char *dna, size_t dna_length)
+del_rolling_hash (rolling_hash rh)
 {
-  int i;
-  kmer->dna = dna;
-  kmer->n_dna = dna_length; 
-  kmer->i = 0;
-  for (i=0; i < kmer->n_f; i++) kmer->forward[i] = kmer->reverse[i] = 0UL;
-  for (i=0; i < kmer->n_hash; i++) kmer->hash[i] = 0UL;
-  for (i=0; i < kmer->p->n1; i++) kmer->kmer[i] = 0UL;
+  if (!rh) return;
+  if (--rh->ref_counter) return;
+  del_dna_salted_hash_encoding (rh->salted_hashcode);
+  free (rh);
 }
 
 void
-del_kmerhash (kmerhash kmer)
+link_rolling_hash_to_dna_sequence (rolling_hash rh, char *dna, size_t dna_length)
 {
-  if (!kmer) return;
-  if (--kmer->ref_counter) return;
-  if (kmer->forward) free (kmer->forward);
-  if (kmer->reverse) free (kmer->reverse);
-  if (kmer->hash) free (kmer->hash);
-  if (kmer->kmer) free (kmer->kmer);
-  del_kmer_params (kmer->p);
-  free (kmer);
+  int j;
+  rh->dna = dna;
+  rh->n_dna = dna_length; 
+  /* generate first k-mer */
+  rh->kmer[0] = rh->salted_hashcode[0][(uint8_t) dna[0]];
+  rh->kmer[1] = rh->salted_hashcode[1][(uint8_t) dna[rh->kmer_size-1]];
+  for (j = 1; j < rh->kmer_size; ++j) {
+    roll_hash_add (&(rh->kmer[0]), dna[j],                 rh->rol, rh->salted_hashcode[0]);
+    roll_hash_add (&(rh->kmer[1]), dna[rh->kmer_size-1-j], rh->rol, rh->salted_hashcode[1]);
+  }
+  rh->i = rh->kmer_size - 1; // FIXME special number; now the first iteration already has the k-mers
 }
+
+// TODO: created linked list if kmer_size > 30, and possibly with spacer region between them
 
 bool
-kmerhash_iterator (kmerhash kmer)
+rolling_hash_iterator (rolling_hash rh)
 {
-  unsigned int i, j, dnachar;
-  uint64_t hf, hr;
-  uint8_t *rev8b;
 
-  if (kmer->i == kmer->n_dna) return false;
+  if (rh->i == rh->n_dna) return false;
 
+  if (rh->i >= rh->kmer_size) {
+    roll_hash_replace_f (&(rh->kmer[0]), rh->dna[rh->i - rh->kmer_size], rh->dna[j], rh->kmer_size, rh->rol, shcode2[0]);
+    roll_hash_replace_r (&h1R, my_dna_seq[j - kmer_size], my_dna_seq[j], kmer_size, rol, shcode1[1]);
+  }
+
+  rh->i = kmer_size; // (or size+1?)
+
+// STOPHERE
   // assume for/rev are full, solve initial case later
   if (kmer->p->dense == 2) { // AT vs GC comparison
     while ((kmer->i < kmer->n_dna) && (dna_in_1_bits[(int)(kmer->dna[kmer->i])][0] > 1)) kmer->i++;
@@ -334,43 +219,3 @@ kmerhash_iterator (kmerhash kmer)
   return true;
 }
 
-static void
-initialize_dna_to_bit_tables (void)
-{
-  int i;
-  for (i = 0; i < 256; i++) dna_in_4_bits[i][0] = dna_in_4_bits[i][1] = 0;
-  /* The ACGT is PAUP convention (and maybe DNAml, fastDNAml); PAML uses TCAG ordering */
-  dna_in_4_bits['A'][0] = 1;   dna_in_4_bits['A'][1] = 8;  /* .   A */ /* 0001 */ /* reverse is 'T'    = 8  */
-  dna_in_4_bits['B'][0] = 14;  dna_in_4_bits['B'][1] = 7;  /* .TGC  */ /* 1110 */ /* reverse is 'ACG'  = 7  */
-  dna_in_4_bits['C'][0] = 2;   dna_in_4_bits['C'][1] = 4;  /* .  C  */ /* 0010 */ /* reverse is 'G'    = 4  */
-  dna_in_4_bits['D'][0] = 13;  dna_in_4_bits['D'][1] = 11; /* .TG A */ /* 1101 */ /* reverse is 'TCA'  = 11 */
-  dna_in_4_bits['G'][0] = 4;   dna_in_4_bits['G'][1] = 2;  /* . G   */ /* 0100 */ /* reverse is 'C'    = 2  */
-  dna_in_4_bits['H'][0] = 11;  dna_in_4_bits['H'][1] = 13; /* .T CA */ /* 1011 */ /* reverse is 'TGA'  = 13 */
-  dna_in_4_bits['K'][0] = 12;  dna_in_4_bits['K'][1] = 3;  /* .TG   */ /* 1100 */ /* reverse is 'AC'   = 3  */
-  dna_in_4_bits['M'][0] = 3;   dna_in_4_bits['M'][1] = 12; /* .  CA */ /* 0011 */ /* reverse is 'TG'   = 12 */
-  dna_in_4_bits['N'][0] = 15;  dna_in_4_bits['N'][1] = 15; /* .TGCA */ /* 1111 */ /* reverse is 'TGCA' = 15 */
-  dna_in_4_bits['O'][0] = 15;  dna_in_4_bits['O'][1] = 15; /* .TGCA */ /* 1111 */ /* reverse is 'TGCA' = 15 */
-  dna_in_4_bits['R'][0] = 5;   dna_in_4_bits['R'][1] = 10; /* . G A */ /* 0101 */ /* reverse is 'TC'   = 10 */
-  dna_in_4_bits['S'][0] = 6;   dna_in_4_bits['S'][1] = 6;  /* . GC  */ /* 0110 */ /* reverse is 'GC'   = 6  */
-  dna_in_4_bits['T'][0] = 8;   dna_in_4_bits['T'][1] = 1;  /* .T    */ /* 1000 */ /* reverse is 'A'    = 1  */
-  dna_in_4_bits['U'][0] = 8;   dna_in_4_bits['U'][1] = 1;  /* .T    */ /* 1000 */ /* reverse is 'A'    = 1  */
-  dna_in_4_bits['V'][0] = 7;   dna_in_4_bits['V'][1] = 14; /* . GCA */ /* 0111 */ /* reverse is 'TGC'  = 14 */
-  dna_in_4_bits['W'][0] = 9;   dna_in_4_bits['W'][1] = 9;  /* .T  A */ /* 1001 */ /* reverse is 'TA'   = 9  */
-  dna_in_4_bits['X'][0] = 15;  dna_in_4_bits['X'][1] = 15; /* .TGCA */ /* 1111 */ /* reverse is 'TGCA' = 15 */
-  dna_in_4_bits['Y'][0] = 10;  dna_in_4_bits['Y'][1] = 5;  /* .T C  */ /* 1010 */ /* reverse is 'GA'   =  5 */
-  dna_in_4_bits['?'][0] = 15;  dna_in_4_bits['?'][1] = 15; /* .TGCA */ /* 1111 */ /* reverse is 'TGCA' = 15 */
-  dna_in_4_bits['-'][0] = 0;   dna_in_4_bits['-'][1] = 0;  /* .TGCA */ /* fifth state */
-
-  for (i = 0; i < 256; i++) dna_in_2_bits[i][0] = dna_in_2_bits[i][1] = 4; // calling function must check if < 4
-  dna_in_2_bits['A'][0] = 0;   dna_in_2_bits['A'][1] = 3;  /*  A  <-> T  */
-  dna_in_2_bits['C'][0] = 1;   dna_in_2_bits['C'][1] = 2;  /*  C  <-> G  */
-  dna_in_2_bits['G'][0] = 2;   dna_in_2_bits['G'][1] = 1;  /*  G  <-> C  */
-  dna_in_2_bits['T'][0] = 3;   dna_in_2_bits['T'][1] = 0;  /*  T  <-> A  */
-  dna_in_2_bits['U'][0] = 3;   dna_in_2_bits['U'][1] = 0;  /*  U  <-> A  */
-
-  for (i = 0; i < 256; i++) dna_in_1_bits[i][0] = dna_in_1_bits[i][1] = 4; // calling function must check if < 4
-  dna_in_1_bits['A'][0] = dna_in_1_bits['A'][1] = dna_in_1_bits['T'][0] = dna_in_1_bits['T'][1] = 0;  
-  dna_in_1_bits['C'][0] = dna_in_1_bits['C'][1] = dna_in_1_bits['G'][0] = dna_in_1_bits['G'][1] = 1;  
-}
-
-//for (j = 0; j < 16; j++) printf ("%d ", (int)((hash_f >> 4*j) & 15LL)); for (j = 0; j < 16; j++) printf ("%c", dna[i-j]);

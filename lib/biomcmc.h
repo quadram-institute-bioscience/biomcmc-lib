@@ -18,6 +18,9 @@
  *  This library started branching from the biomcmc library from the guenomu software.
  *  It includes the edlib library for sequence pairwise edit distance (http://martinsos.github.io/edlib)
  */
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #ifndef _biomcmc_h_
 #define _biomcmc_h_
@@ -57,3 +60,7 @@
 #endif // of THESE_ARE_COMMENTS
 
 #endif //define biomcmc
+
+#ifdef __cplusplus
+}
+#endif
