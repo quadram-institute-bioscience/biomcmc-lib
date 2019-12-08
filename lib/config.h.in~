@@ -45,6 +45,9 @@
 /* Define to the sub-directory where libtool stores uninstalled libraries. */
 #undef LT_OBJDIR
 
+/* not in debug mode, disabling all assert() macros */
+#undef NDEBUG
+
 /* Name of package */
 #undef PACKAGE
 
