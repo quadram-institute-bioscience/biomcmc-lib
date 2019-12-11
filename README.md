@@ -1,4 +1,4 @@
-# Biomcmc-lib 
+![biomcmc-lib](doxygen/biomcmclib_with_text.png)
 
 __Leonardo de Oliveira Martins<sup>1</sup>__
 <br>
