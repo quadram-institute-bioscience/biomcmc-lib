@@ -2475,9 +2475,9 @@ static const TRexChar *trex_matchnode(TRex* exp,TRexNode *node,const TRexChar *s
 }
 
 /* public api */
-TRex *trex_compile(const TRexChar *pattern,const TRexChar **error,int flags)
+TRex *trex_compile (const TRexChar *pattern,const TRexChar **error,int flags)
 {
-	TRex *exp = (TRex *)malloc(sizeof(TRex));
+	TRex *volatile exp = (TRex *)malloc(sizeof(TRex)); // must be volatile due to setjmp/longjmp
 	exp->_eol = exp->_bol = NULL;
 	exp->_p = pattern;
 	exp->_nallocated = (int)scstrlen(pattern) * sizeof(TRexChar);
@@ -2492,8 +2492,7 @@ TRex *trex_compile(const TRexChar *pattern,const TRexChar **error,int flags)
 	if(setjmp(*((jmp_buf*)exp->_jmpbuf)) == 0) {
 		int res = trex_list(exp);
 		exp->_nodes[exp->_first].left = res;
-		if(*exp->_p!='\0')
-			trex_error(exp,_SC("unexpected character"));
+		if(*exp->_p!='\0') trex_error(exp,_SC("unexpected character"));
 		exp->_matches = (TRexMatch *) malloc(exp->_nsubexpr * sizeof(TRexMatch));
 		memset(exp->_matches,0,exp->_nsubexpr * sizeof(TRexMatch));
 	}
