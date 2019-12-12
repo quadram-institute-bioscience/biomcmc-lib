@@ -26,17 +26,40 @@
 
 #include "hashfunctions.h"
 
-static int ulx_size = 12;
-static uint64_t ulx[] = {
-  0x65d200ce55b19ad8UL, 0x4f2162926e40c299UL, 0x162dd799029970f8UL, // 0...2
-  0x68b665e6872bd1f4UL, 0xb6cfcf9d79b51db2UL, 0x7a2b92ae912898c2UL, // 3...5
-  0xff51afd7ed558ccdUL, 0xc4ceb9fe1a85ec53UL, 0x87c37b91114253d5UL, 0x4cf5ad432745937fUL, // 6...9 (murmurhash) 
-  0x52dce729UL, 0x38495ab5UL, // 10...11 
-  11400714785074694791ULL, 14029467366897019727ULL, 1609587929392839161ULL, // 12..14 used by xxhash
-  9650029242287828579ULL, 2870177450012600261ULL}; // 15..16 used by xxhash
+/** \brief large deterministic list of random numbers, that can be used to "salt" hashes etc. */
+uint32_t
+biomcmc_get_salt32_from_spice_table (unsigned int index)
+{
+  uint32_t salt[5] = {0,0,0,0,0};
+  uint16_t id;
+  id = index & (rnd_salt_h64_list_size - 1); // if y is power of 2, then x & (y-1) == x % y
+  salt[0] = rnd_salt_h64_list[id]; 
+  index /= rnd_salt_h64_list_size;  // A = 256 
+  
+  id = index & (rnd_salt_h64_list_size - 1);
+  salt[1] = rnd_salt_h64_list[id]; 
+  index /= rnd_salt_h64_list_size; // A = 256 
+  
+  id = index & (rnd_salt_h16_list_size - 1);
+  salt[2] = rnd_salt_h16_list[id]; 
+  index /= rnd_salt_h16_list_size; // B = 256
+
+  id = index & (prime_salt_list_size - 1);
+  salt[3] = prime_salt_list[id]; 
+  index /= prime_salt_list_size;  // C = 512
+
+  id = index % marsaglia_constants_size; // this is not a power of two; Marsaglia prime pairs are s.t. both k*2^16-1 and k*2^15-1 are prime 
+  salt[4] = (marsaglia_constants[i] << 16) - 1;
+  index /= marsaglia_constants_size; // D = 81
+
+  id = index % marsaglia_constants_size; 
+  salt[5] = (marsaglia_constants[i] << 15) - 1;
+  // D x D x C x B x A x A = 56358560858112 combinations (45 bits)
+
+}
 
 uint32_t 
-biomcmc_hashint_salted (uint32_t a, int salt)
+biomcmc_hashint_salted (uint32_t a, unsigned int salt)
 { // salt != seed, since main usage is to determine which hash function is used
   switch(salt & 15) { // 4 last bits
     case 8: 
@@ -65,7 +88,7 @@ biomcmc_hashint_salted (uint32_t a, int salt)
 
 /* originally for char (1 byte) but can be used for uint32_t (4 bytes) or uint64_t (8 bytes) */
 uint32_t 
-biomcmc_hashbyte_salted (const void *str, size_t size, int salt)
+biomcmc_hashbyte_salted (const void *str, size_t size, unsigned int salt)
 { // salt != seed, since main usage is to determine which hash function is used
   uint8_t *c = (uint8_t*) str;
   uint32_t g, hash = 0;
@@ -111,7 +134,7 @@ biomcmc_hashbyte_salted (const void *str, size_t size, int salt)
 }
 
 uint64_t
-biomcmc_hashint64_salted (uint64_t k, int salt)
+biomcmc_hashint64_salted (uint64_t k, unsigned int salt)
 { // salt != seed, since main usage is to determine which hash function is used
   uint32_t low = k, high = k >> 32UL;
   uint64_t b = k >> 32UL; // only 32bit of each key and b used 
@@ -122,13 +145,13 @@ biomcmc_hashint64_salted (uint64_t k, int salt)
       k = biomcmc_hashint64_mix_salted (biomcmc_hashint64_mix_salted (k * 0x60bee2bee120fc15ull, 0xa3b195354a39b70dull, 0), 0x1b03738712fad5c9ull, 0);
       break;
     case 4: // xxhash avalanche
-      k ^= k >> 33; k *= ulx[13]; k ^= k >> 29; k *= ulx[14]; k ^= k >> 32; break;
+      k ^= k >> 33; k *= ulx_h64[13]; k ^= k >> 29; k *= ulx_h64[14]; k ^= k >> 32; break;
     case 3:  /* ((key + (key << 3)) + (key << 8)) = key * 265 and ((key + (key << 2)) + (key << 4)) = key * 21 */
       k = (~k) + (k << 21); k = k ^ (k >> 24); k = (k + (k << 3)) + (k << 8);
       k = k ^ (k >> 14); k = (k + (k << 2)) + (k << 4); k = k ^ (k >> 28);
       k = k + (k << 31); break;
     case 2: // Lemire's blog post about concatenating two 32 bits
-      k = ((ulx[0] * low + ulx[1] * high + ulx[2]) >> 32) | ((ulx[3] * low + ulx[4] * high + ulx[5]) & 0xFFFFFFFF00000000UL);
+      k = ((ulx_h64[0] * low + ulx_h64[1] * high + ulx_h64[2]) >> 32) | ((ulx_h64[3] * low + ulx_h64[4] * high + ulx_h64[5]) & 0xFFFFFFFF00000000UL);
       break;
     case 1: // two 32bits
       k = (k+0x479ab41d)+(k<<8); k = (k^0xe4aa10ce)^(k>>5);  k = (k+0x9942f0a6)-(k<<14); k = (k^0x5aedd67d)^(k>>3); k = (k+0x17bea992)+(k<<7);
@@ -136,13 +159,13 @@ biomcmc_hashint64_salted (uint64_t k, int salt)
       b = (b+0xd3a2646c)^(b<<9);  b = (b+0xfd7046c5)+(b<<3);  b = (b^0xb55a4f09)^(b>>16);
       k =  (k << 32) | b; break;
     default: // mixer algo of murmur
-      k ^= k >> 33; k *= ulx[6]; k ^= k >> 33; k *= ulx[7]; k ^= k >> 33; break;
+      k ^= k >> 33; k *= ulx_h64[6]; k ^= k >> 33; k *= ulx_h64[7]; k ^= k >> 33; break;
   };
   return k;
 }
 
 uint32_t
-biomcmc_hashint_mix_salted (uint32_t a, uint32_t b, int salt)
+biomcmc_hashint_mix_salted (uint32_t a, uint32_t b, unsigned int salt)
 { // salt != seed, since main usage is to determine which hash function is used
   uint64_t la = a^0x7b16763u, lb = b^0xe4f5a905u;
   uint32_t c = (salt^0xdeadbeef) + (salt<<4); 
@@ -156,7 +179,7 @@ biomcmc_hashint_mix_salted (uint32_t a, uint32_t b, int salt)
       a=a-b; a=a-c; a=a^(c >> 12); b=b-c; b=b-a; b=b^(a << 16); c=c-a; c=c-b; c=c^(b >> 5);
       a=a-b; a=a-c; a=a^(c >> 3);  b=b-c; b=b-a; b=b^(a << 10); c=c-a; c=c-b; c=c^(b >> 15); a = c; break;
     case 1: // modified FNV hash with 64 bits expansion
-      a = (uint32_t) (ulx[0] * (uint64_t) a + ulx[1] * ((uint64_t)(b) << 3) + ulx[2]);
+      a = (uint32_t) (ulx_h64[0] * (uint64_t) a + ulx_h64[1] * ((uint64_t)(b) << 3) + ulx_h64[2]);
       a ^= b; a *= 16777619; break;
     default: // FNV hash
       a = 2166136261U ^ a; a *= 16777619; a ^= b; a *= 16777619;
@@ -165,7 +188,7 @@ biomcmc_hashint_mix_salted (uint32_t a, uint32_t b, int salt)
 }
 
 uint64_t
-biomcmc_hashint64_mix_salted (uint64_t a, uint64_t b, int salt)
+biomcmc_hashint64_mix_salted (uint64_t a, uint64_t b, unsigned int salt)
 { // salt != seed, since main usage is to determine which hash function is used
   uint64_t ha = a >> 32, hb = b >> 32, la = a & 0xFFFFFFFF00000000UL, lb = b & 0xFFFFFFFF00000000UL;
   uint64_t rh = ha * hb, rm_0 = ha * lb, rm_1 = hb * la, rl =  la * lb, t = rl + (rm_0<<32), c = t < rl;
@@ -180,12 +203,12 @@ biomcmc_hashint64_mix_salted (uint64_t a, uint64_t b, int salt)
 }
 
 uint32_t 
-biomcmc_hashint_64to32_seed (uint64_t x, int seed) /* 64 bits */
+biomcmc_hashint_64to32_seed (uint64_t x, unsigned int seed) /* 64 bits */
 { // published algo uses seed=0 or seed=3
   uint32_t low = x;
   uint32_t high = x >> 32UL;
-  int i = seed % (ulx_size - 2); 
-  return (uint32_t) ((ulx[i] * low + ulx[i+1] * high + ulx[i+2]) >> 32);
+  int i = seed % (ulx_h64_size - 2); 
+  return (uint32_t) ((ulx_h64[i] * low + ulx_h64[i+1] * high + ulx_h64[i+2]) >> 32);
 }
 
 uint32_t 
@@ -226,10 +249,10 @@ biomcmc_murmurhash3_128bits (const void *key, const size_t len, const uint32_t s
   for(i = 0; i < nblocks; i++) {
     uint64_t k1 = blocks[i*2+0];
     uint64_t k2 = blocks[i*2+1];
-    k1 *= ulx[8]; k1 = (k1 << 31) | (k1 >> 33); k1 *= ulx[9]; h1 ^= k1;
-    h1 = (h1 << 27) | (h1 >> 37); h1 += h2; h1 = h1 * 5 + ulx[10];
-    k2 *= ulx[9]; k2 = (k2 << 33) | (k2 >> 31); k2 *= ulx[8]; h2 ^= k2;
-    h2 = (h2 << 31) | (h2 >> 33); h2 += h1; h2 = h2 * 5 + ulx[11];
+    k1 *= ulx_h64[8]; k1 = (k1 << 31) | (k1 >> 33); k1 *= ulx_h64[9]; h1 ^= k1;
+    h1 = (h1 << 27) | (h1 >> 37); h1 += h2; h1 = h1 * 5 + ulx_h64[10];
+    k2 *= ulx_h64[9]; k2 = (k2 << 33) | (k2 >> 31); k2 *= ulx_h64[8]; h2 ^= k2;
+    h2 = (h2 << 31) | (h2 >> 33); h2 += h1; h2 = h2 * 5 + ulx_h64[11];
   }
 
   const uint8_t * tail = (const uint8_t*)(data + nblocks*16);
@@ -243,7 +266,7 @@ biomcmc_murmurhash3_128bits (const void *key, const size_t len, const uint32_t s
     case 11: k2 ^= (uint64_t)(tail[10]) << 16; attribute_FALLTHROUGH
     case 10: k2 ^= (uint64_t)(tail[ 9]) << 8;  attribute_FALLTHROUGH
     case  9: k2 ^= (uint64_t)(tail[ 8]) << 0;  
-             k2 *= ulx[9]; k2 = (k2 << 33) | (k2 >> 31); k2 *= ulx[8]; h2 ^= k2; attribute_FALLTHROUGH
+             k2 *= ulx_h64[9]; k2 = (k2 << 33) | (k2 >> 31); k2 *= ulx_h64[8]; h2 ^= k2; attribute_FALLTHROUGH
     case  8: k1 ^= (uint64_t)(tail[ 7]) << 56; attribute_FALLTHROUGH
     case  7: k1 ^= (uint64_t)(tail[ 6]) << 48; attribute_FALLTHROUGH
     case  6: k1 ^= (uint64_t)(tail[ 5]) << 40; attribute_FALLTHROUGH
@@ -252,14 +275,14 @@ biomcmc_murmurhash3_128bits (const void *key, const size_t len, const uint32_t s
     case  3: k1 ^= (uint64_t)(tail[ 2]) << 16; attribute_FALLTHROUGH
     case  2: k1 ^= (uint64_t)(tail[ 1]) << 8;  attribute_FALLTHROUGH 
     case  1: k1 ^= (uint64_t)(tail[ 0]) << 0; // equiv to "case 1"  
-             k1 *= ulx[8]; k1 = (k1 << 31) | (k1 >> 33); k1 *= ulx[9]; h1 ^= k1; break;
+             k1 *= ulx_h64[8]; k1 = (k1 << 31) | (k1 >> 33); k1 *= ulx_h64[9]; h1 ^= k1; break;
   };
 
   h1 ^= len; h2 ^= len;
   h1 += h2; h2 += h1;
 
-  h1 ^= h1 >> 33; h1 *= ulx[6]; h1 ^= h1 >> 33; h1 *= ulx[7]; h1 ^= h1 >> 33;
-  h2 ^= h2 >> 33; h2 *= ulx[6]; h2 ^= h2 >> 33; h2 *= ulx[7]; h2 ^= h2 >> 33;
+  h1 ^= h1 >> 33; h1 *= ulx_h64[6]; h1 ^= h1 >> 33; h1 *= ulx_h64[7]; h1 ^= h1 >> 33;
+  h2 ^= h2 >> 33; h2 *= ulx_h64[6]; h2 ^= h2 >> 33; h2 *= ulx_h64[7]; h2 ^= h2 >> 33;
 
   h1 += h2; h2 += h1;
   if (out) {
@@ -383,9 +406,9 @@ static uint64_t xxh_get_unaligned_le32 (const void* ptr)
 
 static uint64_t xxh64_round (uint64_t acc, const uint64_t input)
 {
-	acc += input * ulx[13];
+	acc += input * ulx_h64[13];
   acc = (acc << 31) | (acc >> 33);
-	acc *= ulx[12];
+	acc *= ulx_h64[12];
 	return acc;
 }
 
@@ -393,7 +416,7 @@ static uint64_t xxh64_merge_round (uint64_t acc, uint64_t val)
 {
 	val = xxh64_round (0, val);
 	acc ^= val;
-	acc = acc * ulx[12] + ulx[15];
+	acc = acc * ulx_h64[12] + ulx_h64[15];
 	return acc;
 }
 
@@ -406,10 +429,10 @@ biomcmc_xxh64 (const void *input, const size_t len, const uint32_t seed)
 
   if (len > 31) {
     const uint8_t *const limit = b_end - 32;
-    uint64_t v1 = h64 + ulx[12]+ ulx[13];
-    uint64_t v2 = h64 + ulx[13];
+    uint64_t v1 = h64 + ulx_h64[12]+ ulx_h64[13];
+    uint64_t v2 = h64 + ulx_h64[13];
     uint64_t v3 = h64 + 0;
-    uint64_t v4 = h64 - ulx[12];
+    uint64_t v4 = h64 - ulx_h64[12];
 
     do {
       v1 = xxh64_round(v1, xxh_get_unaligned_le64(p)); p += 8;
@@ -424,7 +447,7 @@ biomcmc_xxh64 (const void *input, const size_t len, const uint32_t seed)
     h64 = xxh64_merge_round (h64, v3);
     h64 = xxh64_merge_round (h64, v4);
   } else {
-    h64  += ulx[16];
+    h64  += ulx_h64[16];
   }
 
   h64 += (uint64_t) len;
@@ -432,20 +455,245 @@ biomcmc_xxh64 (const void *input, const size_t len, const uint32_t seed)
   while (p + 8 <= b_end) {
     const uint64_t k1 = xxh64_round (0, xxh_get_unaligned_le64(p));
     h64 ^= k1;
-    h64 = ((h64 << 27) | (h64 >> 37)) * ulx[12] + ulx[15];
+    h64 = ((h64 << 27) | (h64 >> 37)) * ulx_h64[12] + ulx_h64[15];
     p += 8;
   }
   if (p + 4 <= b_end) {
-    h64 ^= (uint64_t) (xxh_get_unaligned_le32(p)) * ulx[12];
-    h64 = ((h64 << 23)|(h64 >> 41)) * ulx[13] + ulx[14];
+    h64 ^= (uint64_t) (xxh_get_unaligned_le32(p)) * ulx_h64[12];
+    h64 = ((h64 << 23)|(h64 >> 41)) * ulx_h64[13] + ulx_h64[14];
     p += 4;
   }
   while (p < b_end) {
-    h64 ^= (*p) * ulx[16];
-    h64 = ((h64<<11)|(h64>>53)) * ulx[12];
+    h64 ^= (*p) * ulx_h64[16];
+    h64 = ((h64<<11)|(h64>>53)) * ulx_h64[12];
     p++;
   }
-  h64 ^= h64 >> 33; h64 *= ulx[13]; h64 ^= h64 >> 29; h64 *= ulx[14]; h64 ^= h64 >> 32; // avalanche
+  h64 ^= h64 >> 33; h64 *= ulx_h64[13]; h64 ^= h64 >> 29; h64 *= ulx_h64[14]; h64 ^= h64 >> 32; // avalanche
   return h64;
 }
 
+/*** google Highway Hash ***/
+
+static void ghh_ZipperMergeAndAdd (const uint64_t v1, const uint64_t v0, uint64_t* add1, uint64_t* add0);
+static void ghh_Update (const uint64_t lanes[4], HighwayHashState* state);
+static uint64_t ghh_Read64 (const uint8_t* src);
+static void ghh_Rotate32By (uint64_t count, uint64_t lanes[4]);
+static void ghh_Permute (const uint64_t v[4], uint64_t* permuted);
+void ghh_PermuteAndUpdate (HighwayHashState* state);
+static void ghh_ModularReduction (uint64_t a3_unmasked, uint64_t a2, uint64_t a1, uint64_t a0, uint64_t* m1, uint64_t* m0);
+static void ghh_ProcessAll (const uint8_t* data, size_t size, const uint64_t key[4], HighwayHashState* state); 
+ 
+/* Internal implementation          */
+void HighwayHashReset (const uint64_t key[4], HighwayHashState* state) {
+  state->mul0[0] = 0xdbe6d5d5fe4cce2full;
+  state->mul0[1] = 0xa4093822299f31d0ull;
+  state->mul0[2] = 0x13198a2e03707344ull;
+  state->mul0[3] = 0x243f6a8885a308d3ull;
+  state->mul1[0] = 0x3bd39e10cb0ef593ull;
+  state->mul1[1] = 0xc0acf169b5f18a8cull;
+  state->mul1[2] = 0xbe5466cf34e90c6cull;
+  state->mul1[3] = 0x452821e638d01377ull;
+  state->v0[0] = state->mul0[0] ^ key[0];
+  state->v0[1] = state->mul0[1] ^ key[1];
+  state->v0[2] = state->mul0[2] ^ key[2];
+  state->v0[3] = state->mul0[3] ^ key[3];
+  state->v1[0] = state->mul1[0] ^ ((key[0] >> 32) | (key[0] << 32));
+  state->v1[1] = state->mul1[1] ^ ((key[1] >> 32) | (key[1] << 32));
+  state->v1[2] = state->mul1[2] ^ ((key[2] >> 32) | (key[2] << 32));
+  state->v1[3] = state->mul1[3] ^ ((key[3] >> 32) | (key[3] << 32));
+}
+
+static void ghh_ZipperMergeAndAdd (const uint64_t v1, const uint64_t v0, uint64_t* add1, uint64_t* add0) {
+  *add0 += (((v0 & 0xff000000ull)   | (v1 & 0xff00000000ull)) >> 24)    | (((v0 & 0xff0000000000ull)          | (v1 & 0xff000000000000ull)) >> 16) |
+           (  v0 & 0xff0000ull)     | ((v0 & 0xff00ull) << 32)          | ((v1 & 0xff00000000000000ull) >> 8) | (v0 << 56);
+  *add1 += (((v1 & 0xff000000ull)   | (v0 & 0xff00000000ull)) >> 24)    | (v1 & 0xff0000ull)                  | ((v1 & 0xff0000000000ull) >> 16) |
+           ((v1 & 0xff00ull) << 24) | ((v0 & 0xff000000000000ull) >> 8) | ((v1 & 0xffull) << 48)              | (v0 & 0xff00000000000000ull);
+}
+
+static void ghh_Update (const uint64_t lanes[4], HighwayHashState* state) {
+  int i;
+  for (i = 0; i < 4; ++i) {
+    state->v1[i] += state->mul0[i] + lanes[i];
+    state->mul0[i] ^= (state->v1[i] & 0xffffffff) * (state->v0[i] >> 32);
+    state->v0[i] += state->mul1[i];
+    state->mul1[i] ^= (state->v0[i] & 0xffffffff) * (state->v1[i] >> 32);
+  }
+  ghh_ZipperMergeAndAdd(state->v1[1], state->v1[0], &state->v0[1], &state->v0[0]);
+  ghh_ZipperMergeAndAdd(state->v1[3], state->v1[2], &state->v0[3], &state->v0[2]);
+  ghh_ZipperMergeAndAdd(state->v0[1], state->v0[0], &state->v1[1], &state->v1[0]);
+  ghh_ZipperMergeAndAdd(state->v0[3], state->v0[2], &state->v1[3], &state->v1[2]);
+}
+
+static uint64_t ghh_Read64 (const uint8_t* src) {
+  return (uint64_t)src[0] | ((uint64_t)src[1] << 8) |
+      ((uint64_t)src[2] << 16) | ((uint64_t)src[3] << 24) |
+      ((uint64_t)src[4] << 32) | ((uint64_t)src[5] << 40) |
+      ((uint64_t)src[6] << 48) | ((uint64_t)src[7] << 56);
+}
+
+void HighwayHashUpdatePacket (const uint8_t* packet, HighwayHashState* state) {
+  uint64_t lanes[4];
+  lanes[0] = ghh_Read64(packet + 0);
+  lanes[1] = ghh_Read64(packet + 8);
+  lanes[2] = ghh_Read64(packet + 16);
+  lanes[3] = ghh_Read64(packet + 24);
+  ghh_Update (lanes, state);
+}
+
+static void ghh_Rotate32By (uint64_t count, uint64_t lanes[4]) {
+  int i;
+  for (i = 0; i < 4; ++i) {
+    uint32_t half0 = lanes[i] & 0xffffffff;
+    uint32_t half1 = (lanes[i] >> 32);
+    lanes[i] = (half0 << count) | (half0 >> (32 - count));
+    lanes[i] |= (uint64_t)((half1 << count) | (half1 >> (32 - count))) << 32;
+  }
+}
+
+void HighwayHashUpdateRemainder (const uint8_t* bytes, const size_t size_mod32, HighwayHashState* state) {
+  int i;
+  const size_t size_mod4 = size_mod32 & 3;
+  const uint8_t* remainder = bytes + (size_mod32 & ~3);
+  uint8_t packet[32] = {0};
+  for (i = 0; i < 4; ++i) state->v0[i] += ((uint64_t)size_mod32 << 32) + size_mod32;
+  ghh_Rotate32By (size_mod32, state->v1);
+  for (i = 0; i < remainder - bytes; i++) packet[i] = bytes[i];
+  if (size_mod32 & 16) {
+    for (i = 0; i < 4; i++) packet[28 + i] = remainder[i + size_mod4 - 4];
+  } else {
+    if (size_mod4) {
+      packet[16 + 0] = remainder[0];
+      packet[16 + 1] = remainder[size_mod4 >> 1];
+      packet[16 + 2] = remainder[size_mod4 - 1];
+    }
+  }
+  HighwayHashUpdatePacket (packet, state);
+}
+
+static void ghh_Permute (const uint64_t v[4], uint64_t* permuted) {
+  permuted[0] = (v[2] >> 32) | (v[2] << 32);
+  permuted[1] = (v[3] >> 32) | (v[3] << 32);
+  permuted[2] = (v[0] >> 32) | (v[0] << 32);
+  permuted[3] = (v[1] >> 32) | (v[1] << 32);
+}
+
+void ghh_PermuteAndUpdate (HighwayHashState* state) {
+  uint64_t permuted[4];
+  ghh_Permute (state->v0, permuted);
+  ghh_Update (permuted, state);
+}
+
+static void ghh_ModularReduction (uint64_t a3_unmasked, uint64_t a2, uint64_t a1, uint64_t a0, uint64_t* m1, uint64_t* m0) {
+  uint64_t a3 = a3_unmasked & 0x3FFFFFFFFFFFFFFFull;
+  *m1 = a1 ^ ((a3 << 1) | (a2 >> 63)) ^ ((a3 << 2) | (a2 >> 62));
+  *m0 = a0 ^ (a2 << 1) ^ (a2 << 2);
+}
+
+uint64_t HighwayHashFinalize64 (HighwayHashState* state) {
+  int i;
+  for (i = 0; i < 4; i++) ghh_PermuteAndUpdate(state);
+  return state->v0[0] + state->v1[0] + state->mul0[0] + state->mul1[0];
+}
+
+void HighwayHashFinalize128 (HighwayHashState* state, uint64_t hash[2]) {
+  int i;
+  for (i = 0; i < 6; i++) ghh_PermuteAndUpdate (state);
+  hash[0] = state->v0[0] + state->mul0[0] + state->v1[2] + state->mul1[2];
+  hash[1] = state->v0[1] + state->mul0[1] + state->v1[3] + state->mul1[3];
+}
+
+void HighwayHashFinalize256 (HighwayHashState* state, uint64_t hash[4]) {
+  int i;
+  /* We anticipate that 256-bit hashing will be mostly used with long messages because storing and using the 256-bit hash (in contrast to 128-bit)
+     carries a larger additional constant cost by itself. Doing extra rounds here hardly increases the per-byte cost of long messages. */
+  for (i = 0; i < 10; i++)  ghh_PermuteAndUpdate(state);
+  ghh_ModularReduction (state->v1[1] + state->mul1[1], state->v1[0] + state->mul1[0], 
+                        state->v0[1] + state->mul0[1], state->v0[0] + state->mul0[0], &hash[1], &hash[0]);
+  ghh_ModularReduction (state->v1[3] + state->mul1[3], state->v1[2] + state->mul1[2], 
+                        state->v0[3] + state->mul0[3], state->v0[2] + state->mul0[2], &hash[3], &hash[2]);
+}
+
+/* Non-cat API: single call on full data                                      */
+static void ghh_ProcessAll (const uint8_t* data, size_t size, const uint64_t key[4], HighwayHashState* state) {
+  size_t i;
+  HighwayHashReset (key, state);
+  for (i = 0; i + 32 <= size; i += 32) HighwayHashUpdatePacket (data + i, state);
+  if ((size & 31) != 0) HighwayHashUpdateRemainder (data + i, size & 31, state);
+}
+
+uint64_t HighwayHash64 (const uint8_t* data, size_t size, const uint64_t key[4]) {
+  HighwayHashState state;
+  ghh_ProcessAll (data, size, key, &state);
+  return HighwayHashFinalize64 (&state);
+}
+
+void HighwayHash128 (const uint8_t* data, size_t size, const uint64_t key[4], uint64_t hash[2]) {
+  HighwayHashState state;
+  ghh_ProcessAll (data, size, key, &state);
+  HighwayHashFinalize128 (&state, hash);
+}
+
+void HighwayHash256 (const uint8_t* data, size_t size, const uint64_t key[4], uint64_t hash[4]) {
+  HighwayHashState state;
+  ghh_ProcessAll (data, size, key, &state);
+  HighwayHashFinalize256 (&state, hash);
+}
+
+/* Cat API: allows appending with multiple calls                              */
+void HighwayHashCatStart (const uint64_t key[4], HighwayHashCat* state) {
+  HighwayHashReset (key, &state->state);
+  state->num = 0;
+}
+
+void HighwayHashCatAppend (const uint8_t* bytes, size_t num, HighwayHashCat* state) {
+  size_t i;
+  if (state->num != 0) {
+    size_t num_add = num > (32u - state->num) ? (32u - state->num) : num;
+    for (i = 0; i < num_add; i++) state->packet[state->num + i] = bytes[i];
+    state->num += num_add;
+    num -= num_add;
+    bytes += num_add;
+    if (state->num == 32) { HighwayHashUpdatePacket (state->packet, &state->state); state->num = 0; }
+  }
+  while (num >= 32) { HighwayHashUpdatePacket(bytes, &state->state); num -= 32; bytes += 32; }
+  for (i = 0; i < num; i++) { state->packet[state->num] = bytes[i]; state->num++; }
+}
+
+uint64_t HighwayHashCatFinish64 (const HighwayHashCat* state) {
+  HighwayHashState copy = state->state;
+  if (state->num) HighwayHashUpdateRemainder (state->packet, state->num, &copy);
+  return HighwayHashFinalize64 (&copy);
+}
+
+void HighwayHashCatFinish128 (const HighwayHashCat* state, uint64_t hash[2]) {
+  HighwayHashState copy = state->state;
+  if (state->num) HighwayHashUpdateRemainder (state->packet, state->num, &copy);
+  HighwayHashFinalize128 (&copy, hash);
+}
+
+void HighwayHashCatFinish256 (const HighwayHashCat* state, uint64_t hash[4]) {
+  HighwayHashState copy = state->state;
+  if (state->num) HighwayHashUpdateRemainder (state->packet, state->num, &copy);
+  HighwayHashFinalize256 (&copy, hash);
+}
+
+/*  google highwayhash Usage examples:
+void Example64() {
+  uint64_t key[4] = {1, 2, 3, 4};
+  const char* text = "Hello world!";
+  size_t size = strlen(text);
+  uint64_t hash = HighwayHash64((const uint8_t*)text, size, key);
+  printf("%016"PRIx64"\n", hash);
+}
+
+void Example64Cat() {
+  uint64_t key[4] = {1, 2, 3, 4};
+  HighwayHashCat state;
+  uint64_t hash;
+  HighwayHashCatStart(key, &state);
+  HighwayHashCatAppend((const uint8_t*)"Hello", 5, &state);
+  HighwayHashCatAppend((const uint8_t*)" world!", 7, &state);
+  hash = HighwayHashCatFinish64(state);
+  printf("%016"PRIx64"\n", hash);
+}
+*/

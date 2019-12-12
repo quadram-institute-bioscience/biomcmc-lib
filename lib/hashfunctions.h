@@ -41,4 +41,46 @@ uint32_t biomcmc_murmurhash3_32bits (const void *data, size_t nbytes, const uint
 /*! \brief xxhash function for 64 bits */
 uint64_t biomcmc_xxh64 (const void *input, const size_t len, const uint32_t seed);
 
+/**   Google HighwayHash for C https://github.com/google/highwayhash/ **/
+
+/** \brief 256 bits for highwayhash */
+typedef struct {
+  uint64_t v0[4];
+  uint64_t v1[4];
+  uint64_t mul0[4];
+  uint64_t mul1[4];
+} HighwayHashState;
+
+/* Initializes state with given key */
+void HighwayHashReset (const uint64_t key[4], HighwayHashState* state);
+/* Takes a packet of 32 bytes */
+void HighwayHashUpdatePacket (const uint8_t* packet, HighwayHashState* state);
+/* Adds the final 1..31 bytes, do not use if 0 remain */
+void HighwayHashUpdateRemainder (const uint8_t* bytes, const size_t size_mod32, HighwayHashState* state);
+/* Compute final hash value. Makes state invalid. */
+uint64_t HighwayHashFinalize64 (HighwayHashState* state);
+void HighwayHashFinalize128 (HighwayHashState* state, uint64_t hash[2]);
+void HighwayHashFinalize256 (HighwayHashState* state, uint64_t hash[4]);
+
+/* Non-cat API: single call on full data                                      */
+uint64_t HighwayHash64 (const uint8_t* data, size_t size, const uint64_t key[4]);
+void HighwayHash128 (const uint8_t* data, size_t size, const uint64_t key[4], uint64_t hash[2]);
+void HighwayHash256 (const uint8_t* data, size_t size, const uint64_t key[4], uint64_t hash[4]);
+
+/* Cat API: allows appending with multiple calls                              */
+
+typedef struct {
+  HighwayHashState state;
+  uint8_t packet[32];
+  int num;
+} HighwayHashCat;
+
+/* Allocates new state for a new streaming hash computation */
+void HighwayHashCatStart (const uint64_t key[4], HighwayHashCat* state);
+void HighwayHashCatAppend (const uint8_t* bytes, size_t num, HighwayHashCat* state);
+/* Computes final hash value */
+uint64_t HighwayHashCatFinish64 (const HighwayHashCat* state);
+void HighwayHashCatFinish128 (const HighwayHashCat* state, uint64_t hash[2]);
+void HighwayHashCatFinish256 (const HighwayHashCat* state, uint64_t hash[4]);
+
 #endif

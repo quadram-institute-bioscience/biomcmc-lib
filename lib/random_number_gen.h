@@ -11,7 +11,7 @@
  * details (file "COPYING" or http://www.gnu.org/copyleft/gpl.html).
  */
 
-/*! \file random_number_aux.h
+/*! \file random_number_gen.h
  *  \brief Variables and structures local to random_number.c (should be opaque to user) */
 
 #ifndef _biomcmc_random_number_gen_h_
