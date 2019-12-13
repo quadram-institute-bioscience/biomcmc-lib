@@ -24,7 +24,7 @@
 #include "random_number_gen.h"
 #include "random_number_lists.h"
 
-void rng_set_marsaglia_constants (uint32_t *m, uint32_t s1, uint32_t s2);
+void rng_set_marsaglia_constants (uint32_t *m, uint32_t s);
 
 inline uint64_t
 rng_get_taus (rng_taus_struct *r)
@@ -481,19 +481,19 @@ rng_set_marsaglia (uint32_t *m, uint32_t seed)
   
   if (m[0] == m[1]) m[1] *= 69069UL;
 
-  rng_set_marsaglia_constants (m, m[0], m[1]);
+  rng_set_marsaglia_constants (m, seed); // seed can work as 'stream', since all prime pairs are explored in order
 }
 
 void
-rng_set_marsaglia_constants (uint32_t *m, uint32_t s1, uint32_t s2)
+rng_set_marsaglia_constants (uint32_t *m, uint32_t s)
 {
-  /* we must choose two distinct marsaglia_constants[], from a pool of 81. We have 6400 possible streams, since one
-   * constant we reserve for the diagonals. */
-  s1 = biomcmc_hashint_salted (s1, /*salt*/ 9); s1 %= 80;
-  s2 = biomcmc_hashint_salted (s2, /*salt*/ 9); s2 %= 80;
-  if (s1 == s2) s2 = 80;
-  m[2] = marsaglia_constants[s1];
-  m[3] = marsaglia_constants[s2];
+  uint16_t idx1, idx2;
+  /* choose two *distinct* marsaglia_constants[], from a pool of 81. We have therefore 80 x 81 possible streams */
+  idx1 = s % marsaglia_constants_size; // 0...80
+  idx2 = (s/marsaglia_constants_size) % (marsaglia_constants_size - 1); // 0...79
+  if (idx1 == idx2) idx2 = marsaglia_constants_size - 1; 
+  m[2] = marsaglia_constants[idx1];
+  m[3] = marsaglia_constants[idx2];
 }
 
 uint64_t
@@ -574,7 +574,7 @@ rng_twist_array_32bits (uint32_t *a, uint32_t n_a, uint32_t seed)
   mars[0] = biomcmc_hashint_salted (seed, /*salt*/ 8) + 1UL; 
   mars[1] = seed;
   mars[1] = rng_get_cong_many (mars + 1);
-  rng_set_marsaglia_constants (mars, mars[0], mars[1]);
+  rng_set_marsaglia_constants (mars, seed + 1);
 
   if (!a[0]) a[0] = (1ULL << 30) - n_a;
   a[0] += rng_get_std31 (&seed);

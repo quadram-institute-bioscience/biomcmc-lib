@@ -20,13 +20,13 @@
 
 #include "bipartition.h" // includes lowlevel.h
 
-uint32_t biomcmc_hashint_salted (uint32_t a, int salt);
-uint32_t biomcmc_hashbyte_salted (const void *str, size_t size, int salt);
-uint64_t biomcmc_hashint64_salted (uint64_t k, int salt);
-uint32_t biomcmc_hashint_mix_salted (uint32_t a, uint32_t b, int salt);
-uint64_t biomcmc_hashint64_mix_salted (uint64_t a, uint64_t b, int salt);
+uint32_t biomcmc_hashint_salted (uint32_t a, unsigned int salt);
+uint32_t biomcmc_hashbyte_salted (const void *str, size_t size, unsigned int salt);
+uint64_t biomcmc_hashint64_salted (uint64_t k, unsigned int salt);
+uint32_t biomcmc_hashint_mix_salted (uint32_t a, uint32_t b, unsigned int salt);
+uint64_t biomcmc_hashint64_mix_salted (uint64_t a, uint64_t b, unsigned int salt);
 
-uint32_t biomcmc_hashint_64to32_seed (uint64_t x, int seed);
+uint32_t biomcmc_hashint_64to32_seed (uint64_t x, unsigned int seed);
 uint32_t biomcmc_hashint_64to32 (uint64_t key);
 /*! \brief 32bits hash value for bipartition */
 uint32_t bipartition_hash (bipartition bip);

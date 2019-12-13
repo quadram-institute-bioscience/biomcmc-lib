@@ -37,25 +37,6 @@ biomcmc_random_number_finalize (void)
   biomcmc_random_number = NULL;
 }
 
-biomcmc_rng
-new_biomcmc_rng (unsigned long long int seed, int stream_number)
-{
-  int i;
-  uint64_t useed = seed;
-  biomcmc_rng r = (biomcmc_rng) biomcmc_malloc (sizeof (struct biomcmc_rng_struct));
-  
-  rng_set_taus (&(r->taus), useed, stream_number);
-  rng_get_brent_64bits (&useed); /* fast (one step) PRNG to change seed */
-  rng_set_mt19937 (&(r->mt), useed); /* receive modified seed (but even same seed should work) */
-
-  for (i = 0; i < 32; i++) { rng_get_taus (&(r->taus)); rng_get_mt19937 (&(r->mt)); }
-
-  /* rnorm 64 and 32 bits (since each normal draw produces two values), 32 bits and 16 bits temp values */
-  r->have_rnorm32 = r->have_rnorm64 = r->have_bit32 = false;
-
-  return r;
-}
-
 void
 del_biomcmc_rng (biomcmc_rng r)
 {
@@ -83,6 +64,42 @@ biomcmc_rng_get_initial_seed (void)
 //  fprintf (stderr, "seed %ju\n", (uintmax_t) low|high|top);
 
   return (unsigned long long int) (low | high | top);
+}
+
+// check also arc4random (from BSD)
+uint64_t *seed_rng (void)
+{
+  int fp = open("/dev/urandom", O_RDONLY);
+  if (fp>=0) {
+    uint64_t seed[4];
+    unsigned pos = 0;
+    while (pos < sizeof(seed)) {
+      int amt = read(fp, (char *) &seed + pos, sizeof(seed) - pos);
+      if (amt > 0) pos += amt;
+      else break;
+    }
+  }
+  close(fp);
+  return seed;
+}
+
+biomcmc_rng
+new_biomcmc_rng (unsigned long long int seed, int stream_number)
+{
+  int i;
+  uint64_t useed = seed;
+  biomcmc_rng r = (biomcmc_rng) biomcmc_malloc (sizeof (struct biomcmc_rng_struct));
+  
+  rng_set_taus (&(r->taus), useed, stream_number);
+  rng_get_brent_64bits (&useed); /* fast (one step) PRNG to change seed */
+  rng_set_mt19937 (&(r->mt), useed); /* receive modified seed (but even same seed should work) */
+
+  for (i = 0; i < 32; i++) { rng_get_taus (&(r->taus)); rng_get_mt19937 (&(r->mt)); }
+
+  /* rnorm 64 and 32 bits (since each normal draw produces two values), 32 bits and 16 bits temp values */
+  r->have_rnorm32 = r->have_rnorm64 = r->have_bit32 = false;
+
+  return r;
 }
 
 biomcmc_rng

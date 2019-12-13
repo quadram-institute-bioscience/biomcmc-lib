@@ -80,13 +80,12 @@ struct biomcmc_rng_struct
   bool have_rnorm32, have_rnorm64; /*! \brief true if we have normal random variate stored */ 
 };
 
+/* In OSX at least, the linker will bundle all sources into one library, and thus global variables must be declared "extern" in the headers 
+and defined only once in the corresponding .c file (to avoid duplicates). Functions don't need this because they are implicitly declared "extern" 
+Another solution is to declare all global variables as "static" but this is dangerous since we may have several static copies. */
+
 /*! \brief pointer to pseudo-random number generator (should point to real stream, even when there are several) */
-extern biomcmc_rng biomcmc_random_number; /* in OSX at least, the linker will bundle all sources into one library,
-                                             and thus global variables must be declared "extern" in the headers 
-                                             and defined only once in the corresponding .c file (to avoid duplicates).
-                                             Functions don't need this because they are implicitly declared "extern" 
-                                             Another solution is to declare all global variables as "static" but this 
-                                             is dangerous since we may have several static copies. */
+extern biomcmc_rng biomcmc_random_number; 
 
 /*! \brief High-level setup of a simple random number generator and initialization with a seed (not to be mixed with 
  * other low-level functions that update the seed or allocate memory).
