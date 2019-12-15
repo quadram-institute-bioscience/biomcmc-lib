@@ -31,6 +31,11 @@ uint32_t
 biomcmc_hashint_salted (uint32_t a, unsigned int salt)
 { // salt != seed, since main usage is to determine which hash function is used
   switch(salt & 15) { // 4 last bits
+    case 10: // murmur3 avalanche (from this version)
+      a *= 0xcc9e2d51u; a = (a << 15) | (a >> 17); a *= 0x1b873593u; 
+      a ^= a; a = (a << 13) | (a >> (19)); a = (a * 5) + 0xe6546b64u; break;
+    case 9: // murmur3 avalanche (old version?)
+      a ^= (a >> 16); a *= 0x85ebca6b; a ^= (a >> 13); a *= 0xc2b2ae35; a ^= (a >> 16); break;
     case 8: 
       a -= (a<<6); a ^= (a>>17); a -= (a<<9); a ^= (a<<4); a -= (a<<3); a ^= (a<<10); a ^= (a>>15); break;
     case 7:

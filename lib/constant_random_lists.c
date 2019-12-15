@@ -393,6 +393,8 @@ biomcmc_salt_vector32_from_spice_table (uint32_t *a, uint32_t n_a, uint64_t seed
     a[i+1] ^= (a[i+1] << 17); a[i+1] ^= (a[i+1] >> 13); a[i+1] ^= (a[i+1] << 5);
     a[i]   ^= (a[i]   << 10); a[i]   ^= (a[i]   >> 15); a[i]   ^= (a[i]   << 4);  a[i] ^= (a[i] >> 13);
   }
+  i = n_a - 1;
+  a[i]   ^= (a[i]   << 10); a[i]   ^= (a[i]   >> 15); a[i]   ^= (a[i]   << 4);  a[i] ^= (a[i] >> 13);
   for (i=0; i < n_a; i++) { div = 1 + (i % 30); a[i] = RoL(a[i], div);}
 }
 
