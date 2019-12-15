@@ -5,7 +5,6 @@
  */
 
 #include "rolling_hash.h"
-#include "random_number_lists.h" // predetermined rnadomised DNA values and semi-ordered "salt"
 
 uint32_t**
 new_dna_salted_hash_encoding (uint32_t salt) 

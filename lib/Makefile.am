@@ -3,7 +3,7 @@ AM_CFLAGS = @AM_CFLAGS@  @OPENMP_CFLAGS@
 LDADD = $(GTKDEPS_LIBS) $(AM_LDFLAGS)
 
 # ideally I would hide reconciliation.h etc used only inside genetree.c 
-common_headers = hashtable.h lowlevel.h random_number_gen.h random_number_lists.h random_number.h nexus_common.h \
+common_headers = hashtable.h lowlevel.h random_number_gen.h constant_random_lists.h random_number.h nexus_common.h \
                  bipartition.h prob_distribution.h empirical_frequency.h biomcmc.h argtable3.h \
                  distance_matrix.h alignment.h topology_common.h parsimony.h genetree.h \
                  reconciliation.h splitset_distances.h read_newick_trees.h char_vector.h \
@@ -11,7 +11,7 @@ common_headers = hashtable.h lowlevel.h random_number_gen.h random_number_lists.
                  kmerhash.h hashfunctions.h distance_generator.h clustering_goptics.h \
                  quickselect_quantile.h
                  
-common_src     = hashtable.c lowlevel.c random_number_gen.c random_number.c nexus_common.c \
+common_src     = hashtable.c lowlevel.c random_number_gen.c constant_random_lists.c random_number.c nexus_common.c \
                  bipartition.c prob_distribution.c empirical_frequency.c argtable3.c \
                  distance_matrix.c alignment.c topology_common.c parsimony.c genetree.c \
                  reconciliation.c splitset_distances.c read_newick_trees.c char_vector.c \

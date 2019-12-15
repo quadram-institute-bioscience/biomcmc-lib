@@ -31,7 +31,6 @@
 
 #include "hashfunctions.h" 
 
-
 struct hll_s;
 typedef struct hll_s hll_t;
 

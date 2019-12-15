@@ -66,22 +66,15 @@ biomcmc_rng_get_initial_seed (void)
   return (unsigned long long int) (low | high | top);
 }
 
-// check also arc4random (from BSD)
-uint64_t *seed_rng (void)
+/*
+uint64_t *seed_rng (void)// check also arc4random (from BSD)
 {
   int fp = open("/dev/urandom", O_RDONLY);
-  if (fp>=0) {
-    uint64_t seed[4];
-    unsigned pos = 0;
-    while (pos < sizeof(seed)) {
-      int amt = read(fp, (char *) &seed + pos, sizeof(seed) - pos);
-      if (amt > 0) pos += amt;
-      else break;
-    }
-  }
-  close(fp);
-  return seed;
+  uint64_t seed[4]; unsigned pos = 0; // BUGGY: should malloc if we really want to return address
+  if (fp>=0) while (pos < sizeof(seed)) { int amt = read(fp, (char *) &seed + pos, sizeof(seed) - pos); if (amt > 0) pos += amt; else break; }
+  close(fp); return seed;
 }
+*/
 
 biomcmc_rng
 new_biomcmc_rng (unsigned long long int seed, int stream_number)

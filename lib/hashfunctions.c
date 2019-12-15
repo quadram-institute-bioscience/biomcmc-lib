@@ -25,51 +25,7 @@
  **/
 
 #include "hashfunctions.h"
-#include "random_number_lists.h" // maybe needs to go public?
-
-/** \brief large deterministic list of random numbers, that can be used to "salt" hashes etc. */
-uint32_t
-biomcmc_generate_salt32_from_spice_table (unsigned int index)
-{
-  uint32_t salt[5] = {0,0,0,0,0};
-  uint16_t id;
-  id = index & (rnd_salt_h64_list_size - 1); // if y is power of 2, then x & (y-1) == x % y
-  salt[0] = rnd_salt_h64_list[id]; 
-  index /= rnd_salt_h64_list_size;  // A = 256 
-  
-  id = index & (rnd_salt_h64_list_size - 1);
-  salt[1] = rnd_salt_h64_list[id] >> 32; 
-  index /= rnd_salt_h64_list_size; // A = 256 
-  
-  id = index & (rnd_salt_h16_list_size - 1);
-  salt[2] = rnd_salt_h16_list[id]; 
-  index /= rnd_salt_h16_list_size; // B = 256
-
-  id = index & (prime_salt_list_size - 1);
-  salt[3] = prime_salt_list[id]; 
-  index /= prime_salt_list_size;  // C = 512
-
-  id = index % marsaglia_constants_size; // this is not a power of two; Marsaglia prime pairs are s.t. both k*2^16-1 and k*2^15-1 are prime 
-  salt[4] = (marsaglia_constants[id] << 16) - 1;
-  index /= marsaglia_constants_size; // D = 81
-
-  id = index % marsaglia_constants_size; 
-  salt[5] = (marsaglia_constants[id] << 15) - 1;
-  // D x D x C x B x A x A = 56358560858112 combinations (45 bits)
-
-  return salt[0];  // FIXME: unfinished function
-}
-
-uint32_t
-biomcmc_invert_bits32 (uint32_t n)
-{
-  n = ((n >>  1) & 0x55555555) | ((n <<  1) & 0xaaaaaaaa);
-  n = ((n >>  2) & 0x33333333) | ((n <<  2) & 0xcccccccc);
-  n = ((n >>  4) & 0x0f0f0f0f) | ((n <<  4) & 0xf0f0f0f0);
-  n = ((n >>  8) & 0x00ff00ff) | ((n <<  8) & 0xff00ff00);
-  n = ((n >> 16) & 0x0000ffff) | ((n << 16) & 0xffff0000);
-  return n;
-}
+#include "constant_random_lists.h" 
 
 uint32_t 
 biomcmc_hashint_salted (uint32_t a, unsigned int salt)

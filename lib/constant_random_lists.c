@@ -16,8 +16,8 @@
  *  hash (DNA bases mapped to a random value) and the (deterministic) spice used to generate several streams.
  */
 
-#ifndef _biomcmc_random_number_lists_h_
-#define _biomcmc_random_number_lists_h_
+#include "constant_random_lists.h"
+
 
 /*! \brief  Five-element streams for L'ecuyer's combined LFSR (Tausworthe) generator */ 
 uint64_t sTable76[44][5] = {
@@ -88,7 +88,6 @@ uint64_t qTable543[4][4] = {
 uint64_t kTable543[4][4] = {
    {63ull, 60ull, 58ull, 57ull}, {63ull, 60ull, 58ull, 57ull}, {63ull, 58ull, 57ull, 55ull}, {63ull, 58ull, 55ull, 47ull}
 };
-
 uint64_t Cmask[28] = {
   0xfffffffff0000000ull, 0xfffffffff8000000ull, 0xfffffffffc000000ull, 0xfffffffffe000000ull, /* 36-39 */
   0xffffffffff000000ull, 0xffffffffff800000ull, 0xffffffffffc00000ull, 0xffffffffffe00000ull, /* 40-43 */
@@ -110,8 +109,8 @@ uint32_t marsaglia_constants[] = {
   28980, 29013, 29379, 29889, 30135, 30345, 30459, 30714, 30903, 30963, 31059, 31083, 36969
 };
 
-static uint16_t rnd_salt_h16_list_size = 256; /*! \brief hardcoded table size (*must* be power of 4) */ 
-static uint16_t rnd_salt_h16_list[] = { // 16 bits 
+uint16_t rnd_salt_h16_list_size = 256; /*! \brief hardcoded table size (*must* be power of 4) */ 
+uint16_t rnd_salt_h16_list[] = { // 16 bits 
   0xe02f, 0x2076, 0xea7b, 0x8547, 0x1c49, 0x211b, 0x7af3, 0x5460, 0x3e49, 0xc657, 0xa0e7, 0x169c, 0x26c2, 0x04e9, 0xcaa4, 0x88d0,
   0x5ce8, 0xa00c, 0x5c21, 0xcdf2, 0x024a, 0xbac6, 0xc8ac, 0x0a76, 0x973d, 0x5fd7, 0x79aa, 0x99cf, 0xbe46, 0x2e28, 0x4ff0, 0x4c33,
   0xbee5, 0x7ef3, 0xd911, 0x7b59, 0xa574, 0xe5d7, 0xecf4, 0xcada, 0x79ac, 0xea92, 0xbcb8, 0x19b3, 0x0998, 0xab8f, 0xfdac, 0x399b,
@@ -131,9 +130,9 @@ static uint16_t rnd_salt_h16_list[] = { // 16 bits
 };
   
 // random tip: "printf '0x%08x\n' $(< o1) | pr -ts", " --columns 16 " will transform from decimal to hex and create multicolumn 
-static uint16_t prime_salt_list_size = 512; /*! \brief hardcoded table size */
-static uint32_t prime_salt_list[] = { // 256 x 16.6 bits (<100k) + 256 x 32 bits ==> not very random
-  0x0,     0x17e87, 0x14369, 0x1245b, 0x0addb, 0x14d85, 0x1479d, 0x0d3a5, 0x14aef, 0x1737d, 0x04879, 0x02851, 0x10715, 0x0909d, 0x15b57, 0x0d685,
+uint16_t prime_salt_list_size = 512; /*! \brief hardcoded table size */
+uint32_t prime_salt_list[] = { // 256 x 16.6 bits (<100k) + 256 x 32 bits ==> not very random
+  0x1f,    0x17e87, 0x14369, 0x1245b, 0x0addb, 0x14d85, 0x1479d, 0x0d3a5, 0x14aef, 0x1737d, 0x04879, 0x02851, 0x10715, 0x0909d, 0x15b57, 0x0d685,
   0x0b8b7, 0x17dfd, 0x00d1f, 0x0349d, 0x09f7d, 0x0a2af, 0x159e3, 0x112f9, 0x02e25, 0x14d37, 0x00ffb, 0x07edf, 0x110bd, 0x035bd, 0x12c95, 0x10f79,
   0x03ebf, 0x13b95, 0x0dcf9, 0x044d7, 0x024cd, 0x07e41, 0x063ef, 0x059b1, 0x0327b, 0x040f9, 0x0cf79, 0x0fb4d, 0x0b6ef, 0x12713, 0x08425, 0x10505,
   0x11129, 0x16e2b, 0x182e1, 0x133f7, 0x06d0d, 0x13091, 0x149cf, 0x00d03, 0x13481, 0x038e1, 0x13a17, 0x02e39, 0x04735, 0x05245, 0x15f0b, 0x184eb,
@@ -173,8 +172,8 @@ static uint32_t prime_salt_list[] = { // 256 x 16.6 bits (<100k) + 256 x 32 bits
   0x387def0d, 0x19e2937b, 0x2381a6c7, 0x1a48fd73
 };
 
-static uint16_t rnd_salt_h64_list_size = 256;
-static uint64_t rnd_salt_h64_list[] = { 
+uint16_t rnd_salt_h64_list_size = 256;
+uint64_t rnd_salt_h64_list[] = { 
   0x247f608720f0da15ull, 0x207de5d735679355ull, 0x2df63f7434982647ull, 0x0868a4712dda9fefull, 0x076e0f9538d30781ull, 0x0771a5d31a2fafcbull, 0x390912b320ea16ddull, 0x1a48fd0b38ac7547ull,
   0x38658e0908525ba5ull, 0x2d27db5f018a9139ull, 0x1ac977a3390e5c3full, 0x33356675350209d5ull, 0x0760eec91aa3566bull, 0x01b0f28f07fccf25ull, 0x02fab3892d4902bfull, 0x0352e06b389698f9ull,
   0x2d2e7b4519dfb76bull, 0x3844516d1a5e4279ull, 0x2df48ce92d94bdf9ull, 0x03f95fb33544acddull, 0x035b309d11ded3a3ull, 0x38432e2b1a75de81ull, 0x1aefa26d34cc6eebull, 0x3943bfcb03521465ull,
@@ -209,14 +208,208 @@ static uint64_t rnd_salt_h64_list[] = {
   0x031ee2571fe81161ull, 0x34bc6dcd1b1d6baaull, 0x35974f6f1aed083dull, 0x39238d3b204d4c75ull, 0x2d79b4330814831dull, 0x23ae4ee3037668ddull, 0x20677c850aad9847ull, 0x2dd2efef353cc79bull
 };
 
-static uint16_t ulx_h64_size = 12; // these are used by some hash functions, please do not change their order 
-static uint64_t ulx_h64[] = {
-  0x65d200ce55b19ad8UL, 0x4f2162926e40c299UL, 0x162dd799029970f8UL, // 0...2
-  0x68b665e6872bd1f4UL, 0xb6cfcf9d79b51db2UL, 0x7a2b92ae912898c2UL, // 3...5
-  0xff51afd7ed558ccdUL, 0xc4ceb9fe1a85ec53UL, 0x87c37b91114253d5UL, 0x4cf5ad432745937fUL, // 6...9 (murmurhash) 
-  0x52dce729UL, 0x38495ab5UL, // 10...11 
-  11400714785074694791ull, 14029467366897019727ull, 1609587929392839161ull, // 12..14 used by xxhash
-  9650029242287828579ull, 2870177450012600261ull // 15..16 used by xxhash
+uint16_t ulx_h64_size = 185; // these are used by some hash functions, please do not change their order up to 16th value 
+uint64_t ulx_h64[] = {
+  0x65d200ce55b19ad8ULL, 0x4f2162926e40c299ULL, 0x162dd799029970f8ULL, // 0...2
+  0x68b665e6872bd1f4ULL, 0xb6cfcf9d79b51db2ULL, 0x7a2b92ae912898c2ULL, // 3...5
+  0xff51afd7ed558ccdULL, 0xc4ceb9fe1a85ec53ULL, 0x87c37b91114253d5ULL, 0x4cf5ad432745937fULL, // 6...9 (murmurhash) 
+  0x52dce729ULL, 0x38495ab5ULL, // 10...11 
+  11400714785074694791ULL, 14029467366897019727ULL, 1609587929392839161ULL, // 12..14 used by xxhash
+  9650029242287828579ULL, 2870177450012600261ULL, // 15..16 used by xxhash
+  // other artisanal random numbers come here 
+  0x6d0c71D67aeb5b9dULL, 0x42b6b9b6e2274c79ULL, 0x00B502aF529770f8ULL, 0xa13c8e4680b583ebULL, 0x61c8864680b583ebULL, 0x033f7cd3153caa76ULL, 
+  0x3837edc92e67b403ULL, 0x1aa1923f34e0a0cdULL, 0x12a60c064e612766ULL, 0xB5026F5AA96619E9ULL, 0x54891a96c5c02018ULL, 0x3432f3f4a0793005ULL, 
+  0x9d2c5545ebe6e8a0ULL, 0x1812a4b3ce30a253ULL, 0x15dd913930b9ef26ULL, 0xe118a5f414798669ULL, 0x30085cb207003845ULL, 0x286293c355aa1757ULL, 
+  0x29288647153e7672ULL, 0x343121cb09abcd8bULL, 0x08fe9de839e32377ULL, 0x3934374303a56c91ULL, 0x2f63130f255d6ec8ULL, 0x020510f734dc102cULL,
+  0x08cc0d2f39a5e791ULL, 0x2628d32b15d8fb0cULL, 0x162fa3db26d526fcULL, 0x2a0c6d6f16a57d79ULL, 0x1f42f4e60f297da2ULL, 0x111f40df1eec279dULL,
+  0x3955d141111bfef4ULL, 0x365ec72e3780197aULL, 0x2e26ca942dfe50cbULL, 0x1ea960e23547ef4cULL, 0x16ede4ac2bf5e8b0ULL, 0x3b6286f016686582ULL,
+  0x2e7b325f0c14beedULL, 0x0b3d81dc1df2237fULL, 0x09fe3f1c14bc7c90ULL, 0x0f1c8aa805ea9871ULL, 0x0232c419184bdf0cULL, 0x03f654082d3a5b7aULL,
+  0x0b1cb9b139e68eb3ULL, 0x303f21642d7453e3ULL, 0x008b8f31239581f5ULL, 0x1ba81b5424bcb2a8ULL, 0x2224f3d51801d004ULL, 0x32f614f40c83a2efULL,
+  0x200b51e436ada8d3ULL, 0x31ae8f3a0df2e857ULL, 0x29d5f28e2b434440ULL, 0x2a4120651e473bc7ULL, 0x38f7c83d27b73d02ULL, 0x1ae50ec910926d6bULL,
+  0x0b4c804d0e9b725fULL, 0x3330cfd826887730ULL, 0x16d4b48423a9d533ULL, 0x0acbe5d6329ff53bULL, 0x21d1a6753289bf4fULL, 0x16bfdb2239ee38acULL,
+  0x040afbb426d170d7ULL, 0x1ed8855907592707ULL, 0x116468e13a90979bULL, 0x2a5c20d32b92d804ULL, 0x0d0e0de228f205d7ULL, 0x2e450b743172e15eULL,
+  0x2db499af0c397c7eULL, 0x24dea4a90cc9e0d6ULL, 0x08a451840733dc98ULL, 0x298eb6b7189f7b04ULL, 0x0d8d7b7e013c01bdULL, 0x11765d9128047766ULL,
+  0x30fecd1334b92ffaULL, 0x2ebb48542d4594c1ULL, 0x0670ac731af10527ULL, 0x1cd88e5b35d0938eULL, 0x0054b2202680f0f1ULL, 0x025802e0151a34efULL,
+  0x24d0621e1ed53f7dULL, 0x181264d328907bc9ULL, 0x360f07823b94702dULL, 0x0134da85094a8ef4ULL, 0x36080a3d32e28bf5ULL, 0x145c5df425ba4beeULL,
+  0x0ad3117903f614c2ULL, 0x365d62482490ee41ULL, 0x2ab6d1270ba9a899ULL, 0x12adfe2d07c60749ULL, 0x34b6f4b739ce9b58ULL, 0x35f263cc1e0f9433ULL,
+  0x36dfea420f5ca2d5ULL, 0x32d646c30847d74bULL, 0x2eeea8410c3b1375ULL, 0x1d08c7972a31a258ULL, 0x1d0be2a82b553d3dULL, 0x395537df01e0994fULL,
+  0x12ed6f8b236ad874ULL, 0x2864ee591b5f632fULL, 0x3b47d17a0c990d08ULL, 0x171dd77c033bdf99ULL, 0x0ffa773c1c7da99eULL, 0x1245d2c432bb2376ULL,
+  0x23a0aab233240811ULL, 0x2c86cccd3070950cULL, 0x268fe438370c29eaULL, 0x29462fb130f9e10cULL, 0x23cc668200352433ULL, 0x2d8475d2143dc72aULL,
+  0x0f0dd7a104f29dd3ULL, 0x337c4648264d7b39ULL, 0x03e98904197f7b1dULL, 0x2a835b9c35604503ULL, 0x2db810f42bada6cfULL, 0x2b093d02216ab186ULL,
+  0x20ca32e01d10aa4eULL, 0x1d334a2e3a610ad1ULL, 0x11e02c6a376b677bULL, 0x0bb206dd25139aeaULL, 0x0a58df7a321c215bULL, 0x2fbeb318125c938eULL,
+  0x32511b0928203f96ULL, 0x17effb4d119e2c01ULL, 0x1fb601f132ffbacfULL, 0x00224bec1cffbb9dULL, 0x18a299f01aff8d72ULL, 0x37ef4ac915fbbe4fULL,
+  0x18360ba81eff64b3ULL, 0x30220fcc227fe6d8ULL, 0x1af2a5b7034e6466ULL, 0x31525baa075a9c16ULL, 0x313ed639167a8928ULL, 0x1cab9eca0d980fe9ULL,
+  0x1fe4815205cce088ULL, 0x2cf5100126c7ea9fULL, 0x0de1567038d77254ULL, 0x24df6c552da4963bULL, 0x0630eb69175d4b95ULL, 0x306422432624c7fdULL,
+  0x1291cc6634ca3628ULL, 0x080b36ea02b57850ULL, 0x1f15639432f17875ULL, 0x0a780b94248c7976ULL, 0x39cc78ac30db8601ULL, 0x237ffb610f7439c8ULL,
+  0x2d0bc01f27b91db0ULL, 0x05a4ec980f86d273ULL, 0x3aad6e7f2dc86536ULL, 0x31464e25314190bfULL, 0x0262de3211dcabcdULL, 0x17287dcf0c2ee8f5ULL,
+  0x21c4b1413aed1726ULL, 0x2627cffb3b498a14ULL, 0x1e9b44802883ace7ULL, 0x0090e9940ea5f115ULL, 0x035dca9b05f08e88ULL, 0x1696c58b14d5976fULL,
+  0x24b4a50233eae1e2ULL, 0x01468b203a5fcfadULL, 0x1e867f430dae63d8ULL, 0x07f718d6231becb3ULL, 0x300d0caf1c179d72ULL, 0x2dad3c2b39e3e1ceULL,
+  0x2a132db41d99d8e9ULL, 0x0fbe74f6023b18b1ULL, 0x02e85ad226213f8bULL, 0x16a151f233403148ULL, 0x2ab63e051196bbb7ULL, 0x1e44e5872f4871bbULL
 };
 
-#endif
+/* * * from prob_distribution_aux.c * * */
+
+uint16_t lgamma_algmcs_size = 15;
+double   lgamma_algmcs[] = {
+  +.1666389480451863247205729650822e+0,  -.1384948176067563840732986059135e-4,  +.9810825646924729426157171547487e-8, 
+  -.1809129475572494194263306266719e-10, +.6221098041892605227126015543416e-13, -.3399615005417721944303330599666e-15, 
+  +.2683181998482698748957538846666e-17, -.2868042435334643284144622399999e-19, +.3962837061046434803679306666666e-21, 
+  -.6831888753985766870111999999999e-23, +.1429227355942498147573333333333e-24, -.3547598158101070547199999999999e-26,
+  +.1025680058010470912000000000000e-27, -.3401102254316748799999999999999e-29, +.1276642195630062933333333333333e-30
+};
+
+uint16_t lgamma_coeffs_size = 40;
+double   lgamma_coeffs[] = { /* (zeta(2)-1)/2, (zeta(3)-1)/3 ... (zeta(40+1)-1)/(40+1) */
+  0.3224670334241132182362075833230126e-0, 0.6735230105319809513324605383715000e-1,
+  0.2058080842778454787900092413529198e-1, 0.7385551028673985266273097291406834e-2,
+  0.2890510330741523285752988298486755e-2, 0.1192753911703260977113935692828109e-2,
+  0.5096695247430424223356548135815582e-3, 0.2231547584535793797614188036013401e-3,
+  0.9945751278180853371459589003190170e-4, 0.4492623673813314170020750240635786e-4,
+  0.2050721277567069155316650397830591e-4, 0.9439488275268395903987425104415055e-5,
+  0.4374866789907487804181793223952411e-5, 0.2039215753801366236781900709670839e-5,
+  0.9551412130407419832857179772951265e-6, 0.4492469198764566043294290331193655e-6,
+  0.2120718480555466586923135901077628e-6, 0.1004322482396809960872083050053344e-6,
+  0.4769810169363980565760193417246730e-7, 0.2271109460894316491031998116062124e-7,
+  0.1083865921489695409107491757968159e-7, 0.5183475041970046655121248647057669e-8,
+  0.2483674543802478317185008663991718e-8, 0.1192140140586091207442548202774640e-8,
+  0.5731367241678862013330194857961011e-9, 0.2759522885124233145178149692816341e-9,
+  0.1330476437424448948149715720858008e-9, 0.6422964563838100022082448087644648e-10,
+  0.3104424774732227276239215783404066e-10, 0.1502138408075414217093301048780668e-10,
+  0.7275974480239079662504549924814047e-11, 0.3527742476575915083615072228655483e-11,
+  0.1711991790559617908601084114443031e-11, 0.8315385841420284819798357793954418e-12,
+  0.4042200525289440065536008957032895e-12, 0.1966475631096616490411045679010286e-12,
+  0.9573630387838555763782200936508615e-13, 0.4664076026428374224576492565974577e-13,
+  0.2273736960065972320633279596737272e-13, 0.1109139947083452201658320007192334e-13
+};
+
+uint16_t stirl_sferr_halves_size = 31;
+double   stirl_sferr_halves[] = { /* error for 0, 0.5, 1.0, 1.5, ..., 14.5, 15.0. */
+  0.0, 0.1534264097200273452913848, 0.0810614667953272582196702, 0.0548141210519176538961390,
+  0.0413406959554092940938221,  0.03316287351993628748511048, 0.02767792568499833914878929,
+  0.02374616365629749597132920, 0.02079067210376509311152277, 0.01848845053267318523077934,
+  0.01664469118982119216319487, 0.01513497322191737887351255, 0.01387612882307074799874573,
+  0.01281046524292022692424986, 0.01189670994589177009505572, 0.01110455975820691732662991,
+  0.010411265261972096497478567, 0.009799416126158803298389475, 0.009255462182712732917728637,
+  0.008768700134139385462952823, 0.008330563433362871256469318, 0.007934114564314020547248100,
+  0.007573675487951840794972024, 0.007244554301320383179543912, 0.006942840107209529865664152,
+  0.006665247032707682442354394, 0.006408994188004207068439631, 0.006171712263039457647532867,
+  0.005951370112758847735624416, 0.005746216513010115682023589, 0.005554733551962801371038690 
+};
+
+/** \brief large deterministic list of random numbers, that can be used to "salt" hashes etc. */
+uint32_t
+biomcmc_get_salt_set_from_spice_table (uint64_t index, uint32_t *salt, uint32_t salt_length)
+{
+  uint16_t id;
+  uint32_t si = 0;
+  uint64_t index0 = index;
+  double rdbl;
+
+  if (!salt_length) return 0;
+  id = index & (rnd_salt_h64_list_size - 1); // if y is power of 2, then x & (y-1) == x % y
+  salt[si++] += (uint32_t) rnd_salt_h64_list[id]; 
+  index /= rnd_salt_h64_list_size;  // size = 256 (total 8 bits) 
+
+  if (salt_length > 1) {
+    id = index & (rnd_salt_h64_list_size - 1);
+    salt[si++] += (rnd_salt_h64_list[id] >> 32); 
+    index /= rnd_salt_h64_list_size; // size = 256 (total 16 bits)
+  }
+  if (salt_length > 2) {
+    id = index & (rnd_salt_h16_list_size - 1);
+    salt[si++] += rnd_salt_h16_list[id]; 
+    index /= rnd_salt_h16_list_size; // size = 256 (total 24 bits)
+  }
+  index += index0 + 1; // in case the index is around 32 bits
+
+  if (salt_length > 3) {
+    id = index & (prime_salt_list_size - 1);
+    salt[si++] += prime_salt_list[id]; 
+    index /= prime_salt_list_size;  // size = 512 (total 32 bits)
+  }
+  if (salt_length > 4) {
+    id = index % marsaglia_constants_size; // this is not a power of two 
+    salt[si++] += (marsaglia_constants[id] << 16) - 1;
+    index /= marsaglia_constants_size; // size = 81 (total 39 bits)
+  }
+  if (salt_length > 5) {
+    id = index % marsaglia_constants_size; 
+    salt[si++] += (marsaglia_constants[id] << 15) - 1;
+    index /= marsaglia_constants_size; // size = 81 (total 45 bits)
+  }
+  if (salt_length > 6) {
+    id = index % ulx_h64_size;
+    salt[si++] += (uint32_t) ulx_h64[i];
+    index /= ulx_h64_size; // size = 185 (total 53 bits)
+  }
+  if (salt_length > 7) {
+    id = index % ulx_h64_size;
+    salt[si++] += (ulx_h64[i] >> 32);
+    index /= ulx_h64_size; // size = 185 (total 60 bits)
+  }
+  index += index0 + 2; // assuming index has ~32 bits it should be zero here
+
+  if (salt_length > 8) {
+    id = index % lgamma_algmcs_size;
+    rdbl = lgamma_algmcs[id];
+    salt[si++] += *(uint32_t*)&rdbl;
+    index /= lgamma_algmcs_size; // size = 15 (total 65 bits)
+  }
+  if (salt_length > 9) {
+    id = index % lgamma_coeffs_size;
+    rdbl = lgamma_coeffs[id];
+    salt[si++] += *(uint32_t*)&rdbl;
+    index /= lgamma_coeffs_size; // size = 40 (total 69 bits)
+  }
+  if (salt_length > 10) {
+    id = stirl_sferr_halves_size; 
+    rdbl = stirl_sferr_halves[id] + 2.7; // first value is zero
+    salt[si++] += *(uint32_t*)&rdbl;
+    index /= stirl_sferr_halves_size; // size = 31 (total 75 bits)
+  }
+  return si; 
+}
+
+uint32_t
+biomcmc_invert_bits32 (uint32_t n)
+{
+  n = ((n >>  1) & 0x55555555) | ((n <<  1) & 0xaaaaaaaa);
+  n = ((n >>  2) & 0x33333333) | ((n <<  2) & 0xcccccccc);
+  n = ((n >>  4) & 0x0f0f0f0f) | ((n <<  4) & 0xf0f0f0f0);
+  n = ((n >>  8) & 0x00ff00ff) | ((n <<  8) & 0xff00ff00);
+  n = ((n >> 16) & 0x0000ffff) | ((n << 16) & 0xffff0000);
+  return n;
+}
+
+#define RoL(val, numbits) ((val) << (numbits)) | ((val) >> (32 - (numbits)))
+#define RoR(val, numbits) ((val) >> (numbits)) | ((val) << (32 - (numbits)))
+void
+biomcmc_salt_vector32_from_spice_table (uint32_t *a, uint32_t n_a, uint64_t seed)
+{
+  uint32_t i;
+  uint8_t div = 1;
+  for (i=0; i < n_a;) i = biomcmc_get_salt_set_from_spice_table (2*seed + 1, a + i, n_a - i);
+  for (i=0; i < n_a/2; i+=2) { // shr and brent 
+    a[i+1] ^= (a[i+1] << 17); a[i+!] ^= (a[i+1] >> 13); a[i+1] ^= (a[i+1] << 5);
+    a[i]   ^= (a[i]   << 10); a[i]   ^= (a[i]   >> 15); a[i]   ^= (a[i]   << 4);  a[i] ^= (a[i] >> 13);
+  }
+  for (i=0; i < n_a; i++) { div = 1 + (i % 30); a[i] = RoL(a[i], div);}
+}
+
+void
+biomcmc_salt_vector64_from_spice_table (uint64_t *a, uint32_t n_a, uint64_t seed)
+{
+  uint32_t i, *x = (int*)biomcmc_malloc (sizeof(int) * n_a);
+  uint64_t tmp, bigseed = 0;
+  for (i=0; i < n_a; i++) { x[i] = (uint32_t) a[i]; bigseed += i; }
+  // right-most bits 
+  biomcmc_salt_vector32_from_spice_table (x, n_a, seed);
+  for (i=0; i < n_a; i++) { tmp = a[i]; a[i] = x[i]; x[i] = tmp >> 32; }
+  // left-most bits are in backwards order from table, and with inverted bits
+  bigseed = RoL(bigseed, 13); // it should be a big number
+  biomcmc_salt_vector32_from_spice_table (x, n_a, bigseed);
+  for (i=0; i < n_a; i++) a[i] |= (biomcmc_invert_bit32(x[n_a-i-1]) << 32);
+  if (x) free (x);
+}
+#undef RoL
+#undef RoR}

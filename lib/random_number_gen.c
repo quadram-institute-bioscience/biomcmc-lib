@@ -22,7 +22,7 @@
  * bottom should not call functions at the top (at the risk of overflowing the stack ;). */
 
 #include "random_number_gen.h"
-#include "random_number_lists.h"
+#include "constant_random_lists.h" 
 
 void rng_set_marsaglia_constants (uint32_t *m, uint32_t s);
 
@@ -526,7 +526,7 @@ rng_get_std31 (uint32_t *x)
 uint32_t
 rng_get_shr (uint32_t *x)
 {
-  (*x) ^= ((*x) << 17); (*x) ^= ((*x) >> 13), (*x) ^= ((*x) << 5);
+  (*x) ^= ((*x) << 17); (*x) ^= ((*x) >> 13); (*x) ^= ((*x) << 5);
   return (*x);
 }
 
