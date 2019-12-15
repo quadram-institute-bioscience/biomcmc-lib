@@ -339,12 +339,12 @@ biomcmc_get_salt_set_from_spice_table (uint64_t index, uint32_t *salt, uint32_t 
   }
   if (salt_length > 6) {
     id = index % ulx_h64_size;
-    salt[si++] += (uint32_t) ulx_h64[i];
+    salt[si++] += (uint32_t) ulx_h64[id];
     index /= ulx_h64_size; // size = 185 (total 53 bits)
   }
   if (salt_length > 7) {
     id = index % ulx_h64_size;
-    salt[si++] += (ulx_h64[i] >> 32);
+    salt[si++] += (ulx_h64[id] >> 32);
     index /= ulx_h64_size; // size = 185 (total 60 bits)
   }
   index += index0 + 2; // assuming index has ~32 bits it should be zero here
@@ -390,7 +390,7 @@ biomcmc_salt_vector32_from_spice_table (uint32_t *a, uint32_t n_a, uint64_t seed
   uint8_t div = 1;
   for (i=0; i < n_a;) i = biomcmc_get_salt_set_from_spice_table (2*seed + 1, a + i, n_a - i);
   for (i=0; i < n_a/2; i+=2) { // shr and brent 
-    a[i+1] ^= (a[i+1] << 17); a[i+!] ^= (a[i+1] >> 13); a[i+1] ^= (a[i+1] << 5);
+    a[i+1] ^= (a[i+1] << 17); a[i+1] ^= (a[i+1] >> 13); a[i+1] ^= (a[i+1] << 5);
     a[i]   ^= (a[i]   << 10); a[i]   ^= (a[i]   >> 15); a[i]   ^= (a[i]   << 4);  a[i] ^= (a[i] >> 13);
   }
   for (i=0; i < n_a; i++) { div = 1 + (i % 30); a[i] = RoL(a[i], div);}
@@ -399,7 +399,7 @@ biomcmc_salt_vector32_from_spice_table (uint32_t *a, uint32_t n_a, uint64_t seed
 void
 biomcmc_salt_vector64_from_spice_table (uint64_t *a, uint32_t n_a, uint64_t seed)
 {
-  uint32_t i, *x = (int*)biomcmc_malloc (sizeof(int) * n_a);
+  uint32_t i, *x = (uint32_t*)biomcmc_malloc (sizeof(uint32_t) * n_a);
   uint64_t tmp, bigseed = 0;
   for (i=0; i < n_a; i++) { x[i] = (uint32_t) a[i]; bigseed += i; }
   // right-most bits 
@@ -408,8 +408,8 @@ biomcmc_salt_vector64_from_spice_table (uint64_t *a, uint32_t n_a, uint64_t seed
   // left-most bits are in backwards order from table, and with inverted bits
   bigseed = RoL(bigseed, 13); // it should be a big number
   biomcmc_salt_vector32_from_spice_table (x, n_a, bigseed);
-  for (i=0; i < n_a; i++) a[i] |= (biomcmc_invert_bit32(x[n_a-i-1]) << 32);
+  for (i=0; i < n_a; i++) a[i] |= ((uint64_t)(biomcmc_invert_bits32(x[n_a-i-1])) << 32);
   if (x) free (x);
 }
 #undef RoL
-#undef RoR}
+#undef RoR
