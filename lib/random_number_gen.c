@@ -443,6 +443,84 @@ rng_set_well1024 (rng_well1024_struct *r, uint32_t seed)
 }
 
 /* * * Simple generators (single value or simple vectors of size 2 or 4) */
+#define RoL64(val, numbits) (((val) << (numbits)) | ((val) >> (64 - (numbits))))
+
+/* http://prng.di.unimi.it/xoroshiro128plusplus.c; commented out is http://xoroshiro.di.unimi.it/xoroshiro128plus.c */
+uint64_t 
+rng_get_xoroshiro128 (uint64_t *s) 
+{
+  uint64_t s1 = s[1], uint64_t result;
+	result = RoL64(s[0] + s1, 17) + s[0];
+  // result = s[0] + s1; // 128+ 
+  s1 ^= s[0];
+  // s[0] = RoL64(s[0], 24) ^ s1 ^ (s1 << 16); s[1] = RoL64(s1, 37);  // 128+ V 2018
+  // s[0] = RoL64(s[0], 55) ^ s1 ^ (s1 << 14); s[1] = RoL64(s1, 36);  // 128+ V 2016
+     s[0] = RoL64(s[0], 49) ^ s1 ^ (s1 << 21); s[1] = RoL64(s1, 28);  // 128++
+  return result;
+}
+
+/* Equivalent to 2^64 calls (e.g. generate 2^64 non-overlapping subsequences for parallel computations) */
+uint64_t 
+rng_jump_64_xoroshiro128 (uint64_t *s) 
+{
+  uint64_t s0 = 0, s1 = 0;
+  int i, b;
+  for (i = 17; i < 19; i++) for(b = 0; b < 64; b++) {
+    if (ulx_h64[i] & 1ULL << b) { s0 ^= s[0]; s1 ^= s[1]; }
+    rng_get_xoroshiro128 (s); 
+  }
+  s[0] = s0; s[1] = s1;
+}
+
+/* Equivalent to 2^96 calls (e.g. generate 2^32 non-overlapping subsequences for parallel computations) */
+uint64_t 
+rng_jump_96_xoroshiro128 (uint64_t *s) 
+{
+  uint64_t s0 = 0, s1 = 0;
+  int i, b;
+  for(i = 19; i < 21; i++) for(b = 0; b < 64; b++) {
+    if (ulx_h64[i] & 1ULL << b) { s0 ^= s[0]; s1 ^= s[1]; }
+    rng_get_xoroshiro128 (s); 
+  }
+  s[0] = s0; s[1] = s1;
+}
+
+/* http://prng.di.unimi.it/xoshiro256plusplus.c */
+uint64_t 
+rng_get_xoroshiro256 (uint64_t *s) // 4 x 64bits 
+{
+  uint64_t result, uint64_t t = s[1] << 17;
+  result = RoL64(s[0] + s[3], 23) + s[0];
+	s[2] ^= s[0]; s[3] ^= s[1]; s[1] ^= s[2]; s[0] ^= s[3];
+  s[2] ^= t; s[3] = RoL64(s[3], 45);
+	return result;
+}
+
+/* Equivalent to 2^128 calls (e.g. generate 2^128 non-overlapping subsequences for parallel computations) */
+uint64_t 
+rng_jump_128_xoroshiro256 (uint64_t *s) 
+{	
+  uint64_t s0 = 0,	s1 = 0, s2 = 0, s3 = 0;
+  int i, b;
+  for (i = 21; i < 25; i++) for (b = 0; b < 64; b++) {
+    if (ulx_64[i] & 1ULL << b) { s0 ^= s[0]; s1 ^= s[1]; s2 ^= s[2]; s3 ^= s[3]; }
+    rng_get_xoroshiro256 (s);  
+  }
+  s[0] = s0; s[1] = s1; s[2] = s2; s[3] = s3;
+}
+
+/* Equivalent to 2^192 calls (e.g. generate 2^64 non-overlapping subsequences for parallel computations) */
+uint64_t 
+rng_jump_192_xoroshiro256 (uint64_t *s) 
+{
+  uint64_t s0 = 0,	s1 = 0, s2 = 0, s3 = 0;
+  int i, b;
+  for (i = 25; i < 29; i++) for (b = 0; b < 64; b++) {
+    if (ulx_h64[i] & 1ULL << b) { s0 ^= s[0]; s1 ^= s[1]; s2 ^= s[2]; s3 ^= s[3]; }
+    rng_get_xoroshiro256 (s);  
+  }
+  s[0] = s0; s[1] = s1; s[2] = s2; s[3] = s3;
+}
 
 uint32_t
 rng_get_gamerand (uint32_t *game)

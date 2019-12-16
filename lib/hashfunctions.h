@@ -31,6 +31,13 @@ uint32_t biomcmc_hashint_64to32 (uint64_t key);
 /*! \brief 32bits hash value for bipartition */
 uint32_t bipartition_hash (bipartition bip);
 
+/** \brief invert order of bits (endianness), to increase randomness usually */
+void biomcmc_invert_bits32_by_address (uint32_t *n);
+/** \brief given a vector and set of indices, add (deterministic) random values from tables in constant_random_lists.h */
+void biomcmc_salt_vector32_from_spice_table (uint32_t *a, uint32_t n_a, uint32_t seed[]);
+/** \brief given a vector and set of indices, add (deterministic) random values from tables in constant_random_lists.h */
+void biomcmc_salt_vector64_from_spice_table (uint64_t *a, uint32_t n_a, uint32_t seed[]);
+
 /*! \brief murmurhash3 using 64bits to return 128 bits (4 ints) of hash into out[] and also 64 bits as return value 
  * The 64bits is the format used internally (for speed), but the input can be a vector of any size (>1 byte) */
 uint64_t biomcmc_murmurhash3_128bits ( const void *key, const size_t len, const uint32_t seed, void *out);

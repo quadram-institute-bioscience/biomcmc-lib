@@ -18,7 +18,6 @@
 
 #include "constant_random_lists.h"
 
-
 /*! \brief  Five-element streams for L'ecuyer's combined LFSR (Tausworthe) generator */ 
 uint64_t sTable76[44][5] = {
   /* table 7 of MathsComput(1999)p261 (from elements 0 to 19 here) - safe for up to \f$10^{35}\f$ samples */
@@ -216,6 +215,10 @@ uint64_t ulx_h64[] = {
   0x52dce729ULL, 0x38495ab5ULL, // 10...11 
   11400714785074694791ULL, 14029467366897019727ULL, 1609587929392839161ULL, // 12..14 used by xxhash
   9650029242287828579ULL, 2870177450012600261ULL, // 15..16 used by xxhash
+  /// 0xdf900294d8f554a5ULL, 0x170865df4b3201fcULL, 0xd2a98b26625eee7bULL, 0xdddf9b1090aa7ac1ULL,
+  0x2bd7a6a6e99c2ddcULL, 0x0992ccaf6a6fca05, 0x360fd5f2cf8d5d99, 0x9c6e6877736c46e3, // 17...20 xoroshiro128 // STOPHERE (FIXME must change size!)
+  0x180ec6d33cfd0abaULL, 0xd5a61266f0c9392c, 0xa9582618e03fc9aa, 0x39abdc4529b1661c, // 21...24 xoroshiro256
+  0x76e15d3efefdcbbfULL, 0xc5004e441c522fb3, 0x77710069854ee241, 0x39109bb02acbe635, // 25...29 xoroshiro256
   // other artisanal random numbers come here 
   0x6d0c71D67aeb5b9dULL, 0x42b6b9b6e2274c79ULL, 0x00B502aF529770f8ULL, 0xa13c8e4680b583ebULL, 0x61c8864680b583ebULL, 0x033f7cd3153caa76ULL, 
   0x3837edc92e67b403ULL, 0x1aa1923f34e0a0cdULL, 0x12a60c064e612766ULL, 0xB5026F5AA96619E9ULL, 0x54891a96c5c02018ULL, 0x3432f3f4a0793005ULL, 
@@ -295,123 +298,3 @@ double   stirl_sferr_halves[] = { /* error for 0, 0.5, 1.0, 1.5, ..., 14.5, 15.0
   0.006665247032707682442354394, 0.006408994188004207068439631, 0.006171712263039457647532867,
   0.005951370112758847735624416, 0.005746216513010115682023589, 0.005554733551962801371038690 
 };
-
-/** \brief large deterministic list of random numbers, that can be used to "salt" hashes etc. */
-uint32_t
-biomcmc_get_salt_set_from_spice_table (uint64_t index, uint32_t *salt, uint32_t salt_length)
-{
-  uint16_t id;
-  uint32_t si = 0;
-  uint64_t index0 = index;
-  double rdbl;
-
-  if (!salt_length) return 0;
-  id = index & (rnd_salt_h64_list_size - 1); // if y is power of 2, then x & (y-1) == x % y
-  salt[si++] += (uint32_t) rnd_salt_h64_list[id]; 
-  index /= rnd_salt_h64_list_size;  // size = 256 (total 8 bits) 
-
-  if (salt_length > 1) {
-    id = index & (rnd_salt_h64_list_size - 1);
-    salt[si++] += (rnd_salt_h64_list[id] >> 32); 
-    index /= rnd_salt_h64_list_size; // size = 256 (total 16 bits)
-  }
-  if (salt_length > 2) {
-    id = index & (rnd_salt_h16_list_size - 1);
-    salt[si++] += rnd_salt_h16_list[id]; 
-    index /= rnd_salt_h16_list_size; // size = 256 (total 24 bits)
-  }
-  index += index0 + 1; // in case the index is around 32 bits
-
-  if (salt_length > 3) {
-    id = index & (prime_salt_list_size - 1);
-    salt[si++] += prime_salt_list[id]; 
-    index /= prime_salt_list_size;  // size = 512 (total 32 bits)
-  }
-  if (salt_length > 4) {
-    id = index % marsaglia_constants_size; // this is not a power of two 
-    salt[si++] += (marsaglia_constants[id] << 16) - 1;
-    index /= marsaglia_constants_size; // size = 81 (total 39 bits)
-  }
-  if (salt_length > 5) {
-    id = index % marsaglia_constants_size; 
-    salt[si++] += (marsaglia_constants[id] << 15) - 1;
-    index /= marsaglia_constants_size; // size = 81 (total 45 bits)
-  }
-  if (salt_length > 6) {
-    id = index % ulx_h64_size;
-    salt[si++] += (uint32_t) ulx_h64[id];
-    index /= ulx_h64_size; // size = 185 (total 53 bits)
-  }
-  if (salt_length > 7) {
-    id = index % ulx_h64_size;
-    salt[si++] += (ulx_h64[id] >> 32);
-    index /= ulx_h64_size; // size = 185 (total 60 bits)
-  }
-  index += index0 + 2; // assuming index has ~32 bits it should be zero here
-
-  if (salt_length > 8) {
-    id = index % lgamma_algmcs_size;
-    rdbl = lgamma_algmcs[id];
-    salt[si++] += *(uint32_t*)&rdbl;
-    index /= lgamma_algmcs_size; // size = 15 (total 65 bits)
-  }
-  if (salt_length > 9) {
-    id = index % lgamma_coeffs_size;
-    rdbl = lgamma_coeffs[id];
-    salt[si++] += *(uint32_t*)&rdbl;
-    index /= lgamma_coeffs_size; // size = 40 (total 69 bits)
-  }
-  if (salt_length > 10) {
-    id = stirl_sferr_halves_size; 
-    rdbl = stirl_sferr_halves[id] + 2.7; // first value is zero
-    salt[si++] += *(uint32_t*)&rdbl;
-    index /= stirl_sferr_halves_size; // size = 31 (total 75 bits)
-  }
-  return si; 
-}
-
-uint32_t
-biomcmc_invert_bits32 (uint32_t n)
-{
-  n = ((n >>  1) & 0x55555555) | ((n <<  1) & 0xaaaaaaaa);
-  n = ((n >>  2) & 0x33333333) | ((n <<  2) & 0xcccccccc);
-  n = ((n >>  4) & 0x0f0f0f0f) | ((n <<  4) & 0xf0f0f0f0);
-  n = ((n >>  8) & 0x00ff00ff) | ((n <<  8) & 0xff00ff00);
-  n = ((n >> 16) & 0x0000ffff) | ((n << 16) & 0xffff0000);
-  return n;
-}
-
-#define RoL(val, numbits) ((val) << (numbits)) | ((val) >> (32 - (numbits)))
-#define RoR(val, numbits) ((val) >> (numbits)) | ((val) << (32 - (numbits)))
-void
-biomcmc_salt_vector32_from_spice_table (uint32_t *a, uint32_t n_a, uint64_t seed)
-{
-  uint32_t i;
-  uint8_t div = 1;
-  for (i=0; i < n_a;) i = biomcmc_get_salt_set_from_spice_table (2*seed + 1, a + i, n_a - i);
-  for (i=0; i < n_a/2; i+=2) { // shr and brent 
-    a[i+1] ^= (a[i+1] << 17); a[i+1] ^= (a[i+1] >> 13); a[i+1] ^= (a[i+1] << 5);
-    a[i]   ^= (a[i]   << 10); a[i]   ^= (a[i]   >> 15); a[i]   ^= (a[i]   << 4);  a[i] ^= (a[i] >> 13);
-  }
-  i = n_a - 1;
-  a[i]   ^= (a[i]   << 10); a[i]   ^= (a[i]   >> 15); a[i]   ^= (a[i]   << 4);  a[i] ^= (a[i] >> 13);
-  for (i=0; i < n_a; i++) { div = 1 + (i % 30); a[i] = RoL(a[i], div);}
-}
-
-void
-biomcmc_salt_vector64_from_spice_table (uint64_t *a, uint32_t n_a, uint64_t seed)
-{
-  uint32_t i, *x = (uint32_t*)biomcmc_malloc (sizeof(uint32_t) * n_a);
-  uint64_t tmp, bigseed = 0;
-  for (i=0; i < n_a; i++) { x[i] = (uint32_t) a[i]; bigseed += i; }
-  // right-most bits 
-  biomcmc_salt_vector32_from_spice_table (x, n_a, seed);
-  for (i=0; i < n_a; i++) { tmp = a[i]; a[i] = x[i]; x[i] = tmp >> 32; }
-  // left-most bits are in backwards order from table, and with inverted bits
-  bigseed = RoL(bigseed, 13); // it should be a big number
-  biomcmc_salt_vector32_from_spice_table (x, n_a, bigseed);
-  for (i=0; i < n_a; i++) a[i] |= ((uint64_t)(biomcmc_invert_bits32(x[n_a-i-1])) << 32);
-  if (x) free (x);
-}
-#undef RoL
-#undef RoR

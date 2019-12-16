@@ -39,8 +39,8 @@ del_dna_salted_hash_encoding (uint32_t** shash)
   free (shash);
 }
 
-#define RoL(val, numbits) ((val) << (numbits)) | ((val) >> (32 - (numbits)))
-#define RoR(val, numbits) ((val) >> (numbits)) | ((val) << (32 - (numbits)))
+#define RoL(val, numbits) (((val) << (numbits)) | ((val) >> (32 - (numbits))))
+#define RoR(val, numbits) (((val) >> (numbits)) | ((val) << (32 - (numbits))))
 void
 roll_hash_add (uint32_t *h, const char dna_base, const uint8_t rol, const uint32_t* shashcode)
 {

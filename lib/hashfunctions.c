@@ -27,6 +27,12 @@
 #include "hashfunctions.h"
 #include "constant_random_lists.h" 
 
+/** \brief large deterministic list of random numbers, that can be used to "salt" hashes etc. index[] can be all zeroes
+ * (since idea of this list is to explore all vector combinations, hashing etc should be done outside of it) */
+uint32_t biomcmc_get_salt_set_from_spice_table (uint32_t index[], uint32_t *salt, uint32_t salt_length);
+
+#define RoL(val, numbits) (((val) << (numbits)) | ((val) >> (32 - (numbits))))
+#define RoR(val, numbits) (((val) >> (numbits)) | ((val) << (32 - (numbits))))
 uint32_t 
 biomcmc_hashint_salted (uint32_t a, unsigned int salt)
 { // salt != seed, since main usage is to determine which hash function is used
@@ -34,10 +40,10 @@ biomcmc_hashint_salted (uint32_t a, unsigned int salt)
     case 10: // murmur3 avalanche (from this version)
       a *= 0xcc9e2d51u; a = (a << 15) | (a >> 17); a *= 0x1b873593u; 
       a ^= a; a = (a << 13) | (a >> (19)); a = (a * 5) + 0xe6546b64u; break;
-    case 9: // murmur3 avalanche (old version?)
-      a ^= (a >> 16); a *= 0x85ebca6b; a ^= (a >> 13); a *= 0xc2b2ae35; a ^= (a >> 16); break;
+    case 9: // murmur-like  avalanche
+      a += 0x5851f4; a ^= (a >> 16); a *= 0x85ebca6b; a ^= (a >> 13); a *= 0xc2b2ae35; a ^= (a >> 16); break;
     case 8: 
-      a -= (a<<6); a ^= (a>>17); a -= (a<<9); a ^= (a<<4); a -= (a<<3); a ^= (a<<10); a ^= (a>>15); break;
+      a += 0xe6543b; a -= (a<<6); a ^= (a>>17); a -= (a<<9); a ^= (a<<4); a -= (a<<3); a ^= (a<<10); a ^= (a>>15); break;
     case 7:
       a += ~(a<<15); a ^= (a>>10); a += (a<<3); a ^= (a>>6); a += ~(a<<11); a ^= (a>>16); break;
     case 6:// half-avalanche: Every input bit affects itself and all higher output bits, plus a few lower output bits
@@ -47,8 +53,8 @@ biomcmc_hashint_salted (uint32_t a, unsigned int salt)
       a = (a^0xdeadbeef) + (a<<4); a = a ^ (a>>10); a = a + (a<<7); a = a ^ (a>>13); break;
     case 4: // must use use at least the 17 lowest bits
       a = a ^ (a>>4); a = (a^0xdeadbeef) + (a<<5); a = a ^ (a>>11); break;
-    case 3: /* hashCodes that differ only by constant multiples at each bit have  bounded number of collisions (~8 at default load factor) */
-      a ^= (a >> 20) ^ (a >> 12); a = a ^ (a >> 7) ^ (a >> 4); break;
+    case 3: /* Java hashCodes that differ by multiples at each bit have bounded number of collisions (~8) <- but bad with small numbers */
+      a = a * 0x27d9ab + 0xdca2; a ^= (a >> 20) ^ (a >> 12); a = a ^ (a >> 7) ^ (a >> 4); break; /* must be a large value */
     case 2: // (~a + (a << K)) means ((a << K) - a - 1) and (a * 2057) means (a + (a << 3) + (a << 11)) 
       a = ~a + (a << 15); a ^= (a >> 12); a+= (a << 2); a ^= (a >> 4); a *= 2057; a ^= (a >> 16); break;
     case 1:  // full avalanche
@@ -202,6 +208,142 @@ bipartition_hash (bipartition bip)
   for (i=0; i < bip->n->ints; i++) a = (a ^ biomcmc_hashint_64to32 (bip->bs[i])) * 16777619;
   return a;
 }
+
+/*** functions using constant_random_lists.h values ***/
+
+uint32_t
+biomcmc_get_salt_set_from_spice_table (uint32_t seeds[], uint32_t *salt, uint32_t salt_length)
+{
+  uint16_t id;
+  uint32_t index, si = 0;
+  double rdbl;
+
+  if (!salt_length) return 0;
+
+  index = seeds[0];
+  // below, if y is power of 2, then x & (y-1) == x % y --> (index[] & size-1) or (index%size)
+  id = index & (rnd_salt_h64_list_size - 1); index /= rnd_salt_h64_list_size;  // size = 256 (total_0 8 bits) 
+  salt[si++] = (uint32_t) rnd_salt_h64_list[id]; 
+
+  if (salt_length > 1) {
+    id = index & (rnd_salt_h64_list_size - 1); index /= rnd_salt_h64_list_size; // size = 256 (total_0 16 bits)
+    salt[si++] = (rnd_salt_h64_list[id] >> 32); 
+  }
+  if (salt_length > 2) {
+    id = index & (rnd_salt_h16_list_size - 1); index /= rnd_salt_h16_list_size; // size = 256 (total_0 24 bits) 
+    salt[si++] += rnd_salt_h16_list[id]; 
+  }
+  if (salt_length > 3) {
+    index = seeds[1];
+    id = index & (prime_salt_list_size - 1); index /= prime_salt_list_size;  // size = 512 (total_1 9 bits)
+    salt[si++] = prime_salt_list[id]; 
+  }
+  if (salt_length > 4) {
+    id = index % marsaglia_constants_size;  index /= marsaglia_constants_size; // size = 81 (total_1 15 bits)
+    salt[si++] = (marsaglia_constants[id] << 16) - 1;
+  }
+  if (salt_length > 5) {
+    id = index % marsaglia_constants_size;  index /= marsaglia_constants_size; // size = 81 (total_1 21 bits) 
+    salt[si++] = (marsaglia_constants[id] << 15) - 1;
+  }
+  if (salt_length > 6) {
+    id = index % ulx_h64_size; index /= ulx_h64_size;      // size = 185 (total_1 29 bits) 
+    salt[si++] = (uint32_t) ulx_h64[id];
+  }
+  if (salt_length > 7) {
+    index = seeds[2];
+    id = index % ulx_h64_size; index /= ulx_h64_size; // size = 185 (total_2 7 bits)
+    salt[si++] = ulx_h64[id] >> 16; // cannot be 32 since some value (ulx_h64[10]) has only lower 32 bits
+  }
+  if (salt_length > 8) {
+    id = index % lgamma_algmcs_size; index /= lgamma_algmcs_size; // size = 15 (total_2 11 bits)
+    rdbl = lgamma_algmcs[id];
+    salt[si++] = *(uint32_t*)&rdbl;
+  }
+  if (salt_length > 9) {
+    id = index % lgamma_coeffs_size; index /= lgamma_coeffs_size; // size = 40 (total_2 16 bits)
+    rdbl = lgamma_coeffs[id];
+    salt[si++] = *(uint32_t*)&rdbl;
+  }
+  if (salt_length > 10) {
+    id = index % stirl_sferr_halves_size; index /= stirl_sferr_halves_size; // size = 31 (total_2 21 bits)
+    rdbl = stirl_sferr_halves[id] + 2.7; // first value is zero
+    salt[si++] = *(uint32_t*)&rdbl;
+  }
+  /* combinations using consecutive element */
+  if (salt_length > 11) { 
+    id = index % (ulx_h64_size - 1);  index /= (ulx_h64_size-1); // size = 184 (total_2 29 bits)
+    salt[si++] = (uint32_t) ((ulx_h64[id] >> 9) + (ulx_h64[id+1] >> 7));
+  }
+  if (salt_length > 12) {
+    index = seeds[3];
+    id = index % (rnd_salt_h64_list_size - 1); index /= (rnd_salt_h64_list_size-1); // size = 255 (total_3 8 bits)
+    salt[si++] = (uint32_t)((rnd_salt_h64_list[id] >> 28) + (rnd_salt_h64_list[id+1] >> 25));
+  }
+  if (salt_length > 13) {
+    id = index % (rnd_salt_h16_list_size - 1); index /= (rnd_salt_h16_list_size-1); // size = 255 (total_3 16 bits)
+    salt[si++] = rnd_salt_h16_list[id] + ((uint32_t)(rnd_salt_h16_list[id+1])  << 4);
+  }
+  if (salt_length > 14) {
+    id = index % (prime_salt_list_size - 1); index /= (prime_salt_list_size-1); // size = 511 (total_3 25 bits)
+    salt[si++] = (prime_salt_list[id] << 2) + (prime_salt_list[id+1]  >> 2);
+  }
+  if (salt_length > 15) {
+    id = index % (prime_salt_list_size - 1); index /= (prime_salt_list_size-1); // size = 511 (total_3 25 bits)
+    salt[si++] = (prime_salt_list[id] << 2) + (prime_salt_list[id+1]  >> 2);
+  }
+  return si; 
+}
+
+void
+biomcmc_invert_bits32_by_address (uint32_t *n)
+{
+  *n = ((*n >>  1) & 0x55555555) | ((*n <<  1) & 0xaaaaaaaa);
+  *n = ((*n >>  2) & 0x33333333) | ((*n <<  2) & 0xcccccccc);
+  *n = ((*n >>  4) & 0x0f0f0f0f) | ((*n <<  4) & 0xf0f0f0f0);
+  *n = ((*n >>  8) & 0x00ff00ff) | ((*n <<  8) & 0xff00ff00);
+  *n = ((*n >> 16) & 0x0000ffff) | ((*n << 16) & 0xffff0000);
+}
+
+void
+biomcmc_salt_vector32_from_spice_table (uint32_t *a, uint32_t n_a, uint32_t seed[])
+{
+  uint32_t i,j;
+  uint8_t div = 1;
+  for (i=0; i < n_a;) {
+    i += biomcmc_get_salt_set_from_spice_table (seed, a + i, n_a - i);
+    //for (j=0;j<4;j++) { printf ("%3d: %8x", j, seed[j]); }  printf ("  ::DEBUG::SEED\n");
+    for (j=0;j<4;j++) seed[j] = biomcmc_hashint_salted (seed[j], j); // given same seed, salts are the same
+  }
+  //for (j=0;j<4;j++) { printf ("%3d: %8x", j, seed[j]); } printf ("  ::DEBUG::finalSEED\n");
+
+  for (i=0; i < n_a/2; i+=2) { // shr and brent 
+    a[i+1] ^= (a[i+1] << 17); a[i+1] ^= (a[i+1] >> 13); a[i+1] ^= (a[i+1] << 5);
+    a[i]   ^= (a[i]   << 10); a[i]   ^= (a[i]   >> 15); a[i]   ^= (a[i]   << 4);  a[i] ^= (a[i] >> 13);
+  }
+  i = n_a - 1;
+  a[i]   ^= (a[i]   << 10); a[i]   ^= (a[i]   >> 15); a[i]   ^= (a[i]   << 4);  a[i] ^= (a[i] >> 13);
+  for (i=0; i < n_a; i++) { div = 1 + (i % 30); a[i] = RoL(a[i], div);}
+}
+
+  void
+biomcmc_salt_vector64_from_spice_table (uint64_t *a, uint32_t n_a, uint32_t seed[])
+{
+  uint32_t i, *x = (uint32_t*)biomcmc_malloc (sizeof(uint32_t) * n_a);
+  uint64_t tmp;
+  for (i=0; i < n_a; i++) x[i] = (uint32_t) a[i]; 
+  // right-most bits 
+  biomcmc_salt_vector32_from_spice_table (x, n_a, seed);
+  for (i=0; i < n_a; i++) { tmp = a[i]; a[i] = x[i]; x[i] = tmp >> 32; }
+  // left-most bits are in backwards order from table, and with inverted bits
+  for (i=0;i<4;i++) seed[i] = RoL(seed[i], i+3); // given same seed, salts are the same
+  biomcmc_salt_vector32_from_spice_table (x, n_a, seed);
+  for (i=0; i < n_a; i++) { biomcmc_invert_bits32_by_address (&x[n_a-i-1]); a[i] |= ((uint64_t)(x[n_a-i-1]) << 32); }
+  if (x) free (x);
+}
+#undef RoL
+#undef RoR
+
 
 /*** MurmurHash3 from https://github.com/PeterScott/murmur3/  written originally by Austin Appleby and CC0 ***/
 
