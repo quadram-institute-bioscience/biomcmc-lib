@@ -207,7 +207,7 @@ uint64_t rnd_salt_h64_list[] = {
   0x031ee2571fe81161ull, 0x34bc6dcd1b1d6baaull, 0x35974f6f1aed083dull, 0x39238d3b204d4c75ull, 0x2d79b4330814831dull, 0x23ae4ee3037668ddull, 0x20677c850aad9847ull, 0x2dd2efef353cc79bull
 };
 
-uint16_t ulx_h64_size = 185; // these are used by some hash functions, please do not change their order up to 16th value 
+uint16_t ulx_h64_size = 201; // these are used by some hash and rng functions, please do not change their order up to 33th value 
 uint64_t ulx_h64[] = {
   0x65d200ce55b19ad8ULL, 0x4f2162926e40c299ULL, 0x162dd799029970f8ULL, // 0...2
   0x68b665e6872bd1f4ULL, 0xb6cfcf9d79b51db2ULL, 0x7a2b92ae912898c2ULL, // 3...5
@@ -215,10 +215,10 @@ uint64_t ulx_h64[] = {
   0x52dce729ULL, 0x38495ab5ULL, // 10...11 
   11400714785074694791ULL, 14029467366897019727ULL, 1609587929392839161ULL, // 12..14 used by xxhash
   9650029242287828579ULL, 2870177450012600261ULL, // 15..16 used by xxhash
-  /// 0xdf900294d8f554a5ULL, 0x170865df4b3201fcULL, 0xd2a98b26625eee7bULL, 0xdddf9b1090aa7ac1ULL,
-  0x2bd7a6a6e99c2ddcULL, 0x0992ccaf6a6fca05, 0x360fd5f2cf8d5d99, 0x9c6e6877736c46e3, // 17...20 xoroshiro128 // STOPHERE (FIXME must change size!)
-  0x180ec6d33cfd0abaULL, 0xd5a61266f0c9392c, 0xa9582618e03fc9aa, 0x39abdc4529b1661c, // 21...24 xoroshiro256
-  0x76e15d3efefdcbbfULL, 0xc5004e441c522fb3, 0x77710069854ee241, 0x39109bb02acbe635, // 25...29 xoroshiro256
+  0xdf900294d8f554a5ULL, 0x170865df4b3201fcULL, 0xd2a98b26625eee7bULL, 0xdddf9b1090aa7ac1ULL, // 17...20 xoroshiro128plus  and xoroshiro128*
+  0x2bd7a6a6e99c2ddcULL, 0x0992ccaf6a6fca05ULL, 0x360fd5f2cf8d5d99ULL, 0x9c6e6877736c46e3ULL, // 21...24 xoroshiro128plusplus 
+  0x180ec6d33cfd0abaULL, 0xd5a61266f0c9392cULL, 0xa9582618e03fc9aaULL, 0x39abdc4529b1661cULL, // 25...29 xoroshiro256
+  0x76e15d3efefdcbbfULL, 0xc5004e441c522fb3ULL, 0x77710069854ee241ULL, 0x39109bb02acbe635ULL, // 29...33 xoroshiro256
   // other artisanal random numbers come here 
   0x6d0c71D67aeb5b9dULL, 0x42b6b9b6e2274c79ULL, 0x00B502aF529770f8ULL, 0xa13c8e4680b583ebULL, 0x61c8864680b583ebULL, 0x033f7cd3153caa76ULL, 
   0x3837edc92e67b403ULL, 0x1aa1923f34e0a0cdULL, 0x12a60c064e612766ULL, 0xB5026F5AA96619E9ULL, 0x54891a96c5c02018ULL, 0x3432f3f4a0793005ULL, 

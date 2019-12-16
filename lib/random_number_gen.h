@@ -95,6 +95,13 @@ void     rng_set_well1024 (rng_well1024_struct *r, uint32_t seed);
 
 /* simple algorithms (up to four variables, no vector initialization) */
 
+uint64_t rng_get_xoroshiro128 (uint64_t *s); 
+void rng_jump_64_xoroshiro128 (uint64_t *s); 
+void rng_jump_96_xoroshiro128 (uint64_t *s); 
+uint64_t rng_get_xoroshiro256 (uint64_t *s);
+void rng_jump_128_xoroshiro256 (uint64_t *s); 
+void rng_jump_192_xoroshiro256 (uint64_t *s);
+
 uint32_t rng_get_gamerand (uint32_t *game);
 void     rng_set_gamerand (uint32_t *game, uint32_t seed);
 
@@ -110,6 +117,9 @@ uint64_t rng_get_std61 (uint64_t *x);
    G. S. Fishman, L. R. Moore; An statistical exhaustive analysis of multiplicative congruential random number 
    generators with modulus 2^31-1, SIAM J. Sci. Statist. Comput., 7 (1986) 24-45. Erratum, ibid, 7 (1986) 1058 */
 uint32_t rng_get_std31 (uint32_t *x);
+
+/* xoroshiro64** */
+uint32_t  rng_get_xoroshiro64 (uint32_t *s);
 
 /* Marsaglia's 3-shift-register generator (period 2^32-1) */
 uint32_t rng_get_shr (uint32_t *x);

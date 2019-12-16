@@ -121,6 +121,8 @@ biomcmc_hashint64_salted (uint64_t k, unsigned int salt)
 
   if (salt > 7) k = (k << 27) | (k >> 37);  // rotate key
   switch (salt & 7) { // last 3 bits
+    case 6: // https://github.com/vigna/MRG32k3a/blob/master/MRG32k3a.c
+      k |= 1ULL; k = (k ^ (k >> 30)) * 0xbf58476d1ce4e5b9; k = (k ^ (k >> 27)) * 0x94d049bb133111eb; k = (k >> 1) ^ (k >> 32); break;
     case 5: // Wang Yi https://github.com/Cyan4973/smhasher/blob/master/wyhash.h
       k = biomcmc_hashint64_mix_salted (biomcmc_hashint64_mix_salted (k * 0x60bee2bee120fc15ull, 0xa3b195354a39b70dull, 0), 0x1b03738712fad5c9ull, 0);
       break;
