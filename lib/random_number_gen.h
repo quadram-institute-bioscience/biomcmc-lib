@@ -128,6 +128,8 @@ uint32_t rng_get_shr (uint32_t *x);
 uint32_t rng_get_brent (uint32_t *x);
 uint64_t rng_get_brent_64bits (uint64_t *x);
 
+uint64_t rng_get_splitmix64 (uint64_t *seed);
+
 /* congruential quick-and-dirty generator. */
 uint32_t rng_get_cong      (uint32_t *x);
 uint32_t rng_get_cong_many (uint32_t *x);

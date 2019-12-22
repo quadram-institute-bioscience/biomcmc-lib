@@ -637,6 +637,16 @@ rng_get_brent_64bits (uint64_t *x)
   return *x;
 }
 
+// https://github.com/FastFilter/xor_singleheader/blob/master/include/xorfilter.h
+uint64_t 
+rng_get_splitmix64 (uint64_t *seed) 
+{
+  uint64_t z = (*seed += 0x9E3779B97F4A7C15ull);
+  z = (z ^ (z >> 30)) * 0xBF58476D1CE4E5B9ull;
+  z = (z ^ (z >> 27)) * 0x94D049BB133111EBull;
+  return z ^ (z >> 31);
+}
+
 uint32_t
 rng_get_cong (uint32_t *x)
 {

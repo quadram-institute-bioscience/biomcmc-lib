@@ -328,18 +328,18 @@ biomcmc_salt_vector32_from_spice_table (uint32_t *a, uint32_t n_a, uint32_t seed
   for (i=0; i < n_a; i++) { div = 1 + (i % 30); a[i] = RoL(a[i], div);}
 }
 
-  void
+void
 biomcmc_salt_vector64_from_spice_table (uint64_t *a, uint32_t n_a, uint32_t seed[])
 {
-  uint32_t i, *x = (uint32_t*)biomcmc_malloc (sizeof(uint32_t) * n_a);
+  uint32_t i, seed2[4], *x = (uint32_t*)biomcmc_malloc (sizeof(uint32_t) * n_a);
   uint64_t tmp;
   for (i=0; i < n_a; i++) x[i] = (uint32_t) a[i]; 
   // right-most bits 
   biomcmc_salt_vector32_from_spice_table (x, n_a, seed);
   for (i=0; i < n_a; i++) { tmp = a[i]; a[i] = x[i]; x[i] = tmp >> 32; }
   // left-most bits are in backwards order from table, and with inverted bits
-  for (i=0;i<4;i++) seed[i] = RoL(seed[i], i+3); // given same seed, salts are the same
-  biomcmc_salt_vector32_from_spice_table (x, n_a, seed);
+  for (i=0;i<4;i++) seed2[i] = RoL(seed[i], i+3); // given same seed, salts are the same
+  biomcmc_salt_vector32_from_spice_table (x, n_a, seed2);
   for (i=0; i < n_a; i++) { biomcmc_invert_bits32_by_address (&x[n_a-i-1]); a[i] |= ((uint64_t)(x[n_a-i-1]) << 32); }
   if (x) free (x);
 }

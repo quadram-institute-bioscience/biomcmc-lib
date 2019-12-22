@@ -9,7 +9,7 @@ common_headers = hashtable.h lowlevel.h random_number_gen.h constant_random_list
                  reconciliation.h splitset_distances.h read_newick_trees.h char_vector.h \
                  upgma.h topology_randomise.h newick_space.h topology_space.h topology_distance.h \
                  kmerhash.h hashfunctions.h distance_generator.h clustering_goptics.h \
-                 quickselect_quantile.h
+                 quickselect_quantile.h fortune_cookies.h
                  
 common_src     = hashtable.c lowlevel.c random_number_gen.c constant_random_lists.c random_number.c nexus_common.c \
                  bipartition.c prob_distribution.c empirical_frequency.c argtable3.c \
@@ -17,7 +17,7 @@ common_src     = hashtable.c lowlevel.c random_number_gen.c constant_random_list
                  reconciliation.c splitset_distances.c read_newick_trees.c char_vector.c \
                  upgma.c topology_randomise.c newick_space.c topology_space.c topology_distance.c \
                  kmerhash.c hashfunctions.c distance_generator.c clustering_goptics.c \
-                 quickselect_quantile.c
+                 quickselect_quantile.c fortune_cookies.c
 
 
 noinst_LTLIBRARIES = libbiomcmc.la # convenience lib (not installed globally)

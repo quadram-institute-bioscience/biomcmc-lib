@@ -21,8 +21,7 @@ biomcmc_rng biomcmc_random_number; /* Actual definition here with external decla
 void
 biomcmc_random_number_init (unsigned long long int seed)
 {
-  if (biomcmc_random_number) 
-    biomcmc_error ("When using biomcmc_random_number_init () pls don't use other rng setup functions");
+  if (biomcmc_random_number) { biomcmc_random_number->ref_counter++; return;} // could return error, but let's asume calling function is overzealous 
 
   /* seed != 0 only when debugging; defaults to larger stream (=0) seeded by current date */
   if (seed) biomcmc_random_number = new_biomcmc_rng (seed, 0);
@@ -40,6 +39,7 @@ biomcmc_random_number_finalize (void)
 void
 del_biomcmc_rng (biomcmc_rng r)
 {
+  if(--r->ref_counter) return;
   if (r) free (r);
 }
 

@@ -26,6 +26,7 @@ extern "C" {
 #define _biomcmc_h_
 
 #include "argtable3.h"
+#include "fortune_cookies.h"
 #include "kmerhash.h"
 #include "parsimony.h"
 #include "genetree.h"
@@ -42,7 +43,7 @@ extern "C" {
 #include "hashtable.h"           // called by random_number_gen 
 #include "bipartition.h"         // called by hashtable
 #include "random_number_gen.h"   // called by random_number
-#include "random_number.h"       // called by prob_distribution
+#include "random_number.h"       // called by prob_distribution, fortune_cookies
 #include "topology_common.h"     // called by topology_distance 
 #include "topology_distance.h"   // called by parsimony, reconciliation, read_nexus_trees
 #include "topology_randomise.h"  // called by upgma

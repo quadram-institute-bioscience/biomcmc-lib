@@ -78,6 +78,7 @@ struct biomcmc_rng_struct
 
   double rnorm32, rnorm64;         /*! \brief stored standard normal random values with 32 and 52 bits of precision */
   bool have_rnorm32, have_rnorm64; /*! \brief true if we have normal random variate stored */ 
+  int ref_counter; 
 };
 
 /* In OSX at least, the linker will bundle all sources into one library, and thus global variables must be declared "extern" in the headers 
