@@ -106,9 +106,8 @@ void del_biomcmc_rng (biomcmc_rng r);
 
 /*! \brief Create initial seed based on time, combining time in microseconds and seconds (user-controled seed is not uint64_t) */
 unsigned long long int biomcmc_rng_get_initial_seed (void);
-/*! \brief Generate a vector of seeds (based on initial one), create and initialize stream with an element of this 
- * vector */
-biomcmc_rng new_biomcmc_rng_from_seed (unsigned long long int seed, int stream_number);
+/*! \brief Generate a vector of seeds (based on initial one), create and initialize stream with an element of this vector */
+biomcmc_rng new_biomcmc_rng_with_parallel_seeds (unsigned long long int seed, int stream_number);
 
 /*! \brief Returns a random number from a Standard Normal distribution N(0,1) - prob_distribution.h has general case */
 extern double biomcmc_rng_snorm32 (void);

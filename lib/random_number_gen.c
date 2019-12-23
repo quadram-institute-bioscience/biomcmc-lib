@@ -25,6 +25,8 @@
 #include "constant_random_lists.h" 
 
 void rng_set_marsaglia_constants (uint32_t *m, uint32_t s);
+#define RoL64(val, numbits) (((val) << (numbits)) | ((val) >> (64 - (numbits))))
+#define RoL(val, numbits) (((val) << (numbits)) | ((val) >> (32 - (numbits))))
 
 inline uint64_t
 rng_get_taus (rng_taus_struct *r)
@@ -58,10 +60,11 @@ rng_set_taus (rng_taus_struct *r, uint64_t seed, int stream)
   k = r->x +      r->n;
   q = r->x + (2 * r->n);
 
-  if (!seed) seed = (uint64_t) marsaglia_constants[stream % 80U]; /* any number should work */ 
+  if (!seed) seed = 0x2f72b5f978acb838ULL; 
 
-  seed = rng_randomize_array_64bits (r->x, r->n, seed, true); /* initialize vector */
-  rng_randomize_array_64bits (r->x, r->n, seed, false);
+  seed = rng_randomize_array_64bits (r->x, r->n, seed, true); /* initialize vector using fixed (but quite unique to seed) table */
+  seed = rng_randomize_array_64bits (r->x, r->n, seed, false); /* increase randomness */ 
+  rng_twist_array_64bits (r->x, r->n, seed, 3);
 
   for (i=0; i < r->n; i++) /* Initial values should be larger or equal to 2^(64-k) */
     if (A[i] < ( 1ULL << (64 - k[i]))) A[i] += (1ULL << (64 - k[i]));
@@ -141,19 +144,18 @@ void
 rng_set_xorshift (rng_xorshift_struct *r, uint64_t seed)
 { /* x[65]  but last one (r->x[64]) is not part of the stream (is aux variable) */
   int i, j;
-  uint64_t t, s1 = seed;
+  uint64_t t;
 
-  if (!seed) seed = 1064612766ULL; 
+  if (!seed) seed = 0x1db9b83a20cc6503ULL; 
+
+  seed = rng_randomize_array_64bits (r->x, 64, seed, true); // initialise array with table of random numbers
+  rng_twist_array_64bits (r->x, r->n, seed, 4);
 
   /* Avoid correlations for close seeds; Recurrence has period 2**64-1 */
-  for (i=0; i < 64; i++) rng_get_brent_64bits (&seed);
-
   for (r->x[64] = seed, i = 0; i < 64; i++) { /* Initialise circular array */
     rng_get_brent_64bits (&seed);
-    r->x[i] = (seed + (r->x[64] += 0x61c8864680b583ebULL)) & 0xffffffffffffffffULL;
+    r->x[i] = (r->x[i] ^ seed) + (r->x[64] += 0x61c8864680b583ebULL);
   }
-
-  rng_randomize_array_64bits (r->x, 64, s1, false); /* increase randomness by concatenation */
 
   for (i = 63, j = 0; j < 256; j++) { /* Discard first 256 results */
     i = (i+1) & 63;
@@ -200,15 +202,10 @@ rng_get_mt19937 (rng_mt19937_struct *r)
 void
 rng_set_mt19937 (rng_mt19937_struct *r, uint64_t seed)
 {
-  int i;
-  if (!seed) seed = 548919650218ULL;
-
+  if (!seed) seed = 0x33cba2d924f83a89ULL;
   r->n = 313;
-  r->x[0] = seed;
-  for (i = 1; i < 312; i++) r->x[i] = (6364136223846793005ULL * (r->x[i-1] ^ (r->x[i-1] >> 62)) + i);
-
-  rng_randomize_array_64bits (r->x, 312, seed, false); /* increase randomness by concatenation */
-  rng_twist_array_64bits (r->x, 312, seed);
+  seed = rng_randomize_array_64bits (r->x, 312, seed, true); 
+  rng_twist_array_64bits (r->x, 312, seed, 8);
 }
 
 inline uint32_t
@@ -245,18 +242,12 @@ rng_get_mt19937ar (rng_mt19937ar_struct *r)
 }
 
 void
-rng_set_mt19937ar (rng_mt19937ar_struct *r, uint32_t seed)
+rng_set_mt19937ar (rng_mt19937ar_struct *r, uint64_t seed)
 {
-  int i;
-
-  if (!seed) seed = 19650218UL;
-
+  if (!seed) seed = 0x22b417f12d5f1072ULL;
   r->n = 625;
-  r->x[0]= seed;
-  for (i = 1; i < 624; i++) r->x[i] = (1812433253UL * (r->x[i-1] ^ (r->x[i-1] >> 30)) + i);
-  
-  seed = rng_randomize_array_32bits (r->x, 624, seed, false); /* increase randomness by concatenation */
-  rng_twist_array_32bits (r->x, 624, seed);
+  seed = rng_randomize_array_32bits (r->x, 624, seed, true); 
+  rng_twist_array_32bits (r->x, 624, seed, 8);
 }
 
 inline uint32_t
@@ -269,22 +260,15 @@ rng_get_gfsr4 (rng_gfsr4_struct *r)
 }
 
 void
-rng_set_gfsr4 (rng_gfsr4_struct *r, uint32_t seed)
+rng_set_gfsr4 (rng_gfsr4_struct *r, uint64_t seed)
 { /* r->x[16384] */
-  int i;
-  rng_tt800_struct tt;
-
-  if (!seed) seed = 627749721UL;
-
-  rng_set_tt800 (&tt, seed); /* initialize tt800 generator */
-
-  for (i = 0; i < 16384; i++) r->x[i] = (rng_get_tt800 (&tt) ^ rng_get_cong_many (&seed)) & 0xffffffffUL; 
-  seed = rng_randomize_array_32bits (r->x, 16384, seed, false); /* increase randomness by concatenation */
-  for (i = 0; i < 16384; i++) r->x[i] ^= rng_get_tt800 (&tt);
+  if (!seed) seed = 0x06e346963311b7e3ULL;
+  seed = rng_randomize_array_32bits (r->x, 16384, seed, true); 
+  rng_twist_array_32bits (r->x, 16384, seed, 4);
   r->n = 0;
 }
 
-/* * * below, generators whose initial states depend only on simple functions (single-variable PRNGs etc.) */ 
+/* * * below, generators whose initial states depend only on simple functions (single-variable PRNGs etc.)  */
 
 uint32_t
 rng_get_diaconis (rng_diaconis_struct *r)
@@ -307,19 +291,12 @@ rng_get_diaconis (rng_diaconis_struct *r)
 }
 
 void
-rng_set_diaconis (rng_diaconis_struct *r, uint32_t seed)
+rng_set_diaconis (rng_diaconis_struct *r, uint64_t seed)
 { /*r->x[128] */
-  int i;
-  uint32_t m[4];
   r->n = 0;
-
-  if (!seed) seed = 1372460312UL;
-
-  rng_set_marsaglia (m, seed);
-  rng_get_shr (&seed);
-
-  for (i = 0; i < 127; i++) r->x[i] = rng_get_brent (&seed) + rng_get_marsaglia (m);
-  rng_randomize_array_32bits (r->x, 127, seed, false); /* increase randomness by concatenation */
+  if (!seed) seed = 0x1c9cc5643af25686ULL;
+  seed = rng_randomize_array_32bits (r->x, 127, seed, true);  /* initialise vector */
+  seed = rng_randomize_array_32bits (r->x, 127, seed, false); /* increase randomness */
 }
 
 /* Makoto Matsumoto & Y. Kurita, Twisted GFSR Generators II, ACM Trans. Model. Comput. Simul., 4 (1994) 254-266 */
@@ -343,19 +320,12 @@ rng_get_tt800 (rng_tt800_struct *r)
 }
 
 void
-rng_set_tt800 (rng_tt800_struct *r, uint32_t seed)
+rng_set_tt800 (rng_tt800_struct *r, uint64_t seed)
 { /* r->x[25] */
-  int i;
-  uint32_t s1, s2;
-
-  if (!seed) seed = 1529210297UL;
-  s1 = seed;
-  s2 = rng_get_cong_many (&s1);
-
+  if (!seed) seed = 0x273a3292263c330eULL;
+  seed = rng_randomize_array_32bits (r->x, 25, seed, true); 
+  rng_twist_array_32bits (r->x, 256, seed, 10);
   r->n = 26;
-  for (i = 0; i < 25; i++) r->x[i] = (rng_get_shr (&s2) ^ rng_get_brent (&seed)) + rng_get_cong (&s1);
-  seed = rng_randomize_array_32bits (r->x, 25, seed, false); /* increase randomness by concatenation */
-  rng_randomize_array_32bits (r->x, 25, seed, false);
 }
 
 uint32_t
@@ -366,23 +336,12 @@ rng_get_lfib4 (rng_lfib4_struct *r)
 }
 
 void
-rng_set_lfib4 (rng_swb_struct *r, uint32_t seed)
+rng_set_lfib4 (rng_lfib4_struct *r, uint64_t seed)
 {
-  int i;
-  uint32_t s1, s2, m[4];
-
-  if (!seed) seed = 2642725982UL;
-  s2 = seed;
-
+  if (!seed) seed = 0x395894461ab4c493ULL;
+  rng_randomize_array_32bits (r->x, 256, seed, true); /* increase randomness by concatenation */
+  rng_twist_array_32bits (r->x, 256, seed, 7);
   r->n = 0;
-  s1 = biomcmc_hashint_salted (seed, /*salt*/ 7); /* arbitrary shuffling */
-  for (i = 0; i < 32; i++) { rng_get_cong (&s2); rng_get_cong (&s1); rng_get_brent (&s1); }
-
-  rng_set_marsaglia (m, s1);
-
-  for (i = 0; i < 192; i++)  r->x[i]  = rng_get_marsaglia (m) ^ rng_get_shr (&s1) ^ rng_get_std31 (&seed);
-  for (i = 64; i < 256; i++) r->x[i] ^= rng_get_marsaglia (m) ^ rng_get_shr (&s2) ^ rng_get_std31 (&seed);
-  rng_randomize_array_32bits (r->x, 256, seed, false); /* increase randomness by concatenation */
 }
 
 uint32_t
@@ -395,20 +354,13 @@ rng_get_swb (rng_swb_struct *r)
 }
 
 void
-rng_set_swb (rng_swb_struct *r, uint32_t seed)
+rng_set_swb (rng_swb_struct *r, uint64_t seed)
 {
-  int i;
-  uint32_t s1;
   r->n = 0;
   r->x[256] = r->x[257] = 0UL;
-
-  if (!seed) seed = 904977562UL;
-
-  s1 = seed;
-  for (i=0; i < 32; i++) rng_get_brent (&s1); 
-  
-  for (i = 0; i < 256; i++) r->x[i] = rng_get_shr (&s1) ^ rng_get_std31 (&seed);
-  rng_randomize_array_32bits (r->x, 256, seed, false); /* increase randomness by concatenation */
+  if (!seed) seed = 0x123733ca1b72b747ULL;
+  rng_randomize_array_32bits (r->x, 256, seed, true); 
+  rng_twist_array_32bits (r->x, 32, seed, 6);
 }
 
 /* Panneton, L'Ecuyer, and Matsumoto WELLRNG1024a */
@@ -427,24 +379,16 @@ rng_get_well1024 (rng_well1024_struct *r)
 }
 
 void
-rng_set_well1024 (rng_well1024_struct *r, uint32_t seed)
+rng_set_well1024 (rng_well1024_struct *r, uint64_t seed)
 {
-  int i;
-  uint32_t s1, s2;
   r->n = 0;
-
-  if (!seed) seed = 3519793928UL;
-
-  s1 = biomcmc_hashint_salted (seed, /*salt*/ 8);
-  s2 = rng_get_shr (&s1); 
-  for (i = 0; i < 32; i++) r->x[i] = rng_get_shr (&s1) ^ rng_get_std31 (&s2);
-  seed = rng_randomize_array_32bits (r->x, 32, seed, false); /* increase randomness by concatenation */
-  rng_twist_array_32bits (r->x, 32, seed);
+  if (!seed) seed = 0x165da3840ea4bba9ULL;
+  seed = rng_randomize_array_32bits (r->x, 32, seed, true); 
+  rng_twist_array_32bits (r->x, 32, seed, 5);
 }
 
 /* * * Simple generators (single value or simple vectors of size 2 or 4) */
-#define RoL64(val, numbits) (((val) << (numbits)) | ((val) >> (64 - (numbits))))
-#define RoL(val, numbits) (((val) << (numbits)) | ((val) >> (32 - (numbits))))
+/* better not to call mix() on these functions to avoid loops, since mix call these */ 
 
 /* http://prng.di.unimi.it/xoroshiro128plusplus.c; commented out is http://xoroshiro.di.unimi.it/xoroshiro128plus.c */
 uint64_t 
@@ -534,15 +478,15 @@ rng_get_gamerand (uint32_t *game)
 }
 
 void
-rng_set_gamerand (uint32_t *game, uint32_t seed)
+rng_set_gamerand (uint32_t *game, uint64_t seed)
 { /* game[2] */
   int i;
 
-  if (!seed) seed = 7584631UL; 
+  if (!seed) seed = 0x2a6256952c056553ULL; 
 
   game[0] = seed; 
-  game[1] = biomcmc_hashint_salted (seed, /*salt*/ 9);
-  for (i = 0; i < 32; i++) rng_get_brent (game + 1);
+  game[1] = biomcmc_hashint64_salted (seed, /*salt*/ 0);
+  for (i = 0; i < 4; i++) rng_get_brent (game + 1);
 }
 
 /* Marsaglia's Super-Duper (two-components multiply-with-carry) algortihm */
@@ -554,15 +498,12 @@ rng_get_marsaglia (uint32_t *m)
 }
 
 void
-rng_set_marsaglia (uint32_t *m, uint32_t seed)
+rng_set_marsaglia (uint32_t *m, uint64_t seed)
 { /* m[4] */
-  m[0] = seed; 
-  m[1] = 1UL + biomcmc_hashint_salted (seed, /*salt*/ 9);
-  if (!m[0]) m[0] = 362436069UL;
-  if (!m[1]) m[1] = 521288629UL; 
+  if (!seed) seed = 0x2f3e89e73907c3f8ULL;
+  m[0] = (uint32_t) (seed); 
+  m[1] = 1UL + (uint32_t) (biomcmc_hashint64_salted (seed + 1, /*salt*/ 0) >> 4);
   
-  if (m[0] == m[1]) m[1] *= 69069UL;
-
   rng_set_marsaglia_constants (m, seed); // seed can work as 'stream', since all prime pairs are explored in order
 }
 
@@ -576,6 +517,7 @@ rng_set_marsaglia_constants (uint32_t *m, uint32_t s)
   if (idx1 == idx2) idx2 = marsaglia_constants_size - 1; 
   m[2] = marsaglia_constants[idx1];
   m[3] = marsaglia_constants[idx2];
+  if (m[0] == m[1]) m[1] *= 69069UL; // this function is called even if rng_set is not, so check is here
 }
 
 uint64_t
@@ -606,19 +548,20 @@ rng_get_std31 (uint32_t *x)
 }
 /* http://prng.di.unimi.it/xoroshiro64starstar.c */
 uint32_t 
-rng_get_xoroshiro64 (uint32_t *s)  // s[2]
+rng_get_xoroshiro64 (uint32_t *x)  // s[2]
 {
-	uint32_t result, s1 = s[1];
-	result = RoL(s[0] * 0x9E3779BB, 5) * 5; // 64**
-  //result = s[0] * 0x9E3779BB; // 64* lowest six bits have low linear complexity
-	s1 ^= s[0];
-	s[0] = RoL(s[0], 26) ^ s1 ^ (s1 << 9); s[1] = RoL(s1, 13); 
+	uint32_t result, s1 = x[1];
+	result = RoL(x[0] * 0x9E3779BB, 5) * 5; // 64**
+  //result = x[0] * 0x9E3779BB; // 64* lowest six bits have low linear complexity
+	s1 ^= x[0];
+	x[0] = RoL(x[0], 26) ^ s1 ^ (s1 << 9); x[1] = RoL(s1, 13); 
 	return result;
 }
 
 uint32_t
 rng_get_shr (uint32_t *x)
 {
+  if (!(*x)) (*x) = 0x12585408ULL;
   (*x) ^= ((*x) << 17); (*x) ^= ((*x) >> 13); (*x) ^= ((*x) << 5);
   return (*x);
 }
@@ -626,6 +569,7 @@ rng_get_shr (uint32_t *x)
 uint32_t
 rng_get_brent (uint32_t *x)
 {
+  if (!(*x)) (*x) = 0x0eba937eULL;
   (*x) ^= (*x) << 10; (*x) ^= (*x) >> 15; (*x) ^= (*x) << 4;  (*x) ^= (*x) >> 13;
   return *x;
 }
@@ -633,15 +577,16 @@ rng_get_brent (uint32_t *x)
 uint64_t
 rng_get_brent_64bits (uint64_t *x)
 {
+  if (!(*x)) (*x) = 0x20a4f71433a9481fULL; 
   (*x) ^= (*x) << 10; (*x) ^= (*x) >> 15; (*x) ^= (*x) << 4;  (*x) ^= (*x) >> 13;
   return *x;
 }
 
 // https://github.com/FastFilter/xor_singleheader/blob/master/include/xorfilter.h
 uint64_t 
-rng_get_splitmix64 (uint64_t *seed) 
+rng_get_splitmix64 (uint64_t *x) 
 {
-  uint64_t z = (*seed += 0x9E3779B97F4A7C15ull);
+  uint64_t z = (*x += 0x9E3779B97F4A7C15ull);
   z = (z ^ (z >> 30)) * 0xBF58476D1CE4E5B9ull;
   z = (z ^ (z >> 27)) * 0x94D049BB133111EBull;
   return z ^ (z >> 31);
@@ -650,7 +595,7 @@ rng_get_splitmix64 (uint64_t *seed)
 uint32_t
 rng_get_cong (uint32_t *x)
 {
-  uint32_t b1, b2; /* we use only the leading half bits (the lsat ones are too regular */
+  uint32_t b1, b2; /* we use only the leading half bits (the last ones are too regular */
   b1 = ((*x) = (69069UL * (*x)) + 1234567) >> 16;
   b2 = ((*x) = (69069UL * (*x)) + 1234567) & 0xffff0000UL;
   return (b1 | b2); /* notice that here we don't update x with (b1|b2) */
@@ -668,119 +613,126 @@ rng_get_cong_many (uint32_t *x)
   return t; /* we don't return x, despite it's being being updated */
 }
 
-uint32_t
-rng_twist_array_32bits (uint32_t *a, uint32_t n_a, uint32_t seed)
+uint64_t
+rng_twist_array_32bits (uint32_t *a, uint32_t n_a, uint64_t seed, uint64_t stream)
 {
-  uint32_t i, im, mars[4];
+  uint32_t i, im, s32, mars[4];
+  uint64_t x64, sx[2];
+  if (!seed) seed = 0x085764f60bc8797eULL;
+
+  /* this shuffling runs every time (notice that xoroshiro is 64bits) */
+  sx[0] = (uint64_t) a[0] | 1ULL; sx[1] = seed;
+  for (i = 0; i < n_a - 1; i++) {
+    x64 = rng_get_xoroshiro128 (sx);
+    a[i]   ^= (uint32_t) (x64); 
+    a[i+1] ^= (uint32_t) (x64 >> 32);
+  }
+  seed = sx[0];
 
   /* initialize Marsaglia's Super-Duper generator */
-  mars[0] = biomcmc_hashint_salted (seed, /*salt*/ 8) + 1UL; 
-  mars[1] = seed;
-  mars[1] = rng_get_cong_many (mars + 1);
-  rng_set_marsaglia_constants (mars, seed + 1);
+  mars[0] = s32 = (uint32_t) (sx[1]);
+  mars[1] = (uint32_t) (sx[1] >> 32);
+  rng_set_marsaglia_constants (mars, (uint32_t) (seed));
 
-  if (!a[0]) a[0] = (1ULL << 30) - n_a;
-  a[0] += rng_get_std31 (&seed);
-
-  for (i = 0; i < n_a; i++) {
+  if (stream & 1UL) for (i = 0; i < n_a; i++) { // bit 1
     im = (i + n_a - 1) % n_a; /* im = i - 1 but warping around (so that zero minus one is last element) */ 
-    a[i] = (a[i] ^ ((a[im] ^ (a[im] >> 30)) * 1664525UL)) + rng_get_std31 (&seed) + rng_get_marsaglia (mars);
+    a[i] ^= ((a[im] ^ (a[im] >> 30)) * 0x071a9b16UL) ^ rng_get_marsaglia (mars);
   }
-
-  seed = 69069UL * ((seed >> 6) + ((uint32_t) n_a)); /* change the seed */
-
-  for (i = 0; i < n_a; i++) {
+  mars[0] = RoL(seed, 6);
+  stream >>= 1;
+  if (stream & 1UL) for (i = 0; i < n_a; i++) { // bit 2
     im = (i + n_a - 2) % n_a; /* im = i - 2 but with warp-around */ 
-    a[i] = (a[i] ^ ((a[im] ^ (a[im] >> 30)) * 1566083941UL)) ^ rng_get_std31 (&seed) ^ rng_get_marsaglia (mars);
+    a[i] ^= ((a[im] ^ (a[im] >> 28)) * 0x09f68db7UL) ^ rng_get_std31 (mars); // std31 uses just mars[0]
   }
-  if (!a[0]) a[0] = (1ULL << 30) + ((uint32_t) n_a);
-
+  stream >>= 1;
+  if (stream & 1UL) for (i = 0; i < n_a; i++) { // bit 3 = 4
+    a[i] ^= rng_get_marsaglia (mars) ^ rng_get_shr (&s32); 
+  }
+  stream >>= 1;
+  if (stream & 1UL) for (i = 1; i < n_a; i++) { // bit 4 = 8
+    a[i] ^= (1812433253UL * (a[i-1] ^ (a[i-1] >> 30)) + i); // used by mt19937
+  }
+  stream >>= 1;
+  if (stream & 1UL) for (i = 0; i < n_a; i++) { // bit 5 = 16
+    a[i] ^= rng_get_cong_many (mars) ^ rng_get_shr (&s32); // cong_many uses just mars[0] 
+  }
   return seed;
 }
 
 uint64_t
-rng_twist_array_64bits (uint64_t *a, uint32_t n_a, uint64_t seed)
+rng_twist_array_64bits (uint64_t *a, uint32_t n_a, uint64_t seed, uint64_t stream)
 { /* modified from MT19937 (http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/emt.html) */
   uint32_t i, im;
-  uint64_t s1 = biomcmc_hashint64_salted (seed, /*salted*/ 1) + ((uint64_t) n_a);
+  uint64_t s1, sx[2];
 
-  if (!a[0]) a[0] = (1ULL << 63);
-  a[0] += rng_get_std61 (&seed);
+  if (!seed) seed = 0x1b422e75022494afULL;
+  s1 = biomcmc_hashint64_salted (seed, 4); 
 
-  for (i = 0; i < n_a; i++) {
+  /* this shuffling runs every time */
+  sx[0] = a[0]; sx[1] = seed;
+  for (i = 0; i < n_a; i++) a[i] ^= rng_get_xoroshiro128 (sx);
+  seed = sx[0];
+
+  /* the ones below only if bitmask is present */
+  if (stream & 1UL) for (i = 0; i < n_a; i++) { // bit 1
     im = (i + n_a - 1) % n_a; /* im = i - 1 but warping around (so that zero minus one is last element) */ 
-    a[i] = (a[i] ^ ((a[im] ^ (a[im] >> 62)) * 3935559000370003845ULL)) + rng_get_std61 (&seed) + i;
-
-    for (im = 0; im < 4; im++) rng_get_brent_64bits (&s1);
+    a[i] ^= ((a[im] ^ (a[im] >> 62)) * 0x72b5f90702b838ULL) + rng_get_std61 (&seed);
+  }
+  stream >>= 1;
+  if (stream & 1UL) for (i = 0; i < n_a; i++) { // bit 2
+    im = (i + n_a - 2) % n_a; /* im = i - 2 but with warp-around */ 
+    a[i] ^= ((a[im] ^ (a[im] >> 58)) * 0x548ba82e1b6ce1ULL) ^ rng_get_std61 (&seed);
+  }
+  stream >>= 1;
+  if (stream & 1UL) for (i = 0; i < n_a; i++) { // bit 3
     a[i] ^= rng_get_std61 (&seed) ^ rng_get_brent_64bits (&s1);
   }
-
-  seed = 69069ULL * ((seed >> 6) + 1ULL); /* change the seed */
-
-  for (i = 0; i < n_a; i++) {
-    im = (i + n_a - 2) % n_a; /* im = i - 2 but with warp-around */ 
-    a[i] = (a[i] ^ ((a[im] ^ (a[im] >> 62)) * 2862933555777941757ULL)) - i;
-    a[i] ^= rng_get_std61 (&seed);
+  stream >>= 1;
+  if (stream & 1UL) for (i = 1; i < n_a; i++) { // bit 4
+    a[i] ^= (6364136223846793005ULL * (a[i-1] ^ (a[i-1] >> 62)) + i); // used by mt19937
   }
-  
-  if (!a[0]) a[0] = (1ULL << 63);
   
   return seed; /* so that this function can be called several times */
 }
 
-uint32_t
-rng_randomize_array_32bits (uint32_t *a, uint32_t n_a, uint32_t seed, bool first_time)
+uint64_t
+rng_randomize_array_32bits (uint32_t *a, uint32_t n_a, uint64_t seed, bool first_time)
 {
-  uint32_t i, t, m[4];
+  uint32_t i, t[2], m[4];
 
   if (!seed) seed = (69069 * n_a) + 69069;
+  
+  if (first_time) { 
+    /* spice table needs 4 32bit ints */
+    m[0] = (uint32_t) (seed); m[1] = (uint32_t)(seed >> 32);
+    seed = biomcmc_hashint64_salted (seed, 3);
+    m[2] = (uint32_t) (seed); m[3] = (uint32_t)(seed >> 32);
+    biomcmc_salt_vector32_from_spice_table (a, n_a, m);
+  }
+  t[0] = a[0] + 1ull; t[1] = a[1] + 1ull;
+  for (i = 0; i < n_a; i++) a[i] ^= (rng_get_shr (t) ^ rng_get_std31 (t+1));
 
-  rng_set_marsaglia (m, seed);
-  t = rng_get_marsaglia (m); 
-  seed = rng_get_marsaglia (m);
-  for (i = 0; i < 16; i++) rng_get_brent (&seed);
-
-  if (first_time) for (i = 0; i < n_a; i++) 
-    a[i] = (rng_get_shr (&t) ^ rng_get_marsaglia (m) ^ rng_get_std31 (&t)) ^ rng_get_cong (&seed);
-
-  rng_get_brent (&seed);
-
-  for (i = 0; i < n_a; i++) 
-    a[i] ^= (rng_get_shr (&t) ^ rng_get_marsaglia (m) ^ rng_get_std31 (&t)) + rng_get_cong (&seed);
-
-  return seed;
+  return ((uint64_t)(t[0]) << 32) | t[1];
 }
 
 uint64_t
 rng_randomize_array_64bits (uint64_t *a, uint32_t n_a, uint64_t seed, bool first_time)
 {
-  uint64_t u1, u2, u3;
-  uint32_t i, t, s, m[4];
+  uint64_t t[3]; 
+  uint32_t i, m[4];
 
-  if (!seed) seed = (uint32_t) (69069 * n_a);
-
-  m[0] = (uint32_t) (seed >> 32); /* 32 bits component: Marsaglia's multiply-with-carry */
-  m[1] = (uint32_t) (seed & 0xffffffffUL);
-  rng_set_marsaglia (m, m[0]);
-  t = rng_get_marsaglia (m); /* 32 bits component: Marsaglia's 3-shift register */
-  s = rng_get_marsaglia (m); /* 32 bits component: Fishman and Moore's std31 */
-
-  if (first_time) for (i = 0; i < n_a; i++) {
-    u1 = (((uint64_t) (rng_get_shr (&t))) << 32)      | ((uint64_t) (rng_get_shr (&t))); /* 64 bits filled */
-    u2 = (((uint64_t) (rng_get_marsaglia (m))) << 32) | ((uint64_t) (rng_get_marsaglia (m)));
-    u3 = (((uint64_t) (rng_get_std31 (&s))) << 32)    | ((uint64_t) (rng_get_std31 (&s)));
-    a[i] = u1 ^ u2 ^ u3 ^ rng_get_std61 (&seed);
+  if (!seed) seed = 69069 * n_a;
+  
+  if (first_time) { 
+    /* spice table needs 4 32bit ints (even the 64bits one) */
+    m[0] = (uint32_t) (seed); m[1] = (uint32_t)(seed >> 32);
+    seed = biomcmc_hashint64_salted (seed, 3);
+    m[2] = (uint32_t) (seed); m[3] = (uint32_t)(seed >> 32);
+    biomcmc_salt_vector64_from_spice_table (a, n_a, m);
   }
-
-  m[0] += n_a;
-
-  for (i = 0; i < n_a; i++) {
-    u1 = (((uint64_t) (rng_get_shr (&t))) << 32)      | ((uint64_t) (rng_get_shr (&t))); /* 64 bits filled */
-    u2 = (((uint64_t) (rng_get_marsaglia (m))) << 32) | ((uint64_t) (rng_get_marsaglia (m)));
-    u3 = (((uint64_t) (rng_get_std31 (&s))) << 32)    | ((uint64_t) (rng_get_std31 (&s)));
-    a[i] ^= (u1 + u2) ^ u3 ^ rng_get_std61 (&seed);
-  }
-  return seed;
+  t[0] = a[0] + 1ull; t[1] = a[1] + 1ull; t[2] = a[2] + 1ull;
+  for (i = 0; i < n_a; i++) a[i] ^= rng_get_brent_64bits (t) ^ rng_get_xoroshiro128 (t+1);
+  return t[0];
 }
 
 #undef RoL64

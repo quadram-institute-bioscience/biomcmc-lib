@@ -96,7 +96,7 @@ new_biomcmc_rng (unsigned long long int seed, int stream_number)
 }
 
 biomcmc_rng
-new_biomcmc_rng_from_seed (unsigned long long int seed, int stream_number)
+new_biomcmc_rng_with_parallel_seeds (unsigned long long int seed, int stream_number)
 {
   int i;
   biomcmc_rng r; /* pointer (which will be visible globally through biomcmc_random_number) */
@@ -212,6 +212,8 @@ inline uint64_t
 biomcmc_rng_get (void)
 {
   return (rng_get_taus (&(biomcmc_random_number->taus)) ^ rng_get_mt19937 (&(biomcmc_random_number->mt)));
+  //return rng_get_taus (&(biomcmc_random_number->taus));
+  //return rng_get_mt19937 (&(biomcmc_random_number->mt)); // best dieharder results
 }
 
 inline double
@@ -219,8 +221,7 @@ biomcmc_rng_get_52 (void)
 {
   /* In Matsumoto's MT19937 code they use 53 bits (total double precision) but I think that the integer fraction of a
    * double is only 52 - so the integer-to-double conversion should use only the first 52 bits */
-  return (double) 
-  ((rng_get_taus (&(biomcmc_random_number->taus)) ^ rng_get_mt19937 (&(biomcmc_random_number->mt))) >> 12);
+  return (double) (biomcmc_rng_get () >> 12);
 }
 
 inline uint32_t

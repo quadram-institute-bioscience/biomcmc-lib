@@ -65,35 +65,36 @@ void            rng_set_xorshift (rng_xorshift_struct *r, uint64_t seed);
 extern uint64_t rng_get_mt19937 (rng_mt19937_struct *r);
 void            rng_set_mt19937 (rng_mt19937_struct *r, uint64_t seed);
 
-/*! \brief MT19937, the Mersenne Twister for 32 bits */
+/*! \brief MT19937, the Mersenne Twister for 32 bits seed is 64 as usual) */
 extern uint32_t rng_get_mt19937ar (rng_mt19937ar_struct *r);
-void            rng_set_mt19937ar (rng_mt19937ar_struct *r, uint32_t seed);
+void            rng_set_mt19937ar (rng_mt19937ar_struct *r, uint64_t seed);
 
 /*! \brief gfsr lagged-Fibonacci generator (two-tap Generalised Feedback Shift Register). */
 extern uint32_t rng_get_gfsr4 (rng_gfsr4_struct *r);
-void            rng_set_gfsr4 (rng_gfsr4_struct *r, uint32_t seed);
+void            rng_set_gfsr4 (rng_gfsr4_struct *r, uint64_t seed);
 
 uint32_t rng_get_diaconis (rng_diaconis_struct *r);
-void     rng_set_diaconis (rng_diaconis_struct *r, uint32_t seed);
+void     rng_set_diaconis (rng_diaconis_struct *r, uint64_t seed);
 
 /* TT800 (period = 2^800)  
  * Makoto Matsumoto & Y. Kurita, Twisted GFSR Generators II, ACM Trans. Model. Comput. Simul., 4 (1994) 254-266 */
 uint32_t rng_get_tt800 (rng_tt800_struct *r);
-void     rng_set_tt800 (rng_tt800_struct *r, uint32_t seed);
+void     rng_set_tt800 (rng_tt800_struct *r, uint64_t seed);
 
 /* Marsaglia's four-lag generator using addition */
 uint32_t rng_get_lfib4 (rng_lfib4_struct *r);
-void     rng_set_lfib4 (rng_swb_struct *r, uint32_t seed);
+void     rng_set_lfib4 (rng_lfib4_struct *r, uint64_t seed);
 
 /* Marsaglia's subtract-with-borrow generator with long period (2^7578) but fails at birthday tests */
 uint32_t rng_get_swb (rng_swb_struct *r);
-void     rng_set_swb (rng_swb_struct *r, uint32_t seed);
+void     rng_set_swb (rng_swb_struct *r, uint64_t seed);
 
 /* Panneton, L'Ecuyer, and Matsumoto WELLRNG1024a */
 uint32_t rng_get_well1024 (rng_well1024_struct *r);
-void     rng_set_well1024 (rng_well1024_struct *r, uint32_t seed);
+void     rng_set_well1024 (rng_well1024_struct *r, uint64_t seed);
 
 /* simple algorithms (up to four variables, no vector initialization) */
+/* functions below should not call twist_array() as functions above are not called by it --- to avoid loops */ 
 
 uint64_t rng_get_xoroshiro128 (uint64_t *s); 
 void rng_jump_64_xoroshiro128 (uint64_t *s); 
@@ -103,11 +104,11 @@ void rng_jump_128_xoroshiro256 (uint64_t *s);
 void rng_jump_192_xoroshiro256 (uint64_t *s);
 
 uint32_t rng_get_gamerand (uint32_t *game);
-void     rng_set_gamerand (uint32_t *game, uint32_t seed);
+void     rng_set_gamerand (uint32_t *game, uint64_t seed);
 
 /* George Marsaglia's Two-multiply with carry generator (period ~  2^60) */
 uint32_t rng_get_marsaglia (uint32_t *m);
-void     rng_set_marsaglia (uint32_t *m, uint32_t seed);
+void     rng_set_marsaglia (uint32_t *m, uint64_t seed);
 
 /* Multiplicative, Congruential Random-Number Generators with Multipliers +-2^k1 +- 2^k2 and Modulus 2^p - 1,
    ACM Trans. Math. Software 23 (1997) 255-265. Pei-Chi Wu. */ 
@@ -119,7 +120,7 @@ uint64_t rng_get_std61 (uint64_t *x);
 uint32_t rng_get_std31 (uint32_t *x);
 
 /* xoroshiro64** */
-uint32_t  rng_get_xoroshiro64 (uint32_t *s);
+uint32_t  rng_get_xoroshiro64 (uint32_t *x);
 
 /* Marsaglia's 3-shift-register generator (period 2^32-1) */
 uint32_t rng_get_shr (uint32_t *x);
@@ -128,18 +129,18 @@ uint32_t rng_get_shr (uint32_t *x);
 uint32_t rng_get_brent (uint32_t *x);
 uint64_t rng_get_brent_64bits (uint64_t *x);
 
-uint64_t rng_get_splitmix64 (uint64_t *seed);
+uint64_t rng_get_splitmix64 (uint64_t *x);
 
 /* congruential quick-and-dirty generator. */
 uint32_t rng_get_cong      (uint32_t *x);
 uint32_t rng_get_cong_many (uint32_t *x);
 
 /* randomize an initialized vector following Nishimura and Matsumoto's MT19937 */
-uint32_t rng_twist_array_32bits (uint32_t *a, uint32_t n_a, uint32_t seed);
-uint64_t rng_twist_array_64bits (uint64_t *a, uint32_t n_a, uint64_t seed);
+uint64_t rng_twist_array_32bits (uint32_t *a, uint32_t n_a, uint64_t seed, uint64_t stream);
+uint64_t rng_twist_array_64bits (uint64_t *a, uint32_t n_a, uint64_t seed, uint64_t stream);
 
 /* randomize after possibly initializing a vector using XOR concatenation */
-uint32_t rng_randomize_array_32bits (uint32_t *a, uint32_t n_a, uint32_t seed, bool first_time);
+uint64_t rng_randomize_array_32bits (uint32_t *a, uint32_t n_a, uint64_t seed, bool first_time);
 uint64_t rng_randomize_array_64bits (uint64_t *a, uint32_t n_a, uint64_t seed, bool first_time);
 
 #endif
