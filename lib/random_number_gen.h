@@ -74,6 +74,7 @@ extern uint32_t rng_get_gfsr4 (rng_gfsr4_struct *r);
 void            rng_set_gfsr4 (rng_gfsr4_struct *r, uint64_t seed);
 
 uint32_t rng_get_diaconis (rng_diaconis_struct *r);
+uint32_t rng_get_diaconis_onebit (rng_diaconis_struct *r);
 void     rng_set_diaconis (rng_diaconis_struct *r, uint64_t seed);
 
 /* TT800 (period = 2^800)  
@@ -96,7 +97,11 @@ void     rng_set_well1024 (rng_well1024_struct *r, uint64_t seed);
 /* simple algorithms (up to four variables, no vector initialization) */
 /* functions below should not call twist_array() as functions above are not called by it --- to avoid loops */ 
 
-uint64_t rng_get_xoroshiro128 (uint64_t *s); 
+uint64_t rng_get_gamerand64 (uint64_t *game);
+
+uint64_t rng_get_xoroshiro128  (uint64_t *s); 
+uint64_t rng_get_xoroshiro128p (uint64_t *s); 
+uint64_t rng_get_xoroshiro128s (uint64_t *s); 
 void rng_jump_64_xoroshiro128 (uint64_t *s); 
 void rng_jump_96_xoroshiro128 (uint64_t *s); 
 uint64_t rng_get_xoroshiro256 (uint64_t *s);

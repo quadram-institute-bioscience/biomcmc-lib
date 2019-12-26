@@ -149,7 +149,7 @@ rng_set_xorshift (rng_xorshift_struct *r, uint64_t seed)
   if (!seed) seed = 0x1db9b83a20cc6503ULL; 
 
   seed = rng_randomize_array_64bits (r->x, 64, seed, true); // initialise array with table of random numbers
-  rng_twist_array_64bits (r->x, r->n, seed, 4);
+  rng_twist_array_64bits (r->x, 64, seed, 4);
 
   /* Avoid correlations for close seeds; Recurrence has period 2**64-1 */
   for (r->x[64] = seed, i = 0; i < 64; i++) { /* Initialise circular array */
@@ -212,10 +212,8 @@ inline uint32_t
 rng_get_mt19937ar (rng_mt19937ar_struct *r)
 {
   static const uint32_t mag01[2]={ 0ULL, 0x9908b0dfUL}; /* this is magic vector, don't change */
-  uint32_t y;
+  uint32_t i, y;
   if (r->n >= 624) { /* generate N words at one time */
-    int i;
-
     for (i = 0; i < 227; i++) {
       y = (r->x[i] & 0x80000000UL) | (r->x[i+1] & 0x7fffffffUL);
       r->x[i] = r->x[i+397] ^ (y >> 1) ^ mag01[y & 1UL];
@@ -226,18 +224,11 @@ rng_get_mt19937ar (rng_mt19937ar_struct *r)
     }
     y = (r->x[623] & 0x80000000UL) | (r->x[0] & 0x7fffffffUL);
     r->x[623] = r->x[396] ^ (y >> 1) ^ mag01[y & 1UL];
-
     r->n = 0;
   }
-
   y = r->x[r->n++];
-
   /* Tempering */
-  y ^= (y >> 11);
-  y ^= (y << 7) & 0x9d2c5680UL;
-  y ^= (y << 15) & 0xefc60000UL;
-  y ^= (y >> 18);
-
+  y ^= (y >> 11); y ^= (y << 7) & 0x9d2c5680UL; y ^= (y << 15) & 0xefc60000UL; y ^= (y >> 18);
   return y;
 }
 
@@ -255,8 +246,7 @@ rng_get_gfsr4 (rng_gfsr4_struct *r)
 { /* r->x[16384] */
   r->n = ((r->n)+1) & 16383;
   return r->x[r->n] =
-  ( r->x[(r->n + 15913) & 16383] ^ r->x[(r->n + 14798) & 16383] ^ 
-    r->x[(r->n + 9396)  & 16383] ^ r->x[(r->n + 6695)  & 16383]) & 0xffffffffUL;
+  (r->x[(r->n + 15913) & 16383] ^ r->x[(r->n + 14798) & 16383] ^ r->x[(r->n + 9396)  & 16383] ^ r->x[(r->n + 6695)  & 16383]) & 0xffffffffUL;
 }
 
 void
@@ -275,7 +265,6 @@ rng_get_diaconis (rng_diaconis_struct *r)
 { /*r->x[128] */
   /* two implicid bits version. Period lenght: (2**R + 1) * 2**31. */
   uint32_t b0, sr, ss, br, bs;
-  
   /* fib(n) = fib(n-R) * fib(n-S); with all fib() odd. */
   r->n--;
   br = r->x[(r->n + 127) & 127];
@@ -287,16 +276,32 @@ rng_get_diaconis (rng_diaconis_struct *r)
   if (ss) bs *= 3;
   b0 += br + bs + sr + ss;
   r->x[r->n & 127] = b0;
-  return (b0 + (b0 >> 16)) & 0xffffffffUL; /* low bit improvement */
+  return b0 + (b0 >> 16); /* low bit improvement */
+}
+
+uint32_t
+rng_get_diaconis_onebit (rng_diaconis_struct *r)
+{ /*r->x[128] */
+/* one implicid bit version. Period lenght: (2**R + 1) * 2**30. */
+  uint32_t b0, br, bs;
+  /* fib(n) = fib(n-R) * fib(n-S); with all fib() odd. */
+  r->n--;
+  br = r->x[(r->n + 127) & 127];
+  bs = r->x[(r->n + 30)  & 127];
+  b0 = br + bs + 2*br*bs;
+  r->x[r->n & 127] = b0;
+  return b0 + (b0 >> 16); /* low bit improvement */
 }
 
 void
 rng_set_diaconis (rng_diaconis_struct *r, uint64_t seed)
 { /*r->x[128] */
   r->n = 0;
+  int i;
   if (!seed) seed = 0x1c9cc5643af25686ULL;
   seed = rng_randomize_array_32bits (r->x, 127, seed, true);  /* initialise vector */
   seed = rng_randomize_array_32bits (r->x, 127, seed, false); /* increase randomness */
+  for (i=0; i < 128; i++) r->x[i] |= 1; // initial state must be odd 
 }
 
 /* Makoto Matsumoto & Y. Kurita, Twisted GFSR Generators II, ACM Trans. Model. Comput. Simul., 4 (1994) 254-266 */
@@ -324,7 +329,7 @@ rng_set_tt800 (rng_tt800_struct *r, uint64_t seed)
 { /* r->x[25] */
   if (!seed) seed = 0x273a3292263c330eULL;
   seed = rng_randomize_array_32bits (r->x, 25, seed, true); 
-  rng_twist_array_32bits (r->x, 256, seed, 10);
+  rng_twist_array_32bits (r->x, 25, seed, 10);
   r->n = 26;
 }
 
@@ -360,7 +365,7 @@ rng_set_swb (rng_swb_struct *r, uint64_t seed)
   r->x[256] = r->x[257] = 0UL;
   if (!seed) seed = 0x123733ca1b72b747ULL;
   rng_randomize_array_32bits (r->x, 256, seed, true); 
-  rng_twist_array_32bits (r->x, 32, seed, 6);
+  rng_twist_array_32bits (r->x, 256, seed, 6);
 }
 
 /* Panneton, L'Ecuyer, and Matsumoto WELLRNG1024a */
@@ -390,6 +395,13 @@ rng_set_well1024 (rng_well1024_struct *r, uint64_t seed)
 /* * * Simple generators (single value or simple vectors of size 2 or 4) */
 /* better not to call mix() on these functions to avoid loops, since mix call these */ 
 
+uint64_t
+rng_get_gamerand64 (uint64_t *game)
+{ /* game[2] */
+  game[0] = (game[0] << 32) + (game[0] >> 32); game[0] += game[1]; game[1] += game[0];
+  return game[0];
+}
+
 /* http://prng.di.unimi.it/xoroshiro128plusplus.c; commented out is http://xoroshiro.di.unimi.it/xoroshiro128plus.c */
 uint64_t 
 rng_get_xoroshiro128 (uint64_t *s) 
@@ -403,6 +415,28 @@ rng_get_xoroshiro128 (uint64_t *s)
   // s[0] = RoL64(s[0], 55) ^ s1 ^ (s1 << 14); s[1] = RoL64(s1, 36);  // 128+ V 2016
   // s[0] = RoL64(s[0], 24) ^ s1 ^ (s1 << 16); s[1] = RoL64(s1, 37);  // 128* 
      s[0] = RoL64(s[0], 49) ^ s1 ^ (s1 << 21); s[1] = RoL64(s1, 28);  // 128++
+  return result;
+}
+
+uint64_t 
+rng_get_xoroshiro128p (uint64_t *s) 
+{
+  uint64_t s1 = s[1], result;
+  result = s[0] + s1; // 128+ 
+  // result = RoL64(s[0] * 5, 7) * 9; // 128*
+  s1 ^= s[0];
+  s[0] = RoL64(s[0], 24) ^ s1 ^ (s1 << 16); s[1] = RoL64(s1, 37);  // 128+ V 2018
+  // s[0] = RoL64(s[0], 24) ^ s1 ^ (s1 << 16); s[1] = RoL64(s1, 37);  // 128* 
+  return result;
+}
+
+uint64_t 
+rng_get_xoroshiro128s (uint64_t *s) 
+{
+  uint64_t s1 = s[1], result;
+  result = RoL64(s[0] * 5, 7) * 9; // 128*
+  s1 ^= s[0];
+  s[0] = RoL64(s[0], 24) ^ s1 ^ (s1 << 16); s[1] = RoL64(s1, 37);  // 128* 
   return result;
 }
 

@@ -73,6 +73,8 @@ struct biomcmc_rng_struct
   rng_taus_struct taus; /*! \brief Tausworthe linear feedback shift-register from GSL */
   rng_mt19937_struct mt; /*! \brief 64 bits Mersenne Twister from Matsumoto's webpage */
 
+  uint8_t algorithm; /*! \brief which PRNGs are called */
+
   uint64_t bit32;    /*! \brief temporary values when only 32 bits are necessary */
   bool have_bit32;   /*! \brief when using 32 bits we first check if we have one stored */ 
 
@@ -95,19 +97,19 @@ extern biomcmc_rng biomcmc_random_number;
  * of day, and uses the Tausworthe pseudo-random number generator. 
  * The Tausworthe generator we use has a period of (at least?) \f$10^{35}\f$. This function allocates memory to 
  * global variable ::random_number directly */
-void biomcmc_random_number_init (unsigned long long int seed);
+void biomcmc_random_number_init (uint64_t seed);
 /*! \brief High-level finalization (memory release etc.) of the random number environment */ 
 void biomcmc_random_number_finalize (void);
 
 /*! \brief Allocate memory for new (Tausworthe + MT19937) generator from a pool of streams */
-biomcmc_rng new_biomcmc_rng (unsigned long long int seed, int stream_number);
+biomcmc_rng new_biomcmc_rng (uint64_t seed, int stream_number);
 /*! \brief Release memory occupied by biomcmc_rng:: */
 void del_biomcmc_rng (biomcmc_rng r);
 
 /*! \brief Create initial seed based on time, combining time in microseconds and seconds (user-controled seed is not uint64_t) */
-unsigned long long int biomcmc_rng_get_initial_seed (void);
+uint64_t biomcmc_rng_get_initial_seed (void);
 /*! \brief Generate a vector of seeds (based on initial one), create and initialize stream with an element of this vector */
-biomcmc_rng new_biomcmc_rng_with_parallel_seeds (unsigned long long int seed, int stream_number);
+biomcmc_rng new_biomcmc_rng_with_parallel_seeds (uint64_t seed, int stream_number);
 
 /*! \brief Returns a random number from a Standard Normal distribution N(0,1) - prob_distribution.h has general case */
 extern double biomcmc_rng_snorm32 (void);
@@ -127,6 +129,9 @@ extern double biomcmc_rng_unif32 (void);
 extern double biomcmc_rng_unif_pos32 (void);
 /*! \brief Returns an integer (32 bits) random number between 0 and n (excluding n), provided \f$n < 4 10^9\f$ approx. */
 extern uint32_t biomcmc_rng_unif_int (uint32_t n);
+
+void biomcmcm_rng_set_next_algorithm ();
+void biomcmcm_rng_set_algorithm (uint8_t algo);
 
 /* * * low level functions (direct access to generator) */
 

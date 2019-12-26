@@ -19,7 +19,7 @@ biomcmc_rng biomcmc_random_number; /* Actual definition here with external decla
 
 
 void
-biomcmc_random_number_init (unsigned long long int seed)
+biomcmc_random_number_init (uint64_t seed)
 {
   if (biomcmc_random_number) { biomcmc_random_number->ref_counter++; return;} // could return error, but let's asume calling function is overzealous 
 
@@ -43,11 +43,11 @@ del_biomcmc_rng (biomcmc_rng r)
   if (r) free (r);
 }
 
-unsigned long long int
+uint64_t
 biomcmc_rng_get_initial_seed (void)
 {
   int timeseed[2];
-  uintmax_t low, high, top, pid1, pid2;
+  uint64_t low, high, top, pid1, pid2;
 
   biomcmc_get_time (timeseed);
   pid1 = (uint64_t)  getpid (); /* may be a small number; return type is pid_t (=int) */
@@ -63,7 +63,7 @@ biomcmc_rng_get_initial_seed (void)
   top  = (uint64_t) (biomcmc_hashint_salted (timeseed[0] + timeseed[1], /*salt*/ 6)) << 48;
 //  fprintf (stderr, "seed %ju\n", (uintmax_t) low|high|top);
 
-  return (unsigned long long int) (low | high | top);
+  return (uint64_t) (low | high | top);
 }
 
 /*
@@ -77,7 +77,7 @@ uint64_t *seed_rng (void)// check also arc4random (from BSD)
 */
 
 biomcmc_rng
-new_biomcmc_rng (unsigned long long int seed, int stream_number)
+new_biomcmc_rng (uint64_t seed, int stream_number)
 {
   int i;
   uint64_t useed = seed;
@@ -91,12 +91,12 @@ new_biomcmc_rng (unsigned long long int seed, int stream_number)
 
   /* rnorm 64 and 32 bits (since each normal draw produces two values), 32 bits and 16 bits temp values */
   r->have_rnorm32 = r->have_rnorm64 = r->have_bit32 = false;
-
+  r->algorithm = 0;
   return r;
 }
 
 biomcmc_rng
-new_biomcmc_rng_with_parallel_seeds (unsigned long long int seed, int stream_number)
+new_biomcmc_rng_with_parallel_seeds (uint64_t seed, int stream_number)
 {
   int i;
   biomcmc_rng r; /* pointer (which will be visible globally through biomcmc_random_number) */
@@ -208,12 +208,43 @@ biomcmc_rng_unif_int64 (uint64_t n)
   return k;
 }
 
+void
+biomcmcm_rng_set_next_algorithm ()
+{
+   biomcmc_random_number->algorithm = (biomcmc_random_number->algorithm+1)%10;
+}
+
+void
+biomcmcm_rng_set_algorithm (uint8_t algo)
+{
+   biomcmc_random_number->algorithm = algo; 
+}
+
 inline uint64_t
 biomcmc_rng_get (void)
 {
-  return (rng_get_taus (&(biomcmc_random_number->taus)) ^ rng_get_mt19937 (&(biomcmc_random_number->mt)));
-  //return rng_get_taus (&(biomcmc_random_number->taus));
-  //return rng_get_mt19937 (&(biomcmc_random_number->mt)); // best dieharder results
+  switch (biomcmc_random_number->algorithm) {
+    case 0:
+      return rng_get_mt19937 (&(biomcmc_random_number->mt)); // best dieharder results
+    case 1:
+      return rng_get_taus (&(biomcmc_random_number->taus));
+    case 2:
+      return (rng_get_taus (&(biomcmc_random_number->taus)) ^ rng_get_mt19937 (&(biomcmc_random_number->mt)));
+    case 3: 
+      return rng_get_xoroshiro128p (&(biomcmc_random_number->mt.x[0])); // 2 vars 
+    case 4: 
+      return rng_get_xoroshiro128s (&(biomcmc_random_number->mt.x[4])); // 2 vars 
+    case 5:
+      return rng_get_xoroshiro128 (&(biomcmc_random_number->mt.x[8])); // 2 vars 
+    case 6:
+      return rng_get_brent_64bits (&(biomcmc_random_number->mt.x[12])); // 1 var 
+    case 7:
+      return rng_get_splitmix64 (&(biomcmc_random_number->mt.x[16])); // 1 var 
+    case 8:
+      return rng_get_xoroshiro256 (&(biomcmc_random_number->mt.x[20])); // 4 vars 
+    default:
+      return rng_get_std61 (&(biomcmc_random_number->mt.x[0])) ^ rng_get_gamerand64 (&(biomcmc_random_number->mt.x[1]));
+  }
 }
 
 inline double
@@ -248,11 +279,11 @@ biomcmc_get_time (int *time)
 #if _POSIX_TIMERS > 0
   struct timespec now;
   clock_gettime (CLOCK_REALTIME, &now);
-  time[1] = now.tv_nsec;
+  time[1] = now.tv_nsec; // always less than 1billion thus 32bits is enough
 #else
   struct timeval now;
   gettimeofday (&now, NULL);
-  time[1] = now.tv_usec;
+  time[1] = now.tv_usec; // always less than 1million thus 32bits is enough
 #endif
   time[0] = now.tv_sec;
   return;
