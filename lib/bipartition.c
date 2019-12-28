@@ -253,6 +253,9 @@ bipartition_count_n_ones (const bipartition bip)
   for (i=0; i < bip->n->ints; i++) for (j = bip->bs[i]; j; bip->n_ones++) j &= j - 1LL;
 }
 
+#define BITCOUNT(x) (((BX_(x)+(BX_(x)>>4)) & 0x0F0F0F0F) % 255) // 32bits only? 
+#define BX_(x)      ((x) - (((x)>>1)&0x77777777) - (((x)>>2)&0x33333333) - (((x)>>3)&0x11111111))
+
 bool
 bipartition_is_equal (const bipartition b1, const bipartition b2)
 {
