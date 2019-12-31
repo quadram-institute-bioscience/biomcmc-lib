@@ -96,6 +96,8 @@ void bipartition_NOT (bipartition result, const bipartition bip);
 /*! \brief Count the number of active bits (equal to one). Used by bipartition_AND() and bipartition_XOR() when 
  * update_count = true. Please use it parsimoniously since it is as slow as without bitstring representation. */
 void bipartition_count_n_ones (const bipartition bip);
+int bipartition_count_n_ones_pop2 (const bipartition bip);
+int bipartition_count_n_ones_pop3 (const bipartition bip);
 /*! \brief fill vector id[] with positions of set bits, up to vecsize bits set */
 void bipartition_to_int_vector (const bipartition b, int *id, int vecsize);
 /*! \brief Compare equality of two bipartitions */

@@ -13,7 +13,8 @@
 
 #include "bipartition.h"
 
-int BitStringSize = 8 * sizeof (uint64_t);
+int BitStringSize = 8 * sizeof (uint64_t); // almost surely 64 
+uint64_t mask_onebit[BitStringSize] = {0ULL}; // mask_onebit[j] => 1 << j
 
 bipartition
 new_bipartition (int size)
@@ -38,12 +39,17 @@ new_bipsize (int size)
   bipsize n;
   int i;
 
+  if (!mask_onebit[0]) { // initialise only once
+    mask_onebit[0] = 1;  
+    for (i = 1; i < BitStringSize; ++i) mask_onebit[i] = mask_onebit[i-1] << 1ULL; 
+  }
+
   n = (bipsize) biomcmc_malloc (sizeof (struct bipsize_struct));
   n->bits = n->original_size = size;
   n->ref_counter = 1;
   n->ints = size/BitStringSize + 1;
   n->mask = 0LL;
-  for (i=0; i < n->bits%BitStringSize; i++) n->mask |= (1LL << i); /* disregard other bits */
+  for (i=0; i < n->bits%BitStringSize; i++) n->mask |= mask_onebit[i]; // onebit[i] = (1LL << i); disregard  bits higher than last i
 
   return n;
 }
@@ -94,7 +100,6 @@ del_bipartition (bipartition bip)
   }
 }
 
-
 void
 del_bipsize (bipsize n)
 {
@@ -111,7 +116,7 @@ bipsize_resize (bipsize n, int nbits)
   n->bits = nbits;
   n->ints = nbits/BitStringSize + 1; // might be smaller than original bs size 
   n->mask = 0LL;
-  for (i=0; i < nbits%BitStringSize; i++) n->mask |= (1LL << i); /* disregard other bits */
+  for (i=0; i < nbits%BitStringSize; i++) n->mask |= mask_onebit[i]; // onebit[i] = (1LL << i); disregard  bits higher than last i
 }
 
 void
@@ -122,7 +127,7 @@ bipartition_initialize (bipartition bip, int position)
   j = position%BitStringSize; 
   i = position/BitStringSize;
 
-  bip->bs[i] = (1LL << j);
+  bip->bs[i] = mask_onebit[j];
   bip->n_ones = 1;
 }
 
@@ -143,8 +148,8 @@ bipartition_set (bipartition bip, int position)
 void
 bipartition_set_lowlevel (bipartition bip, int i, int j)
 {
-  if (bip->bs[i] & (1LL << j)) return; // bit already set
-  bip->bs[i] |= (1LL << j);
+  if (bip->bs[i] & mask_onebit[j]) return; // bit already set
+  bip->bs[i] |= mask_onebit[j];
   bip->n_ones++; /* doesn't work if we reduce space later (check replace_int_in_vector() ) */
 }
 
@@ -157,8 +162,8 @@ bipartition_unset (bipartition bip, int position)
 void
 bipartition_unset_lowlevel (bipartition bip, int i, int j)
 {
-  if (!(bip->bs[i] & (1LL << j))) return; // bit already unset
-  bip->bs[i] &= ~(1LL << j);
+  if (!(bip->bs[i] & mask_onebit[j])) return; // bit already unset
+  bip->bs[i] &= ~mask_onebit[j];
   bip->n_ones--;
 }
 
@@ -253,6 +258,53 @@ bipartition_count_n_ones (const bipartition bip)
   for (i=0; i < bip->n->ints; i++) for (j = bip->bs[i]; j; bip->n_ones++) j &= j - 1LL;
 }
 
+uint64_t pop_m_table[] = {
+  0x5555555555555555ULL, 0x3333333333333333ULL,  //0 m1 binary: 0101...  //1 m2 binary: 00110011..
+  0x0f0f0f0f0f0f0f0fULL, 0x00ff00ff00ff00ffULL,  //2 m4 binary: 4 zeros,4 ones //3 m8 binary:  8 zeros,  8 ones ...
+  0x0000ffff0000ffffULL, 0x00000000ffffffffULL,  //4 m16 binary: 16 zeros,16 ones  //5 m32 binary: 32 zeros, 32 ones
+  0xffffffffffffffffULL, 0x0101010101010101ULL   //6 hff binary: all ones //7 h01 the sum of 256 to the power of 0,1,2,3...
+}
+
+// next two popcount algos from http://www.dalkescientific.com/writings/diary/archive/2008/07/03/hakmem_and_other_popcounts.html 
+/* Implement 'popcount_2' from Wikipedia -- fewer arithmetic operations than other known implementations 
+ * on machines with slow multiplication. It uses 17 arithmetic operations.  */
+int
+bipartition_count_n_ones_pop2 (const bipartition bip)
+{
+  int i = bip->n->ints;
+  uint64_t x;
+  bip->n_ones = 0;
+  do {
+    x = bip->bs[i];
+    x -= (x >> 1) & pop_m_table[0];             //put count of each 2 bits into those 2 bits
+    x = (x & pop_m_table[1]) + ((x >> 2) & pop_m_table[1]); //put count of each 4 bits into those 4 bits 
+    x = (x + (x >> 4)) & pop_m_table[2];        //put count of each 8 bits into those 8 bits 
+    x += x >>  8;  //put count of each 16 bits into their lowest 8 bits
+    x += x >> 16;  //put count of each 32 bits into their lowest 8 bits
+    x += x >> 32;  //put count of each 64 bits into their lowest 8 bits
+    bip->n_ones += x & 0x7f;
+  } while (--i);
+  return bip->n_ones;
+}
+
+/*  popcount3 from wikipedia -- uses fewer arithmetic operations than other known  implementations on machines 
+ *  with fast multiplication. It uses 12 arithmetic operations, one of which is a multiply. */
+int
+bipartition_count_n_ones_pop3 (const bipartition bip)
+{
+  int i = bip->n->ints;
+  uint64_t x;
+  bip->n_ones = 0;
+  do {
+    x = bip->bs[i];
+    x -= (x >> 1) & pop_m_table[0];             //put count of each 2 bits into those 2 bits
+    x = (x & pop_m_table[1]) + ((x >> 2) & pop_m_table[1]); //put count of each 4 bits into those 4 bits 
+    x = (x + (x >> 4)) & pop_m_table[2];        //put count of each 8 bits into those 8 bits 
+    bip->n_ones += (x * pop_m_table[7]) >> 56;  //returns left 8 bits of x + (x<<8) + (x<<16) + (x<<24)+...
+  } while (--i);
+  return bip->n_ones;
+}
+
 #define BITCOUNT(x) (((BX_(x)+(BX_(x)>>4)) & 0x0F0F0F0F) % 255) // 32bits only? 
 #define BX_(x)      ((x) - (((x)>>1)&0x77777777) - (((x)>>2)&0x33333333) - (((x)>>3)&0x11111111))
 
@@ -319,7 +371,7 @@ bipartition_flip_to_smaller_set (bipartition bip)
 {
   int i = bip->n->ints - 1; /* most significant position -- consistent with is_larger() above, using OLD algo below */
   if ((2 * bip->n_ones) < bip->n->bits) return; /* it is already the smaller set */
-  /* OLD always x is different from ~x, so we just look at last element ("largest digits of number") */
+  /* OLD: always x is different from ~x, so we just look at last element ("largest digits of number") */
   // if (((2 * bip->n_ones) == bip->n->bits) && (bip->bs[i] < (bip->n->mask & ~bip->bs[i]))) return;
   /* NEW: resolve ties by always showing the same "side" of bipartition, that is, the one having an arbitrary leaf (first one, in our case) */
   if (((2 * bip->n_ones) == bip->n->bits) && (bip->bs[0] & 1LL)) return;
@@ -333,7 +385,7 @@ bipartition_flip_to_smaller_set (bipartition bip)
 bool
 bipartition_is_bit_set (const bipartition bip, int position)
 {
-  if (bip->bs[(int)(position/BitStringSize)] & (1LL << (int)(position%BitStringSize))) return true; 
+  if (bip->bs[(int)(position/BitStringSize)] & mask_onebit[position%BitStringSize]) return true; 
   return false;
 }
 
@@ -380,9 +432,9 @@ bipartition_replace_bit_in_vector (bipartition *bvec, int n_b, int to, int from,
    * 1    -> 1  |     0               | -1  (in fact one of the two "1"s dissapeared after reducing the bitstring 
    * (the above description is outdated since I rewrote by hand the bit functions -- observe how we must erase 1 values from "from") */
   if (reduce) for (k = 0; k < n_b; k++) { // copy 0 or 1 values, erasing "from" values to avoid problems after reducing space (hanging 1s out of range)
-    if      ( ((bvec[k]->bs[i] >> j) & 1LL) && ((bvec[k]->bs[i2] >> j2) & 1LL) )  { bvec[k]->n_ones--; bvec[k]->bs[i] &= ~(1LL << j); }
-    else if ( ((bvec[k]->bs[i] >> j) & 1LL) && !((bvec[k]->bs[i2] >> j2) & 1LL) ) { bvec[k]->bs[i2] |=  (1LL << j2); bvec[k]->bs[i] &= ~(1LL << j); }
-    else if ( !((bvec[k]->bs[i] >> j) & 1LL) && ((bvec[k]->bs[i2] >> j2) & 1LL) ) { bvec[k]->bs[i2] &= ~(1LL << j2); bvec[k]->n_ones--; }
+    if      ( ((bvec[k]->bs[i] >> j) & 1LL) && ((bvec[k]->bs[i2] >> j2) & 1LL) )  { bvec[k]->n_ones--; bvec[k]->bs[i] &= ~mask_onebit[j]; }
+    else if ( ((bvec[k]->bs[i] >> j) & 1LL) && !((bvec[k]->bs[i2] >> j2) & 1LL) ) { bvec[k]->bs[i2] |=  mask_onebit[j2]; bvec[k]->bs[i] &= ~mask_onebit[j]; }
+    else if ( !((bvec[k]->bs[i] >> j) & 1LL) && ((bvec[k]->bs[i2] >> j2) & 1LL) ) { bvec[k]->bs[i2] &= ~mask_onebit[j2]; bvec[k]->n_ones--; }
     /* else do nothing (from zero to zero) */
   }
 
