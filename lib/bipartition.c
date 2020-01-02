@@ -13,7 +13,7 @@
 
 #include "bipartition.h"
 
-int BitStringSize = 8 * sizeof (uint64_t); // almost surely 64 
+#define BitStringSize 64
 uint64_t mask_onebit[BitStringSize] = {0ULL}; // mask_onebit[j] => 1 << j
 
 bipartition
@@ -40,6 +40,7 @@ new_bipsize (int size)
   int i;
 
   if (!mask_onebit[0]) { // initialise only once
+    assert(BitStringSize == (8 * sizeof (uint64_t))); // if not 64 then we're in trouble 
     mask_onebit[0] = 1;  
     for (i = 1; i < BitStringSize; ++i) mask_onebit[i] = mask_onebit[i-1] << 1ULL; 
   }
@@ -263,7 +264,7 @@ uint64_t pop_m_table[] = {
   0x0f0f0f0f0f0f0f0fULL, 0x00ff00ff00ff00ffULL,  //2 m4 binary: 4 zeros,4 ones //3 m8 binary:  8 zeros,  8 ones ...
   0x0000ffff0000ffffULL, 0x00000000ffffffffULL,  //4 m16 binary: 16 zeros,16 ones  //5 m32 binary: 32 zeros, 32 ones
   0xffffffffffffffffULL, 0x0101010101010101ULL   //6 hff binary: all ones //7 h01 the sum of 256 to the power of 0,1,2,3...
-}
+};
 
 // next two popcount algos from http://www.dalkescientific.com/writings/diary/archive/2008/07/03/hakmem_and_other_popcounts.html 
 /* Implement 'popcount_2' from Wikipedia -- fewer arithmetic operations than other known implementations 
