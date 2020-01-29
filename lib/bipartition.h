@@ -93,9 +93,10 @@ void bipartition_XOR (bipartition result, const bipartition b1, const bipartitio
 void bipartition_XORNOT (bipartition result, const bipartition b1, const bipartition b2, bool update_count);
 /*! \brief Unary complement ("~") of bipartition. Use with caution, since there is no mask for unused padded bits */ 
 void bipartition_NOT (bipartition result, const bipartition bip);
-/*! \brief Count the number of active bits (equal to one). Used by bipartition_AND() and bipartition_XOR() when 
- * update_count = true. Please use it parsimoniously since it is as slow as without bitstring representation. */
-void bipartition_count_n_ones (const bipartition bip);
+/*! \brief Count the number of active bits (equal to one). Used by bipartition_AND() and bipartition_XOR() when update_count = true. */
+int bipartition_count_n_ones      (const bipartition bip); /*!< \brief calls pop1(), wich seems to be fastest */
+int bipartition_count_n_ones_pop0 (const bipartition bip); /*!< \brief slowest version; mainly for debugging  */
+int bipartition_count_n_ones_pop1 (const bipartition bip); 
 int bipartition_count_n_ones_pop2 (const bipartition bip);
 int bipartition_count_n_ones_pop3 (const bipartition bip);
 /*! \brief fill vector id[] with positions of set bits, up to vecsize bits set */

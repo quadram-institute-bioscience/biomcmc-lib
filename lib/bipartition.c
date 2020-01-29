@@ -245,8 +245,14 @@ bipartition_NOT (bipartition result, const bipartition bip)
   result->n_ones = bip->n->bits - bip->n_ones;
 }
 
-void
+int
 bipartition_count_n_ones (const bipartition bip)
+{
+  return bipartition_count_n_ones_pop1 (bip);
+}
+
+int
+bipartition_count_n_ones_pop0 (const bipartition bip)
 {
   int i;
   uint64_t j;
@@ -255,16 +261,35 @@ bipartition_count_n_ones (const bipartition bip)
   for (i=0; i < bip->n_ints - 1; i++) for (j=0; j < BitStringSize; j++) bip->n_ones += ((bip->bs[i] >> j) & 1LL);
   for (j=0; j < bip->n_bits%BitStringSize; j++) bip->n_ones += ((bip->bs[i] >> j) & 1LL);
  */
+  bip->bs[bip->n->ints-1] &= bip->n->mask; /* remove last bits (do not belong to bipartition) */
   // clear the least significant bit set per iteration (Peter Wegner in CACM 3 (1960), 322, mentioned in K&R)
   for (i=0; i < bip->n->ints; i++) for (j = bip->bs[i]; j; bip->n_ones++) j &= j - 1LL;
+  return bip->n_ones;
 }
 
 uint64_t pop_m_table[] = {
   0x5555555555555555ULL, 0x3333333333333333ULL,  //0 m1 binary: 0101...  //1 m2 binary: 00110011..
   0x0f0f0f0f0f0f0f0fULL, 0x00ff00ff00ff00ffULL,  //2 m4 binary: 4 zeros,4 ones //3 m8 binary:  8 zeros,  8 ones ...
   0x0000ffff0000ffffULL, 0x00000000ffffffffULL,  //4 m16 binary: 16 zeros,16 ones  //5 m32 binary: 32 zeros, 32 ones
-  0xffffffffffffffffULL, 0x0101010101010101ULL   //6 hff binary: all ones //7 h01 the sum of 256 to the power of 0,1,2,3...
+  0xffffffffffffffffULL, 0x0101010101010101ULL,  //6 hff binary: all ones //7 h01 the sum of 256 to the power of 0,1,2,3...
+  0x1111111111111111ULL
 };
+
+int
+bipartition_count_n_ones_pop1 (const bipartition bip)
+{ // from https://github.com/ruanjue/wtdbg (bitvec.h) GPL'ed
+  int i = bip->n->ints - 1;
+  uint64_t x;
+  bip->n_ones = 0;
+  bip->bs[i] &= bip->n->mask; /* remove last bits (do not belong to bipartition) */
+  for (i=0; i < bip->n->ints; i++) { 
+    x = bip->bs[i] - ((bip->bs[i] & 0xa * pop_m_table[8]) >> 1);
+    x = (x & 3 * pop_m_table[8]) + ((x >> 2) & 3 * pop_m_table[8]);
+    x = (x + (x >> 4)) & 0x0f * pop_m_table[7];
+    bip->n_ones += (x * pop_m_table[7] >> 56);
+  }
+  return bip->n_ones;
+}
 
 // next two popcount algos from http://www.dalkescientific.com/writings/diary/archive/2008/07/03/hakmem_and_other_popcounts.html 
 /* Implement 'popcount_2' from Wikipedia -- fewer arithmetic operations than other known implementations 
@@ -272,10 +297,11 @@ uint64_t pop_m_table[] = {
 int
 bipartition_count_n_ones_pop2 (const bipartition bip)
 {
-  int i = bip->n->ints;
+  int i = bip->n->ints - 1;
   uint64_t x;
   bip->n_ones = 0;
-  do {
+  bip->bs[i] &= bip->n->mask; /* remove last bits (do not belong to bipartition) */
+  for (i=0; i < bip->n->ints; i++) { 
     x = bip->bs[i];
     x -= (x >> 1) & pop_m_table[0];             //put count of each 2 bits into those 2 bits
     x = (x & pop_m_table[1]) + ((x >> 2) & pop_m_table[1]); //put count of each 4 bits into those 4 bits 
@@ -284,7 +310,7 @@ bipartition_count_n_ones_pop2 (const bipartition bip)
     x += x >> 16;  //put count of each 32 bits into their lowest 8 bits
     x += x >> 32;  //put count of each 64 bits into their lowest 8 bits
     bip->n_ones += x & 0x7f;
-  } while (--i);
+  }
   return bip->n_ones;
 }
 
@@ -293,16 +319,17 @@ bipartition_count_n_ones_pop2 (const bipartition bip)
 int
 bipartition_count_n_ones_pop3 (const bipartition bip)
 {
-  int i = bip->n->ints;
+  int i = bip->n->ints - 1;
   uint64_t x;
   bip->n_ones = 0;
-  do {
+  bip->bs[i] &= bip->n->mask; /* remove last bits (do not belong to bipartition) */
+  for (i=0; i < bip->n->ints; i++) { 
     x = bip->bs[i];
     x -= (x >> 1) & pop_m_table[0];             //put count of each 2 bits into those 2 bits
     x = (x & pop_m_table[1]) + ((x >> 2) & pop_m_table[1]); //put count of each 4 bits into those 4 bits 
     x = (x + (x >> 4)) & pop_m_table[2];        //put count of each 8 bits into those 8 bits 
     bip->n_ones += (x * pop_m_table[7]) >> 56;  //returns left 8 bits of x + (x<<8) + (x<<16) + (x<<24)+...
-  } while (--i);
+  } 
   return bip->n_ones;
 }
 
