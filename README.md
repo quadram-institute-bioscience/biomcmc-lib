@@ -112,8 +112,11 @@ Phylogenomic models (like guenomu) can also use duplications and losses to estim
 You can also provide the outgroup (i.e., which clade should have the furthest lowest common ancestor with the other
 taxa), or use midpoint/MAD/minimum variance to find the best root location for your tree.
 
-In any case, it is good idea to always assume that the trees are unrooted unless explicitly stated otherwise.
-Irrespective of what the newick string tells you. 
+In any case, from the *biological* point of view, it is good idea to always assume that the trees are unrooted unless explicitly 
+stated otherwise &mdash; irrespective of what the newick string or the visualisation software tells you.
+From a pure *computational* point of view, however, I find it safer to always work with binary, rooted newick trees, such that we can assume 
+the [node-branch correspondence is valid](http://dx.doi.org/10.1093/molbev/msx055).
+
 
 ## License 
 SPDX-License-Identifier: GPL-3.0-or-later
