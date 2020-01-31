@@ -56,7 +56,7 @@ The trees can be in nexus or newick formats, and the sequences can be in nexus o
 * A file is assumed to be in the nexus format if one of the first lines start with the keyword `#NEXUS`, followed by
   some other nexus keyword (`DATA` or `TREES`). Otherwise it's treated as newick (or fasta, for sequence files). 
 * All trees from a single nexus file must contain the same taxa (e.g. output from a Bayesian inference algorithm). 
-  This means that more compact representations are allowed, leading to smaller files. This also allow for some
+  This means that more compact representations are possible, leading to smaller files. It also allows for some
   optimisations when reading large files.
   1. The taxon names can come first, in a `TRANSLATE` table; the individual trees then just point to the IDs in this
      table. BTW, technically each tree in a nexus file is represented in newick format (so "newick file" is a
@@ -64,7 +64,7 @@ The trees can be in nexus or newick formats, and the sequences can be in nexus o
   2. If the same topology is observed, then some programs (e.g. MrBayes, guenomu) just output the distinct topologies, with 
      their equivalent *frequencies* as nexus comments. The trees are ordered, with the most frequent trees at the top.
      The individual branch length information is lost, however, as just the mean values are reported. Unless explicitly
-     flagged by the calling program, our nexus tree reading functions will also store only mean branch lengths for equal
+     flagged by the calling program, our nexus tree reading functions will store only mean branch lengths for equal
      topologies. 
   3. Since nexus files may represent MCMC samples, you can do "thinning", i.e. you may subsample by skipping consecutive
      trees, and also by skipping the first ones (from the "burnin" period). This leads to faster reading of nexus files
@@ -77,7 +77,7 @@ The trees can be in nexus or newick formats, and the sequences can be in nexus o
   unique taxon names (to allow for interoperability, although I may change this in the future).
 * All trees are stored internally as rooted trees, and are saved/printed as rooted, without the `[U]` flag some nexus
   implementations assume. The downstream program/user must take into account if the rooting is relevant or not. Having
-  said that, all algorithms know when to ignore the root node (e.g. gene tree / species tree reconciliation assumes
+  said that, all nice algorithms know when to ignore the root node (e.g. gene tree / species tree reconciliation assumes
   both trees are rooted, but we optimise over all gene rootings effectively looking at unrooted gene trees).
 * If the calling function (downstream software) knows that the nexus trees are unrooted, then they are rooted close to a
   common leaf. This is to facilitate branch length comparisons. One possibility is to first read all nexus files and then 
