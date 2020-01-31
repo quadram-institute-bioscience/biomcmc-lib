@@ -51,7 +51,7 @@ The trees can be in nexus or newick formats, and the sequences can be in nexus o
 ```[python]
 (A,B,C)  -->  ((A,B):0,C)     # notice the single branch length of zero
 ```
-* All missing branch lengths are given a value of one. This way we can work with topologies (a.k.a. cladograms, trees without  
+* All missing branch lengths are given a value of one. This way we can work with topologies (a.k.a. cladograms, trees without
   lengths) transparently.
 * A file is assumed to be in the nexus format if one of the first lines start with the keyword `#NEXUS`, followed by
   some other nexus keyword (`DATA` or `TREES`). Otherwise it's treated as newick (or fasta, for sequence files). 
