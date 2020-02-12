@@ -68,7 +68,7 @@ distance_generator_get_at_distance (distance_generator d, int i, int j, int whic
 void
 distance_generator_set_function_data (distance_generator d, void (*lowlevel_dist_funct)(void*, int, int, double*), void *extra_data)
 {
-  d->distance_function = lowlevel_dist_funct;
+  d->distance_function = lowlevel_dist_funct; // lowlevel_dist_funct (extra_data, i, j, *results[n_distances])
   d->data = extra_data;
 }
 
