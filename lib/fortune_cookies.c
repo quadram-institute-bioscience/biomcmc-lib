@@ -28,8 +28,9 @@ const char *prt_col[][8]={ // 0-black   1-red   2-grn   3-yel   4-blu   5-mag   
    {"\e[1;90m",  "\e[1;91m",  "\e[1;92m",  "\e[1;93m",  "\e[1;94m",  "\e[1;95m",  "\e[1;96m",  "\e[1;97m"}   // 6 bold high intensity text
 };
 
-uint16_t biomcmc_fortune_cookies_size = 283;
+uint16_t biomcmc_fortune_cookies_size = 284;
 char *biomcmc_fortune_cookies[] = {
+  " Far better an approximate answer to the right question, which is often vague, than an exact answer to the wrong question, which can always be made precise. -- John Tukey",
   " A good programmer is someone who always looks both ways before crossing a one-way street. -- Doug Linder",
   " A bug in the code is worth two in the documentation",
   " A bug in the hand is better than one as yet undetected",
