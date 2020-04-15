@@ -26,7 +26,8 @@ It includes, however, the `makefile.am` and `configure.ac` for autotools, and it
 [libcheck](https://github.com/libcheck/check) library as well as custom checks. 
 
 ## Algorithms 
-This is a very incomplete list!
+This is a very incomplete list! For a more complete, although more technical list, you should take a look at the doxygen documentation of the API by running 
+doxygen yourself in the `docs` directory. I also maintain a (sometimes outdated) web version of it [here](https://leomrtns.github.io/doxygen-biomcmclib).
 
 - **Random number generation.** Can work with MPI, where some streams are shared and some are independent. Depends therefore on initialisation, low level control 
   of the seed structures. 
