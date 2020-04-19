@@ -87,3 +87,7 @@ distance_generator_reset (distance_generator d)
     for (j=0; j < d->n_distances; j++) d->dist[i][j] = 0.; // dist can be any number actually
   }
 }
+
+// sketch
+//distance_generator
+//new_distance_generator (int n_samples, int n_distances)
