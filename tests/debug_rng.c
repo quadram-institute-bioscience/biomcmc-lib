@@ -21,7 +21,7 @@ int main(int argc, char **argv)
   sscanf (argv[1], " %d ", &n_samples);
   sscanf (argv[2], " %hhd ", &algo);
 //  printf ("type: d\ncount: %d\nnumbit: 32\n", n_samples);
-  biomcmcm_rng_set_algorithm (algo);
+  biomcmc_rng_set_algorithm (algo);
 
 //  for (i=0; i < n_samples; i++) printf ("%u\n", (uint32_t)(biomcmc_rng_get () & 0xffffffffU));
   for (i=0; i < n_samples; i++) {

@@ -14,7 +14,7 @@
 #include "newick_space.h"
 
 newick_space
-new_newick_space ()
+new_newick_space (void)
 {
   newick_space nwk;
   nwk = (newick_space) biomcmc_malloc (sizeof (struct newick_space_struct));

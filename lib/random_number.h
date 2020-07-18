@@ -130,8 +130,8 @@ extern double biomcmc_rng_unif_pos32 (void);
 /*! \brief Returns an integer (32 bits) random number between 0 and n (excluding n), provided \f$n < 4 10^9\f$ approx. */
 extern uint32_t biomcmc_rng_unif_int (uint32_t n);
 
-void biomcmcm_rng_set_next_algorithm ();
-void biomcmcm_rng_set_algorithm (uint8_t algo);
+void biomcmc_rng_set_next_algorithm (void);
+void biomcmc_rng_set_algorithm (uint8_t algo);
 
 /* * * low level functions (direct access to generator) */
 

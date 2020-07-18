@@ -209,15 +209,15 @@ biomcmc_rng_unif_int64 (uint64_t n)
 }
 
 void
-biomcmcm_rng_set_next_algorithm ()
+biomcmc_rng_set_next_algorithm (void)
 {
    biomcmc_random_number->algorithm = (biomcmc_random_number->algorithm+1)%10;
 }
 
 void
-biomcmcm_rng_set_algorithm (uint8_t algo)
+biomcmc_rng_set_algorithm (uint8_t algo)
 {
-   biomcmc_random_number->algorithm = algo; 
+   biomcmc_random_number->algorithm = algo%10; 
 }
 
 inline uint64_t

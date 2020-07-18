@@ -31,7 +31,7 @@ struct newick_space_struct
   int ref_counter; /*! \brief How many variables point to this structure (to see if memory can be free'd or not) */
 };
 
-newick_space new_newick_space ();
+newick_space new_newick_space (void);
 void del_newick_space (newick_space nwk);
 /*! \brief Convenience function to read one newick tree from file, skipping checks (comments, multiline trees, etc.) */
 topology new_single_topology_from_newick_file (char *filename); 
