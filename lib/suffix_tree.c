@@ -185,8 +185,7 @@ void extendSuffixTree(int pos)
         lastNewNode = NULL;
        }
      }
-    // There is an outgoing edge starting with activeEdge
-    // from activeNode
+    // There is an outgoing edge starting with activeEdge from activeNode
     else {  // Get the next node at the end of edge starting with activeEdge
       Node *next = activeNode->children[text[activeEdge]];
       if (walkDown(next)) continue; //Start from next node (the new activeNode)
@@ -254,193 +253,120 @@ void print(int i, int j)
 void setSuffixIndexByDFS(Node *n, int labelHeight)
 {
   if (n == NULL)  return;
-
-  if (n->start != -1) //A non-root node
-   {
-    if (print_enabled == 1){
-      //Print the label on edge from parent to current node
-      print(n->start, *(n->end));
-    }
-   }
+  //A non-root node
+  if (n->start != -1) if (print_enabled == 1) print(n->start, *(n->end));  //Print the label on edge from parent to current node
   int leaf = 1;
   int i;
   char *printer;
-  for (i = 0; i < MAX_CHAR; i++)
-   {
-    if (n->children[i] != NULL)
-     {
-      if (print_enabled == 1){
-        //print suffix index
-        if (leaf == 1 && n->start != -1){
-          asprintf(&printer, " [%d]\n", n->suffixIndex);
-          buildString(&tree_string, printer);
-          free(printer);
-        }
-      }
-
-      //Current node is not a leaf as it has outgoing
-      //edges from it.
-      leaf = 0;
-      setSuffixIndexByDFS(n->children[i], labelHeight + edgeLength(n->children[i]));
-     }
-   }
-  if (leaf == 1)
-   {
-    for(i= n->start; i<= *(n->end); i++)
-     {
-      if(text[i] == '+')
-       {
-        n->end = (int*) malloc(sizeof(int));
-        *(n->end) = i;
-       }
-     }
+  for (i = 0; i < MAX_CHAR; i++) if (n->children[i] != NULL) {
+    if (print_enabled == 1) if (leaf == 1 && n->start != -1) {
+      asprintf(&printer, " [%d]\n", n->suffixIndex);
+      buildString(&tree_string, printer);
+      free(printer);
+    }
+    leaf = 0;   // Current node is not a leaf as it has outgoing edges from it.
+    setSuffixIndexByDFS(n->children[i], labelHeight + edgeLength(n->children[i]));
+  }
+  if (leaf == 1) {
+    for(i= n->start; i<= *(n->end); i++) if(text[i] == '+') {
+      n->end = (int*) malloc(sizeof(int));
+      *(n->end) = i;
+    }
     n->suffixIndex = totalStringLength - labelHeight;
     if (print_enabled == 1){
-      //print suffix index
       asprintf(&printer, " [%d]\n", n->suffixIndex);
       buildString(&tree_string,printer);
       free(printer);
     }
-   }
+  }
 }
 
 void freeSuffixTreeByPostOrder(Node *n)
 {
-  if (n == NULL)
-    return;
+  if (n == NULL) return;
   int i;
-  for (i = 0; i < MAX_CHAR; i++)
-   {
-    if (n->children[i] != NULL)
-     {
-      freeSuffixTreeByPostOrder(n->children[i]);
-     }
-   }
-  if (n->suffixIndex == -1)
-    free(n->end);
+  for (i = 0; i < MAX_CHAR; i++) if (n->children[i] != NULL) freeSuffixTreeByPostOrder(n->children[i]);
+  if (n->suffixIndex == -1) free(n->end);
   free(n);
 }
 
-/*Build the suffix tree and print the edge labels along with
-  suffixIndex. suffixIndex for leaf edges will be >= 0 and
-  for non-leaf edges will be -1*/
-int buildSuffixTree(unsigned char *string1, unsigned char *string2, unsigned char print_tree){
-  //First check if we have at least one valid string
-  if(string1 == NULL){
-    return 1;
-  }
+/*Build the suffix tree and print the edge labels along with suffixIndex. suffixIndex for leaf edges will be >= 0 and for non-leaf edges will be -1*/
+int buildSuffixTree (unsigned char *string1, unsigned char *string2, unsigned char print_tree) {
+  if(string1 == NULL) return 1; // First check if we have at least one valid string
   // Check if we are printing suffix tree
   print_enabled = print_tree;
 
   //Check if we have two strings
   //Two strings mean we are building a generalized suffix tree
   if(string2 != NULL){
-    asprintf(&text, "%s%c%s%c", string1, 43,  string2, 36);
+    asprintf (&text, "%s%c%s%c", string1, 43,  string2, 36);
     string1Length = strlen((const char*) string1);
   }
-  else{
-    asprintf(&text, "%s%c", string1, 36);
-  }
+  else asprintf (&text, "%s%c", string1, 36);
 
   totalStringLength = strlen((const char*) text);
   int i;
   rootEnd = (int*) malloc(sizeof(int));
   *rootEnd = - 1;
 
-  /*Root is a special node with start and end indices as -1,
-    as it has no parent from where an edge comes to root*/
-  root = newNode(-1, rootEnd);
+  root = newNode (-1, rootEnd); /* Root is a special node with start and end indices as -1 */
 
   activeNode = root; //First activeNode will be root
-  for (i=0; i<totalStringLength; i++)
-    extendSuffixTree(i);
+  for (i=0; i<totalStringLength; i++) extendSuffixTree(i);
   int labelHeight = 0;
-  setSuffixIndexByDFS(root, labelHeight);
+  setSuffixIndexByDFS (root, labelHeight);
 
   return 0;
 }
 
-int doTraversal(Node *n, int labelHeight, int* maxHeight,
-                int* substringStartIndex)
+int doTraversal(Node *n, int labelHeight, int* maxHeight, int* substringStartIndex)
 {
-  if(n == NULL)
-   {
-    return 0;
-   }
+  if(n == NULL) return 0;
   int i=0;
   int ret = -1;
-  if(n->suffixIndex < 0) //If it is internal node
-   {
-    for (i = 0; i < MAX_CHAR; i++)
-     {
-      if(n->children[i] != NULL)
-       {
-        ret = doTraversal(n->children[i], labelHeight +
-                          edgeLength(n->children[i]),
-                          maxHeight, substringStartIndex);
+// If it is internal node 
+  if(n->suffixIndex < 0) for (i = 0; i < MAX_CHAR; i++) if(n->children[i] != NULL) {
+    ret = doTraversal(n->children[i], labelHeight + edgeLength(n->children[i]), maxHeight, substringStartIndex);
+    if(n->suffixIndex == -1) n->suffixIndex = ret;
+    else if((n->suffixIndex == -2 && ret == -3) || (n->suffixIndex == -3 && ret == -2) || n->suffixIndex == -4) {
+      n->suffixIndex = -4; //Mark node as XY
 
-        if(n->suffixIndex == -1)
-          n->suffixIndex = ret;
-        else if((n->suffixIndex == -2 && ret == -3) ||
-                (n->suffixIndex == -3 && ret == -2) ||
-                n->suffixIndex == -4)
-         {
-          n->suffixIndex = -4; //Mark node as XY
+      if(*maxHeight < labelHeight) { // Keep track of deepest node
+        *maxHeight = labelHeight;
+        *substringStartIndex = *(n->end) - labelHeight + 1;
+      }
+    }
+  }
+  // suffix of X
+  else if(n->suffixIndex > -1 && n->suffixIndex < string1Length) return -2; //Mark node as X
+  // suffix of Y
+  else if(n->suffixIndex >= string1Length) return -3; //Mark node as Y
 
-          if(*maxHeight < labelHeight) //Keep track of deepest node
-           {
-            *maxHeight = labelHeight;
-            *substringStartIndex = *(n->end) -
-              labelHeight + 1;
-           }
-         }
-       }
-     }
-   }
-  else if(n->suffixIndex > -1 && n->suffixIndex < string1Length)//suffix of X
-    return -2;//Mark node as X
-  else if(n->suffixIndex >= string1Length)//suffix of Y
-    return -3;//Mark node as Y
   return n->suffixIndex;
 }
 
 int allCommonSubstringsTraversal(Node *n, int labelHeight)
 {
-  if(n == NULL)
-   {
-    return 0;
-   }
+  if(n == NULL)   return 0;
   int i=0;
   int ret = -1;
-  if(n->suffixIndex < 0) //If it is internal node
-   {
-    for (i = 0; i < MAX_CHAR; i++)
-     {
-      if(n->children[i] != NULL)
-       {
-        ret = allCommonSubstringsTraversal(n->children[i], labelHeight + edgeLength(n->children[i]));
+  // If it is internal node
+  if(n->suffixIndex < 0)  for (i = 0; i < MAX_CHAR; i++) if(n->children[i] != NULL) {
+    ret = allCommonSubstringsTraversal(n->children[i], labelHeight + edgeLength(n->children[i]));
 
-        if(n->suffixIndex == -1)
-          n->suffixIndex = ret;
-        else if((n->suffixIndex == -2 && ret == -3) ||
-                (n->suffixIndex == -3 && ret == -2) ||
-                n->suffixIndex == -4)
-         {
-          n->suffixIndex = -4;//Mark node as XY
-          if(labelHeight > 2){
-            if (subtrings[i].stringend == 0 || n->start < subtrings[i].stringstart){
-              subtrings[i].stringstart = n->start;
-              subtrings[i].stringend = *(n->end);
-            }
-          }
-         }
-       }
-     }
-   }
-  else if(n->suffixIndex > -1 && n->suffixIndex < string1Length)//suffix of X
-    return -2;//Mark node as X
-  else if(n->suffixIndex >= string1Length)//suffix of Y
-    return -3;//Mark node as Y
+    if(n->suffixIndex == -1) n->suffixIndex = ret;
+    else if((n->suffixIndex == -2 && ret == -3) || (n->suffixIndex == -3 && ret == -2) || n->suffixIndex == -4) {
+      n->suffixIndex = -4; // Mark node as XY
+      if(labelHeight > 2) if (subtrings[i].stringend == 0 || n->start < subtrings[i].stringstart) {
+          subtrings[i].stringstart = n->start;
+          subtrings[i].stringend = *(n->end);
+        }
+    }
+  }
+  //suffix of X
+  else if(n->suffixIndex > -1 && n->suffixIndex < string1Length) return -2;//Mark node as X
+  //suffix of Y
+  else if(n->suffixIndex >= string1Length) return -3;//Mark node as Y
   return n->suffixIndex;
 }
 
@@ -449,197 +375,130 @@ char *getLongestCommonSubstring(unsigned char *string1, unsigned char *string2, 
   int maxHeight = 0;
   int substringStartIndex = 0;
 
-
   //First check if we have two strings
-  if((string1 == NULL) || (string2 == NULL)){
-    return NULL;
-  }
+  if((string1 == NULL) || (string2 == NULL)) return NULL;
   buildSuffixTree(string1, string2, print_tree);
   doTraversal(root, 0, &maxHeight, &substringStartIndex);
   static char *longest_substring = NULL;
   char *printer;
   int k;
   buildString(&longest_substring,"");
-  for (k=0; k<maxHeight; k++){
+  for (k=0; k<maxHeight; k++) {
     asprintf(&printer, "%c", text[k + substringStartIndex]);
     buildString(&longest_substring,printer);
     free(printer);
-
   }
-  if(k == 0){
-    buildString(&longest_substring,"No common substring");
-  }
-  else{
+  if(k == 0) buildString(&longest_substring,"No common substring");
+  else {
     asprintf(&printer, ", of length: %d",maxHeight);
     buildString(&longest_substring,printer);
     free(printer);
   }
   buildString(&longest_substring,"\n");
 
-
   //Free the dynamically allocated memory
   freeSuffixTreeByPostOrder(root);
-
   return longest_substring;
 }
 
 char *getAllCommonSubstrings(unsigned char *string1, unsigned char *string2, unsigned char print_tree){
-  //First check if we have two strings
-  if((string1 == NULL) || (string2 == NULL)){
-    return NULL;
-  }
+  if((string1 == NULL) || (string2 == NULL)) return NULL;
   buildSuffixTree(string1, string2, print_tree);
 
   int i = 0;
   allCommonSubstringsTraversal(root, 0);
 
-  for (i = 0; i < MAX_CHAR; i++){
-    if(subtrings[i].stringend != 0){
-      printf("string start: %d \n",subtrings[i].stringstart);
-      printf("string end: %d \n",subtrings[i].stringend);
-    }
+  for (i = 0; i < MAX_CHAR; i++) if(subtrings[i].stringend != 0) {
+    printf("string start: %d \n",subtrings[i].stringstart);
+    printf("string end: %d \n",subtrings[i].stringend);
   }
 
   return NULL;
 }
 
-int traverseEdge(unsigned char *str, int idx, int start, int end){
+int traverseEdge(unsigned char *str, int idx, int start, int end) {
   int k = 0;
   //Traverse the edge with character by character matching
-  for(k=start; k<=end && str[idx] != '\0'; k++, idx++)
-   {
-    if(text[k] != str[idx])
-      return -1;  // mo match
-   }
-  if(str[idx] == '\0')
-    return 1;  // match
+  for(k=start; k<=end && str[idx] != '\0'; k++, idx++) if(text[k] != str[idx]) return -1;  // mo match
+  if(str[idx] == '\0') return 1;  // match
   return 0;  // more characters yet to match
 }
 
-int substringTraversal(Node *n,unsigned char* str, int idx){
-  if(n == NULL)
-   {
-    return -1; // no match
-   }
+int substringTraversal(Node *n,unsigned char* str, int idx) {
+  if(n == NULL) return -1; // no match
   int res = -1;
-  //If node n is not root node, then traverse edge
-  //from node n's parent to node n.
-  if(n->start != -1)
-   {
+  //If node n is not root node, then traverse edge from node n's parent to node n.
+  if(n->start != -1) {
     res = traverseEdge(str, idx, n->start, *(n->end));
-    if(res != 0)
-      return res;  // match (res = 1) or no match (res = -1)
-   }
-  //Get the character index to search
-  idx = idx + edgeLength(n);
-  //If there is an edge from node n going out
-  //with current character str[idx], travrse that edge
-  if(n->children[str[idx]] != NULL)
-    return substringTraversal(n->children[str[idx]], str, idx);
-  else
-    return -1;  // no match
+    if(res != 0) return res;  // match (res = 1) or no match (res = -1)
+  }
+  idx = idx + edgeLength(n);  // Get the character index to search
+  //If there is an edge from node n going out with current character str[idx], travrse that edge
+  if(n->children[str[idx]] != NULL) return substringTraversal(n->children[str[idx]], str, idx);
+  else return -1;  // no match
 }
 
 int doTraversalToCountLeaf(Node *n){
-  if(n == NULL)
-    return 0;
-  if(n->suffixIndex > -1)
-   {
+  if(n == NULL) return 0;
+  if(n->suffixIndex > -1) {
     vector_append(&vector, n->suffixIndex);
     return 1;
-   }
+  }
   int count = 0;
   int i = 0;
-  for (i = 0; i < MAX_CHAR; i++)
-   {
-    if(n->children[i] != NULL)
-     {
-      count += doTraversalToCountLeaf(n->children[i]);
-     }
-   }
+  for (i = 0; i < MAX_CHAR; i++) if(n->children[i] != NULL) count += doTraversalToCountLeaf(n->children[i]);
   return count;
 }
 
-int countLeaf(Node *n){
-  if(n == NULL)
-    return 0;
+int countLeaf(Node *n) {
+  if(n == NULL) return 0;
   return doTraversalToCountLeaf(n);
 }
 
 int substringAllOccurenceTraversal(Node *n, unsigned char* str, int idx){
-  if(n == NULL)
-   {
-    return -1; // no match
-   }
+  if(n == NULL) return -1; // no match
   int res = -1;
-  //If node n is not root node, then traverse edge
-  //from node n's parent to node n.
-  if(n->start != -1)
-   {
+  //If node n is not root node, then traverse edge from node n's parent to node n.
+  if(n->start != -1) {
     res = traverseEdge(str, idx, n->start, *(n->end));
-    if(res == -1)  //no match
-      return -1;
-    if(res == 1) //match
-     {
-      if(n->suffixIndex > -1){
+    if(res == -1) return -1;//no match
+    if(res == 1) {//match
+      if(n->suffixIndex > -1) {
         vector_set(&vector, 0, 1);
         vector_append(&vector, n->suffixIndex);
       }
-      else{
+      else {
         int leaf_count = countLeaf(n);
         vector_set(&vector, 0, leaf_count);
       }
       return 1;
-     }
-   }
-  //Get the character index to search
+    }
+  }
+  // Get the character index to search
   idx = idx + edgeLength(n);
-  //If there is an edge from node n going out
-  //with current character str[idx], travrse that edge
-  if(n->children[str[idx]] != NULL)
-    return substringAllOccurenceTraversal(n->children[str[idx]], str, idx);
-  else
-    return -1;  // no match
+  // If there is an edge from node n going out with current character str[idx], travrse that edge
+  if(n->children[str[idx]] != NULL) return substringAllOccurenceTraversal(n->children[str[idx]], str, idx);
+  else return -1;  // no match
 }
 
-void longestRepeatedSubstringTraversal(Node *n, int labelHeight,
-                                       int* maxHeight,
-                                       int* substringStartIndex){
-  if(n == NULL)
-   {
-    return;
-   }
+void longestRepeatedSubstringTraversal(Node *n, int labelHeight, int* maxHeight, int* substringStartIndex) {
+  if(n == NULL) return;
   int i=0;
-  if(n->suffixIndex == -1) //If it is internal node
-   {
-    for (i = 0; i < MAX_CHAR; i++)
-     {
-      if(n->children[i] != NULL)
-       {
-        longestRepeatedSubstringTraversal(n->children[i], labelHeight +
-                                          edgeLength(n->children[i]), maxHeight,
-                                          substringStartIndex);
-       }
-     }
-   }
-  else if(n->suffixIndex > -1 &&
-          (*maxHeight < labelHeight - edgeLength(n)))
-   {
+  // If it is internal node
+  if(n->suffixIndex == -1) for (i = 0; i < MAX_CHAR; i++) if(n->children[i] != NULL)
+    longestRepeatedSubstringTraversal(n->children[i], labelHeight + edgeLength(n->children[i]), maxHeight, substringStartIndex);
+  else if (n->suffixIndex > -1 && (*maxHeight < labelHeight - edgeLength(n))) {
     *maxHeight = labelHeight - edgeLength(n);
     *substringStartIndex = n->suffixIndex;
-   }
+  }
 }
 
-int checkForSubString(unsigned char* search_string, unsigned char* source_string){
+int checkForSubString(unsigned char* search_string, unsigned char* source_string) {
   buildSuffixTree(source_string, NULL, 0);
   int res = substringTraversal(root, search_string, 0);
-  //Free the dynamically allocated memory
-  freeSuffixTreeByPostOrder(root);
-
-  if(res == 1)
-    return 1;
-  else
-    return 0;
+  freeSuffixTreeByPostOrder(root); // Free the dynamically allocated memory
+  if(res == 1) return 1;
+  else return 0;
 }
 
 int *checkAllSubStringOccurences(unsigned char* search_string, unsigned char* source_string){
@@ -648,18 +507,13 @@ int *checkAllSubStringOccurences(unsigned char* search_string, unsigned char* so
 
   buildSuffixTree(source_string, NULL, 0);
   int res = substringAllOccurenceTraversal(root, search_string, 0);
-  //Free the dynamically allocated memory
-  freeSuffixTreeByPostOrder(root);
+  freeSuffixTreeByPostOrder(root);  //Free the dynamically allocated memory
 
   const int len = vector.size * sizeof(int);
   int * result_array = malloc(len);
 
-  if(res == 1){
-    memcpy(result_array, vector.data, len);
-  }
-  else{
-    result_array[0] = 0;
-  }
+  if(res == 1) memcpy(result_array, vector.data, len);
+  else result_array[0] = 0;
   vector_free(&vector);
   return result_array;
 }
@@ -682,20 +536,15 @@ char * getLongestRepeatedSubstring(unsigned char* source_string){
     asprintf(&printer, "%c", text[k + substringStartIndex]);
     strcat(longest_repeat, printer);
     free(printer);
-
   }
-  if(k == 0){
-    buildString(&longest_repeat,"No repeated substring");
-  }
+  if(k == 0) buildString(&longest_repeat,"No repeated substring");
 
   return longest_repeat;
 }
 
 void buildString(char** current_text, const char *new_text){
   size_t new_len = strlen(new_text) + 1; /* + 1 for terminating NULL */
-  if (*current_text == NULL){
-    *current_text = malloc(new_len);
-  }
+  if (*current_text == NULL) *current_text = malloc(new_len);
   size_t current_len = strlen(*current_text);
   *current_text = realloc(*current_text, (new_len + current_len));
   strncat(*current_text, new_text, new_len);
@@ -704,20 +553,14 @@ void buildString(char** current_text, const char *new_text){
 /*  Vector (Dynamic Array) helper functions  */
 
 void vector_init(Vector *vector) {
-  // initialize size and capacity
-  vector->size = 0;
+  vector->size = 0;  // initialize size and capacity
   vector->capacity = 1;
-
-  // allocate memory for vector->data
-  vector->data = malloc(sizeof(int) * vector->capacity);
+  vector->data = malloc(sizeof(int) * vector->capacity);// allocate memory for vector->data
 }
 
 void vector_append(Vector *vector, int value) {
-  // make sure there's room to expand into
-  vector_double_capacity_if_full(vector);
-
-  // append the value and increment vector->size
-  vector->data[vector->size++] = value;
+  vector_double_capacity_if_full(vector);// make sure there's room to expand into
+  vector->data[vector->size++] = value;  // append the value and increment vector->size
 }
 
 int vector_get(Vector *vector, int index) {
@@ -730,12 +573,8 @@ int vector_get(Vector *vector, int index) {
 
 void vector_set(Vector *vector, int index, int value) {
   // zero fill the vector up to the desired index
-  while (index >= vector->size) {
-    vector_append(vector, 0);
-  }
-
-  // set the value at the desired index
-  vector->data[index] = value;
+  while (index >= vector->size) vector_append(vector, 0);
+  vector->data[index] = value;// set the value at the desired index
 }
 
 void vector_double_capacity_if_full(Vector *vector) {
