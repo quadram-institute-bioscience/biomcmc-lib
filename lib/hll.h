@@ -41,7 +41,7 @@ struct hll_estimate_s {
   uint16_t n_buckets;       /** Number of buckets */
   uint16_t n_empty_buckets; /** Number of empty buckets */
   uint64_t estimate;        /** Final estimated cardinality */
-  uint64_t hll_estimate;    /** HLL estimated cardinaloty, before any correction */
+  uint64_t hll_estimate;    /** HLL estimated cardinality, before any correction */
   uint64_t small_range_estimate; /** Small range estimated cardinality */
   uint64_t large_range_estimate; /** Large range estimated cardinality */
 };

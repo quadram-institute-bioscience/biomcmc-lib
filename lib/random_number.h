@@ -132,6 +132,7 @@ extern uint32_t biomcmc_rng_unif_int (uint32_t n);
 
 void biomcmc_rng_set_next_algorithm (void);
 void biomcmc_rng_set_algorithm (uint8_t algo);
+uint8_t biomcmc_rng_get_algorithm (void);
 
 /* * * low level functions (direct access to generator) */
 

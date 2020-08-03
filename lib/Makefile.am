@@ -1,6 +1,5 @@
 AM_CPPFLAGS = $(GTKDEPS_CFLAGS)  @OPENMP_CPPFLAGS@
 AM_CFLAGS = @AM_CFLAGS@  @OPENMP_CFLAGS@
-LDADD = $(GTKDEPS_LIBS) $(AM_LDFLAGS)
 
 # ideally I would hide reconciliation.h etc used only inside genetree.c 
 common_headers = hashtable.h lowlevel.h random_number_gen.h constant_random_lists.h random_number.h nexus_common.h \
@@ -19,12 +18,21 @@ common_src     = hashtable.c lowlevel.c random_number_gen.c constant_random_list
                  kmerhash.c hashfunctions.c distance_generator.c clustering_goptics.c \
                  quickselect_quantile.c fortune_cookies.c
 
-#noinst_LTLIBRARIES = libbiomcmc.la # convenience lib (not installed globally)
-lib_LTLIBRARIES = libbiomcmc.la  # libedlib.la # libtools 
 otherincludedir = $(includedir)/biomcmc
 otherinclude_HEADERS = config.h $(common_headers) # if headers are here (=global) should not be on SOURCES (=local)
+
+lib_LTLIBRARIES = libbiomcmc.la  # libedlib.la # libtools 
 libbiomcmc_la_SOURCES = $(common_src) $(common_headers) config.h # listed here s.t. any change triggers recompilation 
+libbiomcmc_la_CPPFLAGS = $(AM_CPPFLAGS)
+libbiomcmc_la_CFLAGS = $(AM_CFLAGS) 
+libbiomcmc_la_LIBADD = $(GTKDEPS_LIBS) $(AM_LDFLAGS)
+
+
+noinst_LTLIBRARIES = libbiomcmc_static.la # convenience lib (not installed globally)
+libbiomcmc_static_la_SOURCES = $(libbiomcmc_la_SOURCES)
+libbiomcmc_static_la_CPPFLAGS = $(libbiomcmc_la_CPPFLAGS)
+libbiomcmc_static_la_CFLAGS = $(libbiomcmc_la_CFLAGS)
+
 #libbiomcmc_la_LIBADD   = libedlib.la
 #libedlib_la_SOURCES = edlib.cpp edlib.h
 #libedlib_la_CXXFLAGS =  -std=c++03 $(CXXFLAGS) #c++98 c++03 c++11
-

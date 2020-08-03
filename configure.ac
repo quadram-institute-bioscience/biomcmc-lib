@@ -22,10 +22,10 @@ dnl Basic compiler and related tools
 AC_LANG_C
 AC_PROG_CC
 AC_PROG_INSTALL
-AC_PROG_RANLIB
 dnl directs the libc header files to provide the standard GNU system interfaces including all GNU extensions
 AC_GNU_SOURCE
 dnl Libtool (for library): in lib/Makefile.am, we include an "abstract" libfoo.la
+LT_INIT
 AC_PROG_LIBTOOL
 
 dnl openMP: sets $OPENMP_CFLAGS which should be passed to CFLAGS, CPPFLAGS; creates preprocessor macro _OPENMP 

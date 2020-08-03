@@ -25,6 +25,14 @@ This library is usually not installed directly, but as a submodule of another pr
 It includes, however, the `makefile.am` and `configure.ac` for autotools, and it provides unit tests from the
 [libcheck](https://github.com/libcheck/check) library as well as custom checks. 
 
+Notice that two libraries are installed, `libbiomcmc.la` and `libbiomcmc_static.la` (with `.a` and `.so` versions). 
+The first (`libbiomcmc.la`) is installed with `make install` and is available "globally" or wherever you tell it with
+`--prefix`.
+The second version is a [convenience library](https://www.gnu.org/software/automake/manual/html_node/Libtool-Convenience-Libraries.html)
+that is used with other programs (through `autotools` subdirs usually) and is not shared. 
+Until recently this was the only library, but in a few cases (e.g. python's `setuptools`) we may need the dynamic,
+shared version.
+
 ## Algorithms 
 This is a very incomplete list! For a more complete, although more technical list, you should take a look at the doxygen documentation of the API by running 
 doxygen yourself in the `docs` directory. I also maintain a (sometimes outdated) web version of it [here](https://leomrtns.github.io/doxygen-biomcmclib).

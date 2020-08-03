@@ -220,6 +220,12 @@ biomcmc_rng_set_algorithm (uint8_t algo)
    biomcmc_random_number->algorithm = algo%10; 
 }
 
+uint8_t
+biomcmc_rng_get_algorithm (void)
+{
+   return biomcmc_random_number->algorithm; 
+}
+
 inline uint64_t
 biomcmc_rng_get (void)
 {
