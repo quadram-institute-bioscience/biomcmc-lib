@@ -136,6 +136,11 @@ biomcmc-lib is free software; you can redistribute it and/or modify it under the
 License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later
 version (http://www.gnu.org/copyleft/gpl.html).
 
+#### Acknowledgements and external libraries
+
+biomcmc-lib and its derived sofware incorporate or were inspired by many existing open source libraries and publicly available 
+implementations.
+For a complete list, please see the file [README_algorithms.md](README_algorithms.md)
 The files `argtable3.c` and `argtable3.h` are part of the [argtable3](https://www.argtable.org/) library, maintained by
 Tom G. Huang at the time of this writting  and are distributed under a BSD license. Please refer to 
 https://github.com/argtable/argtable3 for the list of authors.
