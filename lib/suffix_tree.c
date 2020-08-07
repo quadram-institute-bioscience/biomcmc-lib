@@ -21,41 +21,81 @@
 #include "suffix_tree.h"
 
 
-#define MAX_CHAR 256
+#define size_of_char 256
 
-struct SuffixTreeNode {
-  struct SuffixTreeNode *children[MAX_CHAR];
-  //pointer to other node via suffix link
-  struct SuffixTreeNode *suffixLink;
-  int start;
-  int *end;
-  int suffixIndex;
+typedef struct STNode_struct* STNode;
+typedef struct suffix_tree_struct* suffix_tree;
+
+struct STNode_struct 
+{
+  struct STNode children[size_of_char];
+  struct STNode suffixLink;  //pointer to other node via suffix link
+  int start, *end, suffixIndex;
 };
 
-typedef struct SuffixTreeNode Node;
-// Global variable declaration 
-char text[22000]; 
-Node *root = NULL; 
+struct suffix_tree_struct
+{
+char *text; 
+bool text_allocated_here; // tells if text is link (make sure not freed upstream) or alloced (uses more memory)
+STNode root, lastNewSTNode, activeSTNode;
+int activeEdge, activeLength, remainingSuffixCount;
+int size, leafEnd,rootEnd, splitEnd;
+};
 
-Node *lastNewNode = NULL;
-Node *activeNode = NULL;
 
-int activeEdge = -1;
-int activeLength = 0;
+//void buildSuffixTree()
+suffix_tree new_suffix_tree (char *input_text, bool create_text_copy)
+{
+  int i;
+  suftre = (suffix_tree) biomcmc_malloc (sizeof (struct suffix_tree_struct));
+  text_size = strlen(input_text);
+  suftre->text_allocated_here = create_text_copy; // used by del_suffix_tree() 
+  if (suftre->text_allocated_here) {
+    suftre->text = (char*) biomcmc_malloc ((text_size+1) * sizeof (char));
+    strncpy(suftre->text, input_text, text_size);
+    suftre->text[text_size] = '\0'; // original code has '$' but not used... 
+  }
+  else suftre->text = input_text;
 
-int remainingSuffixCount = 0;
-int leafEnd = -1;
-int *rootEnd = NULL;
-int *splitEnd = NULL;
-int size = -1; 
-// End GLobal Variable Declaration
+  suftre->lastNewSTNode = NULL;
+  suftre->activeSTNode = NULL;
+  suftre->activeEdge = -1;
+  suftre->activeLength = 0;
+  suftre->remainingSuffixCount = 0;
+  suftre->splitEnd = -1;
+  suftre->leafEnd = -1;
+  suftre->rootEnd = -1;
+  suftre->root = newSTNode (-1, &(suftre->rootEnd));
+  suftre->activeSTNode = suftre->root; 
+  for (i = 0; i < text_size; i++) extendSuffixTree (suftre, i);
+  setSuffixIndexByDFS (suftre->root, 0);
+}
+
+void del_suffix_tree (suffix_tree suftre)
+{ 
+  if (!suftre) return;
+  freeSuffixTreeByPostOrder(suftre->root);
+  if ((suftre->text_allocated_here) && (suftre->text)) free (suftre->text);
+  suftre->text = NULL;
+  free (suftre);
+}
+
+void freeSuffixTreeByPostOrder(STNode *n)
+{
+  if (!n) return;
+  int i;
+  for (i = 0; i < size_of_char; i++) if (n->children[i]) freeSuffixTreeByPostOrder (n->children[i]);
+  if ((n->suffixIndex == -1) && (n->end != NULL)) free (n->end);
+  free (n);
+}
+
 
 // Structure and Functions for extending tree  
-Node *newNode(int start, int *end)
+STNode *newSTNode(int start, int *end)
 {
-  Node *node =(Node*) malloc(sizeof(Node));
+  STNode *node =(STNode*) malloc(sizeof(STNode));
   int i;
-  for (i = 0; i < MAX_CHAR; i++) node->children[i] = NULL;
+  for (i = 0; i < size_of_char; i++) node->children[i] = NULL;
   node->suffixLink = root;
   node->start = start;
   node->end = end;
@@ -63,16 +103,16 @@ Node *newNode(int start, int *end)
   return node;
 }
 
-int edgeLength(Node *n) {
+int edgeLength(STNode *n) {
   return *(n->end) - (n->start) + 1;
 }
 
-int walkDown(Node *currNode)
+int walkDown(STNode *currSTNode)
 {
-  if (activeLength >= edgeLength(currNode)) {
-    activeEdge += edgeLength(currNode);
-    activeLength -= edgeLength(currNode);
-    activeNode = currNode;
+  if (activeLength >= edgeLength(currSTNode)) {
+    activeEdge += edgeLength(currSTNode);
+    activeLength -= edgeLength(currSTNode);
+    activeSTNode = currSTNode;
     return 1;
    }
   return 0;
@@ -83,25 +123,25 @@ void extendSuffixTree(int pos)
 
   leafEnd = pos;
   remainingSuffixCount++;
-  lastNewNode = NULL;
+  lastNewSTNode = NULL;
 
   while(remainingSuffixCount > 0) {
     if (activeLength == 0) activeEdge = pos; 
   
-    if (activeNode->children[text[activeEdge]] == NULL) {  // first character of edge not found
-      activeNode->children[text[activeEdge]] = newNode(pos, &leafEnd);
-      if (lastNewNode != NULL) {
-        lastNewNode->suffixLink = activeNode;
-        lastNewNode = NULL;
+    if (activeSTNode->children[text[activeEdge]] == NULL) {  // first character of edge not found
+      activeSTNode->children[text[activeEdge]] = newSTNode(pos, &leafEnd);
+      if (lastNewSTNode != NULL) {
+        lastNewSTNode->suffixLink = activeSTNode;
+        lastNewSTNode = NULL;
        }
      }
     else {  // first character of edge found
-      Node *next = activeNode->children[text[activeEdge]];
+      STNode *next = activeSTNode->children[text[activeEdge]];
       if (walkDown(next)) continue;
       if (text[next->start + activeLength] == text[pos]) {// Rule 3 found, end phase //
-        if(lastNewNode != NULL && activeNode != root) {
-          lastNewNode->suffixLink = activeNode;
-          lastNewNode = NULL;
+        if(lastNewSTNode != NULL && activeSTNode != root) {
+          lastNewSTNode->suffixLink = activeSTNode;
+          lastNewSTNode = NULL;
          }
         activeLength++;
         break;
@@ -110,35 +150,35 @@ void extendSuffixTree(int pos)
       splitEnd = (int*) malloc(sizeof(int));
       *splitEnd = next->start + activeLength - 1;
 
-      Node *split = newNode(next->start, splitEnd);
-      activeNode->children[text[activeEdge]] = split;
+      STNode *split = newSTNode(next->start, splitEnd);
+      activeSTNode->children[text[activeEdge]] = split;
 
-      split->children[text[pos]] = newNode(pos, &leafEnd);
+      split->children[text[pos]] = newSTNode(pos, &leafEnd);
       next->start += activeLength;
       split->children[text[next->start]] = next;
 
-      if (lastNewNode != NULL)    lastNewNode->suffixLink = split;
-      lastNewNode = split;
+      if (lastNewSTNode != NULL)    lastNewSTNode->suffixLink = split;
+      lastNewSTNode = split;
      }
   
     remainingSuffixCount--;  // decrease remaining leaf nodes to be created 
-    if (activeNode == root && activeLength > 0) { // update activeNode for next extension //
+    if (activeSTNode == root && activeLength > 0) { // update activeSTNode for next extension //
       activeLength--;
       activeEdge = pos - remainingSuffixCount + 1;
      }
-    else if (activeNode != root)  activeNode = activeNode->suffixLink;
+    else if (activeSTNode != root)  activeSTNode = activeSTNode->suffixLink;
   }
 }
 // End Structure and Functions for extending tree Definitions  
 
 //Functions for printing Suffix Tree and Labeling Leaf nodes//
-void setSuffixIndexByDFS(Node *n, int labelHeight)
+void setSuffixIndexByDFS(STNode *n, int labelHeight)
 {
   if (n == NULL)  return;
 
   int leaf = 1;
   int i;
-  for (i = 0; i < MAX_CHAR; i++)  if (n->children[i] != NULL) {
+  for (i = 0; i < size_of_char; i++)  if (n->children[i] != NULL) {
       leaf = 0;
       setSuffixIndexByDFS(n->children[i], labelHeight + edgeLength(n->children[i]));
      }
@@ -146,37 +186,16 @@ void setSuffixIndexByDFS(Node *n, int labelHeight)
 }
 
 // free allocated memory where children are NULL// 
-void freeSuffixTreeByPostOrder(Node *n)
-{
-  if (n == NULL) return;
-  int i;
-  for (i = 0; i < MAX_CHAR; i++) if (n->children[i] != NULL) freeSuffixTreeByPostOrder(n->children[i]);
-  if (n->suffixIndex == -1) free(n->end);
-  free(n);
-}
-
-void buildSuffixTree()
-{
-  size = strlen(text);
-  int i;
-  rootEnd = (int*) malloc(sizeof(int));
-  *rootEnd = - 1;
-  root = newNode(-1, rootEnd);
-  activeNode = root; 
-  for (i=0; i<size; i++) extendSuffixTree(i);
-  int labelHeight = 0;
-  setSuffixIndexByDFS(root, labelHeight);
-}
 //End of Functions for printing Suffix Tree and Labeling Leaf nodes//
 
 // pattern search  version2.0
-Node* pickEdge(Node* node, char* p, int pos) {
+STNode* pickEdge(STNode* node, char* p, int pos) {
   char c = p[pos];
   if(node->children[c] != NULL) return node->children[c];
   return NULL;
 }
 
-int traverseEdge(Node* node, char* p, int pos) {
+int traverseEdge(STNode* node, char* p, int pos) {
   int i, flag=0;
   for(i = 0; i < edgeLength(node) || p[pos] == '\0'; i++, pos++) if(text[(node->start) + i] != p[pos]) {
       flag = -1;
@@ -187,8 +206,8 @@ int traverseEdge(Node* node, char* p, int pos) {
   return 1;
 }
 
-Node* findLocusNode(char* p) {
-  Node* u = malloc(sizeof(Node));
+STNode* findLocusSTNode(char* p) {
+  STNode* u = malloc(sizeof(STNode));
   u = root;
   int pos = 0;
   while(p[pos] != '\0') {
@@ -204,12 +223,12 @@ Node* findLocusNode(char* p) {
   return NULL;	
 }
 
-void subtreeDFS (Node* u) 
+void subtreeDFS (STNode* u) 
 {
   if(u != NULL && u->suffixIndex != -1) printf("Index:%d\n", u->suffixIndex);
   if (u == NULL) return;
   int i;
-  for(i = 0; i < MAX_CHAR; i++) if(u->children[i] != NULL) {
+  for(i = 0; i < size_of_char; i++) if(u->children[i] != NULL) {
       if(u->children[i]->suffixIndex == -1) subtreeDFS(u->children[i]);
       else printf("Index:%d\n", u->children[i]->suffixIndex);//Leo:idx of match
     }
@@ -217,12 +236,12 @@ void subtreeDFS (Node* u)
 // end of pattern search v2.0 //
 
 // memory usage tracking function 
-int sizeofTree(Node* u) 
+int sizeofTree(STNode* u) 
 {		
   if(u == NULL) return 0;
   if(u->suffixIndex != -1) return sizeof(u);
   int i, size = 0;
-  for(i = 0; i < MAX_CHAR; i++) if(u->children[i] != NULL) size += sizeofTree(u->children[i]);
+  for(i = 0; i < size_of_char; i++) if(u->children[i] != NULL) size += sizeofTree(u->children[i]);
   return size;
 }
 // end of memory usage tracking function //
@@ -264,10 +283,9 @@ int main()
     if(strlen(pattern) == 0)
       break;
     printf("Pattern: %s\n", pattern);
-    subtreeDFS(findLocusNode(pattern));	
+    subtreeDFS(findLocusSTNode(pattern));	
 
   }
   freeSuffixTreeByPostOrder(root);
-  //checkForSubString("abc");
   return 0;
 }
