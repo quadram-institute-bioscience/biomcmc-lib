@@ -29,8 +29,8 @@ typedef struct st_matches_struct* st_matches;
 
 struct STNode_struct 
 {
-  struct STNode children[size_of_char];
-  struct STNode suffixLink;  //pointer to other node via suffix link
+  STNode children[size_of_char];
+  STNode suffixLink;  //pointer to other node via suffix link
   int start, *end, suffixIndex;
 };
 
@@ -46,7 +46,15 @@ struct suffix_tree_struct
 struct st_matches_struct
 {
   int *idx, n_idx, length;
-  bool 
+  bool is_partial; 
 };
+
+suffix_tree new_suffix_tree (char *input_text, bool create_text_copy);
+void del_suffix_tree (suffix_tree suftre);
+
+st_matches new_st_matches_from_pattern (char *pattern, suffix_tree subtre);
+void del_st_matches (st_matches match);
+
+int sizeof_suffix_tree (suffix_tree suftre);
 
 #endif

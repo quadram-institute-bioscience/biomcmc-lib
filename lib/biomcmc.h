@@ -27,6 +27,7 @@ extern "C" {
 
 #include "argtable3.h"
 #include "fortune_cookies.h"
+#include "suffix_tree.h"
 #include "kmerhash.h"
 #include "parsimony.h"
 #include "genetree.h"
