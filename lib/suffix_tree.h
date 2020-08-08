@@ -25,6 +25,7 @@
 #define size_of_char 256
 typedef struct STNode_struct* STNode;
 typedef struct suffix_tree_struct* suffix_tree;
+typedef struct st_matches_struct* st_matches;
 
 struct STNode_struct 
 {
@@ -40,6 +41,12 @@ struct suffix_tree_struct
   STNode root, lastNewSTNode, activeSTNode;
   int activeEdge, activeLength, remainingSuffixCount;
   int size, leafEnd,rootEnd, splitEnd; // rootend, splitend are pointers in original
+};
+
+struct st_matches_struct
+{
+  int *idx, n_idx, length;
+  bool 
 };
 
 #endif
