@@ -22,4 +22,24 @@
 #include "lowlevel.h"
 
 
+#define size_of_char 256
+typedef struct STNode_struct* STNode;
+typedef struct suffix_tree_struct* suffix_tree;
+
+struct STNode_struct 
+{
+  struct STNode children[size_of_char];
+  struct STNode suffixLink;  //pointer to other node via suffix link
+  int start, *end, suffixIndex;
+};
+
+struct suffix_tree_struct
+{
+  char *text; 
+  bool text_allocated_here; // tells if text is link (make sure not freed upstream) or alloced (uses more memory)
+  STNode root, lastNewSTNode, activeSTNode;
+  int activeEdge, activeLength, remainingSuffixCount;
+  int size, leafEnd,rootEnd, splitEnd; // rootend, splitend are pointers in original
+};
+
 #endif
