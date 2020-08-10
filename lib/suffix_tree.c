@@ -20,6 +20,8 @@
 
 #include "suffix_tree.h"
 
+#define size_of_char 256 // max degree of each node (number of children)
+
 st_matches new_st_matches (void);
 void st_matches_insert (st_matches match, int id);
 void freeSuffixTreeByPostOrder (STNode n);
@@ -34,11 +36,10 @@ void subTreeDFS (STNode u, suffix_tree suftre, st_matches match);
 int sizeof_suffix_tree_below_node (STNode u);
 
 suffix_tree 
-new_suffix_tree (char *input_text, bool create_text_copy)
+new_suffix_tree (char *input_text, size_t text_size, bool create_text_copy)
 {
   int i;
   suffix_tree suftre = (suffix_tree) biomcmc_malloc (sizeof (struct suffix_tree_struct));
-  size_t text_size = strlen(input_text);
   suftre->text_allocated_here = create_text_copy; // used by del_suffix_tree() 
   if (suftre->text_allocated_here || (input_text[text_size] != '\0')) {
     suftre->text_allocated_here = true;
@@ -55,8 +56,9 @@ new_suffix_tree (char *input_text, bool create_text_copy)
   suftre->splitEnd = suftre->leafEnd = suftre->rootEnd = suftre->size = -1;
   suftre->root = new_STNode (-1, &(suftre->rootEnd), suftre);
   suftre->activeSTNode = suftre->root; 
-  for (i = 0; i < text_size; i++) extendSuffixTree (suftre, i);
+  for (i = 0; i < (int) text_size; i++) extendSuffixTree (suftre, i);
   setSuffixIndexByDFS (suftre->root, 0, suftre);
+  return suftre;
 }
 
 void 
@@ -73,7 +75,7 @@ st_matches
 new_st_matches (void)
 {
   st_matches match = (st_matches) biomcmc_malloc (sizeof (struct st_matches_struct));
-  match->idx = NULL; // alllocated by insert()
+  match->idx = (int*) biomcmc_malloc (sizeof (int)); // could be NULL and let realloc take care  
   match->n_idx = match->length = 0;
   match->is_partial = false;
   return match;
@@ -99,16 +101,20 @@ freeSuffixTreeByPostOrder (STNode n)
 {
   if (!n) return;
   int i;
-  for (i = 0; i < size_of_char; i++) if (n->children[i]) freeSuffixTreeByPostOrder (n->children[i]);
-  if ((n->suffixIndex == -1) && (n->end)) free (n->end);
+  if (n->children) {
+    for (i = size_of_char; i >= 0; i--) freeSuffixTreeByPostOrder (n->children[i]);
+    free (n->children);
+  }
   free (n);
+  return;
 }
 
 STNode 
 new_STNode (int start, int *end, suffix_tree suftre)
 {
-  STNode node = (STNode) biomcmc_malloc (sizeof (struct STNode_struct));
   int i;
+  STNode node = (STNode) biomcmc_malloc (sizeof (struct STNode_struct));
+  node->children = (STNode*) biomcmc_malloc (size_of_char * sizeof (STNode)); 
   for (i = 0; i < size_of_char; i++) node->children[i] = NULL;
   node->suffixLink = suftre->root;
   node->start = start;
@@ -144,15 +150,15 @@ extendSuffixTree (suffix_tree suftre, int pos)
 
   while(suftre->remainingSuffixCount > 0) {
     if (suftre->activeLength == 0) suftre->activeEdge = pos; 
-    if (!suftre->activeSTNode->children[suftre->text[suftre->activeEdge]]) {  // first character of edge not found
-      suftre->activeSTNode->children[suftre->text[suftre->activeEdge]] = new_STNode (pos, &(suftre->leafEnd), suftre);
+    if (!suftre->activeSTNode->children[(int)suftre->text[suftre->activeEdge]]) {  // first character of edge not found
+      suftre->activeSTNode->children[(int)suftre->text[suftre->activeEdge]] = new_STNode (pos, &(suftre->leafEnd), suftre);
       if (suftre->lastNewSTNode) {
         suftre->lastNewSTNode->suffixLink = suftre->activeSTNode;
         suftre->lastNewSTNode = NULL;
       }
     }
     else {  // first character of edge found
-      STNode next = suftre->activeSTNode->children[suftre->text[suftre->activeEdge]];
+      STNode next = suftre->activeSTNode->children[(int)suftre->text[suftre->activeEdge]];
       if (walkDown (next, suftre)) continue;
       if (suftre->text[next->start + suftre->activeLength] == suftre->text[pos]) {// Rule 3 found, end phase //
         if(suftre->lastNewSTNode && (suftre->activeSTNode != suftre->root)) {
@@ -166,11 +172,11 @@ extendSuffixTree (suffix_tree suftre, int pos)
       suftre->splitEnd = next->start + suftre->activeLength - 1;
 
       STNode split = new_STNode (next->start, &(suftre->splitEnd), suftre);
-      suftre->activeSTNode->children[suftre->text[suftre->activeEdge]] = split;
+      suftre->activeSTNode->children[(int) suftre->text[suftre->activeEdge]] = split;
 
-      split->children[suftre->text[pos]] = new_STNode (pos, &(suftre->leafEnd), suftre);
+      split->children[(int) suftre->text[pos]] = new_STNode (pos, &(suftre->leafEnd), suftre);
       next->start += suftre->activeLength;
-      split->children[suftre->text[next->start]] = next;
+      split->children[(int) suftre->text[next->start]] = next;
 
       if (suftre->lastNewSTNode) suftre->lastNewSTNode->suffixLink = split;
       suftre->lastNewSTNode = split;
@@ -216,14 +222,15 @@ findLocusSTNode (char* pattern, suffix_tree suftre, st_matches match) {
   STNode u = suftre->root;
   int pos = 0;
   while(pattern[pos] != '\0') {
-    if (u->children[pattern[pos]]) u = u->children[pattern[pos]];
+    if (u->children[(int) pattern[pos]]) u = u->children[(int) pattern[pos]];
     else break;
     /*if len of p runs out returns 0, if whole edge matches returns 1, if missmatch occurs return -1*/
     int k;
     k = traverseEdge (u, pattern, pos, suftre);
     if (k == 0) { pos = pos + edgeLength (u); continue; }
     else if (k > 0) { match->is_partial = false; match->length =  k-1; return u; } 
-    else if (k < 0) { match->is_partial = true;  match->length = -k-1; return u; } 
+    else if (k < 0) { printf ("DBG::received %s\n", pattern);match->is_partial = true;  match->length = -k-1; return u; } 
+  
   } 
   match->is_partial = true; match->length = pos; return u; 
 }

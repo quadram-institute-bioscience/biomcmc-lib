@@ -22,14 +22,13 @@
 #include "lowlevel.h"
 
 
-#define size_of_char 256
 typedef struct STNode_struct* STNode;
 typedef struct suffix_tree_struct* suffix_tree;
 typedef struct st_matches_struct* st_matches;
 
 struct STNode_struct 
 {
-  STNode children[size_of_char];
+  STNode *children;
   STNode suffixLink;  //pointer to other node via suffix link
   int start, *end, suffixIndex;
 };
@@ -49,7 +48,7 @@ struct st_matches_struct
   bool is_partial; 
 };
 
-suffix_tree new_suffix_tree (char *input_text, bool create_text_copy);
+suffix_tree new_suffix_tree (char *input_text, size_t text_size, bool create_text_copy);
 void del_suffix_tree (suffix_tree suftre);
 
 st_matches new_st_matches_from_pattern (char *pattern, suffix_tree subtre);

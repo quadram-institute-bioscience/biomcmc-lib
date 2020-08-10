@@ -103,17 +103,23 @@ CONFIG_HEADER = $(top_builddir)/lib/config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__EXEEXT_1 = check_unit$(EXEEXT) check_topology$(EXEEXT) \
-	debug_topology$(EXEEXT) debug_rng$(EXEEXT)
-am_check_topology_OBJECTS = check_topology.$(OBJEXT)
-check_topology_OBJECTS = $(am_check_topology_OBJECTS)
-check_topology_LDADD = $(LDADD)
+	check_suffix_tree$(EXEEXT) debug_topology$(EXEEXT) \
+	debug_rng$(EXEEXT)
+am_check_suffix_tree_OBJECTS = check_suffix_tree.$(OBJEXT)
+check_suffix_tree_OBJECTS = $(am_check_suffix_tree_OBJECTS)
+check_suffix_tree_LDADD = $(LDADD)
 am__DEPENDENCIES_1 =
-check_topology_DEPENDENCIES = $(am__DEPENDENCIES_1) \
+check_suffix_tree_DEPENDENCIES = $(am__DEPENDENCIES_1) \
 	../lib/libbiomcmc.la
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
 am__v_lt_1 = 
+am_check_topology_OBJECTS = check_topology.$(OBJEXT)
+check_topology_OBJECTS = $(am_check_topology_OBJECTS)
+check_topology_LDADD = $(LDADD)
+check_topology_DEPENDENCIES = $(am__DEPENDENCIES_1) \
+	../lib/libbiomcmc.la
 am_check_unit_OBJECTS = check_unit.$(OBJEXT)
 check_unit_OBJECTS = $(am_check_unit_OBJECTS)
 check_unit_LDADD = $(LDADD)
@@ -142,9 +148,9 @@ am__v_at_1 =
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/lib
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
-am__depfiles_remade = ./$(DEPDIR)/check_topology.Po \
-	./$(DEPDIR)/check_unit.Po ./$(DEPDIR)/debug_rng.Po \
-	./$(DEPDIR)/debug_topology.Po
+am__depfiles_remade = ./$(DEPDIR)/check_suffix_tree.Po \
+	./$(DEPDIR)/check_topology.Po ./$(DEPDIR)/check_unit.Po \
+	./$(DEPDIR)/debug_rng.Po ./$(DEPDIR)/debug_topology.Po
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -164,10 +170,12 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(check_topology_SOURCES) $(check_unit_SOURCES) \
-	$(debug_rng_SOURCES) $(debug_topology_SOURCES)
-DIST_SOURCES = $(check_topology_SOURCES) $(check_unit_SOURCES) \
-	$(debug_rng_SOURCES) $(debug_topology_SOURCES)
+SOURCES = $(check_suffix_tree_SOURCES) $(check_topology_SOURCES) \
+	$(check_unit_SOURCES) $(debug_rng_SOURCES) \
+	$(debug_topology_SOURCES)
+DIST_SOURCES = $(check_suffix_tree_SOURCES) $(check_topology_SOURCES) \
+	$(check_unit_SOURCES) $(debug_rng_SOURCES) \
+	$(debug_topology_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -531,9 +539,12 @@ AM_CPPFLAGS = $(GTKDEPS_CFLAGS)  @OPENMP_CPPFLAGS@ -I$(srcdir)/../lib -DTEST_FIL
 LDADD = $(GTKDEPS_LIBS) $(AM_LDFLAGS) @CHECK_LIBS@ ../lib/libbiomcmc.la 
 EXTRA_DIST = files # directory with fasta etc files (accessed with #define TEST_FILE_DIR above)
 # we use the list twice below, since we want all to be compiled only with 'make check'
-LIST_OF_TEST_PROGS = check_unit check_topology debug_topology debug_rng 
+LIST_OF_TEST_PROGS = check_unit check_topology check_suffix_tree debug_topology debug_rng 
+
+#check_minhash_SOURCES = check_minhash.c
 check_unit_SOURCES = check_unit.c
 check_topology_SOURCES = check_topology.c
+check_suffix_tree_SOURCES = check_suffix_tree.c
 # not using libcheck, not actual tests
 debug_topology_SOURCES = debug_topology.c
 debug_rng_SOURCES = debug_rng.c
@@ -580,6 +591,10 @@ clean-checkPROGRAMS:
 	echo " rm -f" $$list; \
 	rm -f $$list
 
+check_suffix_tree$(EXEEXT): $(check_suffix_tree_OBJECTS) $(check_suffix_tree_DEPENDENCIES) $(EXTRA_check_suffix_tree_DEPENDENCIES) 
+	@rm -f check_suffix_tree$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(check_suffix_tree_OBJECTS) $(check_suffix_tree_LDADD) $(LIBS)
+
 check_topology$(EXEEXT): $(check_topology_OBJECTS) $(check_topology_DEPENDENCIES) $(EXTRA_check_topology_DEPENDENCIES) 
 	@rm -f check_topology$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(check_topology_OBJECTS) $(check_topology_LDADD) $(LIBS)
@@ -602,6 +617,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/check_suffix_tree.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/check_topology.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/check_unit.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/debug_rng.Po@am__quote@ # am--include-marker
@@ -847,6 +863,13 @@ check_topology.log: check_topology$(EXEEXT)
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
+check_suffix_tree.log: check_suffix_tree$(EXEEXT)
+	@p='check_suffix_tree$(EXEEXT)'; \
+	b='check_suffix_tree'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
 debug_topology.log: debug_topology$(EXEEXT)
 	@p='debug_topology$(EXEEXT)'; \
 	b='debug_topology'; \
@@ -954,7 +977,8 @@ clean-am: clean-checkPROGRAMS clean-generic clean-libtool \
 	mostlyclean-am
 
 distclean: distclean-am
-		-rm -f ./$(DEPDIR)/check_topology.Po
+		-rm -f ./$(DEPDIR)/check_suffix_tree.Po
+	-rm -f ./$(DEPDIR)/check_topology.Po
 	-rm -f ./$(DEPDIR)/check_unit.Po
 	-rm -f ./$(DEPDIR)/debug_rng.Po
 	-rm -f ./$(DEPDIR)/debug_topology.Po
@@ -1003,7 +1027,8 @@ install-ps-am:
 installcheck-am:
 
 maintainer-clean: maintainer-clean-am
-		-rm -f ./$(DEPDIR)/check_topology.Po
+		-rm -f ./$(DEPDIR)/check_suffix_tree.Po
+	-rm -f ./$(DEPDIR)/check_topology.Po
 	-rm -f ./$(DEPDIR)/check_unit.Po
 	-rm -f ./$(DEPDIR)/debug_rng.Po
 	-rm -f ./$(DEPDIR)/debug_topology.Po
