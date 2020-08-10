@@ -39,7 +39,8 @@ struct suffix_tree_struct
   bool text_allocated_here; // tells if text is link (make sure not freed upstream) or alloced (uses more memory)
   STNode root, lastNewSTNode, activeSTNode;
   int activeEdge, activeLength, remainingSuffixCount;
-  int size, leafEnd,rootEnd, splitEnd; // rootend, splitend are pointers in original
+  int size, leafEnd, rootEnd, *splitEnd; // rootend, splitend are pointers in original
+  int n_splitEnd;
 };
 
 struct st_matches_struct

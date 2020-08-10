@@ -20,7 +20,7 @@
 
 #include "suffix_tree.h"
 
-#define size_of_char 256 // max degree of each node (number of children)
+#define size_of_char 255 // max degree of each node (number of children)
 
 st_matches new_st_matches (void);
 void st_matches_insert (st_matches match, int id);
@@ -49,12 +49,15 @@ new_suffix_tree (char *input_text, size_t text_size, bool create_text_copy)
   }
   else suftre->text = input_text;
 
+  suftre->splitEnd = NULL; 
+  suftre->n_splitEnd = 0;
+
   suftre->size = (int) text_size;
   suftre->lastNewSTNode = suftre->activeSTNode = NULL;
   suftre->activeEdge = -1;
   suftre->activeLength = 0;
   suftre->remainingSuffixCount = 0;
-  suftre->splitEnd = suftre->leafEnd = suftre->rootEnd = -1;
+  suftre->leafEnd = suftre->rootEnd = -1;
   suftre->root = new_STNode (-1, &(suftre->rootEnd), suftre);
   suftre->activeSTNode = suftre->root; 
   for (i = 0; i < suftre->size; i++) extendSuffixTree (suftre, i);
@@ -68,6 +71,7 @@ del_suffix_tree (suffix_tree suftre)
   if (!suftre) return;
   freeSuffixTreeByPostOrder(suftre->root);
   if ((suftre->text_allocated_here) && (suftre->text)) free (suftre->text);
+  if (suftre->splitEnd) free (suftre->splitEnd);
   suftre->text = NULL;
   free (suftre);
 }
@@ -119,6 +123,7 @@ new_STNode (int start, int *end, suffix_tree suftre)
   for (i = 0; i < size_of_char; i++) node->children[i] = NULL;
   node->suffixLink = suftre->root;
   node->start = start;
+  printf ("DBG::end::%p::%d\n", end, *end);
   node->end = end;
   node->suffixIndex = -1;
   return node;
@@ -170,10 +175,11 @@ extendSuffixTree (suffix_tree suftre, int pos)
         break;
       }
       // Rule 2 found, Create new internal node //
-      suftre->splitEnd = next->start + suftre->activeLength - 1;
-
-      STNode split = new_STNode (next->start, &(suftre->splitEnd), suftre);
+      suftre->splitEnd = (int*) biomcmc_realloc ((int*) suftre->splitEnd, (suftre->n_splitEnd + 1) * sizeof (int));
+      suftre->splitEnd[suftre->n_splitEnd] = next->start + suftre->activeLength - 1;
+      STNode split = new_STNode (next->start, suftre->splitEnd + suftre->n_splitEnd, suftre);
       suftre->activeSTNode->children[(int) suftre->text[suftre->activeEdge]] = split;
+      suftre->n_splitEnd++;
 
       split->children[(int) suftre->text[pos]] = new_STNode (pos, &(suftre->leafEnd), suftre);
       next->start += suftre->activeLength;
@@ -230,7 +236,7 @@ findLocusSTNode (char* pattern, int pattern_length, suffix_tree suftre, st_match
     printf ("DBG::k::%d, %d\n", k, pos);
     if (k == 0) { pos = pos + edgeLength (u); continue; }
     else if (k > 0) { match->is_partial = false; match->length =  k-1; return u; } 
-    else if (k < 0) { printf ("DBG::received %s\n", pattern);match->is_partial = true;  match->length = -k-1; return u; } 
+    else if (k < 0) { match->is_partial = true;  match->length = -k-1; return u; } 
   
   } 
   match->is_partial = true; match->length = pos; return u; 
@@ -263,7 +269,7 @@ subTreeDFS (STNode u, suffix_tree suftre, st_matches match)
 int 
 sizeof_suffix_tree (suffix_tree suftre)
 {
-  return sizeof_suffix_tree_below_node (suftre->root);
+  return sizeof_suffix_tree_below_node (suftre->root) + suftre->n_splitEnd;
 }
  
 int 
