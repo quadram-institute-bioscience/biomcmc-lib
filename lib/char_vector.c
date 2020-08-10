@@ -229,6 +229,7 @@ char_vector_finalise_big (char_vector vec)
     vec->string[i] = (char*) biomcmc_realloc ((char*)vec->string[i], vec->nchars[i] * sizeof (char));
   }
   if (vec->alloc) free (vec->alloc);
+  vec->alloc = NULL;
 }
 
 void

@@ -296,10 +296,10 @@ del_alignment (alignment align)
 {
   if (!align) return;
   if (--align->ref_counter) return;
-  del_char_vector (align->character); 
+  del_hashtable   (align->taxlabel_hash);
   del_char_vector (align->taxlabel); 
   del_char_vector (align->taxshort); 
-  del_hashtable   (align->taxlabel_hash);
+  del_char_vector (align->character); 
   if (align->charset_start) free (align->charset_start);
   if (align->charset_end)   free (align->charset_end);
   if (align->site_pattern)  free (align->site_pattern);

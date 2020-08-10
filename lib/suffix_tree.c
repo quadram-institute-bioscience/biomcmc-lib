@@ -30,8 +30,8 @@ int edgeLength (STNode n);
 int walkDown (STNode currSTNode, suffix_tree suftre);
 void extendSuffixTree (suffix_tree suftre, int pos);
 void setSuffixIndexByDFS (STNode n, int labelHeight, suffix_tree suftre);
-int traverseEdge (STNode node, char* p, int pos, suffix_tree suftre);
-STNode findLocusSTNode (char* pattern, suffix_tree suftre, st_matches match);
+int traverseEdge (STNode node, char* p, int p_length, int pos, suffix_tree suftre);
+STNode findLocusSTNode (char* pattern, int pattern_length, suffix_tree suftre, st_matches match);
 void subTreeDFS (STNode u, suffix_tree suftre, st_matches match);
 int sizeof_suffix_tree_below_node (STNode u);
 
@@ -49,14 +49,15 @@ new_suffix_tree (char *input_text, size_t text_size, bool create_text_copy)
   }
   else suftre->text = input_text;
 
+  suftre->size = (int) text_size;
   suftre->lastNewSTNode = suftre->activeSTNode = NULL;
   suftre->activeEdge = -1;
   suftre->activeLength = 0;
   suftre->remainingSuffixCount = 0;
-  suftre->splitEnd = suftre->leafEnd = suftre->rootEnd = suftre->size = -1;
+  suftre->splitEnd = suftre->leafEnd = suftre->rootEnd = -1;
   suftre->root = new_STNode (-1, &(suftre->rootEnd), suftre);
   suftre->activeSTNode = suftre->root; 
-  for (i = 0; i < (int) text_size; i++) extendSuffixTree (suftre, i);
+  for (i = 0; i < suftre->size; i++) extendSuffixTree (suftre, i);
   setSuffixIndexByDFS (suftre->root, 0, suftre);
   return suftre;
 }
@@ -206,27 +207,27 @@ setSuffixIndexByDFS (STNode n, int labelHeight, suffix_tree suftre)
 }
 
 int 
-traverseEdge (STNode node, char* p, int pos, suffix_tree suftre) {
+traverseEdge (STNode node, char* p, int p_length, int pos, suffix_tree suftre) {
   int i, flag=0;
-  for(i = 0; i < edgeLength (node) || p[pos] == '\0'; i++, pos++) if (suftre->text[(node->start) + i] != p[pos]) {
+  for(i = 0; (i < edgeLength (node)) || (p[pos] == '\0') || (i == p_length); i++, pos++) if (suftre->text[(node->start) + i] != p[pos]) {
     flag = -1;
     break;
   }
-  if(p[pos] == '\0') return pos + 1; // perfect match
+  if ((p[pos] == '\0') || (i == p_length)) return pos + 1; // perfect match
   else if (flag == -1) return - pos - 1; // mismatch
   return 0;
 }
 
 STNode 
-findLocusSTNode (char* pattern, suffix_tree suftre, st_matches match) {
+findLocusSTNode (char* pattern, int pattern_length, suffix_tree suftre, st_matches match) {
   STNode u = suftre->root;
-  int pos = 0;
-  while(pattern[pos] != '\0') {
+  int k, pos = 0;
+  while ((pattern[pos] != '\0') && (pos < pattern_length)) {
     if (u->children[(int) pattern[pos]]) u = u->children[(int) pattern[pos]];
     else break;
     /*if len of p runs out returns 0, if whole edge matches returns 1, if missmatch occurs return -1*/
-    int k;
-    k = traverseEdge (u, pattern, pos, suftre);
+    k = traverseEdge (u, pattern, pattern_length, pos, suftre);
+    printf ("DBG::k::%d, %d\n", k, pos);
     if (k == 0) { pos = pos + edgeLength (u); continue; }
     else if (k > 0) { match->is_partial = false; match->length =  k-1; return u; } 
     else if (k < 0) { printf ("DBG::received %s\n", pattern);match->is_partial = true;  match->length = -k-1; return u; } 
@@ -239,7 +240,8 @@ st_matches
 new_st_matches_from_pattern (char *pattern, suffix_tree suftre)
 {
   st_matches match = new_st_matches();
-  STNode u = findLocusSTNode (pattern, suftre, match);
+  int pattern_length = (int) strlen (pattern);
+  STNode u = findLocusSTNode (pattern, pattern_length, suftre, match);
   subTreeDFS (u, suftre, match);
   if (match->n_idx > 1) qsort (match->idx, match->n_idx, sizeof (int), compare_int_increasing);
   return match;

@@ -17,7 +17,7 @@ START_TEST(file_match_function)
 {
   int i,j;
   clock_t time0, time1;
-  char *txt[] = {"CCTACAAAGATTAAA\0", "AAAACTATAC\0", "AAAACTATACAAAA\0"};
+  char *txt[] = {"CCTACAAAGATTAAA\0", "AAAACTATAC\0", "AAA\0",  "AAAACTATACAAAA\0"};
   suffix_tree st;
   st_matches match;
   alignment aln;
@@ -26,9 +26,10 @@ START_TEST(file_match_function)
   memcpy(filename + prefix_size, "bacteria_riboprot.fasta", 23);
   aln = read_alignment_from_file (filename);
   time1 = clock (); printf ("  time to read alignment: %.8f secs\n", (double)(time1-time0)/(double)CLOCKS_PER_SEC);
+  
   st = new_suffix_tree (aln->character->string[0], aln->character->nchars[0], false); // true=copy text
 
-  for (i = 0; i < 3; i++) {
+  for (i = 0; i < 4; i++) {
     match = new_st_matches_from_pattern (txt[i], st);
     printf ("[%s]\nmatch %d\tpartial: %d\tn_matches = %d \t length = %d\n", txt[i], i, match->is_partial, match->n_idx, match->length);
     for (j = 0; j < match->n_idx; j++) printf ("[%7d]\t %.20s\n", match->idx[j], aln->character->string[0] + match->idx[j]);
@@ -37,7 +38,7 @@ START_TEST(file_match_function)
   time1 = clock (); printf ("  time to find matches: %.8f secs\n", (double)(time1-time0)/(double)CLOCKS_PER_SEC);
 
   del_suffix_tree (st);
-//  del_alignment (aln); // FIXME
+  del_alignment (aln);
   if (false) ck_abort_msg ("dummy");
 }
 END_TEST
