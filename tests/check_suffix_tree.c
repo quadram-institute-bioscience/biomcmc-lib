@@ -27,7 +27,7 @@ START_TEST(file_match_function)
   aln = read_alignment_from_file (filename);
   time1 = clock (); printf ("  time to read alignment: %.8f secs\n", (double)(time1-time0)/(double)CLOCKS_PER_SEC);
   
-  st = new_suffix_tree (aln->character->string[0], aln->character->nchars[0], false); // true=copy text
+  st = new_suffix_tree (aln->character->string[0], aln->character->nchars[0], true); // true=copy text
 
   for (i = 0; i < 4; i++) {
     match = new_st_matches_from_pattern (txt[i], st);

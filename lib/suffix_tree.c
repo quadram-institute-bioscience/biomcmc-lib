@@ -53,11 +53,12 @@ new_suffix_tree (char *input_text, size_t text_size, bool create_text_copy)
   suftre->n_splitEnd = 0;
 
   suftre->size = (int) text_size;
-  suftre->lastNewSTNode = suftre->activeSTNode = NULL;
+  suftre->root = suftre->lastNewSTNode = suftre->activeSTNode = NULL;
   suftre->activeEdge = -1;
   suftre->activeLength = 0;
   suftre->remainingSuffixCount = 0;
   suftre->leafEnd = suftre->rootEnd = -1;
+
   suftre->root = new_STNode (-1, &(suftre->rootEnd), suftre);
   suftre->activeSTNode = suftre->root; 
   for (i = 0; i < suftre->size; i++) extendSuffixTree (suftre, i);
@@ -156,9 +157,9 @@ extendSuffixTree (suffix_tree suftre, int pos)
 
   while(suftre->remainingSuffixCount > 0) {
     if (suftre->activeLength == 0) suftre->activeEdge = pos; 
-    if (!suftre->activeSTNode->children[(int)suftre->text[suftre->activeEdge]]) {  // first character of edge not found
+    if (suftre->activeSTNode->children[(int) suftre->text[suftre->activeEdge]] == NULL) {  // first character of edge not found
       suftre->activeSTNode->children[(int)suftre->text[suftre->activeEdge]] = new_STNode (pos, &(suftre->leafEnd), suftre);
-      if (suftre->lastNewSTNode) {
+      if (suftre->lastNewSTNode != NULL) {
         suftre->lastNewSTNode->suffixLink = suftre->activeSTNode;
         suftre->lastNewSTNode = NULL;
       }
@@ -167,7 +168,7 @@ extendSuffixTree (suffix_tree suftre, int pos)
       STNode next = suftre->activeSTNode->children[(int)suftre->text[suftre->activeEdge]];
       if (walkDown (next, suftre)) continue;
       if (suftre->text[next->start + suftre->activeLength] == suftre->text[pos]) {// Rule 3 found, end phase //
-        if(suftre->lastNewSTNode && (suftre->activeSTNode != suftre->root)) {
+        if((suftre->lastNewSTNode != NULL) && (suftre->activeSTNode != suftre->root)) {
           suftre->lastNewSTNode->suffixLink = suftre->activeSTNode;
           suftre->lastNewSTNode = NULL;
         }
@@ -177,7 +178,7 @@ extendSuffixTree (suffix_tree suftre, int pos)
       // Rule 2 found, Create new internal node //
       suftre->splitEnd = (int*) biomcmc_realloc ((int*) suftre->splitEnd, (suftre->n_splitEnd + 1) * sizeof (int));
       suftre->splitEnd[suftre->n_splitEnd] = next->start + suftre->activeLength - 1;
-      STNode split = new_STNode (next->start, suftre->splitEnd + suftre->n_splitEnd, suftre);
+      STNode split = new_STNode (next->start, &(suftre->splitEnd[suftre->n_splitEnd]), suftre);
       suftre->activeSTNode->children[(int) suftre->text[suftre->activeEdge]] = split;
       suftre->n_splitEnd++;
 
@@ -215,11 +216,11 @@ setSuffixIndexByDFS (STNode n, int labelHeight, suffix_tree suftre)
 int 
 traverseEdge (STNode node, char* p, int p_length, int pos, suffix_tree suftre) {
   int i, flag=0;
-  for(i = 0; (i < edgeLength (node)) || (p[pos] == '\0') || (i == p_length); i++, pos++) if (suftre->text[(node->start) + i] != p[pos]) {
+  for(i = 0; (i < edgeLength (node)) || (p[pos] == '\0') || (pos == p_length); i++, pos++) if (suftre->text[(node->start) + i] != p[pos]) {
     flag = -1;
     break;
   }
-  if ((p[pos] == '\0') || (i == p_length)) return pos + 1; // perfect match
+  if ((p[pos] == '\0') || (pos == p_length)) return pos + 1; // perfect match
   else if (flag == -1) return - pos - 1; // mismatch
   return 0;
 }
