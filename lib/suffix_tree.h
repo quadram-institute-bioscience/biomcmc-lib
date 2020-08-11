@@ -13,7 +13,8 @@
  */
 
 /*! \file suffix_tree.h 
- * Original code: https://github.com/mattporritt/ukkonen_suffix_tree ( GPL-3.0-or-later) 
+ *  Following ideas from git@github.com:Jodh/Ukkonen_Algorithm.git (see README_algorithms.md for full list) 
+ *  (this version is still buggy, please do not use)
  */ 
 
 #ifndef _biomcmc_suffix_tree_h_
