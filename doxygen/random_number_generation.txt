@@ -1,0 +1,191 @@
+TAUS: Maximally equidistributed combined Tausworthe random number generator. The original description (from The Gnu 
+Scientific Library http://www.gnu.org/software/gsl) follows:
+   \verbatim
+	 This is a maximally equidistributed combined Tausworthe generator. The sequence is,
+
+   x_n = (s1_n ^ s2_n ^ s3_n) 
+
+   s1_{n+1} = (((s1_n & 4294967294) <<12) ^ (((s1_n <<13) ^ s1_n) >>19))
+   s2_{n+1} = (((s2_n & 4294967288) << 4) ^ (((s2_n << 2) ^ s2_n) >>25))
+   s3_{n+1} = (((s3_n & 4294967280) <<17) ^ (((s3_n << 3) ^ s3_n) >>11))
+
+   computed modulo 2^32. In the three formulas above '^' means exclusive-or (C-notation), not exponentiation. Note that
+the algorithm relies on the properties of 32-bit unsigned integers (it is formally defined on bit-vectors of length 32).
+I have added a bitmask to make it work on 64 bit machines.
+
+   We initialize the generator with s1_1 .. s3_1 = s_n MOD m, where s_n = (69069 * s_{n-1}) mod 2^32, and s_0 = s is
+the user-supplied seed.
+
+   The theoretical value of x_{10007} is 2733957125. The subscript 10007 means (1) seed the generator with s=1 (2) do
+six warm-up iterations, (3) then do 10000 actual iterations.
+
+   The period of this generator is about 2^88.
+
+   From: P. L'Ecuyer, "Maximally Equidistributed Combined Tausworthe Generators", 
+   Mathematics of Computation, 65, 213 (1996), 203--213.
+
+   This is available on the net from L'Ecuyer's home page,
+
+   http://www.iro.umontreal.ca/~lecuyer/myftp/papers/tausme.ps
+   ftp://ftp.iro.umontreal.ca/pub/simulation/lecuyer/papers/tausme.ps 
+
+   Update: April 2002
+   There is an erratum in the paper "Tables of Maximally Equidistributed Combined LFSR Generators", Mathematics of
+Computation, 68, 225 (1999), 261--269: http://www.iro.umontreal.ca/~lecuyer/myftp/papers/tausme2.ps
+
+        ... the k_j most significant bits of z_j must be non-zero, for each j. (Note: this restriction also applies 
+        to the  computer code given in [4], but was mistakenly not mentioned in that paper.)
+   
+   This affects the seeding procedure by imposing the requirement s1 > 1, s2 > 7, s3 > 15.
+
+   The generator taus2 has been added to satisfy this requirement. The original taus generator is unchanged.
+
+   Update: November 2002
+   There was a bug in the correction to the seeding procedure for s2. It affected the following seeds 
+   254679140 1264751179 1519430319 2274823218 2529502358 3284895257 3539574397 (s2 < 8).
+	 \endverbatim
+
+GFSR4: Lagged-bonacci generator.  The original description (from The Gnu Scientific Library 
+http://www.gnu.org/software/gsl) follows:
+   /verbatim
+   From Robert M. Ziff, "Four-tap shift-register-sequence random-number generators," Computers in Physics 12(4), Jul/Aug
+1998, pp 385-392.  A generalized feedback shift-register (GFSR) is basically an xor-sum of particular past lagged values. 
+A four-tap register looks like:
+
+      ra[nd] = ra[nd-A] ^ ra[nd-B] ^ ra[nd-C] ^ ra[nd-D]
+   
+   Ziff notes that "it is now widely known" that two-tap registers have serious flaws, the most obvious one being the
+three-point correlation that comes from the defn of the generator.  Nice mathematical properties can be derived for
+GFSR's, and numerics bears out the claim that 4-tap GFSR's with appropriately chosen offsets are as random as can be
+measured, using the author's test.
+
+   This implementation uses the values suggested the the author's example on p392, but altered to fit the GSL framework.
+The "state" is 2^14 longs, or 64Kbytes; 2^14 is the smallest power of two that is larger than D, the largest offset.  We
+really only need a state with the last D values, but by going to a power of two, we can do a masking operation instead
+of a modulo, and this is presumably faster, though I haven't actually tried it.  The article actually suggested a
+short/fast hack:
+
+   #define RandomInteger (++nd, ra[nd&M]=ra[(nd-A)&M]^ra[(nd-B)&M]^ra[(nd-C)&M]^ra[(nd-D)&M])
+
+   so that (as long as you've defined nd,ra[M+1]), then you ca do things like: 'if (RandomInteger < p) {...}'.
+
+   Note that n&M varies from 0 to M, *including* M, so that the array has to be of size M+1.  Since M+1 is a power of
+two, n&M is a potentially quicker implementation of the equivalent n%(M+1).
+
+   This implementation copyright (C) 1998 James Theiler, based on the example mt.c in the GSL, as implemented by Brian
+Gough.
+	 \endverbatim
+
+
+--------------
+
+the sampling from an arbitrary discrete distribution in O(1) time is taken from the GSL version 1.14. The original
+explanation follows:
+\beginverbatim
+/* Gnu Scientific Library gsl-1.14/randist/discrete.c [http://www.gnu.org/software/gsl/]
+ * 
+ * Copyright (C) 1996, 1997, 1998, 1999, 2000, 2007, 2009 James Theiler, Brian Gough
+ * 
+   Random Discrete Events
+   
+   Given K discrete events with different probabilities P[k]
+   produce a value k consistent with its probability.
+
+ * Based on: Alastair J Walker, An efficient method for generating
+ * discrete random variables with general distributions, ACM Trans
+ * Math Soft 3, 253-256 (1977).  See also: D. E. Knuth, The Art of
+ * Computer Programming, Volume 2 (Seminumerical algorithms), 3rd
+ * edition, Addison-Wesley (1997), p120.
+* Walker's algorithm does some preprocessing, and provides two
+ * arrays: floating point F[k] and integer A[k].  A value k is chosen
+ * from 0..K-1 with equal likelihood, and then a uniform random number
+ * u is compared to F[k].  If it is less than F[k], then k is
+ * returned.  Otherwise, A[k] is returned.
+   
+ * Walker's original paper describes an O(K^2) algorithm for setting
+ * up the F and A arrays.  I found this disturbing since I wanted to
+ * use very large values of K.  I'm sure I'm not the first to realize
+ * this, but in fact the preprocessing can be done in O(K) steps.
+
+ * A figure of merit for the preprocessing is the average value for
+ * the F[k]'s (that is, SUM_k F[k]/K); this corresponds to the
+ * probability that k is returned, instead of A[k], thereby saving a
+ * redirection.  Walker's O(K^2) preprocessing will generally improve
+ * that figure of merit, compared to my cheaper O(K) method; from some
+ * experiments with a perl script, I get values of around 0.6 for my
+ * method and just under 0.75 for Walker's.  Knuth has pointed out
+ * that finding _the_ optimum lookup tables, which maximize the
+ * average F[k], is a combinatorially difficult problem.  But any
+ * valid preprocessing will still provide O(1) time for the call to
+ * gsl_ran_discrete().  I find that if I artificially set F[k]=1 --
+ * ie, better than optimum! -- I get a speedup of maybe 20%, so that's
+ * the maximum I could expect from the most expensive preprocessing.
+ * Folding in the difference of 0.6 vs 0.75, I'd estimate that the
+ * speedup would be less than 10%.
+
+ * I've not implemented it here, but one compromise is to sort the
+ * probabilities once, and then work from the two ends inward.  This
+ * requires O(K log K), still lots cheaper than O(K^2), and from my
+ * experiments with the perl script, the figure of merit is within
+ * about 0.01 for K up to 1000, and no sign of diverging (in fact,
+ * they seemed to be converging, but it's hard to say with just a
+ * handful of runs).
+
+ * The O(K) algorithm goes through all the p_k's and decides if they
+ * are "smalls" or "bigs" according to whether they are less than or
+ * greater than the mean value 1/K.  The indices to the smalls and the
+ * bigs are put in separate stacks, and then we work through the
+ * stacks together.  For each small, we pair it up with the next big
+ * in the stack (Walker always wanted to pair up the smallest small
+ * with the biggest big).  The small "borrows" from the big just
+ * enough to bring the small up to mean.  This reduces the size of the
+ * big, so the (smaller) big is compared again to the mean, and if it
+ * is smaller, it gets "popped" from the big stack and "pushed" to the
+ * small stack.  Otherwise, it stays put.  Since every time we pop a
+* small, we are able to deal with it right then and there, and we
+ * never have to pop more than K smalls, then the algorithm is O(K).
+
+ * This implementation sets up two separate stacks, and allocates K
+ * elements between them.  Since neither stack ever grows, we do an
+ * extra O(K) pass through the data to determine how many smalls and
+ * bigs there are to begin with and allocate appropriately.  In all
+ * there are 2*K*sizeof(double) transient bytes of memory that are
+ * used than returned, and K*(sizeof(int)+sizeof(double)) bytes used
+ * in the lookup table.
+   
+ * Walker spoke of using two random numbers (an integer 0..K-1, and a
+ * floating point u in [0,1]), but Knuth points out that one can just
+ * use the integer and fractional parts of K*u where u is in [0,1].
+ * In fact, Knuth further notes that taking F'[k]=(k+F[k])/K, one can
+ * directly compare u to F'[k] without having to explicitly set
+ * u=K*u-int(K*u).
+
+ * Usage:
+
+ * Starting with an array of probabilities P, initialize and do
+ * preprocessing with a call to:
+
+ *    gsl_rng *r;
+ *    gsl_ran_discrete_t *f;
+ *    f = gsl_ran_discrete_preproc(K,P);
+   
+ * Then, whenever a random index 0..K-1 is desired, use
+
+ *    k = gsl_ran_discrete(r,f);
+
+ * Note that several different randevent struct's can be
+ * simultaneously active.
+
+ * Aside: A very clever alternative approach is described in
+ * Abramowitz and Stegun, p 950, citing: Marsaglia, Random variables
+ * and computers, Proc Third Prague Conference in Probability Theory,
+ * 1962.  A more accesible reference is: G. Marsaglia, Generating
+ * discrete random numbers in a computer, Comm ACM 6, 37-38 (1963).
+ * If anybody is interested, I (jt) have also coded up this version as
+ * part of another software package.  However, I've done some
+ * comparisons, and the Walker method is both faster and more stingy
+ * with memory.  So, in the end I decided not to include it with the
+ * GSL package.
+   
+ * Written 26 Jan 1999, James Theiler, jt@lanl.gov */
+\endverbatim

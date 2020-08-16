@@ -140,7 +140,7 @@ version (http://www.gnu.org/copyleft/gpl.html).
 
 biomcmc-lib and its derived sofware incorporate or were inspired by many existing open source libraries and publicly available 
 implementations.
-For a complete list, please see the file [README_algorithms.md](README_algorithms.md)
+For a complete list, please see the file [README_references.md](README_references.md)
 The files `argtable3.c` and `argtable3.h` are part of the [argtable3](https://www.argtable.org/) library, maintained by
 Tom G. Huang at the time of this writting  and are distributed under a BSD license. Please refer to 
 https://github.com/argtable/argtable3 for the list of authors.
