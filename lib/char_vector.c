@@ -132,7 +132,7 @@ char_vector_link_string_at_position (char_vector vec, const char *string, int po
   if (vec->nchars[position]) free (vec->string[position]);
 
   vec->nchars[position] = strlen (string); /* Actually alloc'ed memory may be larger than this (next line fix it) */
-  string = (char*) biomcmc_realloc ((char*)string, (vec->nchars[position]+1) * sizeof (char));
+  string = (char*) biomcmc_realloc ((char*) string, (vec->nchars[position]+1) * sizeof (char));
   vec->string[position] = (char*) string;
   // next_avail may be before position; should we assume char_vector is always increasing?
   vec->next_avail = position+1;

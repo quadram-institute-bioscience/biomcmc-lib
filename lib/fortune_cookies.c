@@ -753,8 +753,19 @@ biomcmc_fprintf_bofh (FILE *stream)
 {
   int idx;
   biomcmc_random_number_init (0);
-  idx = biomcmc_rng_unif_int (biomcmc_fortune_bofh_size); // 0/1, 4 = regular/bold, red
+  idx = biomcmc_rng_unif_int (biomcmc_fortune_bofh_size); // 0/1, 1 = regular/bold, red
   fprintf (stream, "%s'''%s'''%s\n", prt_col[0][1], biomcmc_fortune_bofh[idx], prt_col_reset);
   biomcmc_random_number_finalize();
 }
 
+void
+biomcmc_fprintf_colour (FILE *stream, int regular, int colour, const char *message, const char *normaltext, ...)
+{
+  va_list ap;
+  if ((regular < 0) || (regular > 6)) regular = 0;
+  if ((colour < 0) || (colour > 7)) colour = 1;
+  fprintf (stream, "%s%s%s", prt_col[regular][colour], message, prt_col_reset);
+  va_start (ap, normaltext);
+  vfprintf (stream, normaltext, ap);
+  va_end (ap);
+}
