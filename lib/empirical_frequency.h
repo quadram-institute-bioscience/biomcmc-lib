@@ -73,6 +73,7 @@ empfreq_double new_empfreq_double_sort_increasing (double *vec, int n);
 
 empfreq new_empfreq_from_int (int *vec, int n);
 empfreq new_empfreq_from_int_weighted (int *vec, int n, int *weight);
+empfreq new_empfreq_merge_empfreqs (empfreq a1, empfreq a2);
 int find_mode_int (int *vec, int n);
 int find_mode_int_weighted (int *vec, int n, int *weight);
 

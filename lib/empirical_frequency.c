@@ -228,6 +228,30 @@ new_empfreq_from_int_weighted (int *vec, int n, int *weight)
 }
 
 empfreq
+new_empfreq_merge_empfreqs (empfreq a1, empfreq a2)
+{
+  int i, j, new_n = a1->n + a2->n;
+  empfreq e_idx, e_count;
+
+  e_idx = new_empfreq (new_n);
+  /* sort by idx of a1 and a2, and not by frequency (sort by frequency comes below) */
+  for (i = 0; i < a1->n; i++) {
+    e_idx->i[i].idx  = a1->i[i].freq;
+    e_idx->i[i].freq = a1->i[i].idx;
+  }
+  for (j = 0; j < a2->n; i++, j++) {
+    e_idx->i[i].idx  = a2->i[j].freq;
+    e_idx->i[i].freq = a2->i[j].idx;
+  }
+
+  sort_empfreq_increasing (e_idx); /* equiv. to qsort (vec, n, sizeof (int), compare_int) but preserving weights. */
+  e_count = create_empfreq_from_value_sorted_empfreq (e_idx); /* create e_count with freq = e_idx->idx */
+
+  del_empfreq (e_idx);
+  return e_count;
+}
+
+empfreq
 create_empfreq_from_value_sorted_empfreq (empfreq e_idx)
 {
   int i, distinct_values = 1;
