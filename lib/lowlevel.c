@@ -189,7 +189,7 @@ biomcmc_levenshtein_distance (const char *s1, uint32_t n1, const char *s2, uint3
     for (j = 0; j <= n2; j++) if (dist[n1][j] < indel) indel = dist[n1][j];
   }
   if (dist) {
-    for (i = n1;; i--) if (dist[i]) free (dist[i]); // unsigned int is always true
+    for (i = n1+1; i-- > 0;) if (dist[i]) free (dist[i]); // loop starts at i=n1; unsigned int is always positive...
     free (dist);
   }
   return indel;
