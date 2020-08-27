@@ -133,31 +133,10 @@ am__uninstall_files_from_dir = { \
 am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(otherincludedir)"
 LTLIBRARIES = $(lib_LTLIBRARIES) $(noinst_LTLIBRARIES)
 am__DEPENDENCIES_1 =
-libbiomcmc_la_DEPENDENCIES = $(am__DEPENDENCIES_1)
-am__objects_1 = libbiomcmc_la-hashtable.lo libbiomcmc_la-lowlevel.lo \
-	libbiomcmc_la-random_number_gen.lo \
-	libbiomcmc_la-constant_random_lists.lo \
-	libbiomcmc_la-random_number.lo libbiomcmc_la-nexus_common.lo \
-	libbiomcmc_la-bipartition.lo \
-	libbiomcmc_la-prob_distribution.lo \
-	libbiomcmc_la-empirical_frequency.lo \
-	libbiomcmc_la-argtable3.lo libbiomcmc_la-distance_matrix.lo \
-	libbiomcmc_la-alignment.lo libbiomcmc_la-topology_common.lo \
-	libbiomcmc_la-parsimony.lo libbiomcmc_la-genetree.lo \
-	libbiomcmc_la-reconciliation.lo \
-	libbiomcmc_la-splitset_distances.lo \
-	libbiomcmc_la-read_newick_trees.lo \
-	libbiomcmc_la-char_vector.lo libbiomcmc_la-upgma.lo \
-	libbiomcmc_la-topology_randomise.lo \
-	libbiomcmc_la-newick_space.lo libbiomcmc_la-topology_space.lo \
-	libbiomcmc_la-topology_distance.lo libbiomcmc_la-kmerhash.lo \
-	libbiomcmc_la-hashfunctions.lo \
-	libbiomcmc_la-distance_generator.lo \
-	libbiomcmc_la-clustering_goptics.lo \
-	libbiomcmc_la-quickselect_quantile.lo \
-	libbiomcmc_la-fortune_cookies.lo libbiomcmc_la-suffix_tree.lo
-am__objects_2 =
-am_libbiomcmc_la_OBJECTS = $(am__objects_1) $(am__objects_2)
+libbiomcmc_la_DEPENDENCIES = $(am__DEPENDENCIES_1) \
+	libbiomcmc_static.la
+am__objects_1 =
+am_libbiomcmc_la_OBJECTS = $(am__objects_1)
 libbiomcmc_la_OBJECTS = $(am_libbiomcmc_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -167,7 +146,7 @@ libbiomcmc_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(libbiomcmc_la_CFLAGS) \
 	$(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 libbiomcmc_static_la_LIBADD =
-am__objects_3 = libbiomcmc_static_la-hashtable.lo \
+am__objects_2 = libbiomcmc_static_la-hashtable.lo \
 	libbiomcmc_static_la-lowlevel.lo \
 	libbiomcmc_static_la-random_number_gen.lo \
 	libbiomcmc_static_la-constant_random_lists.lo \
@@ -197,9 +176,10 @@ am__objects_3 = libbiomcmc_static_la-hashtable.lo \
 	libbiomcmc_static_la-clustering_goptics.lo \
 	libbiomcmc_static_la-quickselect_quantile.lo \
 	libbiomcmc_static_la-fortune_cookies.lo \
-	libbiomcmc_static_la-suffix_tree.lo
-am__objects_4 = $(am__objects_3) $(am__objects_2)
-am_libbiomcmc_static_la_OBJECTS = $(am__objects_4)
+	libbiomcmc_static_la-suffix_tree.lo \
+	libbiomcmc_static_la-phylogeny.lo \
+	libbiomcmc_static_la-likelihood.lo
+am_libbiomcmc_static_la_OBJECTS = $(am__objects_2) $(am__objects_1)
 libbiomcmc_static_la_OBJECTS = $(am_libbiomcmc_static_la_OBJECTS)
 libbiomcmc_static_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
 	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
@@ -408,7 +388,7 @@ common_headers = hashtable.h lowlevel.h random_number_gen.h constant_random_list
                  reconciliation.h splitset_distances.h read_newick_trees.h char_vector.h \
                  upgma.h topology_randomise.h newick_space.h topology_space.h topology_distance.h \
                  kmerhash.h hashfunctions.h distance_generator.h clustering_goptics.h \
-                 quickselect_quantile.h fortune_cookies.h suffix_tree.h
+                 quickselect_quantile.h fortune_cookies.h suffix_tree.h phylogeny.h likelihood.h 
 
 common_src = hashtable.c lowlevel.c random_number_gen.c constant_random_lists.c random_number.c nexus_common.c \
                  bipartition.c prob_distribution.c empirical_frequency.c argtable3.c \
@@ -416,17 +396,17 @@ common_src = hashtable.c lowlevel.c random_number_gen.c constant_random_lists.c 
                  reconciliation.c splitset_distances.c read_newick_trees.c char_vector.c \
                  upgma.c topology_randomise.c newick_space.c topology_space.c topology_distance.c \
                  kmerhash.c hashfunctions.c distance_generator.c clustering_goptics.c \
-                 quickselect_quantile.c fortune_cookies.c suffix_tree.c
+                 quickselect_quantile.c fortune_cookies.c suffix_tree.c phylogeny.c likelihood.c
 
 otherincludedir = $(includedir)/biomcmc
 otherinclude_HEADERS = config.h $(common_headers) # if headers are here (=global) should not be on SOURCES (=local)
 lib_LTLIBRARIES = libbiomcmc.la  # libedlib.la # libtools 
-libbiomcmc_la_SOURCES = $(common_src) $(common_headers) config.h # listed here s.t. any change triggers recompilation 
+libbiomcmc_la_SOURCES = $(common_headers) config.h
 libbiomcmc_la_CPPFLAGS = $(AM_CPPFLAGS)
 libbiomcmc_la_CFLAGS = $(AM_CFLAGS) 
-libbiomcmc_la_LIBADD = $(GTKDEPS_LIBS) $(AM_LDFLAGS)
+libbiomcmc_la_LIBADD = $(GTKDEPS_LIBS) $(AM_LDFLAGS) libbiomcmc_static.la  
 noinst_LTLIBRARIES = libbiomcmc_static.la # convenience lib (not installed globally)
-libbiomcmc_static_la_SOURCES = $(libbiomcmc_la_SOURCES)
+libbiomcmc_static_la_SOURCES = $(common_src) $(common_headers) config.h # listed here s.t. any change triggers recompilation 
 libbiomcmc_static_la_CPPFLAGS = $(libbiomcmc_la_CPPFLAGS)
 libbiomcmc_static_la_CFLAGS = $(libbiomcmc_la_CFLAGS)
 all: config.h
@@ -537,37 +517,6 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libbiomcmc_la-alignment.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libbiomcmc_la-argtable3.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libbiomcmc_la-bipartition.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libbiomcmc_la-char_vector.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libbiomcmc_la-clustering_goptics.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libbiomcmc_la-constant_random_lists.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libbiomcmc_la-distance_generator.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libbiomcmc_la-distance_matrix.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libbiomcmc_la-empirical_frequency.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libbiomcmc_la-fortune_cookies.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libbiomcmc_la-genetree.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libbiomcmc_la-hashfunctions.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libbiomcmc_la-hashtable.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libbiomcmc_la-kmerhash.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libbiomcmc_la-lowlevel.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libbiomcmc_la-newick_space.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libbiomcmc_la-nexus_common.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libbiomcmc_la-parsimony.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libbiomcmc_la-prob_distribution.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libbiomcmc_la-quickselect_quantile.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libbiomcmc_la-random_number.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libbiomcmc_la-random_number_gen.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libbiomcmc_la-read_newick_trees.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libbiomcmc_la-reconciliation.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libbiomcmc_la-splitset_distances.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libbiomcmc_la-suffix_tree.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libbiomcmc_la-topology_common.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libbiomcmc_la-topology_distance.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libbiomcmc_la-topology_randomise.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libbiomcmc_la-topology_space.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libbiomcmc_la-upgma.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libbiomcmc_static_la-alignment.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libbiomcmc_static_la-argtable3.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libbiomcmc_static_la-bipartition.Plo@am__quote@
@@ -582,10 +531,12 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libbiomcmc_static_la-hashfunctions.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libbiomcmc_static_la-hashtable.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libbiomcmc_static_la-kmerhash.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libbiomcmc_static_la-likelihood.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libbiomcmc_static_la-lowlevel.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libbiomcmc_static_la-newick_space.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libbiomcmc_static_la-nexus_common.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libbiomcmc_static_la-parsimony.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libbiomcmc_static_la-phylogeny.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libbiomcmc_static_la-prob_distribution.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libbiomcmc_static_la-quickselect_quantile.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libbiomcmc_static_la-random_number.Plo@am__quote@
@@ -620,223 +571,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LTCOMPILE) -c -o $@ $<
-
-libbiomcmc_la-hashtable.lo: hashtable.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libbiomcmc_la_CPPFLAGS) $(CPPFLAGS) $(libbiomcmc_la_CFLAGS) $(CFLAGS) -MT libbiomcmc_la-hashtable.lo -MD -MP -MF $(DEPDIR)/libbiomcmc_la-hashtable.Tpo -c -o libbiomcmc_la-hashtable.lo `test -f 'hashtable.c' || echo '$(srcdir)/'`hashtable.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libbiomcmc_la-hashtable.Tpo $(DEPDIR)/libbiomcmc_la-hashtable.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='hashtable.c' object='libbiomcmc_la-hashtable.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libbiomcmc_la_CPPFLAGS) $(CPPFLAGS) $(libbiomcmc_la_CFLAGS) $(CFLAGS) -c -o libbiomcmc_la-hashtable.lo `test -f 'hashtable.c' || echo '$(srcdir)/'`hashtable.c
-
-libbiomcmc_la-lowlevel.lo: lowlevel.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libbiomcmc_la_CPPFLAGS) $(CPPFLAGS) $(libbiomcmc_la_CFLAGS) $(CFLAGS) -MT libbiomcmc_la-lowlevel.lo -MD -MP -MF $(DEPDIR)/libbiomcmc_la-lowlevel.Tpo -c -o libbiomcmc_la-lowlevel.lo `test -f 'lowlevel.c' || echo '$(srcdir)/'`lowlevel.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libbiomcmc_la-lowlevel.Tpo $(DEPDIR)/libbiomcmc_la-lowlevel.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='lowlevel.c' object='libbiomcmc_la-lowlevel.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libbiomcmc_la_CPPFLAGS) $(CPPFLAGS) $(libbiomcmc_la_CFLAGS) $(CFLAGS) -c -o libbiomcmc_la-lowlevel.lo `test -f 'lowlevel.c' || echo '$(srcdir)/'`lowlevel.c
-
-libbiomcmc_la-random_number_gen.lo: random_number_gen.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libbiomcmc_la_CPPFLAGS) $(CPPFLAGS) $(libbiomcmc_la_CFLAGS) $(CFLAGS) -MT libbiomcmc_la-random_number_gen.lo -MD -MP -MF $(DEPDIR)/libbiomcmc_la-random_number_gen.Tpo -c -o libbiomcmc_la-random_number_gen.lo `test -f 'random_number_gen.c' || echo '$(srcdir)/'`random_number_gen.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libbiomcmc_la-random_number_gen.Tpo $(DEPDIR)/libbiomcmc_la-random_number_gen.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='random_number_gen.c' object='libbiomcmc_la-random_number_gen.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libbiomcmc_la_CPPFLAGS) $(CPPFLAGS) $(libbiomcmc_la_CFLAGS) $(CFLAGS) -c -o libbiomcmc_la-random_number_gen.lo `test -f 'random_number_gen.c' || echo '$(srcdir)/'`random_number_gen.c
-
-libbiomcmc_la-constant_random_lists.lo: constant_random_lists.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libbiomcmc_la_CPPFLAGS) $(CPPFLAGS) $(libbiomcmc_la_CFLAGS) $(CFLAGS) -MT libbiomcmc_la-constant_random_lists.lo -MD -MP -MF $(DEPDIR)/libbiomcmc_la-constant_random_lists.Tpo -c -o libbiomcmc_la-constant_random_lists.lo `test -f 'constant_random_lists.c' || echo '$(srcdir)/'`constant_random_lists.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libbiomcmc_la-constant_random_lists.Tpo $(DEPDIR)/libbiomcmc_la-constant_random_lists.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='constant_random_lists.c' object='libbiomcmc_la-constant_random_lists.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libbiomcmc_la_CPPFLAGS) $(CPPFLAGS) $(libbiomcmc_la_CFLAGS) $(CFLAGS) -c -o libbiomcmc_la-constant_random_lists.lo `test -f 'constant_random_lists.c' || echo '$(srcdir)/'`constant_random_lists.c
-
-libbiomcmc_la-random_number.lo: random_number.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libbiomcmc_la_CPPFLAGS) $(CPPFLAGS) $(libbiomcmc_la_CFLAGS) $(CFLAGS) -MT libbiomcmc_la-random_number.lo -MD -MP -MF $(DEPDIR)/libbiomcmc_la-random_number.Tpo -c -o libbiomcmc_la-random_number.lo `test -f 'random_number.c' || echo '$(srcdir)/'`random_number.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libbiomcmc_la-random_number.Tpo $(DEPDIR)/libbiomcmc_la-random_number.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='random_number.c' object='libbiomcmc_la-random_number.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libbiomcmc_la_CPPFLAGS) $(CPPFLAGS) $(libbiomcmc_la_CFLAGS) $(CFLAGS) -c -o libbiomcmc_la-random_number.lo `test -f 'random_number.c' || echo '$(srcdir)/'`random_number.c
-
-libbiomcmc_la-nexus_common.lo: nexus_common.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libbiomcmc_la_CPPFLAGS) $(CPPFLAGS) $(libbiomcmc_la_CFLAGS) $(CFLAGS) -MT libbiomcmc_la-nexus_common.lo -MD -MP -MF $(DEPDIR)/libbiomcmc_la-nexus_common.Tpo -c -o libbiomcmc_la-nexus_common.lo `test -f 'nexus_common.c' || echo '$(srcdir)/'`nexus_common.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libbiomcmc_la-nexus_common.Tpo $(DEPDIR)/libbiomcmc_la-nexus_common.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='nexus_common.c' object='libbiomcmc_la-nexus_common.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libbiomcmc_la_CPPFLAGS) $(CPPFLAGS) $(libbiomcmc_la_CFLAGS) $(CFLAGS) -c -o libbiomcmc_la-nexus_common.lo `test -f 'nexus_common.c' || echo '$(srcdir)/'`nexus_common.c
-
-libbiomcmc_la-bipartition.lo: bipartition.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libbiomcmc_la_CPPFLAGS) $(CPPFLAGS) $(libbiomcmc_la_CFLAGS) $(CFLAGS) -MT libbiomcmc_la-bipartition.lo -MD -MP -MF $(DEPDIR)/libbiomcmc_la-bipartition.Tpo -c -o libbiomcmc_la-bipartition.lo `test -f 'bipartition.c' || echo '$(srcdir)/'`bipartition.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libbiomcmc_la-bipartition.Tpo $(DEPDIR)/libbiomcmc_la-bipartition.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='bipartition.c' object='libbiomcmc_la-bipartition.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libbiomcmc_la_CPPFLAGS) $(CPPFLAGS) $(libbiomcmc_la_CFLAGS) $(CFLAGS) -c -o libbiomcmc_la-bipartition.lo `test -f 'bipartition.c' || echo '$(srcdir)/'`bipartition.c
-
-libbiomcmc_la-prob_distribution.lo: prob_distribution.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libbiomcmc_la_CPPFLAGS) $(CPPFLAGS) $(libbiomcmc_la_CFLAGS) $(CFLAGS) -MT libbiomcmc_la-prob_distribution.lo -MD -MP -MF $(DEPDIR)/libbiomcmc_la-prob_distribution.Tpo -c -o libbiomcmc_la-prob_distribution.lo `test -f 'prob_distribution.c' || echo '$(srcdir)/'`prob_distribution.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libbiomcmc_la-prob_distribution.Tpo $(DEPDIR)/libbiomcmc_la-prob_distribution.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='prob_distribution.c' object='libbiomcmc_la-prob_distribution.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libbiomcmc_la_CPPFLAGS) $(CPPFLAGS) $(libbiomcmc_la_CFLAGS) $(CFLAGS) -c -o libbiomcmc_la-prob_distribution.lo `test -f 'prob_distribution.c' || echo '$(srcdir)/'`prob_distribution.c
-
-libbiomcmc_la-empirical_frequency.lo: empirical_frequency.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libbiomcmc_la_CPPFLAGS) $(CPPFLAGS) $(libbiomcmc_la_CFLAGS) $(CFLAGS) -MT libbiomcmc_la-empirical_frequency.lo -MD -MP -MF $(DEPDIR)/libbiomcmc_la-empirical_frequency.Tpo -c -o libbiomcmc_la-empirical_frequency.lo `test -f 'empirical_frequency.c' || echo '$(srcdir)/'`empirical_frequency.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libbiomcmc_la-empirical_frequency.Tpo $(DEPDIR)/libbiomcmc_la-empirical_frequency.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='empirical_frequency.c' object='libbiomcmc_la-empirical_frequency.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libbiomcmc_la_CPPFLAGS) $(CPPFLAGS) $(libbiomcmc_la_CFLAGS) $(CFLAGS) -c -o libbiomcmc_la-empirical_frequency.lo `test -f 'empirical_frequency.c' || echo '$(srcdir)/'`empirical_frequency.c
-
-libbiomcmc_la-argtable3.lo: argtable3.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libbiomcmc_la_CPPFLAGS) $(CPPFLAGS) $(libbiomcmc_la_CFLAGS) $(CFLAGS) -MT libbiomcmc_la-argtable3.lo -MD -MP -MF $(DEPDIR)/libbiomcmc_la-argtable3.Tpo -c -o libbiomcmc_la-argtable3.lo `test -f 'argtable3.c' || echo '$(srcdir)/'`argtable3.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libbiomcmc_la-argtable3.Tpo $(DEPDIR)/libbiomcmc_la-argtable3.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='argtable3.c' object='libbiomcmc_la-argtable3.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libbiomcmc_la_CPPFLAGS) $(CPPFLAGS) $(libbiomcmc_la_CFLAGS) $(CFLAGS) -c -o libbiomcmc_la-argtable3.lo `test -f 'argtable3.c' || echo '$(srcdir)/'`argtable3.c
-
-libbiomcmc_la-distance_matrix.lo: distance_matrix.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libbiomcmc_la_CPPFLAGS) $(CPPFLAGS) $(libbiomcmc_la_CFLAGS) $(CFLAGS) -MT libbiomcmc_la-distance_matrix.lo -MD -MP -MF $(DEPDIR)/libbiomcmc_la-distance_matrix.Tpo -c -o libbiomcmc_la-distance_matrix.lo `test -f 'distance_matrix.c' || echo '$(srcdir)/'`distance_matrix.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libbiomcmc_la-distance_matrix.Tpo $(DEPDIR)/libbiomcmc_la-distance_matrix.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='distance_matrix.c' object='libbiomcmc_la-distance_matrix.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libbiomcmc_la_CPPFLAGS) $(CPPFLAGS) $(libbiomcmc_la_CFLAGS) $(CFLAGS) -c -o libbiomcmc_la-distance_matrix.lo `test -f 'distance_matrix.c' || echo '$(srcdir)/'`distance_matrix.c
-
-libbiomcmc_la-alignment.lo: alignment.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libbiomcmc_la_CPPFLAGS) $(CPPFLAGS) $(libbiomcmc_la_CFLAGS) $(CFLAGS) -MT libbiomcmc_la-alignment.lo -MD -MP -MF $(DEPDIR)/libbiomcmc_la-alignment.Tpo -c -o libbiomcmc_la-alignment.lo `test -f 'alignment.c' || echo '$(srcdir)/'`alignment.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libbiomcmc_la-alignment.Tpo $(DEPDIR)/libbiomcmc_la-alignment.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='alignment.c' object='libbiomcmc_la-alignment.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libbiomcmc_la_CPPFLAGS) $(CPPFLAGS) $(libbiomcmc_la_CFLAGS) $(CFLAGS) -c -o libbiomcmc_la-alignment.lo `test -f 'alignment.c' || echo '$(srcdir)/'`alignment.c
-
-libbiomcmc_la-topology_common.lo: topology_common.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libbiomcmc_la_CPPFLAGS) $(CPPFLAGS) $(libbiomcmc_la_CFLAGS) $(CFLAGS) -MT libbiomcmc_la-topology_common.lo -MD -MP -MF $(DEPDIR)/libbiomcmc_la-topology_common.Tpo -c -o libbiomcmc_la-topology_common.lo `test -f 'topology_common.c' || echo '$(srcdir)/'`topology_common.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libbiomcmc_la-topology_common.Tpo $(DEPDIR)/libbiomcmc_la-topology_common.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='topology_common.c' object='libbiomcmc_la-topology_common.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libbiomcmc_la_CPPFLAGS) $(CPPFLAGS) $(libbiomcmc_la_CFLAGS) $(CFLAGS) -c -o libbiomcmc_la-topology_common.lo `test -f 'topology_common.c' || echo '$(srcdir)/'`topology_common.c
-
-libbiomcmc_la-parsimony.lo: parsimony.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libbiomcmc_la_CPPFLAGS) $(CPPFLAGS) $(libbiomcmc_la_CFLAGS) $(CFLAGS) -MT libbiomcmc_la-parsimony.lo -MD -MP -MF $(DEPDIR)/libbiomcmc_la-parsimony.Tpo -c -o libbiomcmc_la-parsimony.lo `test -f 'parsimony.c' || echo '$(srcdir)/'`parsimony.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libbiomcmc_la-parsimony.Tpo $(DEPDIR)/libbiomcmc_la-parsimony.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='parsimony.c' object='libbiomcmc_la-parsimony.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libbiomcmc_la_CPPFLAGS) $(CPPFLAGS) $(libbiomcmc_la_CFLAGS) $(CFLAGS) -c -o libbiomcmc_la-parsimony.lo `test -f 'parsimony.c' || echo '$(srcdir)/'`parsimony.c
-
-libbiomcmc_la-genetree.lo: genetree.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libbiomcmc_la_CPPFLAGS) $(CPPFLAGS) $(libbiomcmc_la_CFLAGS) $(CFLAGS) -MT libbiomcmc_la-genetree.lo -MD -MP -MF $(DEPDIR)/libbiomcmc_la-genetree.Tpo -c -o libbiomcmc_la-genetree.lo `test -f 'genetree.c' || echo '$(srcdir)/'`genetree.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libbiomcmc_la-genetree.Tpo $(DEPDIR)/libbiomcmc_la-genetree.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='genetree.c' object='libbiomcmc_la-genetree.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libbiomcmc_la_CPPFLAGS) $(CPPFLAGS) $(libbiomcmc_la_CFLAGS) $(CFLAGS) -c -o libbiomcmc_la-genetree.lo `test -f 'genetree.c' || echo '$(srcdir)/'`genetree.c
-
-libbiomcmc_la-reconciliation.lo: reconciliation.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libbiomcmc_la_CPPFLAGS) $(CPPFLAGS) $(libbiomcmc_la_CFLAGS) $(CFLAGS) -MT libbiomcmc_la-reconciliation.lo -MD -MP -MF $(DEPDIR)/libbiomcmc_la-reconciliation.Tpo -c -o libbiomcmc_la-reconciliation.lo `test -f 'reconciliation.c' || echo '$(srcdir)/'`reconciliation.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libbiomcmc_la-reconciliation.Tpo $(DEPDIR)/libbiomcmc_la-reconciliation.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='reconciliation.c' object='libbiomcmc_la-reconciliation.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libbiomcmc_la_CPPFLAGS) $(CPPFLAGS) $(libbiomcmc_la_CFLAGS) $(CFLAGS) -c -o libbiomcmc_la-reconciliation.lo `test -f 'reconciliation.c' || echo '$(srcdir)/'`reconciliation.c
-
-libbiomcmc_la-splitset_distances.lo: splitset_distances.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libbiomcmc_la_CPPFLAGS) $(CPPFLAGS) $(libbiomcmc_la_CFLAGS) $(CFLAGS) -MT libbiomcmc_la-splitset_distances.lo -MD -MP -MF $(DEPDIR)/libbiomcmc_la-splitset_distances.Tpo -c -o libbiomcmc_la-splitset_distances.lo `test -f 'splitset_distances.c' || echo '$(srcdir)/'`splitset_distances.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libbiomcmc_la-splitset_distances.Tpo $(DEPDIR)/libbiomcmc_la-splitset_distances.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='splitset_distances.c' object='libbiomcmc_la-splitset_distances.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libbiomcmc_la_CPPFLAGS) $(CPPFLAGS) $(libbiomcmc_la_CFLAGS) $(CFLAGS) -c -o libbiomcmc_la-splitset_distances.lo `test -f 'splitset_distances.c' || echo '$(srcdir)/'`splitset_distances.c
-
-libbiomcmc_la-read_newick_trees.lo: read_newick_trees.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libbiomcmc_la_CPPFLAGS) $(CPPFLAGS) $(libbiomcmc_la_CFLAGS) $(CFLAGS) -MT libbiomcmc_la-read_newick_trees.lo -MD -MP -MF $(DEPDIR)/libbiomcmc_la-read_newick_trees.Tpo -c -o libbiomcmc_la-read_newick_trees.lo `test -f 'read_newick_trees.c' || echo '$(srcdir)/'`read_newick_trees.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libbiomcmc_la-read_newick_trees.Tpo $(DEPDIR)/libbiomcmc_la-read_newick_trees.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='read_newick_trees.c' object='libbiomcmc_la-read_newick_trees.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libbiomcmc_la_CPPFLAGS) $(CPPFLAGS) $(libbiomcmc_la_CFLAGS) $(CFLAGS) -c -o libbiomcmc_la-read_newick_trees.lo `test -f 'read_newick_trees.c' || echo '$(srcdir)/'`read_newick_trees.c
-
-libbiomcmc_la-char_vector.lo: char_vector.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libbiomcmc_la_CPPFLAGS) $(CPPFLAGS) $(libbiomcmc_la_CFLAGS) $(CFLAGS) -MT libbiomcmc_la-char_vector.lo -MD -MP -MF $(DEPDIR)/libbiomcmc_la-char_vector.Tpo -c -o libbiomcmc_la-char_vector.lo `test -f 'char_vector.c' || echo '$(srcdir)/'`char_vector.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libbiomcmc_la-char_vector.Tpo $(DEPDIR)/libbiomcmc_la-char_vector.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='char_vector.c' object='libbiomcmc_la-char_vector.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libbiomcmc_la_CPPFLAGS) $(CPPFLAGS) $(libbiomcmc_la_CFLAGS) $(CFLAGS) -c -o libbiomcmc_la-char_vector.lo `test -f 'char_vector.c' || echo '$(srcdir)/'`char_vector.c
-
-libbiomcmc_la-upgma.lo: upgma.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libbiomcmc_la_CPPFLAGS) $(CPPFLAGS) $(libbiomcmc_la_CFLAGS) $(CFLAGS) -MT libbiomcmc_la-upgma.lo -MD -MP -MF $(DEPDIR)/libbiomcmc_la-upgma.Tpo -c -o libbiomcmc_la-upgma.lo `test -f 'upgma.c' || echo '$(srcdir)/'`upgma.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libbiomcmc_la-upgma.Tpo $(DEPDIR)/libbiomcmc_la-upgma.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='upgma.c' object='libbiomcmc_la-upgma.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libbiomcmc_la_CPPFLAGS) $(CPPFLAGS) $(libbiomcmc_la_CFLAGS) $(CFLAGS) -c -o libbiomcmc_la-upgma.lo `test -f 'upgma.c' || echo '$(srcdir)/'`upgma.c
-
-libbiomcmc_la-topology_randomise.lo: topology_randomise.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libbiomcmc_la_CPPFLAGS) $(CPPFLAGS) $(libbiomcmc_la_CFLAGS) $(CFLAGS) -MT libbiomcmc_la-topology_randomise.lo -MD -MP -MF $(DEPDIR)/libbiomcmc_la-topology_randomise.Tpo -c -o libbiomcmc_la-topology_randomise.lo `test -f 'topology_randomise.c' || echo '$(srcdir)/'`topology_randomise.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libbiomcmc_la-topology_randomise.Tpo $(DEPDIR)/libbiomcmc_la-topology_randomise.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='topology_randomise.c' object='libbiomcmc_la-topology_randomise.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libbiomcmc_la_CPPFLAGS) $(CPPFLAGS) $(libbiomcmc_la_CFLAGS) $(CFLAGS) -c -o libbiomcmc_la-topology_randomise.lo `test -f 'topology_randomise.c' || echo '$(srcdir)/'`topology_randomise.c
-
-libbiomcmc_la-newick_space.lo: newick_space.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libbiomcmc_la_CPPFLAGS) $(CPPFLAGS) $(libbiomcmc_la_CFLAGS) $(CFLAGS) -MT libbiomcmc_la-newick_space.lo -MD -MP -MF $(DEPDIR)/libbiomcmc_la-newick_space.Tpo -c -o libbiomcmc_la-newick_space.lo `test -f 'newick_space.c' || echo '$(srcdir)/'`newick_space.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libbiomcmc_la-newick_space.Tpo $(DEPDIR)/libbiomcmc_la-newick_space.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='newick_space.c' object='libbiomcmc_la-newick_space.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libbiomcmc_la_CPPFLAGS) $(CPPFLAGS) $(libbiomcmc_la_CFLAGS) $(CFLAGS) -c -o libbiomcmc_la-newick_space.lo `test -f 'newick_space.c' || echo '$(srcdir)/'`newick_space.c
-
-libbiomcmc_la-topology_space.lo: topology_space.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libbiomcmc_la_CPPFLAGS) $(CPPFLAGS) $(libbiomcmc_la_CFLAGS) $(CFLAGS) -MT libbiomcmc_la-topology_space.lo -MD -MP -MF $(DEPDIR)/libbiomcmc_la-topology_space.Tpo -c -o libbiomcmc_la-topology_space.lo `test -f 'topology_space.c' || echo '$(srcdir)/'`topology_space.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libbiomcmc_la-topology_space.Tpo $(DEPDIR)/libbiomcmc_la-topology_space.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='topology_space.c' object='libbiomcmc_la-topology_space.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libbiomcmc_la_CPPFLAGS) $(CPPFLAGS) $(libbiomcmc_la_CFLAGS) $(CFLAGS) -c -o libbiomcmc_la-topology_space.lo `test -f 'topology_space.c' || echo '$(srcdir)/'`topology_space.c
-
-libbiomcmc_la-topology_distance.lo: topology_distance.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libbiomcmc_la_CPPFLAGS) $(CPPFLAGS) $(libbiomcmc_la_CFLAGS) $(CFLAGS) -MT libbiomcmc_la-topology_distance.lo -MD -MP -MF $(DEPDIR)/libbiomcmc_la-topology_distance.Tpo -c -o libbiomcmc_la-topology_distance.lo `test -f 'topology_distance.c' || echo '$(srcdir)/'`topology_distance.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libbiomcmc_la-topology_distance.Tpo $(DEPDIR)/libbiomcmc_la-topology_distance.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='topology_distance.c' object='libbiomcmc_la-topology_distance.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libbiomcmc_la_CPPFLAGS) $(CPPFLAGS) $(libbiomcmc_la_CFLAGS) $(CFLAGS) -c -o libbiomcmc_la-topology_distance.lo `test -f 'topology_distance.c' || echo '$(srcdir)/'`topology_distance.c
-
-libbiomcmc_la-kmerhash.lo: kmerhash.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libbiomcmc_la_CPPFLAGS) $(CPPFLAGS) $(libbiomcmc_la_CFLAGS) $(CFLAGS) -MT libbiomcmc_la-kmerhash.lo -MD -MP -MF $(DEPDIR)/libbiomcmc_la-kmerhash.Tpo -c -o libbiomcmc_la-kmerhash.lo `test -f 'kmerhash.c' || echo '$(srcdir)/'`kmerhash.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libbiomcmc_la-kmerhash.Tpo $(DEPDIR)/libbiomcmc_la-kmerhash.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='kmerhash.c' object='libbiomcmc_la-kmerhash.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libbiomcmc_la_CPPFLAGS) $(CPPFLAGS) $(libbiomcmc_la_CFLAGS) $(CFLAGS) -c -o libbiomcmc_la-kmerhash.lo `test -f 'kmerhash.c' || echo '$(srcdir)/'`kmerhash.c
-
-libbiomcmc_la-hashfunctions.lo: hashfunctions.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libbiomcmc_la_CPPFLAGS) $(CPPFLAGS) $(libbiomcmc_la_CFLAGS) $(CFLAGS) -MT libbiomcmc_la-hashfunctions.lo -MD -MP -MF $(DEPDIR)/libbiomcmc_la-hashfunctions.Tpo -c -o libbiomcmc_la-hashfunctions.lo `test -f 'hashfunctions.c' || echo '$(srcdir)/'`hashfunctions.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libbiomcmc_la-hashfunctions.Tpo $(DEPDIR)/libbiomcmc_la-hashfunctions.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='hashfunctions.c' object='libbiomcmc_la-hashfunctions.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libbiomcmc_la_CPPFLAGS) $(CPPFLAGS) $(libbiomcmc_la_CFLAGS) $(CFLAGS) -c -o libbiomcmc_la-hashfunctions.lo `test -f 'hashfunctions.c' || echo '$(srcdir)/'`hashfunctions.c
-
-libbiomcmc_la-distance_generator.lo: distance_generator.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libbiomcmc_la_CPPFLAGS) $(CPPFLAGS) $(libbiomcmc_la_CFLAGS) $(CFLAGS) -MT libbiomcmc_la-distance_generator.lo -MD -MP -MF $(DEPDIR)/libbiomcmc_la-distance_generator.Tpo -c -o libbiomcmc_la-distance_generator.lo `test -f 'distance_generator.c' || echo '$(srcdir)/'`distance_generator.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libbiomcmc_la-distance_generator.Tpo $(DEPDIR)/libbiomcmc_la-distance_generator.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='distance_generator.c' object='libbiomcmc_la-distance_generator.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libbiomcmc_la_CPPFLAGS) $(CPPFLAGS) $(libbiomcmc_la_CFLAGS) $(CFLAGS) -c -o libbiomcmc_la-distance_generator.lo `test -f 'distance_generator.c' || echo '$(srcdir)/'`distance_generator.c
-
-libbiomcmc_la-clustering_goptics.lo: clustering_goptics.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libbiomcmc_la_CPPFLAGS) $(CPPFLAGS) $(libbiomcmc_la_CFLAGS) $(CFLAGS) -MT libbiomcmc_la-clustering_goptics.lo -MD -MP -MF $(DEPDIR)/libbiomcmc_la-clustering_goptics.Tpo -c -o libbiomcmc_la-clustering_goptics.lo `test -f 'clustering_goptics.c' || echo '$(srcdir)/'`clustering_goptics.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libbiomcmc_la-clustering_goptics.Tpo $(DEPDIR)/libbiomcmc_la-clustering_goptics.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='clustering_goptics.c' object='libbiomcmc_la-clustering_goptics.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libbiomcmc_la_CPPFLAGS) $(CPPFLAGS) $(libbiomcmc_la_CFLAGS) $(CFLAGS) -c -o libbiomcmc_la-clustering_goptics.lo `test -f 'clustering_goptics.c' || echo '$(srcdir)/'`clustering_goptics.c
-
-libbiomcmc_la-quickselect_quantile.lo: quickselect_quantile.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libbiomcmc_la_CPPFLAGS) $(CPPFLAGS) $(libbiomcmc_la_CFLAGS) $(CFLAGS) -MT libbiomcmc_la-quickselect_quantile.lo -MD -MP -MF $(DEPDIR)/libbiomcmc_la-quickselect_quantile.Tpo -c -o libbiomcmc_la-quickselect_quantile.lo `test -f 'quickselect_quantile.c' || echo '$(srcdir)/'`quickselect_quantile.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libbiomcmc_la-quickselect_quantile.Tpo $(DEPDIR)/libbiomcmc_la-quickselect_quantile.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='quickselect_quantile.c' object='libbiomcmc_la-quickselect_quantile.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libbiomcmc_la_CPPFLAGS) $(CPPFLAGS) $(libbiomcmc_la_CFLAGS) $(CFLAGS) -c -o libbiomcmc_la-quickselect_quantile.lo `test -f 'quickselect_quantile.c' || echo '$(srcdir)/'`quickselect_quantile.c
-
-libbiomcmc_la-fortune_cookies.lo: fortune_cookies.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libbiomcmc_la_CPPFLAGS) $(CPPFLAGS) $(libbiomcmc_la_CFLAGS) $(CFLAGS) -MT libbiomcmc_la-fortune_cookies.lo -MD -MP -MF $(DEPDIR)/libbiomcmc_la-fortune_cookies.Tpo -c -o libbiomcmc_la-fortune_cookies.lo `test -f 'fortune_cookies.c' || echo '$(srcdir)/'`fortune_cookies.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libbiomcmc_la-fortune_cookies.Tpo $(DEPDIR)/libbiomcmc_la-fortune_cookies.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='fortune_cookies.c' object='libbiomcmc_la-fortune_cookies.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libbiomcmc_la_CPPFLAGS) $(CPPFLAGS) $(libbiomcmc_la_CFLAGS) $(CFLAGS) -c -o libbiomcmc_la-fortune_cookies.lo `test -f 'fortune_cookies.c' || echo '$(srcdir)/'`fortune_cookies.c
-
-libbiomcmc_la-suffix_tree.lo: suffix_tree.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libbiomcmc_la_CPPFLAGS) $(CPPFLAGS) $(libbiomcmc_la_CFLAGS) $(CFLAGS) -MT libbiomcmc_la-suffix_tree.lo -MD -MP -MF $(DEPDIR)/libbiomcmc_la-suffix_tree.Tpo -c -o libbiomcmc_la-suffix_tree.lo `test -f 'suffix_tree.c' || echo '$(srcdir)/'`suffix_tree.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libbiomcmc_la-suffix_tree.Tpo $(DEPDIR)/libbiomcmc_la-suffix_tree.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='suffix_tree.c' object='libbiomcmc_la-suffix_tree.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libbiomcmc_la_CPPFLAGS) $(CPPFLAGS) $(libbiomcmc_la_CFLAGS) $(CFLAGS) -c -o libbiomcmc_la-suffix_tree.lo `test -f 'suffix_tree.c' || echo '$(srcdir)/'`suffix_tree.c
 
 libbiomcmc_static_la-hashtable.lo: hashtable.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libbiomcmc_static_la_CPPFLAGS) $(CPPFLAGS) $(libbiomcmc_static_la_CFLAGS) $(CFLAGS) -MT libbiomcmc_static_la-hashtable.lo -MD -MP -MF $(DEPDIR)/libbiomcmc_static_la-hashtable.Tpo -c -o libbiomcmc_static_la-hashtable.lo `test -f 'hashtable.c' || echo '$(srcdir)/'`hashtable.c
@@ -1054,6 +788,20 @@ libbiomcmc_static_la-suffix_tree.lo: suffix_tree.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='suffix_tree.c' object='libbiomcmc_static_la-suffix_tree.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libbiomcmc_static_la_CPPFLAGS) $(CPPFLAGS) $(libbiomcmc_static_la_CFLAGS) $(CFLAGS) -c -o libbiomcmc_static_la-suffix_tree.lo `test -f 'suffix_tree.c' || echo '$(srcdir)/'`suffix_tree.c
+
+libbiomcmc_static_la-phylogeny.lo: phylogeny.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libbiomcmc_static_la_CPPFLAGS) $(CPPFLAGS) $(libbiomcmc_static_la_CFLAGS) $(CFLAGS) -MT libbiomcmc_static_la-phylogeny.lo -MD -MP -MF $(DEPDIR)/libbiomcmc_static_la-phylogeny.Tpo -c -o libbiomcmc_static_la-phylogeny.lo `test -f 'phylogeny.c' || echo '$(srcdir)/'`phylogeny.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libbiomcmc_static_la-phylogeny.Tpo $(DEPDIR)/libbiomcmc_static_la-phylogeny.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='phylogeny.c' object='libbiomcmc_static_la-phylogeny.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libbiomcmc_static_la_CPPFLAGS) $(CPPFLAGS) $(libbiomcmc_static_la_CFLAGS) $(CFLAGS) -c -o libbiomcmc_static_la-phylogeny.lo `test -f 'phylogeny.c' || echo '$(srcdir)/'`phylogeny.c
+
+libbiomcmc_static_la-likelihood.lo: likelihood.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libbiomcmc_static_la_CPPFLAGS) $(CPPFLAGS) $(libbiomcmc_static_la_CFLAGS) $(CFLAGS) -MT libbiomcmc_static_la-likelihood.lo -MD -MP -MF $(DEPDIR)/libbiomcmc_static_la-likelihood.Tpo -c -o libbiomcmc_static_la-likelihood.lo `test -f 'likelihood.c' || echo '$(srcdir)/'`likelihood.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libbiomcmc_static_la-likelihood.Tpo $(DEPDIR)/libbiomcmc_static_la-likelihood.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='likelihood.c' object='libbiomcmc_static_la-likelihood.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libbiomcmc_static_la_CPPFLAGS) $(CPPFLAGS) $(libbiomcmc_static_la_CFLAGS) $(CFLAGS) -c -o libbiomcmc_static_la-likelihood.lo `test -f 'likelihood.c' || echo '$(srcdir)/'`likelihood.c
 
 mostlyclean-libtool:
 	-rm -f *.lo

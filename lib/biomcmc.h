@@ -34,6 +34,7 @@ extern "C" {
 #include "topology_space.h"
 #include "clustering_goptics.h"
 #include "quickselect_quantile.h"
+#include "phylogeny.h"
 
 
 // extra libs not used yet: edlib hll
