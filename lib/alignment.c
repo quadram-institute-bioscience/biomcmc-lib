@@ -75,23 +75,13 @@ read_alignment_from_file (char *seqfilename)
 alignment
 read_fasta_alignment_from_file (char *seqfilename)
 {
-  alignment align = NULL; /* we will create a new alignment by hand (no call to new_alignment() */
+  alignment align; /* we will create a new alignment by hand (no call to new_alignment() */
+  char_vector taxlabel, character;
   FILE *seqfile;
   char *line = NULL, *line_read = NULL, *delim = NULL;
   size_t linelength = 0;
-  int i, max_length = 0;
-
-  /* equivalent to call to new_alignment(), but hashtable will be initialized afterwards */
-  align = (alignment) biomcmc_malloc (sizeof (struct alignment_struct));
-  align->n_charset = 0; /* FASTA files don't support partitioning */ 
-  align->charset_start = align->charset_end = NULL;
-  align->taxlabel      = new_char_vector (1); /* will increase dynamically */ 
-  align->character     = new_char_vector_big (1); /* will increase dynamically, and realloc() will double when needed */ 
-  align->is_aligned    = true; /* we will check after reading file */
-  align->site_pattern = NULL; 
-  align->pattern_freq = NULL;
-  align->npat = 0; /* number of site patterns only make sense if aligned (checked by alignment_create_sitepattern()) */
-  align->ref_counter = 1;
+  taxlabel  = new_char_vector (1); /* will increase dynamically */ 
+  character = new_char_vector_big (1); /* will increase dynamically, and realloc() will double when needed */ 
 
   /* start reading file */
   seqfile = biomcmc_fopen (seqfilename, "r");
@@ -99,19 +89,39 @@ read_fasta_alignment_from_file (char *seqfilename)
     line = line_read; /* the variable *line_read should point always to the same value (no line++ or alike) */
     if (nonempty_fasta_line (line)) { /* each line can be either the sequence or its name, on a strict order */
       /* sequence description (in FASTA jargon); the sequence name */
-      if ((delim = strchr (line, '>'))) char_vector_add_string (align->taxlabel, ++delim);
+      if ((delim = strchr (line, '>'))) char_vector_add_string (taxlabel, ++delim);
       /* the sequence itself, which may span several lines */
       else {
         line = remove_space_from_string (line);
         line = uppercase_string (line);
-        char_vector_append_string_big_at_position (align->character, line, align->taxlabel->next_avail-1);
+        char_vector_append_string_big_at_position (character, line, taxlabel->next_avail-1); // counter from taxlabel NOT character
       }
     }
   }
   fclose (seqfile);
   if (line_read) free (line_read);
-
   char_vector_finalise_big (align->character);
+  align = new_alignment_from_taxlabel_and_character_vectors (taxlabel, character, seqfilename);
+  return align;
+}
+
+alignment
+new_alignment_from_taxlabel_and_character_vectors (char_vector taxlabel, char_vector character, char *seqfilename)
+{
+  int i;
+  size_t max_length = 0;
+  alignment align = (alignment) biomcmc_malloc (sizeof (struct alignment_struct));
+  /* equivalent to call to new_alignment(), but for fasta the "nchar" is not constant */
+  align->n_charset = 0; /* FASTA files don't support partitioning */ 
+  align->charset_start = align->charset_end = NULL;
+  align->is_aligned    = true; /* we will check after reading file */
+  align->site_pattern = NULL; 
+  align->pattern_freq = NULL;
+  align->npat = 0; /* number of site patterns only make sense if aligned (checked by alignment_create_sitepattern()) */
+  align->ref_counter = 1;
+  align->taxlabel  = taxlabel;  taxlabel->ref_counter++; 
+  align->character = character; character->ref_counter++;
+
   if (align->taxlabel->nstrings != align->character->nstrings)
     biomcmc_error ("number of sequences and number of sequence names disagree in FASTA file \"%s\"\n", seqfilename);
   if (char_vector_remove_empty_strings (align->taxlabel)) /* store sequence length info in taxlabel->nchars[] */
@@ -120,12 +130,12 @@ read_fasta_alignment_from_file (char *seqfilename)
     biomcmc_error ("problem (empty string) reading sequence data for FASTA file \"%s\"\n", seqfilename);
 
   for (i=0; i < align->character->nstrings; i++) { /* check if is aligned and store size of largest sequence */
-    if (max_length && (max_length != (int) align->character->nchars[i])) align->is_aligned = false;
-    if (max_length < (int) align->character->nchars[i]) max_length = align->character->nchars[i];
+    if (max_length && (max_length != align->character->nchars[i])) align->is_aligned = false;
+    if (max_length < align->character->nchars[i]) max_length = align->character->nchars[i];
   }
 
   align->ntax  = align->taxlabel->nstrings;
-  align->nchar = max_length;
+  align->nchar = (int) max_length;
 
   align->taxlabel_hash = new_hashtable (align->ntax);
   for (i=0; i < align->ntax; i++) insert_hashtable (align->taxlabel_hash, align->taxlabel->string[i], i);
@@ -134,7 +144,6 @@ read_fasta_alignment_from_file (char *seqfilename)
   if (char2bit[0][0] == 0xffff) initialize_char2bit_table (); /* translation table between ACGT to 1248 */
   alignment_shorten_taxa_names (align);
   store_filename_in_alignment (align, seqfilename);
-
   return align;
 }
 
