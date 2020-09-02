@@ -72,8 +72,9 @@ gff3_fields_from_char_line (const char *line)
       default: break; // skip 'score' field  (6 of 9)
     };
   }
-  if (i < 9) biomcmc_error ("Malformed GFF3 file, found only %d (tab-separated) fields instead of 9 on line \n%s", i, line);
-  if (f_end != NULL) biomcmc_error ("Malformed GFF3, more than 9 tab-separating fields found on line\n%s", line);
+//  if (i < 9) biomcmc_error ("Malformed GFF3 file, found only %d (tab-separated) fields instead of 9 on line \n%s", i, line);
+//  if (f_end != NULL) biomcmc_error ("Malformed GFF3, more than 9 tab-separating fields found on line\n%s", line);
+  if ((i < 9) || (f_end != NULL)) {free_strings_gff3_fields (gff); return NULL; }
   return gff;
 }
 
@@ -110,15 +111,29 @@ read_gff3_from_file (char *gff3filename)
   char *line = NULL, *line_read = NULL;
   size_t linelength = 0;
   int stage = 0;
+  gff3_fields gff;
 
   seqfile = biomcmc_fopen (gff3filename, "r");
 
   while (biomcmc_getline (&line_read, &linelength, seqfile) != -1) {
     line = line_read; /* the variable *line_read should point always to the same value (no line++ or alike) */
     if (nonempty_gff3_string (line)) {
-      if ((stage == 0) && strcasestr (line, "##gff-version")) stage = 1;
+      if (stage == 0) && (strcasestr (line, "##gff-version")) stage = 1; // obligatory first line to keep going on
+      else if (stage == 1) {
+        if (strcasestr (line, "##sequence-region")) /*DOSOMETHING*/;
+        else if ((gff = gff3_fields_from_char_line (line)) != NULL) {
+          /*DOSOMETHING*/
+          stage = 2;
+        }
+      }
+      else if (stage == 2) {
+        if ((gff = gff3_fields_from_char_line (line)) != NULL) {/*business as usual*/ }
+        else if (strcasestr (line, "##fasta")) stage = 3;
+      }
+      else if (stage == 3) /*read fasta file*/;
     }
   }
 
   fclose (seqfile);
   if (line_read) free (line_read);
+}
