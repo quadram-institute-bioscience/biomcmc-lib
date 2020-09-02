@@ -39,5 +39,7 @@ char* remove_space_from_string (char *string);
 bool nonempty_string (char *string);
 /*! \brief returns bool::false if first nonspace character of string is ';' (FASTA comment) or '#' (HUPO extension) */
 bool nonempty_fasta_line (char *string);
+/*! \brief returns bool::false if first nonspace character of string is '#' except for '##' which is pragma */
+bool nonempty_gff3_line (char *string);
 
 #endif

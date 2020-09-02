@@ -22,6 +22,8 @@ void free_strings_gff3_fields (gff3_fields gff);
 gff3_string gff3_string_from_field (const char *start, const char *end);
 
 // static char *feature_type_list[] = {"gene", "cds", "mrna", "region"}; // many more, but I dont use them
+// TODO: prokka generates many of these, one per contig: ##sequence-region seqid start end 
+// and fasta sequences are one seqid each
 
 compare_gff3_fields_increasing (const void *a, const void *b)
 {
@@ -99,3 +101,24 @@ gff3_string_from_field (const char *start, const char *end)
   string.id = -1; // defined elsewhere, if relevant
   return string;
 }
+
+
+void /* not actually, I need a struct for this */
+read_gff3_from_file (char *gff3filename)
+{
+  FILE *seqfile;
+  char *line = NULL, *line_read = NULL;
+  size_t linelength = 0;
+  int stage = 0;
+
+  seqfile = biomcmc_fopen (gff3filename, "r");
+
+  while (biomcmc_getline (&line_read, &linelength, seqfile) != -1) {
+    line = line_read; /* the variable *line_read should point always to the same value (no line++ or alike) */
+    if (nonempty_gff3_string (line)) {
+      if ((stage == 0) && strcasestr (line, "##gff-version")) stage = 1;
+    }
+  }
+
+  fclose (seqfile);
+  if (line_read) free (line_read);

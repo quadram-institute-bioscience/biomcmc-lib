@@ -29,8 +29,9 @@ const char *prt_col[][8]={ // 0-black   1-red   2-grn   3-yel   4-blu   5-mag   
 };
 
 // curiosity. to add quotes with gawk: gawk '{print q,$0,q,","}' q="\""
-uint16_t biomcmc_fortune_cookies_size = 329;
+uint16_t biomcmc_fortune_cookies_size = 330;
 char *biomcmc_fortune_cookies[] = {
+  " A computer is like a mischievous genie. It will give you exactly what you ask for, but not always what you want. -- Joe Sondow",
   " The most secure code in the world is code which is never written. -- Colin Percival",
   " Becoming sufficiently familiar with something is a substitute for understanding it. -- John Conway",
   " Mathematics is the simple bit. Its the stuff we can understand. Its cats that are complicated.  -- John Conway",
