@@ -20,7 +20,7 @@
 
 #include "alignment.h"
 
-static char *feature_type_list[] = {"gene", "CDS", "mRNA", "region"}; // many more, but I dont use them
+typedef struct gff3_file_struct* gff3_t;
 
 struct
 {
@@ -35,5 +35,20 @@ struct
   uint8_t pos_strand:1, phase:3, type:4;
   gff3_string seqid, source, attr_id, attr_parent;
 } gff3_fields;
+
+struct gff3_file_struct
+{
+  gff3_fields *f0, *f_cds, *f_gene;
+  int n_f0, n_cds, n_gene;
+  char_vector sequence; /*! \brief from fasta info at end of file; not mandatory */
+  char_vector seqname;  /*! \brief from fasta info at end of file; not mandatory */
+  hashtable seqname_hash; /*! \brief index from seqname, seq_region, or f0.seqid, in order of preference */
+//  char_vector seq_region; /*! \brief pragma with seqid and size, not mandatory but very common */
+  int ref_counter;
+};
+
+gff3_t read_gff3_from_file (char *gff3filename);
+void del_gff3_t (gff3_t g3);
+gff3_fields find_gff3_field_from_genomic_location (gff3_t g3, const char *seqid, int location); // main function for tatajuba
 
 #endif

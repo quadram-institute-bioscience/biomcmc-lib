@@ -48,6 +48,30 @@ biomcmc_fopen (const char *path, const char *mode)
   return fp;
 }
 
+/*
+FILE *
+biomcmc_gzopen (const char *path, const char *mode)
+{
+#ifdef HAVE_ZLIB
+  gzFile *zfp;
+  FILE *fp;
+
+  *zfp = gzopen (path, mode);
+  if (*zfp == NULL) return biomcmc_fopen (path, mode);
+  if ((fp = __sfp()) == NULL) return (NULL);
+  fp->_flags =  __SRW; // read-write 
+  fp->_file = -1;
+  fp->_cookie = (void *) zfp;
+  fp->_read = gzread;
+  fp->_write = gzwrite;
+  fp->_seek = gzseek;
+  fp->_close = gzclose;
+#else
+  fprintf (stderr, "This biomcmc-lib was not compiled with zlib support");
+  return biomcmc_fopen (path, mode);
+#endif
+}
+*/
 void
 biomcmc_error (const char *template, ...)
 {

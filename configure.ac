@@ -33,8 +33,12 @@ dnl         (checked with "ifdef _OPENMP"); user can disable it through "--disab
 AC_OPENMP
 AC_SUBST(OPENMP_CFLAGS)
 AC_SUBST(OPENMP_CPPFLAGS)
-dnl unit tests in for "make check"
-PKG_CHECK_MODULES([CHECK], [check >= 0.9.10])
+dnl notice that default if-not-found action is to exist with error
+PKG_CHECK_MODULES([CHECK], [check >= 0.9.10]) # unit tests
+PKG_CHECK_MODULES([ZLIB], [zlib], 
+                  AC_DEFINE([HAVE_ZLIB],[1],[io compression library found]),  
+                  AC_DEFINE([HAVE_ZLIB],[0],[compression library not found])
+                  )
 
 dnl check for the math library
 AC_CHECK_LIB([m],[main])

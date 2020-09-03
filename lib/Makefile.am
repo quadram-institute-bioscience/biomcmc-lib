@@ -1,5 +1,5 @@
-AM_CPPFLAGS = $(GTKDEPS_CFLAGS)  @OPENMP_CPPFLAGS@
-AM_CFLAGS = @AM_CFLAGS@  @OPENMP_CFLAGS@
+AM_CPPFLAGS = $(GTKDEPS_CFLAGS)  @OPENMP_CPPFLAGS@ @ZLIB_CFLAGS@
+AM_CFLAGS = @AM_CFLAGS@  @OPENMP_CFLAGS@ @ZLIB_CFLAGS@
 
 # ideally I would hide reconciliation.h etc used only inside genetree.c 
 common_headers = hashtable.h lowlevel.h random_number_gen.h constant_random_lists.h random_number.h nexus_common.h \
@@ -25,7 +25,7 @@ lib_LTLIBRARIES = libbiomcmc.la  # libedlib.la # libtools
 libbiomcmc_la_SOURCES = $(common_headers) config.h
 libbiomcmc_la_CPPFLAGS = $(AM_CPPFLAGS)
 libbiomcmc_la_CFLAGS = $(AM_CFLAGS) 
-libbiomcmc_la_LIBADD = $(GTKDEPS_LIBS) $(AM_LDFLAGS) libbiomcmc_static.la  
+libbiomcmc_la_LIBADD = $(GTKDEPS_LIBS) $(AM_LDFLAGS) libbiomcmc_static.la @ZLIB_LIBS@  
 
 noinst_LTLIBRARIES = libbiomcmc_static.la # convenience lib (not installed globally)
 libbiomcmc_static_la_SOURCES = $(common_src) $(common_headers) config.h # listed here s.t. any change triggers recompilation 

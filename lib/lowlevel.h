@@ -38,10 +38,11 @@
 #include <assert.h>    
 //#include <sys/resource.h> // suggested by goptics (gpu), but don't seem needed
 //#include <sys/stat.h>     // suggested by goptics (gpu), but don't seem needed
-
-
 #include <libgen.h> /* standard XPG basename() - the one provided by string.h is a GNU extension, fails on macOSX*/
 
+#ifdef HAVE_ZLIB
+#include <zlib.h>
+#endif
 #ifdef _OPENMP
 #include <omp.h>         /* OpenMP parallel threading library when available */
 #endif

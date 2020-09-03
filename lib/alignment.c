@@ -100,7 +100,7 @@ read_fasta_alignment_from_file (char *seqfilename)
   }
   fclose (seqfile);
   if (line_read) free (line_read);
-  char_vector_finalise_big (align->character);
+  char_vector_finalise_big (character);
   align = new_alignment_from_taxlabel_and_character_vectors (taxlabel, character, seqfilename);
   return align;
 }

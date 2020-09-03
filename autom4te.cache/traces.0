@@ -2945,24 +2945,39 @@ m4trace:configure.ac:37: -1- PKG_CHECK_EXISTS([check >= 0.9.10], [pkg_cv_[]CHECK
 m4trace:configure.ac:37: -1- PKG_CHECK_EXISTS([check >= 0.9.10], [pkg_cv_[]CHECK_LIBS=`$PKG_CONFIG --[]libs "check >= 0.9.10" 2>/dev/null`
 		      test "x$?" != "x0" && pkg_failed=yes ], [pkg_failed=yes])
 m4trace:configure.ac:37: -1- _PKG_SHORT_ERRORS_SUPPORTED
-m4trace:configure.ac:40: -1- m4_pattern_allow([^HAVE_LIBM$])
-m4trace:configure.ac:47: -1- m4_pattern_allow([^STDC_HEADERS$])
-m4trace:configure.ac:57: -1- m4_pattern_allow([^SIZEOF_INT$])
-m4trace:configure.ac:58: -1- m4_pattern_allow([^SIZEOF_DOUBLE$])
-m4trace:configure.ac:59: -1- m4_pattern_allow([^SIZEOF_LONG_LONG_INT$])
-m4trace:configure.ac:69: -1- m4_pattern_allow([^BIOMCMC_DEBUG$])
-m4trace:configure.ac:72: -1- m4_pattern_allow([^NDEBUG$])
-m4trace:configure.ac:102: -1- m4_pattern_allow([^AM_CFLAGS$])
-m4trace:configure.ac:103: -1- m4_pattern_allow([^AM_LDFLAGS$])
-m4trace:configure.ac:104: -1- m4_pattern_allow([^MPI_CXXLIBS$])
-m4trace:configure.ac:105: -1- m4_pattern_allow([^MPI_CXXFLAGS$])
-m4trace:configure.ac:109: -1- m4_pattern_allow([^LIB@&t@OBJS$])
-m4trace:configure.ac:109: -1- m4_pattern_allow([^LTLIBOBJS$])
-m4trace:configure.ac:109: -1- AM_CONDITIONAL([am__EXEEXT], [test -n "$EXEEXT"])
-m4trace:configure.ac:109: -1- m4_pattern_allow([^am__EXEEXT_TRUE$])
-m4trace:configure.ac:109: -1- m4_pattern_allow([^am__EXEEXT_FALSE$])
-m4trace:configure.ac:109: -1- _AM_SUBST_NOTMAKE([am__EXEEXT_TRUE])
-m4trace:configure.ac:109: -1- _AM_SUBST_NOTMAKE([am__EXEEXT_FALSE])
-m4trace:configure.ac:109: -1- _AC_AM_CONFIG_HEADER_HOOK(["$ac_file"])
-m4trace:configure.ac:109: -1- _AM_OUTPUT_DEPENDENCY_COMMANDS
-m4trace:configure.ac:109: -1- _LT_PROG_LTMAIN
+m4trace:configure.ac:39: -2- m4_pattern_allow([^HAVE_ZLIB$])
+m4trace:configure.ac:40: -2- m4_pattern_allow([^HAVE_ZLIB$])
+m4trace:configure.ac:38: -1- PKG_CHECK_MODULES([ZLIB], [zlib], [
+$as_echo "@%:@define HAVE_ZLIB 1" >>confdefs.h
+], [
+$as_echo "@%:@define HAVE_ZLIB 0" >>confdefs.h
+
+                  ])
+m4trace:configure.ac:38: -1- m4_pattern_allow([^ZLIB_CFLAGS$])
+m4trace:configure.ac:38: -1- m4_pattern_allow([^ZLIB_LIBS$])
+m4trace:configure.ac:38: -1- PKG_CHECK_EXISTS([zlib], [pkg_cv_[]ZLIB_CFLAGS=`$PKG_CONFIG --[]cflags "zlib" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes ], [pkg_failed=yes])
+m4trace:configure.ac:38: -1- PKG_CHECK_EXISTS([zlib], [pkg_cv_[]ZLIB_LIBS=`$PKG_CONFIG --[]libs "zlib" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes ], [pkg_failed=yes])
+m4trace:configure.ac:38: -1- _PKG_SHORT_ERRORS_SUPPORTED
+m4trace:configure.ac:44: -1- m4_pattern_allow([^HAVE_LIBM$])
+m4trace:configure.ac:51: -1- m4_pattern_allow([^STDC_HEADERS$])
+m4trace:configure.ac:61: -1- m4_pattern_allow([^SIZEOF_INT$])
+m4trace:configure.ac:62: -1- m4_pattern_allow([^SIZEOF_DOUBLE$])
+m4trace:configure.ac:63: -1- m4_pattern_allow([^SIZEOF_LONG_LONG_INT$])
+m4trace:configure.ac:73: -1- m4_pattern_allow([^BIOMCMC_DEBUG$])
+m4trace:configure.ac:76: -1- m4_pattern_allow([^NDEBUG$])
+m4trace:configure.ac:106: -1- m4_pattern_allow([^AM_CFLAGS$])
+m4trace:configure.ac:107: -1- m4_pattern_allow([^AM_LDFLAGS$])
+m4trace:configure.ac:108: -1- m4_pattern_allow([^MPI_CXXLIBS$])
+m4trace:configure.ac:109: -1- m4_pattern_allow([^MPI_CXXFLAGS$])
+m4trace:configure.ac:113: -1- m4_pattern_allow([^LIB@&t@OBJS$])
+m4trace:configure.ac:113: -1- m4_pattern_allow([^LTLIBOBJS$])
+m4trace:configure.ac:113: -1- AM_CONDITIONAL([am__EXEEXT], [test -n "$EXEEXT"])
+m4trace:configure.ac:113: -1- m4_pattern_allow([^am__EXEEXT_TRUE$])
+m4trace:configure.ac:113: -1- m4_pattern_allow([^am__EXEEXT_FALSE$])
+m4trace:configure.ac:113: -1- _AM_SUBST_NOTMAKE([am__EXEEXT_TRUE])
+m4trace:configure.ac:113: -1- _AM_SUBST_NOTMAKE([am__EXEEXT_FALSE])
+m4trace:configure.ac:113: -1- _AC_AM_CONFIG_HEADER_HOOK(["$ac_file"])
+m4trace:configure.ac:113: -1- _AM_OUTPUT_DEPENDENCY_COMMANDS
+m4trace:configure.ac:113: -1- _LT_PROG_LTMAIN
