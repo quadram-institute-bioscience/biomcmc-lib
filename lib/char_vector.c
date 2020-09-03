@@ -356,11 +356,21 @@ char_vector_reduce_to_valid_strings (char_vector vec, int *valid, int n_valid)
     vec->string[i] = vec->string[ valid[i] ];
     vec->nchars[i] = vec->nchars[ valid[i] ];
   }
-  vec->nstrings = n_valid;
+  vec->nstrings = vec->next_avail = n_valid;
 
   vec->string = (char**)  biomcmc_realloc ((char**)  vec->string, n_valid * sizeof (char*));
   vec->nchars = (size_t*) biomcmc_realloc ((size_t*) vec->nchars, n_valid * sizeof (size_t));
 }  
+
+void
+char_vector_reduce_to_trimmed_size (char_vector vec, int new_size)
+{
+  int i;
+  for (i=vec->nstrings-1; i >= new_size; i--) if (vec->string[i]) free (vec->string[i]);
+  vec->nstrings = vec->next_avail = new_size;
+  vec->string = (char**)  biomcmc_realloc ((char**)  vec->string, new_size * sizeof (char*));
+  vec->nchars = (size_t*) biomcmc_realloc ((size_t*) vec->nchars, new_size * sizeof (size_t));
+}
 
 void
 char_vector_reorder_by_size_or_lexicographically (char_vector vec, bool lexico, int *order) 

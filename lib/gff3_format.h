@@ -19,6 +19,7 @@
 #define _biomcmc_gff3_format_h_
 
 #include "alignment.h"
+#include "fortune_cookies.h" 
 
 typedef struct gff3_file_struct* gff3_t;
 
@@ -38,7 +39,7 @@ struct
 
 struct gff3_file_struct
 {
-  gff3_fields *f0, *f_cds, *f_gene;
+  gff3_fields *f0, **cds, **gene; // cds and gene are pointers
   int n_f0, n_cds, n_gene;
   char_vector sequence; /*! \brief from fasta info at end of file; not mandatory */
   char_vector seqname;  /*! \brief from fasta info at end of file; not mandatory */

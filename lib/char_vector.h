@@ -78,6 +78,8 @@ int char_vector_remove_empty_strings (char_vector vec);
 int char_vector_remove_duplicate_strings (char_vector vec);
 /*! \brief reduce char_string_struct to only those elements indexed by valid[] */
 void char_vector_reduce_to_valid_strings (char_vector vec, int *valid, int n_valid);
+/*! \brief reduce char_string_struct to only the first elements (assuming last are not needed anymore); usually after reorder */
+void char_vector_reduce_to_trimmed_size (char_vector vec, int new_size);
 
 /*! \brief Order char_vector_struct elements from longer string to smaller, or lexicographically; can be used after calling
  * new_char_vector_from_file() but if topology etc. are associated to it, then order[] must be externally defined and
