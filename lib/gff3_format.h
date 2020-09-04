@@ -13,6 +13,15 @@
 
 /*! \file 
  *  \brief GFF3 format 
+ *  This library focuses on two units: the chromosome/contig/genome, and the fields (rows) with features. 
+ *  
+ *  The feature field is the usual, mandatory, 9 columns table. Each feature has a type (CDS, gene, mRNA), the
+ *  chromosome/contig/genome it belongs to, its start and end positions, etc.
+ *
+ *  The chromosome/contig/genome/etc can be described in three places:
+ *  1. as a pragma called ##genome-region, before the feature table (optional)
+ *  2. as the first column, called "seqid", in the table (mandatory)
+ *  3. as a fasta header (sequence name, after the ">") in the ##fasta pragma after the table (optional)
  */
 
 #ifndef _biomcmc_gff3_format_h_
@@ -20,21 +29,22 @@
 
 #include "alignment.h"
 #include "fortune_cookies.h" 
+#include "hashfunctions.h"
 
 typedef struct gff3_file_struct* gff3_t;
 
-struct
+typedef struct
 {
   char *str;
   uint64_t hash;
   int id;
 } gff3_string;
 
-struct 
+typedef struct 
 {
   int start, end;
-  uint8_t pos_strand:1, phase:3, type:4;
-  gff3_string seqid, source, attr_id, attr_parent;
+  uint8_t pos_strand:3, phase:5; 
+  gff3_string seqid, source, type, attr_id, attr_parent;
 } gff3_fields;
 
 struct gff3_file_struct
@@ -44,7 +54,6 @@ struct gff3_file_struct
   char_vector sequence; /*! \brief from fasta info at end of file; not mandatory */
   char_vector seqname;  /*! \brief from fasta info at end of file; not mandatory */
   hashtable seqname_hash; /*! \brief index from seqname, seq_region, or f0.seqid, in order of preference */
-//  char_vector seq_region; /*! \brief pragma with seqid and size, not mandatory but very common */
   int ref_counter;
 };
 

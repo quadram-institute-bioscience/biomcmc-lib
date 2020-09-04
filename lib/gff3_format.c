@@ -19,47 +19,53 @@
 
 int compare_gff3_fields_increasing (const void *a, const void *b);
 
-gff3_fields gff3_fields_from_char_line (const char *line);
+gff3_fields gff3_fields_from_char_line (char *line);
 void free_strings_gff3_fields (gff3_fields gff);
 void get_gff3_string_from_field (const char *start, const char *end, gff3_string *string);
-uint64_t return_gff3_hashed_string (const char *str, type_t len);
+uint64_t return_gff3_hashed_string (const char *str, size_t len);
+void get_gff3_attributes_from_field (char *start, char *end, gff3_string *attr_id, gff3_string *attr_parent);
 
 gff3_t new_gff3_t (void);
 void add_fields_to_gff3_t (gff3_t g3, gff3_fields gfield);
+void gff3_finalise (gff3_t g3, char_vector seq_region);
+void merge_seqid_from_fields_and_pragma (gff3_t g3, char_vector s);
+void generate_feature_type_pointers (gff3_t g3);
 
 // static char *feature_type_list[] = {"gene", "cds", "mrna", "region"}; // many more, but I dont use them
-// TODO: prokka generates many of these, one per contig: ##sequence-region seqid start end 
+// prokka generates many of these, one per contig: ##sequence-region seqid start end 
 // and fasta sequences are one seqid each
 
 int
 compare_gff3_fields_increasing (const void *a, const void *b)
 {
   // arbitrary order of distinct genomes 
-  if ((*(gff3_fields*)a)->seqid.hash > (*(gff3_fields*)b)->seqid.hash) return 1;
-  if ((*(gff3_fields*)a)->seqid.hash < (*(gff3_fields*)b)->seqid.hash) return -1;
+  if (((gff3_fields*)a)->seqid.hash > ((gff3_fields*)b)->seqid.hash) return 1;
+  if (((gff3_fields*)a)->seqid.hash < ((gff3_fields*)b)->seqid.hash) return -1;
   // arbitrary order of feature types (all genes first, then all CDS, etc.)
-  if ((*(gff3_fields*)a)->type.hash > (*(gff3_fields*)b)->type.hash) return 1;
-  if ((*(gff3_fields*)a)->type.hash < (*(gff3_fields*)b)->type.hash) return -1;
-  int result = (*(gff3_fields*)a)->start - (*(gff3_fields*)b)->start;
+  if (((gff3_fields*)a)->type.hash > ((gff3_fields*)b)->type.hash) return 1;
+  if (((gff3_fields*)a)->type.hash < ((gff3_fields*)b)->type.hash) return -1;
+  int result = ((gff3_fields*)a)->start - ((gff3_fields*)b)->start;
   if (result) return result; // this is main sorting, by genome location
-  return (*(gff3_fields*)a)->end - (*(gff3_fields*)b)->end; // if same type and start, try to sort by end
+  return ((gff3_fields*)a)->end - ((gff3_fields*)b)->end; // if same type and start, try to sort by end
 }
 
+static gff3_fields NULL_gff3_fields = {.start = -0xfdfd}; // equivalent to NULL; structs can't be compared (only elements) 
+
 gff3_fields
-gff3_fields_from_char_line (const char *line)
+gff3_fields_from_char_line (char *line)
 {
-  gff3_fields gff;
+  gff3_fields gff = NULL_gff3_fields;
   char *f_start, *f_end;
-  int i;
+  int i, i2;
   // check if proper gff3 fields line, otherwise return NULL before doing anything else
-  for (i = 0, f_start = line; f_start != NULL; f_start = strstr (f_start, '\t'), i++);
-  if (i != 8) return NULL;
+  for (i = 0, f_start = line; f_start != NULL; f_start = strchr (f_start, '\t'), i++);
+  if (i != 8) return NULL_gff3_fields;
 
   f_end = line; // will become f_start as son as enters loop 
   for (i = 0; (i < 9) && (f_end != NULL); i++) {
     f_start = f_end; 
     if (f_start[0] == '\t') f_start++;
-    f_end = strstr (f_start, '\t');
+    f_end = strchr (f_start, '\t');
     if (f_end == NULL) f_end = line + strlen (line); // last column
 
     switch (i) {
@@ -74,18 +80,20 @@ gff3_fields_from_char_line (const char *line)
       case 4: 
         sscanf (f_start, "%d\t", &gff.end);   gff.end--;   break; // gff3 is one-based but we are zero-based
       case 6: // + or - strand (relative to landmark in column 1); can be "." for irrelevant or "?" for unknown 
-        if (f_start == '+') gff.pos_strand = 1;
-        else if (f_start == '-') gff.pos_strand = 0;
-        else gff.pos_strand = 2; break;
+        if (*f_start == '+') gff.pos_strand = 1; // positive
+        else if (*f_start == '-') gff.pos_strand = 0; // negative
+        else if (*f_start == '.') gff.pos_strand = 2; // irrelevant (non-coding)
+        else gff.pos_strand = 3;   // unknown ('?')
+        break;
       case 7:  // where codon starts, in CDS. It can be 0,1,2 (relative to start if + or to end if -) 
-        sscanf (f_start, "%d\t", &gff.phase); break;
+        sscanf (f_start, "%d\t", &i2); gff.phase = i2; break; // bit-fields dont have address
       case 8: get_gff3_attributes_from_field (f_start, f_end, &gff.attr_id, &gff.attr_parent); break;
       default: break; // skip 'score' field  (6 of 9)
     };
   }
-//  if (i < 9) biomcmc_error ("Malformed GFF3 file, found only %d (tab-separated) fields instead of 9 on line \n%s", i, line);
-//  if (f_end != NULL) biomcmc_error ("Malformed GFF3, more than 9 tab-separating fields found on line\n%s", line);
-  if ((i < 9) || (f_end != NULL)) {free_strings_gff3_fields (gff); return NULL; }
+  //  if (i < 9) biomcmc_error ("Malformed GFF3 file, found only %d (tab-separated) fields instead of 9 on line \n%s", i, line);
+  //  if (f_end != NULL) biomcmc_error ("Malformed GFF3, more than 9 tab-separating fields found on line\n%s", line);
+  if ((i < 9) || (f_end != NULL)) {free_strings_gff3_fields (gff); return NULL_gff3_fields; }
   return gff;
 }
 
@@ -95,42 +103,42 @@ free_strings_gff3_fields (gff3_fields gff)
   if (gff.seqid.str)   free (gff.seqid.str);
   if (gff.source.str)  free (gff.source.str);
   if (gff.type.str)    free (gff.type.str);
-  if (gff.attr_id.str) free (gff.id.str);
-  if (gff.attr_parent.str) free (gff.parent.str);
+  if (gff.attr_id.str) free (gff.attr_id.str);
+  if (gff.attr_parent.str) free (gff.attr_parent.str);
 }
 
 void
 get_gff3_string_from_field (const char *start, const char *end, gff3_string *string)
 {
-  type_t len = end - start; // len actually points to final "\t"; spaces _are_part_of_string_ 
+  size_t len = end - start; // len actually points to final "\t"; spaces _are_part_of_string_ 
   if (len == 1) { string->str = NULL; string->hash = 0ULL; string->id = -1; return; }
 
   string->str = (char*) biomcmc_malloc (sizeof (char) * len);
   strncpy (string->str, start, len - 1); // do not copy trailing tab
   string->str[len-1] = '\0';
   /* hash is 64 bits, formed by concatenating 2 uint32_t hash values */
-  string->hash = return_gff3_hash_string (string->str, len-1);
+  string->hash = return_gff3_hashed_string (string->str, len-1);
   string->id = -1; // defined when creating char_vector 
   return;
 }
 
 uint64_t
-return_gff3_hashed_string (const char *str, type_t len)
+return_gff3_hashed_string (const char *str, size_t len)
 {
-  uint64_t hash = (biomcmc_hashbyte_salted (str, len, 4) << 32); // 4 (salt) = CRC algo
-  hash |= (biomcmc_hashbyte_salted (str, len, 2) & 0xffffffff);  // 2 (salt) = dbj2 algo
+  uint64_t hash = ((uint64_t)(biomcmc_hashbyte_salted (str, len, 4)) << 32); // 4 (salt) = CRC algo
+  hash |= (biomcmc_hashbyte_salted (str, len, 2) & 0xffffffffULL);  // 2 (salt) = dbj2 algo
   return hash;
 }
 
 void      
-get_gff3_attributes_from_field (const char *start, const char *end, gff3_string *attr_id, gff3_string *attr_parent)
+get_gff3_attributes_from_field (char *start, char *end, gff3_string *attr_id, gff3_string *attr_parent)
 {
   char *s1, *e1;
   s1 = strstr (start, "ID="); // protected attributes start with uppercase 
   if (s1 == NULL) { attr_id->str = NULL; attr_id->hash = 0ULL; attr_id->id = -1; }
   else {
     s1 += 3; // everything after '=', even spaces
-    e1 = strstr (s1, ";");
+    e1 = strchr (s1, ';');
     if (e1 == NULL) e1 = end;
     if (s1 + 1 == e1) { attr_id->str = NULL; attr_id->hash = 0ULL; attr_id->id = -1; }
     else get_gff3_string_from_field (s1, e1, attr_id);
@@ -140,7 +148,7 @@ get_gff3_attributes_from_field (const char *start, const char *end, gff3_string 
   if (s1 == NULL) { attr_parent->str = NULL; attr_parent->hash = 0ULL; attr_parent->id = -1; }
   else { // Parent can be like "Parent=mRNA00001,mRNA00002" (i.e. several parents; here I don't care)
     s1 += 7; // everything after '=', even spaces
-    e1 = strstr (s1, ";");
+    e1 = strchr (s1, ';');
     if (e1 == NULL) e1 = end;
     if (s1 + 1 == e1) { attr_parent->str = NULL; attr_parent->hash = 0ULL; attr_parent->id = -1; }
     else get_gff3_string_from_field (s1, e1, attr_parent);
@@ -157,7 +165,7 @@ read_gff3_from_file (char *gff3filename)
   int stage = 0, i1, i2;
   gff3_fields gfield;
   gff3_t g3;
-  char_vector seqreg = new_char_vector (1);
+  char_vector seq_region = new_char_vector (1);
 
   seqfile = biomcmc_fopen (gff3filename, "r");
   g3 = new_gff3_t ();
@@ -165,24 +173,28 @@ read_gff3_from_file (char *gff3filename)
 
   while (biomcmc_getline (&line_read, &linelength, seqfile) != -1) {
     line = line_read; /* the variable *line_read should point always to the same value (no line++ or alike) */
-    if (nonempty_gff3_string (line)) {
-      if (stage == 0) && (strcasestr (line, "##gff-version")) stage = 1; // obligatory first line to keep going on
+    if (nonempty_gff3_line (line)) {
+      if ((stage == 0) && (strcasestr (line, "##gff-version") != NULL)) {stage = 1; continue; } // obligatory first line to keep going on
 
       else if (stage == 1) { /* initial pragmas */
-        if (delim = strcasestr (line, "##sequence-region")) {
+        if ((delim = strcasestr (line, "##sequence-region")) != NULL) {
           sscanf (delim, "##sequence-region %s %d %d", tmpc, &i1, &i2); i2--; // TODO: use i2 (contig length) 
-          char_vector_add_string (seqreg, tmpc); // add chromosome/contig name;
+          char_vector_add_string (seq_region, tmpc); // add chromosome/contig name;
+          continue;
         }
-        else if (strcasestr (line, "##")) /*DO NOTHING */;
-        else if ((gfield = gff3_fields_from_char_line (line)) != NULL) {
+        if (strcasestr (line, "##")) continue; // do nothing atm
+        gfield = gff3_fields_from_char_line (line);
+        if (gfield.start != NULL_gff3_fields.start) {
           add_fields_to_gff3_t (g3, gfield);
           stage = 2;
+          continue;
         }
       }
 
       else if (stage == 2) { /* regular fields */
-        if ((gff = gff3_fields_from_char_line (line)) != NULL)  add_fields_to_gff3_t (g3, gfield);
-        else if (strcasestr (line, "##fasta")) stage = 3;
+        if (strcasestr (line, "##fasta")) { stage = 3; continue; }
+        gfield = gff3_fields_from_char_line (line);
+        if (gfield.start != NULL_gff3_fields.start) { add_fields_to_gff3_t (g3, gfield); continue; }
       }
 
       else if (stage == 3) {  /* FASTA file */
@@ -200,11 +212,12 @@ read_gff3_from_file (char *gff3filename)
   fclose (seqfile);
 
   char_vector_finalise_big (g3->sequence);
-  gff3_finalise (g3, seqreg);
+  gff3_finalise (g3, seq_region);
 
-  del_char_vector (seqreg);
+  del_char_vector (seq_region);
   if (line_read) free (line_read);
   if (tmpc) free (tmpc);
+  return g3;
 }
 
 gff3_t
@@ -218,7 +231,7 @@ new_gff3_t (void)
   g3->n_f0 = g3->n_cds = g3->n_gene = 0;
   g3->seqname_hash = NULL; // created when finalising 
   g3->ref_counter = 1;
-  return gff3;
+  return g3;
 }
 
 void
@@ -242,22 +255,20 @@ add_fields_to_gff3_t (gff3_t g3, gff3_fields gfield)
   g3->f0[g3->n_f0++] = gfield;
 }
 
-void merge_seqid_from_fields_and_pragma (gff3_t g3, char_vector s);
-
 void
-gff3_finalise (gff3_t g3, char_vector seqreg)
+gff3_finalise (gff3_t g3, char_vector seq_region)
 {
   /* 1. sort fields, map seqids to char_vector, and point to specific features (cds, gene) */
-  merge_seqid_from_fields_and_pragma (g3, seqreg); // updates seqreg to match fields->seqid
+  merge_seqid_from_fields_and_pragma (g3, seq_region); // updates seq_region to match fields->seqid
   generate_feature_type_pointers (g3); // vectors of pointers (CDS, gene)
 
   /* 2. if fasta is incomplete or missing, just copy seqids to seqname */
-  if ((!g3->sequence->next_avail) || (g3->seqname->next_avail < seqreg->next_avail)) { 
+  if ((!g3->sequence->next_avail) || (g3->seqname->next_avail < seq_region->next_avail)) { 
     del_char_vector (g3->sequence); g3->sequence = NULL;
     del_char_vector (g3->seqname);
-    g3->seqname = seqreg;
-    g3->seqname->ref_counter++; // seqreg will be deleted later
-    if (g3->seqname && (g3->seqname->next_avail < seqreg->next_avail)) 
+    g3->seqname = seq_region;
+    g3->seqname->ref_counter++; // seq_region will be deleted later
+    if (g3->seqname && (g3->seqname->next_avail < seq_region->next_avail)) 
       biomcmc_warning ("incomplete fasta pragma in GFF3; ignoring DNA sequences from file\n");
     return;
   }
@@ -265,15 +276,15 @@ gff3_finalise (gff3_t g3, char_vector seqreg)
   /* 3. map seqnames from fasta pragma to seqid from fields; assume fasta have spurious seqs */
   int i, n_extra, hid, *order;
   order = (int*) biomcmc_malloc (g3->seqname->nstrings * sizeof (int));
-  n_extra = seqreg->nstrings; // OK for us for fasta to have more sequences than needed
+  n_extra = seq_region->nstrings; // OK for us for fasta to have more sequences than needed
   for (i = 0; i < g3->seqname->nstrings; i++) {
     hid = lookup_hashtable (g3->seqname_hash, g3->seqname->string[i]);
     if ((hid < 0) && (n_extra == g3->seqname->nstrings)) {
       biomcmc_warning ("fasta pragma in GFF3 doesn't correspond to field seqids; ignoring DNA sequences from file\n");
       del_char_vector (g3->sequence); g3->sequence = NULL;
       del_char_vector (g3->seqname);
-      g3->seqname = seqreg;
-      g3->seqname->ref_counter++; // seqreg will be deleted later
+      g3->seqname = seq_region;
+      g3->seqname->ref_counter++; // seq_region will be deleted later
       if (order) free (order);
       return;
     }
@@ -281,11 +292,11 @@ gff3_finalise (gff3_t g3, char_vector seqreg)
     else order[hid] = i;
   }
   /* 4. use order from fields seqids (hash sorted) on fasta */  
-  if (seqreg->nstrings < g3->seqname->nstrings) {
+  if (seq_region->nstrings < g3->seqname->nstrings) {
     char_vector_reorder_strings_from_external_order (g3->seqname,  order);
     char_vector_reorder_strings_from_external_order (g3->sequence, order);
-    char_vector_reduce_to_trimmed_size (g3->seqname,  seqreg->nstrings);	
-    char_vector_reduce_to_trimmed_size (g3->sequence, seqreg->nstrings);	
+    char_vector_reduce_to_trimmed_size (g3->seqname,  seq_region->nstrings);	
+    char_vector_reduce_to_trimmed_size (g3->sequence, seq_region->nstrings);	
   }
 
   if (order) free (order);
@@ -333,5 +344,4 @@ generate_feature_type_pointers (gff3_t g3)
   g3->gene = (gff3_fields**) biomcmc_realloc ((gff3_fields**) g3->gene, g3->n_gene * sizeof (gff3_fields*));
   return;
 }
-
 
