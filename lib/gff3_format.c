@@ -17,7 +17,8 @@
 
 #include "gff3_format.h"
 
-int compare_gff3_fields_increasing (const void *a, const void *b);
+int compare_gff3_fields_by_hash (const void *a, const void *b);
+int compare_gff3_fields_by_id (const void *a, const void *b);
 
 gff3_fields gff3_fields_from_char_line (char *line);
 void free_strings_gff3_fields (gff3_fields gff);
@@ -28,24 +29,39 @@ void get_gff3_attributes_from_field (char *start, char *end, gff3_string *attr_i
 gff3_t new_gff3_t (void);
 void add_fields_to_gff3_t (gff3_t g3, gff3_fields gfield);
 void gff3_finalise (gff3_t g3, char_vector seq_region);
-void merge_seqid_from_fields_and_pragma (gff3_t g3, char_vector s);
+void merge_seqid_from_fields_and_pragma (gff3_t g3, char_vector *seq_region);
+void give_feature_type_id (gff3_t g3);
 void generate_feature_type_pointers (gff3_t g3);
+void reorder_seqid_charvector_from_pragma (char_vector sid, char_vector *seq_region);
+void gff3_generate_seq_vectors (gff3_t g3, hashtable hgs);
 
 // static char *feature_type_list[] = {"gene", "cds", "mrna", "region"}; // many more, but I dont use them
 // prokka generates many of these, one per contig: ##sequence-region seqid start end 
 // and fasta sequences are one seqid each
 
 int
-compare_gff3_fields_increasing (const void *a, const void *b)
+compare_gff3_fields_by_hash (const void *a, const void *b)
 {
   // arbitrary order of distinct genomes 
   if (((gff3_fields*)a)->seqid.hash > ((gff3_fields*)b)->seqid.hash) return 1;
   if (((gff3_fields*)a)->seqid.hash < ((gff3_fields*)b)->seqid.hash) return -1;
-  // arbitrary order of feature types (all genes first, then all CDS, etc.)
+  // arbitrary order of feature types (all genes then CDS, etc. but based on hashed strings)
   if (((gff3_fields*)a)->type.hash > ((gff3_fields*)b)->type.hash) return 1;
   if (((gff3_fields*)a)->type.hash < ((gff3_fields*)b)->type.hash) return -1;
   int result = ((gff3_fields*)a)->start - ((gff3_fields*)b)->start;
   if (result) return result; // this is main sorting, by genome location
+  return ((gff3_fields*)a)->end - ((gff3_fields*)b)->end; // if same type and start, try to sort by end
+}
+
+int
+compare_gff3_fields_by_id (const void *a, const void *b)
+{
+  int result = ((gff3_fields*)a)->seqid.id - ((gff3_fields*)b)->seqid.id; 
+  if (result) return result;// genomes names in increasing order ("id" comes from char_vector)
+  result = ((gff3_fields*)a)->type.id - ((gff3_fields*)b)->type.id;
+  if (result) return result;// order of feature types (genes, CDS, etc.) 
+  result = ((gff3_fields*)a)->start - ((gff3_fields*)b)->start;
+  if (result) return result; // main sorting, by genome location
   return ((gff3_fields*)a)->end - ((gff3_fields*)b)->end; // if same type and start, try to sort by end
 }
 
@@ -167,7 +183,7 @@ read_gff3_from_file (char *gff3filename)
   FILE *seqfile;
   char *line = NULL, *line_read = NULL, *delim = NULL, *tmpc = NULL;
   size_t linelength = 0;
-  int stage = 0, i1, i2;
+  int stage = 0, i1, i2, *reg_size = NULL, n_reg_size=0;
   gff3_fields gfield;
   gff3_t g3;
   char_vector seq_region = new_char_vector (1);
@@ -183,8 +199,10 @@ read_gff3_from_file (char *gff3filename)
 
       else if (stage == 1) { /* initial pragmas */
         if ((delim = strcasestr (line, "##sequence-region")) != NULL) {
-          sscanf (delim, "##sequence-region %s %d %d", tmpc, &i1, &i2); i2--; // TODO: use i2 (contig length) 
+          sscanf (delim, "##sequence-region %s %d %d", tmpc, &i1, &i2); i2--; 
           char_vector_add_string (seq_region, tmpc); // add chromosome/contig name;
+          reg_size = (int*) biomcmc_realloc ((int*)reg_size, (n_reg_size + 1) * sizeof (int));
+          reg_size[n_reg_size++] = i2; // will be associated to contig name through hashtable 
           continue;
         }
         if (strcasestr (line, "##")) continue; // do nothing atm
@@ -215,13 +233,20 @@ read_gff3_from_file (char *gff3filename)
     } // if gff3 line not empty
   } // while readline ()
   fclose (seqfile);
-
   char_vector_finalise_big (g3->sequence);
+
+  /* hashtable with genome sizes for all seq_regions (contig/genome/chromosome), but only added to gff3_t after finalisation */
+  hashtable hgs = new_hashtable (n_reg_size);
+  for (i1 = 0; i1 < n_reg_size; i1++)  insert_hashtable (hgs, seq_region->string[i1], reg_size[i1]); // seq name + genome size
+  /* sort, remove unused contig names; and then generate vectors (with genome size etc.) */
   gff3_finalise (g3, seq_region);
+  gff3_generate_seq_vectors (g3, hgs);
 
   del_char_vector (seq_region);
+  del_hashtable (hgs);
   if (line_read) free (line_read);
   if (tmpc) free (tmpc);
+  if (reg_size) free (reg_size);
   return g3;
 }
 
@@ -235,6 +260,7 @@ new_gff3_t (void)
   g3->cds = g3->gene = NULL;
   g3->n_f0 = g3->n_cds = g3->n_gene = 0;
   g3->seqname_hash = NULL; // created when finalising 
+  g3->seq_f0_idx = g3->seq_length = NULL;
   g3->ref_counter = 1;
   return g3;
 }
@@ -250,6 +276,8 @@ del_gff3_t (gff3_t g3)
   if (g3->f0) free (g3->f0);
   if (g3->cds) free (g3->cds);
   if (g3->gene) free (g3->gene);
+  if (g3->seq_length) free (g3->seq_length);
+  if (g3->seq_f0_idx) free (g3->seq_f0_idx);
   free (g3);
 }
 
@@ -264,12 +292,13 @@ void
 gff3_finalise (gff3_t g3, char_vector seq_region)
 {
   /* 1. sort fields, map seqids to char_vector, and point to specific features (cds, gene) */
-  merge_seqid_from_fields_and_pragma (g3, seq_region); // updates seq_region to match fields->seqid
+  give_feature_type_id (g3); // transform cds, genes, etc to 0, 1, etc so that can be properly sorted below
+  merge_seqid_from_fields_and_pragma (g3, &seq_region); // updates seq_region to match fields->seqid
   generate_feature_type_pointers (g3); // vectors of pointers (CDS, gene)
 
   /* 2. if fasta is incomplete or missing, just copy seqids to seqname */
   if ((!g3->sequence->next_avail) || (g3->seqname->next_avail < seq_region->next_avail)) { 
-    printf ("DBG::no fasta %6d  %6d\n", g3->seqname->nstrings, seq_region->next_avail); //FIXME
+    //printf ("DBG::no fasta %6d , %6d %6d\n", g3->seqname->nstrings, seq_region->nstrings, seq_region->next_avail);
     del_char_vector (g3->sequence); g3->sequence = NULL;
     del_char_vector (g3->seqname);
     g3->seqname = seq_region;
@@ -297,7 +326,7 @@ gff3_finalise (gff3_t g3, char_vector seq_region)
     else if (hid < 0) order[n_extra++] = i; // last elements, hopefully just extra fasta sequences
     else order[hid] = i;
   }
-  /* 4. use order from fields seqids (hash sorted) on fasta */  
+  /* 4. use order from fields seqids (sequence-region sorted) on fasta */  
   if (seq_region->nstrings < g3->seqname->nstrings) {
     printf ("DBG::trimming %6d %6d\n", g3->seqname->nstrings, seq_region->nstrings);
     char_vector_reorder_strings_from_external_order (g3->seqname,  order);
@@ -311,22 +340,69 @@ gff3_finalise (gff3_t g3, char_vector seq_region)
 }
 
 void
-merge_seqid_from_fields_and_pragma (gff3_t g3, char_vector s)
-{ // FIXME: currently we ignore completely sequence-region (which might be used to define order)
-  int i;
-  qsort (g3->f0, g3->n_f0, sizeof (gff3_fields), compare_gff3_fields_increasing);
-  del_char_vector (s);
-  s = new_char_vector (1); // TODO: this should be compared with original s 
+merge_seqid_from_fields_and_pragma (gff3_t g3, char_vector *seq_region)
+{ // seq_region will indicate order of seqids; this function updates it to match feature table
+  int i, hid;
+  char_vector sid = new_char_vector (1);
+  qsort (g3->f0, g3->n_f0, sizeof (gff3_fields), compare_gff3_fields_by_hash);
 
-  char_vector_add_string (s, g3->f0[0].seqid.str);
-  g3->f0[i].seqid.id = s->next_avail - 1; // which is zero, btw, since next_avail is one after add_string()
+  /* 1. create char_vector with seqid names from feature table */
+  char_vector_add_string (sid, g3->f0[0].seqid.str);
+  g3->f0[i].seqid.id = sid->next_avail - 1; // which is zero, btw, since next_avail is one after add_string()
+  for (i = 1; i < g3->n_f0; i++) 
+    if (strcmp(g3->f0[i].seqid.str, sid->string[sid->next_avail-1])) char_vector_add_string (sid, g3->f0[i].seqid.str);
+
+  /* 2. sid has all seqids in feature table, but order is given by seq_region. UPDATED seqid will be seq_region */
+  reorder_seqid_charvector_from_pragma (sid, seq_region);
+  del_char_vector (sid); // we don't need sid anymore; seq_region has all names, in best possible order 
+
+  /* 3. seq_region has all seqids and in right order; now fields must be updated */
+  g3->seqname_hash = new_hashtable ((*seq_region)->nstrings);
+  for (i = 0; i < (*seq_region)->nstrings; i++) insert_hashtable (g3->seqname_hash, (*seq_region)->string[i], i);
   for (i = 1; i < g3->n_f0; i++) {
-    if (strcmp(g3->f0[i].seqid.str, s->string[s->next_avail-1])) char_vector_add_string (s, g3->f0[i].seqid.str);
-    g3->f0[i].seqid.id = s->next_avail - 1;
+    hid = lookup_hashtable (g3->seqname_hash, g3->f0[i].seqid.str);
+    g3->f0[i].seqid.id = hid; // hid should be valid (i.e. not negative) but downstream functions might want to check
   }
 
-  g3->seqname_hash = new_hashtable (s->nstrings);
-  for (i = 0; i < s->nstrings; i++) insert_hashtable (g3->seqname_hash, s->string[i], i);
+  /* 4. now that feature seqid fields have id, sort whole table */
+  qsort (g3->f0, g3->n_f0, sizeof (gff3_fields), compare_gff3_fields_by_id);
+  return;
+}
+
+void
+give_feature_type_id (gff3_t g3)
+{
+  for (int i = 0; i < g3->n_f0; i++) {
+    if ((!strcasecmp (g3->f0[i].type.str, "cds")) || (!strcasecmp (g3->f0[i].type.str, "SO:0000316"))) {
+      g3->f0[i].type.id = 0;
+    }
+    else if ((!strcasecmp (g3->f0[i].type.str, "gene")) || (!strcasecmp (g3->f0[i].type.str, "SO:0000704"))) {
+      g3->f0[i].type.id = 1;
+    }
+    else if ((!strcasecmp (g3->f0[i].type.str, "mRNA")) || (!strcasecmp (g3->f0[i].type.str, "SO:0000234"))) {
+      g3->f0[i].type.id = 2;
+    }
+    else if ((!strcasecmp (g3->f0[i].type.str, "exon")) || (!strcasecmp (g3->f0[i].type.str, "SO:0000147"))) {
+      g3->f0[i].type.id = 3;
+    }
+    else if ((!strcasecmp (g3->f0[i].type.str, "polyA_sequence")) || (!strcasecmp (g3->f0[i].type.str, "SO:0000610"))) {
+      g3->f0[i].type.id = 4;
+    }
+    else if ((!strcasecmp (g3->f0[i].type.str, "polyA_site")) || (!strcasecmp (g3->f0[i].type.str, "SO:0000553"))) {
+      g3->f0[i].type.id = 5;
+    }
+    else if ((!strcasecmp (g3->f0[i].type.str, "intron")) || (!strcasecmp (g3->f0[i].type.str, "SO:0000188"))) {
+      g3->f0[i].type.id = 6;
+    }
+    else if ((!strcasecmp (g3->f0[i].type.str, "five_prime_UTR")) || (!strcasecmp (g3->f0[i].type.str, "SO:0000204"))) {
+      g3->f0[i].type.id = 7;
+    }
+    else if ((!strcasecmp (g3->f0[i].type.str, "three_prime_UTR")) || (!strcasecmp (g3->f0[i].type.str, "SO:0000205"))) {
+      g3->f0[i].type.id = 8;
+    }
+    else g3->f0[i].type.id = 0xffff;
+  }
+  return;
 }
 
 void
@@ -338,15 +414,16 @@ generate_feature_type_pointers (gff3_t g3)
   g3->n_gene = g3->n_cds = 0;
 
   for (i = 0; i < g3->n_f0; i++) {
-    if (!strcasecmp (g3->f0[i].type.str, "cds")) {
+    if (g3->f0[i].type.id == 0) { // for mapping see give_feature_type_id() above 
       g3->f0[i].attr_id.id = g3->n_cds; // experimental (not used); several CDS (rows) can have same ID in gff3
       g3->cds[g3->n_cds++] = &(g3->f0[i]);
     }
-    else if (!strcasecmp (g3->f0[i].type.str, "gene")) {
+    else  if (g3->f0[i].type.id == 1) {
       g3->f0[i].attr_id.id = g3->n_gene; // experimental (not used yet)
       g3->cds[g3->n_gene++] = &(g3->f0[i]);
     }
   }
+
   if (g3->n_cds > 0)  g3->cds = (gff3_fields**) biomcmc_realloc ((gff3_fields**) g3->cds,  g3->n_cds  * sizeof (gff3_fields*));
   else if (g3->cds)  { free (g3->cds);  g3->cds = NULL; }
 
@@ -355,3 +432,62 @@ generate_feature_type_pointers (gff3_t g3)
   return;
 }
 
+void
+reorder_seqid_charvector_from_pragma (char_vector sid, char_vector *seq_region)
+{
+  if ((*seq_region)->next_avail < 2) { // empty (no pragma directives) or only one sequence name
+    del_char_vector (*seq_region);
+    *seq_region = sid;
+    sid->ref_counter++;
+    return;
+  }
+  int i, hid, *idx, n_seq = (*seq_region)->nstrings;
+  char_vector seq = *seq_region; // convenience only, hard to look at asterisks
+  empfreq ef;
+  hashtable ht;
+
+  /* 1. hash table with indices of seq_region */
+  ht = new_hashtable (seq->nstrings);
+  for (i = 0; i < seq->nstrings; i++) insert_hashtable (ht, seq->string[i], i);
+
+  /* 2. which seq_region name maps to each seqid */
+  idx = (int*) biomcmc_malloc (sid->nstrings * sizeof (int));
+  for (i = 0; i < sid->nstrings; i++) {
+    hid = lookup_hashtable (ht, sid->string[i]);
+    if (hid < 0) hid = n_seq++; // seqid not present in pragma, will be sorted last
+    idx[i] = hid; // hid value doesnt matter, only order
+  }
+
+  /* 3. sort idx[] while keeping index i (of idx[i]) */
+  ef = new_empfreq_sort_increasing (idx, sid->nstrings, 2); // 2->integer (0->char and 1->size_t)
+  for (i = 0; i < sid->nstrings; i++) idx[i] = ef->i[i].idx; // DEBUG: check if this is correct
+
+  /* 4. reorder seqid preesrving preferences from pragma (seq_region) */
+  char_vector_reorder_strings_from_external_order (sid, idx);
+
+  /* 5. now that seqid is up-to-date, we don't need seq_region (but we do need its pointer!) */
+  del_char_vector (*seq_region);
+  *seq_region = sid;
+  sid->ref_counter++;
+
+  /* 6. free memomry */
+  if (idx) free (idx);
+  del_empfreq (ef);
+  del_hashtable (ht);
+  return;
+}
+
+void
+gff3_generate_seq_vectors (gff3_t g3, hashtable hgs)
+{
+  int i;
+
+  g3->seq_length = (int*) biomcmc_malloc (g3->seqname->nstrings * sizeof (int));
+  g3->seq_f0_idx = (int*) biomcmc_malloc (g3->seqname->nstrings * sizeof (int));
+
+  for (i = 0; i < g3->seqname->nstrings; i++) g3->seq_length[i] = lookup_hashtable (hgs, g3->seqname->string[i]);
+  assert (g3->f0[0].seqid.id == 0);
+  g3->seq_f0_idx[0] = 0; // idx of first element (on f0 vector) belonging to seqid 0
+  for (i = 1; i < g3->n_f0; i++) if (g3->f0[i].seqid.id != g3->f0[i-1].seqid.id) g3->seq_f0_idx[ g3->f0[i].seqid.id ] = i;
+  return;
+}

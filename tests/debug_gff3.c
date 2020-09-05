@@ -15,13 +15,11 @@ int main(int argc, char **argv)
   time0 = clock ();
 
   g3 = read_gff3_from_file(argv[1]);
-  for (i = 0; i < g3->n_cds; i++) printf ("%5d %32s %32s : %5d\n", i, g3->cds[i]->seqid.str, g3->cds[i]->attr_id.str, g3->cds[i]->start);
+  for (i = 0; i < g3->n_cds; i++) printf ("id=%5d seqid=%50s (id=%4d)   attr=%16s\n", i, g3->cds[i]->seqid.str, g3->cds[i]->seqid.id, g3->cds[i]->attr_id.str);
 
-  if (g3->seqname) { 
-    printf ("n = %d\n", g3->seqname->nstrings);
-    for (i = 0; i < g3->seqname->nstrings; i++) printf ("FASTA: %s\n", g3->seqname->string[i]);
-  }
-//  else printf ("no contig names\n");
+  printf ("number of seqnames (contigs/genomes/chromosomes) = %d\n", g3->seqname->nstrings);
+  for (i = 0; i < g3->seqname->nstrings; i++) printf ("FASTA: %s\n", g3->seqname->string[i]);
+
   time1 = clock ();  fprintf (stderr, "timing: %.8f secs\n", (double)(time1-time0)/(double)CLOCKS_PER_SEC);
 
   return TEST_SKIPPED;

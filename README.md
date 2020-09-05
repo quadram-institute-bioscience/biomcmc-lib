@@ -53,6 +53,9 @@ doxygen yourself in the `docs` directory. I also maintain a (sometimes outdated)
   clustering methods are implemented using it: GOPTICS, hierarchical clustering (UPGMA, WPGMA, median, etc.), and
   affinity propagation. (OBS: some are still part of Amburana and not here...)
 
+- **GFF3 format library.** Basic functions to read a [GFF3 file](https://github.com/The-Sequence-Ontology/Specifications/blob/master/gff3.md). 
+  Does not implement all functionality (only `sequence-region` and `FASTA` pragmas, with focus on coding regions). 
+
 ## Assumptions and limitations
 This library works mainly with phylogenetic trees, but also contain a few functions to work with sequences. 
 The trees can be in nexus or newick formats, and the sequences can be in nexus or fasta formats.
