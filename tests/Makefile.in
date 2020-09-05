@@ -103,7 +103,7 @@ CONFIG_HEADER = $(top_builddir)/lib/config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__EXEEXT_1 = check_unit$(EXEEXT) check_topology$(EXEEXT) \
-	debug_topology$(EXEEXT) debug_rng$(EXEEXT)
+	debug_topology$(EXEEXT) debug_rng$(EXEEXT) debug_gff3$(EXEEXT)
 am_check_topology_OBJECTS = check_topology.$(OBJEXT)
 check_topology_OBJECTS = $(am_check_topology_OBJECTS)
 check_topology_LDADD = $(LDADD)
@@ -118,6 +118,10 @@ am_check_unit_OBJECTS = check_unit.$(OBJEXT)
 check_unit_OBJECTS = $(am_check_unit_OBJECTS)
 check_unit_LDADD = $(LDADD)
 check_unit_DEPENDENCIES = $(am__DEPENDENCIES_1) ../lib/libbiomcmc.la
+am_debug_gff3_OBJECTS = debug_gff3.$(OBJEXT)
+debug_gff3_OBJECTS = $(am_debug_gff3_OBJECTS)
+debug_gff3_LDADD = $(LDADD)
+debug_gff3_DEPENDENCIES = $(am__DEPENDENCIES_1) ../lib/libbiomcmc.la
 am_debug_rng_OBJECTS = debug_rng.$(OBJEXT)
 debug_rng_OBJECTS = $(am_debug_rng_OBJECTS)
 debug_rng_LDADD = $(LDADD)
@@ -162,9 +166,11 @@ am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
 SOURCES = $(check_topology_SOURCES) $(check_unit_SOURCES) \
-	$(debug_rng_SOURCES) $(debug_topology_SOURCES)
+	$(debug_gff3_SOURCES) $(debug_rng_SOURCES) \
+	$(debug_topology_SOURCES)
 DIST_SOURCES = $(check_topology_SOURCES) $(check_unit_SOURCES) \
-	$(debug_rng_SOURCES) $(debug_topology_SOURCES)
+	$(debug_gff3_SOURCES) $(debug_rng_SOURCES) \
+	$(debug_topology_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -530,7 +536,7 @@ AM_CPPFLAGS = $(GTKDEPS_CFLAGS)  @OPENMP_CPPFLAGS@ -I$(srcdir)/../lib -DTEST_FIL
 LDADD = $(GTKDEPS_LIBS) $(AM_LDFLAGS) @CHECK_LIBS@ @ZLIB_LIBS@ ../lib/libbiomcmc.la 
 EXTRA_DIST = files # directory with fasta etc files (accessed with #define TEST_FILE_DIR above)
 # we use the list twice below, since we want all to be compiled only with 'make check'
-LIST_OF_TEST_PROGS = check_unit check_topology debug_topology debug_rng 
+LIST_OF_TEST_PROGS = check_unit check_topology debug_topology debug_rng debug_gff3 
 
 #check_minhash_SOURCES = check_minhash.c
 #check_suffix_tree_SOURCES = check_suffix_tree.c
@@ -539,6 +545,7 @@ check_topology_SOURCES = check_topology.c
 # not using libcheck, not actual tests
 debug_topology_SOURCES = debug_topology.c
 debug_rng_SOURCES = debug_rng.c
+debug_gff3_SOURCES = debug_gff3.c
 all: all-am
 
 .SUFFIXES:
@@ -590,6 +597,10 @@ check_unit$(EXEEXT): $(check_unit_OBJECTS) $(check_unit_DEPENDENCIES) $(EXTRA_ch
 	@rm -f check_unit$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(check_unit_OBJECTS) $(check_unit_LDADD) $(LIBS)
 
+debug_gff3$(EXEEXT): $(debug_gff3_OBJECTS) $(debug_gff3_DEPENDENCIES) $(EXTRA_debug_gff3_DEPENDENCIES) 
+	@rm -f debug_gff3$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(debug_gff3_OBJECTS) $(debug_gff3_LDADD) $(LIBS)
+
 debug_rng$(EXEEXT): $(debug_rng_OBJECTS) $(debug_rng_DEPENDENCIES) $(EXTRA_debug_rng_DEPENDENCIES) 
 	@rm -f debug_rng$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(debug_rng_OBJECTS) $(debug_rng_LDADD) $(LIBS)
@@ -606,6 +617,7 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/check_topology.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/check_unit.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/debug_gff3.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/debug_rng.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/debug_topology.Po@am__quote@
 
@@ -853,6 +865,13 @@ debug_topology.log: debug_topology$(EXEEXT)
 debug_rng.log: debug_rng$(EXEEXT)
 	@p='debug_rng$(EXEEXT)'; \
 	b='debug_rng'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+debug_gff3.log: debug_gff3$(EXEEXT)
+	@p='debug_gff3$(EXEEXT)'; \
+	b='debug_gff3'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \

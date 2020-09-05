@@ -35,6 +35,7 @@ extern "C" {
 #include "clustering_goptics.h"
 #include "quickselect_quantile.h"
 #include "phylogeny.h"
+#include "gff3_format.h"
 
 
 // extra libs not used yet: edlib hll

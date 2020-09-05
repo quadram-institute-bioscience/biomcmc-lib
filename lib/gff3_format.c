@@ -56,10 +56,15 @@ gff3_fields_from_char_line (char *line)
 {
   gff3_fields gff = NULL_gff3_fields;
   char *f_start, *f_end;
-  int i, i2;
+  int i=0, i2;
   // check if proper gff3 fields line, otherwise return NULL before doing anything else
-  for (i = 0, f_start = line; f_start != NULL; f_start = strchr (f_start, '\t'), i++);
-  if (i != 8) return NULL_gff3_fields;
+  f_start = line;
+  f_end = line + strlen (line); // last column
+  for (i = 0; (f_start != NULL) && (f_start < f_end); i++) {
+    f_start = strchr (f_start, '\t'); 
+    if (f_start) f_start++;
+  }
+  if (i != 9) return NULL_gff3_fields;
 
   f_end = line; // will become f_start as son as enters loop 
   for (i = 0; (i < 9) && (f_end != NULL); i++) {
@@ -93,7 +98,7 @@ gff3_fields_from_char_line (char *line)
   }
   //  if (i < 9) biomcmc_error ("Malformed GFF3 file, found only %d (tab-separated) fields instead of 9 on line \n%s", i, line);
   //  if (f_end != NULL) biomcmc_error ("Malformed GFF3, more than 9 tab-separating fields found on line\n%s", line);
-  if ((i < 9) || (f_end != NULL)) {free_strings_gff3_fields (gff); return NULL_gff3_fields; }
+  if (i < 9) {free_strings_gff3_fields (gff); return NULL_gff3_fields; }
   return gff;
 }
 
@@ -110,7 +115,7 @@ free_strings_gff3_fields (gff3_fields gff)
 void
 get_gff3_string_from_field (const char *start, const char *end, gff3_string *string)
 {
-  size_t len = end - start; // len actually points to final "\t"; spaces _are_part_of_string_ 
+  size_t len = end - start + 1; // end actually points to final "\t"; spaces _are_part_of_string_ 
   if (len == 1) { string->str = NULL; string->hash = 0ULL; string->id = -1; return; }
 
   string->str = (char*) biomcmc_malloc (sizeof (char) * len);
@@ -192,7 +197,7 @@ read_gff3_from_file (char *gff3filename)
       }
 
       else if (stage == 2) { /* regular fields */
-        if (strcasestr (line, "##fasta")) { stage = 3; continue; }
+        if (strcasestr (line, "##FASTA")) { stage = 3; continue; }
         gfield = gff3_fields_from_char_line (line);
         if (gfield.start != NULL_gff3_fields.start) { add_fields_to_gff3_t (g3, gfield); continue; }
       }
@@ -264,6 +269,7 @@ gff3_finalise (gff3_t g3, char_vector seq_region)
 
   /* 2. if fasta is incomplete or missing, just copy seqids to seqname */
   if ((!g3->sequence->next_avail) || (g3->seqname->next_avail < seq_region->next_avail)) { 
+    printf ("DBG::no fasta %6d  %6d\n", g3->seqname->nstrings, seq_region->next_avail); //FIXME
     del_char_vector (g3->sequence); g3->sequence = NULL;
     del_char_vector (g3->seqname);
     g3->seqname = seq_region;
@@ -273,7 +279,7 @@ gff3_finalise (gff3_t g3, char_vector seq_region)
     return;
   }
 
-  /* 3. map seqnames from fasta pragma to seqid from fields; assume fasta have spurious seqs */
+  /* 3. map seqnames from fasta pragma to seqid from fields; assume fasta can have spurious (extra) seqs */
   int i, n_extra, hid, *order;
   order = (int*) biomcmc_malloc (g3->seqname->nstrings * sizeof (int));
   n_extra = seq_region->nstrings; // OK for us for fasta to have more sequences than needed
@@ -293,6 +299,7 @@ gff3_finalise (gff3_t g3, char_vector seq_region)
   }
   /* 4. use order from fields seqids (hash sorted) on fasta */  
   if (seq_region->nstrings < g3->seqname->nstrings) {
+    printf ("DBG::trimming %6d %6d\n", g3->seqname->nstrings, seq_region->nstrings);
     char_vector_reorder_strings_from_external_order (g3->seqname,  order);
     char_vector_reorder_strings_from_external_order (g3->sequence, order);
     char_vector_reduce_to_trimmed_size (g3->seqname,  seq_region->nstrings);	
@@ -340,8 +347,11 @@ generate_feature_type_pointers (gff3_t g3)
       g3->cds[g3->n_gene++] = &(g3->f0[i]);
     }
   }
-  g3->cds  = (gff3_fields**) biomcmc_realloc ((gff3_fields**) g3->cds,  g3->n_cds  * sizeof (gff3_fields*));
-  g3->gene = (gff3_fields**) biomcmc_realloc ((gff3_fields**) g3->gene, g3->n_gene * sizeof (gff3_fields*));
+  if (g3->n_cds > 0)  g3->cds = (gff3_fields**) biomcmc_realloc ((gff3_fields**) g3->cds,  g3->n_cds  * sizeof (gff3_fields*));
+  else if (g3->cds)  { free (g3->cds);  g3->cds = NULL; }
+
+  if (g3->n_gene > 0) g3->gene = (gff3_fields**) biomcmc_realloc ((gff3_fields**) g3->gene, g3->n_gene * sizeof (gff3_fields*));
+  else if (g3->gene) { free (g3->gene); g3->gene = NULL; }
   return;
 }
 
