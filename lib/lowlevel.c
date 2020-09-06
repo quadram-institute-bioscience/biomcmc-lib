@@ -48,30 +48,25 @@ biomcmc_fopen (const char *path, const char *mode)
   return fp;
 }
 
-/*
-FILE *
+#ifdef HAVE_ZLIB
+gzFile
 biomcmc_gzopen (const char *path, const char *mode)
 {
-#ifdef HAVE_ZLIB
-  gzFile *zfp;
-  FILE *fp;
-
-  *zfp = gzopen (path, mode);
-  if (*zfp == NULL) return biomcmc_fopen (path, mode);
-  if ((fp = __sfp()) == NULL) return (NULL);
-  fp->_flags =  __SRW; // read-write 
-  fp->_file = -1;
-  fp->_cookie = (void *) zfp;
-  fp->_read = gzread;
-  fp->_write = gzwrite;
-  fp->_seek = gzseek;
-  fp->_close = gzclose;
-#else
-  fprintf (stderr, "This biomcmc-lib was not compiled with zlib support");
-  return biomcmc_fopen (path, mode);
-#endif
+  gzFile zfp = gzopen (path, mode);
+  if (zfp == NULL) {
+    fprintf (stderr, "Please check if path is correct, if there are non-ASCII characters in file name,\n");
+    fprintf (stderr, "if you have enough permissions (to read/write). Remember that paths are relative to\n");
+    fprintf (stderr, "where this program is being called\n");
+    biomcmc_error ( "problem opening file \"%s\" with mode \"%s\" with zlib", path, mode);
+  }
+  const char *err_mesg;
+  int err_number;
+  err_mesg = gzerror (zfp, &err_number);
+  if (err_number != Z_OK) biomcmc_error ("zlib error when trying to open \"%s\". zlib error message:\n%s", path, err_mesg);
+  return zfp;
 }
-*/
+#endif
+
 void
 biomcmc_error (const char *template, ...)
 {
@@ -132,7 +127,7 @@ compare_double_decreasing (const void *a, const void *b)
 }
 
 /* \brief size, in bytes, when extending the buffer of biomcmc_getline() */
-#define MIN_CHUNK 128
+#define MIN_CHUNK 256
 int
 biomcmc_getline (char **lineptr, size_t *n, FILE *stream)
 {
@@ -185,6 +180,62 @@ biomcmc_getline (char **lineptr, size_t *n, FILE *stream)
   *read_pos = '\0';
   return (read_pos - (*lineptr));
 }
+
+#ifdef HAVE_ZLIB
+int
+biomcmc_getline_gz (char **lineptr, size_t *n, gzFile zstream)
+{
+  int nchars_avail;    /* Allocated but unused chars in *LINEPTR.  */
+  char *read_pos;      /* Where we're reading into *LINEPTR. */
+  const char *err_mesg;
+  int err_number;
+
+  if (!lineptr) biomcmc_error ("NULL pointer sent to biomcmc_getline_gz() as target string");
+  if (!n)       biomcmc_error ("string length unavailable to biomcmc_getline_gz()");
+  if (!zstream) biomcmc_error ("lack of input file in biomcmc_getline_gz()");
+
+  if (!(*lineptr)) {
+    *n = MIN_CHUNK;
+    *lineptr = (char *) biomcmc_malloc (*n);
+  }
+  nchars_avail = *n;
+  read_pos = *lineptr;
+
+  for (;;) {
+    register int c = gzgetc (zstream);
+    /* We always want at least one char left in the buffer, since we always (unless we get an error while reading the 
+     * first char) NUL-terminate the line buffer.  
+     */
+    if ((*lineptr + *n) != (read_pos + nchars_avail))  biomcmc_error ("problem_1 setting string size in biomcmc_getline_gz()");
+    if (nchars_avail < 2) {
+      if (*n > MIN_CHUNK) (*n) *= 2;
+      else (*n) += MIN_CHUNK;
+
+      nchars_avail = *n + *lineptr - read_pos;
+      *lineptr = (char *) biomcmc_realloc ((char*) *lineptr, *n);
+      read_pos = *n - nchars_avail + *lineptr;
+      if ((*lineptr + *n) != (read_pos + nchars_avail)) biomcmc_error ("problem_2 setting string size in biomcmc_getline_gz()");
+    }
+
+    err_mesg = gzerror (zstream, &err_number);
+    if (err_number != Z_OK) biomcmc_error ("error in biomcmc_getline_gz()::  %s", err_mesg);
+
+    if (c == EOF) {
+      /* Return partial line, if any.  */
+      if (read_pos == *lineptr) return -1;
+      else break;
+    }
+
+    if (c == '\r') c = '\n';
+    *read_pos++ = c; 
+    nchars_avail--;
+    if (c == '\n') break;
+  }
+  /* Done - NUL terminate and return the number of chars read.  */
+  *read_pos = '\0';
+  return (read_pos - (*lineptr));
+}
+#endif
 
 uint32_t
 biomcmc_levenshtein_distance (const char *s1, uint32_t n1, const char *s2, uint32_t n2, uint32_t cost_sub, uint32_t cost_indel, bool skip_borders)

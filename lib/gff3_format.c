@@ -180,7 +180,6 @@ get_gff3_attributes_from_field (char *start, char *end, gff3_string *attr_id, gf
 gff3_t
 read_gff3_from_file (char *gff3filename)
 {
-  FILE *seqfile;
   char *line = NULL, *line_read = NULL, *delim = NULL, *tmpc = NULL;
   size_t linelength = 0;
   int stage = 0, i1, i2, *reg_size = NULL, n_reg_size=0;
@@ -188,11 +187,18 @@ read_gff3_from_file (char *gff3filename)
   gff3_t g3;
   char_vector seq_region = new_char_vector (1);
 
-  seqfile = biomcmc_fopen (gff3filename, "r");
   g3 = new_gff3_t ();
   tmpc = (char*) biomcmc_malloc (1024 * sizeof (char));
 
+#ifdef HAVE_ZLIB
+  gzFile seqfile;
+  seqfile = biomcmc_gzopen (gff3filename, "r");
+  while (biomcmc_getline_gz (&line_read, &linelength, seqfile) != -1) {
+#else
+  FILE *seqfile;
+  seqfile = biomcmc_fopen (gff3filename, "r");
   while (biomcmc_getline (&line_read, &linelength, seqfile) != -1) {
+#endif
     line = line_read; /* the variable *line_read should point always to the same value (no line++ or alike) */
     if (nonempty_gff3_line (line)) {
       if ((stage == 0) && (strcasestr (line, "##gff-version") != NULL)) {stage = 1; continue; } // obligatory first line to keep going on
@@ -232,7 +238,11 @@ read_gff3_from_file (char *gff3filename)
       } // if stage 3 
     } // if gff3 line not empty
   } // while readline ()
+#ifdef HAVE_ZLIB
+  gzclose (seqfile);
+#else
   fclose (seqfile);
+#endif
   char_vector_finalise_big (g3->sequence);
 
   /* hashtable with genome sizes for all seq_regions (contig/genome/chromosome), but only added to gff3_t after finalisation */
