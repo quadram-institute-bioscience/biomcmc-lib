@@ -144,8 +144,8 @@ extern double   biomcmc_rng_get_52 (void);
 extern uint32_t biomcmc_rng_get_32 (void);
 
 /*! \brief get current time with maximum precision and soter in vector time[2] */
-void biomcmc_get_time (int *time);
+void biomcmc_get_time (int64_t *time);
 /*! \brief returns the floating-point time in seconds elapsed between past[2] and now[2] */
-double biomcmc_elapsed_time (int *now, int *past);
+double biomcmc_elapsed_time (int64_t *now, int64_t *past);
 
 #endif

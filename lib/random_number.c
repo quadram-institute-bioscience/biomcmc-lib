@@ -46,7 +46,7 @@ del_biomcmc_rng (biomcmc_rng r)
 uint64_t
 biomcmc_rng_get_initial_seed (void)
 {
-  int timeseed[2];
+  int64_t timeseed[2];
   uint64_t low, high, top, pid1, pid2;
 
   biomcmc_get_time (timeseed);
@@ -60,7 +60,7 @@ biomcmc_rng_get_initial_seed (void)
   /* use the lowest 32 bits of time in seconds as highest 48 bits (with lowest 16 masked) */
   high = (((uint64_t)(timeseed[0]) * pid2) << 16) & 0xffffffff0000ULL;
   /* highest 16 bits */
-  top  = (uint64_t) (biomcmc_hashint_salted (timeseed[0] + timeseed[1], /*salt*/ 6)) << 48;
+  top  = (uint64_t) (biomcmc_hashint_salted ((int)(timeseed[0] + timeseed[1]), /*salt*/ 6)) << 48;
 //  fprintf (stderr, "seed %ju\n", (uintmax_t) low|high|top);
 
   return (uint64_t) (low | high | top);
@@ -280,7 +280,7 @@ biomcmc_rng_get_32 (void)
 /* * * * extra functions: gettimeofday() with maximum precision * * * */
 
 void
-biomcmc_get_time (int *time)
+biomcmc_get_time (int64_t *time)
 {
 #if _POSIX_TIMERS > 0
   struct timespec now;
@@ -296,16 +296,15 @@ biomcmc_get_time (int *time)
 }
 
 #ifdef _POSIX_TIMERS
-#define TIMEWARP 1e9
+#define TIMEWARP 1.e9
 #else
-#define TIMEWARP 1e6
+#define TIMEWARP 1.e6
 #endif
 
 double
-biomcmc_elapsed_time (int *now, int *past)
+biomcmc_elapsed_time (int64_t *now, int64_t *past)
 {
-  if (now[1] < past[1])
-    return (((double)(past[1] + TIMEWARP - now[1]) / (double)(TIMEWARP)) - 1. + (double)(now[0] - past[0]));
-  else 
-    return (((double)(now[1] - past[1]) / (double)(TIMEWARP)) + (double)(now[0] - past[0]));
+  if (now[1] < past[1]) return (((double)(past[1] - now[1]) / (double)(TIMEWARP)) - 1. + (double)(now[0] - past[0]));
+  else                  return (((double)(now[1] - past[1]) / (double)(TIMEWARP))      + (double)(now[0] - past[0]));
+//  return (double)(now[0] + now[1]/TIMEWARP) - (double)(past[0] + past[1]/TIMEWARP);
 }
