@@ -272,6 +272,39 @@ print_alignment_in_fasta_format (alignment align, FILE *stream)
   }
 }
 
+void
+save_gzfasta_from_char_vector (const char *filename, char_vector label, char_vector seq)
+{
+  int i;
+  size_t j, k, columns = 120;
+#ifdef HAVE_ZLIB
+  gzFile stream;
+  stream = biomcmc_gzopen (filename, "w");
+  for (i = 0; i < label->nstrings; i++) if (seq->nchars[i]) {
+    gzprintf (stream, ">%s\n", label->string[i]);
+    for (j = 0; j < seq->nchars[i]; j+= columns) {
+      for (k = 0; (k < columns) && ((j+k) < seq->nchars[i]); k++) 
+        gzprintf (stream, "%c", seq->string[i][j+k]);
+      gzprintf (stream, "\n");
+    }
+  }
+  gzclose (stream);
+#else
+  FILE *stream;
+  stream = biomcmc_fopen (filename, "w");
+  for (i = 0; i < label->nstrings; i++) if (seq->nchars[i]) {
+    fprintf (stream, ">%s\n", label->string[i]);
+    for (j = 0; j < seq->nchars[i]; j+= columns) {
+      for (k = 0; (k < columns) && ((j+k) < seq->nchars[i]); k++) 
+        fprintf (stream, "%c", seq->string[i][j+k]);
+      fprintf (stream, "\n");
+    }
+  }
+  fclose (stream);
+#endif
+}
+
+
 alignment
 new_alignment (int ntax, int nchar)
 {

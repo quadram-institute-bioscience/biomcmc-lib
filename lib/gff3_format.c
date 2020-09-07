@@ -279,7 +279,6 @@ new_gff3_t (const char *filename)
     g3->file_basename = (char*) biomcmc_malloc ((len+1) * sizeof (char));
     strncpy (g3->file_basename, filename, len);
     g3->file_basename[len] = '\0';
-    printf ("DBG::filename: %s\n", g3->file_basename);
   }
 
   g3->ref_counter = 1;
@@ -318,15 +317,55 @@ gff3_finalise (gff3_t g3, char_vector seq_region)
   merge_seqid_from_fields_and_pragma (g3, &seq_region); // updates seq_region to match fields->seqid
   generate_feature_type_pointers (g3); // vectors of pointers (CDS, gene)
 
-  /* 2. if fasta is incomplete or missing, just copy seqids to seqname */
-  if ((!g3->sequence->next_avail) || (g3->seqname->next_avail < seq_region->next_avail)) { 
+  /* 2. now seq_region has updated, authoritative sequence names; */
+  char_vector fasta_name = g3->seqname; // just a pointer
+  g3->seqname = seq_region; // must increase pointer counter since 
+  g3->seqname->ref_counter++; // seq_region will be deleted later
+  
+  /* 2. if fasta is missing, just copy seqids to seqname */
+  if (!g3->sequence->next_avail) {
+    del_char_vector (fasta_name); // delete original seqname of length zero
+    del_char_vector (g3->sequence); g3->sequence = NULL;
+    return;
+  }
+
+  int hid, i, *idx;
+  /* 3. prepare to reorder fasta, with name order in gff3 */
+  idx = (int*) biomcmc_malloc (fasta_name->nstrings * sizeof (int));
+  for (i = 0; i < fasta_name->nstrings; i++) {
+    hid = lookup_hashtable (g3->seqname_hash, fasta_name->string[i]);
+    idx[i] = hid; // negative values if fasta sequence not present in GFF3 
+  }
+
+  /* 4. Assume fasta file can have info about only a few of the seqs */
+  char_vector seq = new_char_vector (g3->seqname->nstrings);
+  for (i = 0; i < fasta_name->nstrings; i++) if (idx[i] >= 0) char_vector_add_string_at_position (seq, g3->sequence->string[i], idx[i]); 
+  del_char_vector (g3->sequence);
+  g3->sequence = seq;
+
+  del_char_vector (fasta_name); // original fasta names not needed anymore
+  if (idx) free (idx);
+
+  return;
+}
+
+void
+gff3_finalise_OLD (gff3_t g3, char_vector seq_region)
+{
+  /* 1. sort fields, map seqids to char_vector, and point to specific features (cds, gene) */
+  give_feature_type_id (g3); // transform cds, genes, etc to 0, 1, etc so that can be properly sorted below
+  merge_seqid_from_fields_and_pragma (g3, &seq_region); // updates seq_region to match fields->seqid
+  generate_feature_type_pointers (g3); // vectors of pointers (CDS, gene)
+
+  /* 2. if fasta is missing, just copy seqids to seqname */
+  //if ((!g3->sequence->next_avail) || (g3->seqname->next_avail < seq_region->next_avail)) { 
+  if (!g3->sequence->next_avail) { 
     //printf ("DBG::no fasta %6d , %6d %6d\n", g3->seqname->nstrings, seq_region->nstrings, seq_region->next_avail);
     del_char_vector (g3->sequence); g3->sequence = NULL;
     del_char_vector (g3->seqname);
     g3->seqname = seq_region;
     g3->seqname->ref_counter++; // seq_region will be deleted later
-    if (g3->seqname && (g3->seqname->next_avail < seq_region->next_avail)) 
-      biomcmc_warning ("incomplete fasta pragma in GFF3; ignoring DNA sequences from file\n");
+    //if (g3->seqname && (g3->seqname->next_avail < seq_region->next_avail)) biomcmc_warning ("incomplete fasta pragma in GFF3; ignoring DNA sequences from file\n");
     return;
   }
 
@@ -482,7 +521,7 @@ reorder_seqid_charvector_from_pragma (char_vector sid, char_vector *seq_region)
 
   /* 3. sort idx[] while keeping index i (of idx[i]) */
   ef = new_empfreq_sort_increasing (idx, sid->nstrings, 2); // 2->integer (0->char and 1->size_t)
-  for (i = 0; i < sid->nstrings; i++) idx[i] = ef->i[i].idx; // DEBUG: check if this is correct
+  for (i = 0; i < sid->nstrings; i++) idx[i] = ef->i[i].idx;
 
   /* 4. reorder seqid preesrving preferences from pragma (seq_region) */
   char_vector_reorder_strings_from_external_order (sid, idx);
@@ -512,4 +551,42 @@ gff3_generate_seq_vectors (gff3_t g3, hashtable hgs)
   g3->seq_f0_idx[0] = 0; // idx of first element (on f0 vector) belonging to seqid 0
   for (i = 1; i < g3->n_f0; i++) if (g3->f0[i].seqid.id != g3->f0[i-1].seqid.id) g3->seq_f0_idx[ g3->f0[i].seqid.id ] = i;
   return;
+}
+
+void
+add_fasta_to_gff3 (gff3_t g3, char_vector name, char_vector seq)
+{
+  int hid, i, *idx;
+
+  /* 1. prepare to reorder fasta, with name order in gff3 (we don't care about name[], GFF3 has authoritative one) */
+  idx = (int*) biomcmc_malloc (name->nstrings * sizeof (int));
+  for (i = 0; i < name->nstrings; i++) {
+    hid = lookup_hashtable (g3->seqname_hash, name->string[i]);
+    idx[i] = hid; // negative values if fasta sequence not present in GFF3 
+  }
+
+  /* 2. even if GFF3 has no DNA seqs, we cannot just copy char_vector b/c we need to preserve order and size (from seqname) */
+  if (!g3->sequence) g3->sequence = new_char_vector (g3->seqname->nstrings);
+  /* 3. Assume that the fasta file can have only info about some of the seqs */
+  for (i = 0; i < name->nstrings; i++) if (idx[i] >= 0) char_vector_add_string_at_position (g3->sequence, seq->string[i], idx[i]); 
+  if (idx) free (idx);
+  return;
+} 
+
+void
+save_fasta_from_gff3 (gff3_t g3, char *fname)
+{
+  if (!g3->sequence) return; // no fasta info 
+  char *filename;
+  if (!fname) fname = g3->file_basename;
+  size_t len = strlen (fname);
+#ifdef HAVE_ZLIB
+  filename = (char*) biomcmc_malloc ((len + 7) * sizeof (char));
+  strcpy (filename, fname); strcat (filename, ".fa.gz");
+#else
+  filename = (char*) biomcmc_malloc ((len + 4) * sizeof (char));
+  strcpy (filename, fname); strcat (filename, ".fa");
+#endif
+  save_gzfasta_from_char_vector (filename, g3->seqname, g3->sequence);
+  if (filename) free (filename);
 }

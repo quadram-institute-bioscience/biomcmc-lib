@@ -252,7 +252,7 @@ char_vector_expand_nstrings (char_vector vec, int new_size)
     for (i=vec->nstrings; i < new_size; i++) vec->alloc[i] = 0;
   }
   
-  vec->nstrings = new_size;
+  vec->next_avail = vec->nstrings = new_size;
 }
 
 void
@@ -366,6 +366,7 @@ void
 char_vector_reduce_to_trimmed_size (char_vector vec, int new_size)
 {
   int i;
+  if (new_size <= vec->nstrings) return;
   for (i=vec->nstrings-1; i >= new_size; i--) if (vec->string[i]) free (vec->string[i]);
   vec->nstrings = vec->next_avail = new_size;
   vec->string = (char**)  biomcmc_realloc ((char**)  vec->string, new_size * sizeof (char*));

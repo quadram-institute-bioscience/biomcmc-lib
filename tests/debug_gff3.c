@@ -18,7 +18,8 @@ int main(int argc, char **argv)
   for (i = 0; i < g3->n_cds; i++) printf ("id=%5d seqid=%50s (id=%4d)   attr=%16s\n", i, g3->cds[i]->seqid.str, g3->cds[i]->seqid.id, g3->cds[i]->attr_id.str);
 
   printf ("number of seqnames (contigs/genomes/chromosomes) = %d\n", g3->seqname->nstrings);
-  for (i = 0; i < g3->seqname->nstrings; i++) printf ("FASTA: %s\n", g3->seqname->string[i]);
+  for (i = 0; i < g3->seqname->nstrings; i++) printf ("FASTA: %s\t%ld\n", g3->seqname->string[i], (g3->sequence==NULL? 0:g3->sequence->nchars[i]));
+  save_fasta_from_gff3 (g3, NULL);
 
   time1 = clock ();  fprintf (stderr, "timing: %.8f secs\n", (double)(time1-time0)/(double)CLOCKS_PER_SEC);
 
