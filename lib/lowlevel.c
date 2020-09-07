@@ -270,6 +270,30 @@ biomcmc_levenshtein_distance (const char *s1, uint32_t n1, const char *s2, uint3
   return indel;
 }
 
+char *
+biomcmc_strrstr (const char *haystack, const char *needle) // find last occurence of needle
+{
+  //if (*needle == '\0') return (char *) haystack;
+  if (*needle == '\0') return NULL; 
+  char *result = NULL;
+  for (;;) {
+    char *p = strstr(haystack, needle);
+    if (p == NULL) break;
+    result = p;
+    haystack = p + 1;
+  }
+  // useful for removing file extension; for basename check <libgen.h>(posix) and <string> (gnu) 
+  return result;
+}
+
+int
+biomcmc_length_common_prefix (const char *s1, const char *s2)
+{
+  int i;
+  for (i = 0; (s1[i] != '\0') && (s2[i] != '\0'); i++) if (s1[i] != s2[i]) break;
+  return i;
+}
+
 /* The hungarian method below is copied from http://www.informatik.uni-freiburg.de/~stachnis/misc.html
  * The (edited) original message follows:
  *

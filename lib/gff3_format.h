@@ -51,6 +51,7 @@ struct gff3_file_struct
 {
   gff3_fields *f0, **cds, **gene; // cds and gene are pointers
   int n_f0, n_cds, n_gene;
+  char *file_basename;  /*! \brief filename without suffix (file extension) */
   char_vector sequence; /*! \brief from fasta info at end of file; not mandatory */
   char_vector seqname;  /*! \brief from fasta info at end of file; not mandatory */
   hashtable seqname_hash; /*! \brief index from seqname, seq_region, or f0.seqid, in order of preference */

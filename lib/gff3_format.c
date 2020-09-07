@@ -26,7 +26,7 @@ void get_gff3_string_from_field (const char *start, const char *end, gff3_string
 uint64_t return_gff3_hashed_string (const char *str, size_t len);
 void get_gff3_attributes_from_field (char *start, char *end, gff3_string *attr_id, gff3_string *attr_parent);
 
-gff3_t new_gff3_t (void);
+gff3_t new_gff3_t (const char *filename);
 void add_fields_to_gff3_t (gff3_t g3, gff3_fields gfield);
 void gff3_finalise (gff3_t g3, char_vector seq_region);
 void merge_seqid_from_fields_and_pragma (gff3_t g3, char_vector *seq_region);
@@ -187,7 +187,7 @@ read_gff3_from_file (char *gff3filename)
   gff3_t g3;
   char_vector seq_region = new_char_vector (1);
 
-  g3 = new_gff3_t ();
+  g3 = new_gff3_t (gff3filename);
   tmpc = (char*) biomcmc_malloc (1024 * sizeof (char));
 
 #ifdef HAVE_ZLIB
@@ -261,7 +261,7 @@ read_gff3_from_file (char *gff3filename)
 }
 
 gff3_t
-new_gff3_t (void)
+new_gff3_t (const char *filename)
 {
   gff3_t g3 = (gff3_t) biomcmc_malloc (sizeof (struct gff3_file_struct));
   g3->sequence = new_char_vector_big (1);
@@ -271,6 +271,17 @@ new_gff3_t (void)
   g3->n_f0 = g3->n_cds = g3->n_gene = 0;
   g3->seqname_hash = NULL; // created when finalising 
   g3->seq_f0_idx = g3->seq_length = NULL;
+  g3->file_basename = NULL;
+
+  char *last = biomcmc_strrstr (filename, ".gff");
+  if (last) {
+    size_t len = last - filename;
+    g3->file_basename = (char*) biomcmc_malloc ((len+1) * sizeof (char));
+    strncpy (g3->file_basename, filename, len);
+    g3->file_basename[len] = '\0';
+    printf ("DBG::filename: %s\n", g3->file_basename);
+  }
+
   g3->ref_counter = 1;
   return g3;
 }
@@ -282,12 +293,13 @@ del_gff3_t (gff3_t g3)
   if (--g3->ref_counter) return;
   del_char_vector (g3->sequence);
   del_char_vector (g3->seqname);
-  del_hashtable (g3->seqname_hash);
-  if (g3->f0) free (g3->f0);
-  if (g3->cds) free (g3->cds);
+  del_hashtable   (g3->seqname_hash);
+  if (g3->f0) free   (g3->f0);
+  if (g3->cds) free  (g3->cds);
   if (g3->gene) free (g3->gene);
   if (g3->seq_length) free (g3->seq_length);
   if (g3->seq_f0_idx) free (g3->seq_f0_idx);
+  if (g3->file_basename) free (g3->file_basename);
   free (g3);
 }
 

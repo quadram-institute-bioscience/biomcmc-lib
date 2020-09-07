@@ -141,6 +141,9 @@ int biomcmc_getline_gz (char **lineptr, size_t *n, gzFile zstream);
 /*! \brief edit distance between two sequences (slow), with option to allow one of sequences to terminate soon (o.w. global cost from end to end) */
 uint32_t biomcmc_levenshtein_distance (const char *s1, uint32_t n1, const char *s2, uint32_t n2, uint32_t cost_sub, uint32_t cost_indel, bool skip_borders);
 
+char * biomcmc_strrstr (const char *haystack, const char *needle); // find last occurence of needle
+int biomcmc_length_common_prefix (const char *s1, const char *s2);
+
 /* Hungarian method for bipartite matching (assignment) */
 hungarian new_hungarian (int size, bool is_double);
 void hungarian_reset (hungarian p);
