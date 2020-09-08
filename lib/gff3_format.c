@@ -185,7 +185,7 @@ get_gff3_attributes_from_field (char *start, char *end, gff3_string *attr_id, gf
 }
 
 gff3_t
-read_gff3_from_file (char *gff3filename)
+read_gff3_from_file (const char *gff3filename)
 {
   char *line = NULL, *line_read = NULL, *delim = NULL, *tmpc = NULL;
   size_t linelength = 0;
@@ -579,11 +579,12 @@ add_fasta_to_gff3 (gff3_t g3, char_vector name, char_vector seq)
   return;
 } 
 
-void
-save_fasta_from_gff3 (gff3_t g3, char *fname)
+char *
+save_fasta_from_gff3 (gff3_t g3, char *fname, bool overwrite)
 {
-  if (!g3->sequence) return; // no fasta info 
+  if (!g3->sequence) return NULL; // no fasta info 
   char *filename;
+  FILE *f_exist;
   if (!fname) fname = g3->file_basename;
   size_t len = strlen (fname);
 #ifdef HAVE_ZLIB
@@ -593,8 +594,14 @@ save_fasta_from_gff3 (gff3_t g3, char *fname)
   filename = (char*) biomcmc_malloc ((len + 4) * sizeof (char));
   strcpy (filename, fname); strcat (filename, ".fa");
 #endif
+
+  if ((!overwrite) && ((f_exist = fopen(filename, "r")) != NULL)) { // file exists; don't overwrite
+    fclose (f_exist);
+    return filename;
+  }
+
   save_gzfasta_from_char_vector (filename, g3->seqname, g3->sequence);
-  if (filename) free (filename);
+  return filename;
 }
 
 gff3_fields *
