@@ -104,7 +104,7 @@ hash2 (hashtable ht)
 }
 
 void 
-insert_hashtable (hashtable ht, char* key, int value) 
+insert_hashtable (hashtable ht, const char* key, int value) 
 {
   uint32_t i;
   int h1, h2;
@@ -129,7 +129,7 @@ insert_hashtable (hashtable ht, char* key, int value)
 }
 
 int 
-lookup_hashtable (hashtable ht, char* key) 
+lookup_hashtable (hashtable ht, const char* key) 
 {
   uint32_t i;
   int h1, h2;

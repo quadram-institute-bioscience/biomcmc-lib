@@ -67,6 +67,13 @@ compare_gff3_fields_by_id (const void *a, const void *b)
 
 static gff3_fields NULL_gff3_fields = {.start = -0xfdfd}; // equivalent to NULL; structs can't be compared (only elements) 
 
+bool
+gff3_fields_is_valid (gff3_fields gff)
+{
+  if (gff.start == NULL_gff3_fields.start) return false;
+  return true;
+}
+
 gff3_fields
 gff3_fields_from_char_line (char *line)
 {
@@ -213,7 +220,7 @@ read_gff3_from_file (char *gff3filename)
         }
         if (strcasestr (line, "##")) continue; // do nothing atm
         gfield = gff3_fields_from_char_line (line);
-        if (gfield.start != NULL_gff3_fields.start) {
+        if (gff3_fields_is_valid (gfield)) {
           add_fields_to_gff3_t (g3, gfield);
           stage = 2;
           continue;
@@ -223,7 +230,7 @@ read_gff3_from_file (char *gff3filename)
       else if (stage == 2) { /* regular fields */
         if (strcasestr (line, "##FASTA")) { stage = 3; continue; }
         gfield = gff3_fields_from_char_line (line);
-        if (gfield.start != NULL_gff3_fields.start) { add_fields_to_gff3_t (g3, gfield); continue; }
+        if (gff3_fields_is_valid (gfield)) { add_fields_to_gff3_t (g3, gfield); continue; }
       }
 
       else if (stage == 3) {  /* FASTA file */
@@ -409,7 +416,6 @@ merge_seqid_from_fields_and_pragma (gff3_t g3, char_vector *seq_region)
 
   /* 1. create char_vector with seqid names from feature table */
   char_vector_add_string (sid, g3->f0[0].seqid.str);
-  g3->f0[i].seqid.id = sid->next_avail - 1; // which is zero, btw, since next_avail is one after add_string()
   for (i = 1; i < g3->n_f0; i++) 
     if (strcmp(g3->f0[i].seqid.str, sid->string[sid->next_avail-1])) char_vector_add_string (sid, g3->f0[i].seqid.str);
 
@@ -420,7 +426,7 @@ merge_seqid_from_fields_and_pragma (gff3_t g3, char_vector *seq_region)
   /* 3. seq_region has all seqids and in right order; now fields must be updated */
   g3->seqname_hash = new_hashtable ((*seq_region)->nstrings);
   for (i = 0; i < (*seq_region)->nstrings; i++) insert_hashtable (g3->seqname_hash, (*seq_region)->string[i], i);
-  for (i = 1; i < g3->n_f0; i++) {
+  for (i = 0; i < g3->n_f0; i++) {
     hid = lookup_hashtable (g3->seqname_hash, g3->f0[i].seqid.str);
     g3->f0[i].seqid.id = hid; // hid should be valid (i.e. not negative) but downstream functions might want to check
   }
@@ -590,3 +596,37 @@ save_fasta_from_gff3 (gff3_t g3, char *fname)
   save_gzfasta_from_char_vector (filename, g3->seqname, g3->sequence);
   if (filename) free (filename);
 }
+
+gff3_fields *
+find_fields_within_position (gff3_t g3, const char *ref_genome, int location, int *n)
+{
+  gff3_fields *fid;
+  int i, start_genome, end_genome, first, mid, last; // start and end are positions in f0[] vector of all gff3_fields_t
+
+  *n = -1; // return value if genome does not exist (i.e. error)
+  i = lookup_hashtable (g3->seqname_hash, ref_genome);
+  if (i < 0) { biomcmc_warning ("no reference \"%s\" found in GFF3 file %s\n", ref_genome, g3->file_basename); return NULL; }
+  start_genome = g3->seq_f0_idx[i]; 
+  if (i < g3->seqname->nstrings - 1) end_genome = g3->seq_f0_idx[i + 1] - 1;
+  else                               end_genome = g3->n_f0 - 1; 
+
+  *n = 0; // return value if no feature found (position before first or after last feature) 
+  if ((g3->f0[start_genome].start > location) || (g3->f0[end_genome].end < location)) return NULL;
+
+  fid = (gff3_fields*) biomcmc_malloc ((end_genome - start_genome + 1) * sizeof (gff3_fields));// end==start  
+
+  first = start_genome; last = end_genome; // we might need start and end of genome again later
+  while (first <= last) {
+    mid = first + (last - first)/2;
+    if (location < g3->f0[mid].start) last = mid - 1; // update binary search and move
+    else {
+      first = mid + 1; // update binary search for next iter
+      if (location <= g3->f0[mid].end) fid[(*n)++] = g3->f0[mid];
+    }
+   }
+
+  if (*n) fid = (gff3_fields*) biomcmc_realloc ((gff3_fields*) fid, (*n) * sizeof (gff3_fields));
+  else if (fid) { free (fid); fid = NULL; }
+  return fid;
+}
+

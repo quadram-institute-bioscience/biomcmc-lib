@@ -77,9 +77,9 @@ struct bip_hashitem_struct {
 };
 
 /*! \brief Insert key/value pair into hashtable. */
-void insert_hashtable (hashtable ht, char* key, int value);
+void insert_hashtable (hashtable ht, const char* key, int value);
 /*! \brief Return location (value) of corresponding key (string) or negative value if not found. */
-int  lookup_hashtable (hashtable ht, char* key);
+int  lookup_hashtable (hashtable ht, const char* key);
 /*! \brief Create new hashtable of size elements. */
 hashtable new_hashtable (int size);
 /*! \brief Free hashtable space. */

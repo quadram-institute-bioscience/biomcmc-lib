@@ -64,5 +64,6 @@ void del_gff3_t (gff3_t g3);
 gff3_fields find_gff3_field_from_genomic_location (gff3_t g3, const char *seqid, int location); // main function for tatajuba
 void add_fasta_to_gff3 (gff3_t g3, char_vector name, char_vector seq);
 void save_fasta_from_gff3 (gff3_t g3, char *fname);
+gff3_fields *find_fields_within_position (gff3_t g3, const char *ref_genome, int location, int *n);
 
 #endif

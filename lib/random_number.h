@@ -147,5 +147,7 @@ extern uint32_t biomcmc_rng_get_32 (void);
 void biomcmc_get_time (int64_t *time);
 /*! \brief returns the floating-point time in seconds elapsed between past[2] and now[2] */
 double biomcmc_elapsed_time (int64_t *now, int64_t *past);
+/*! \brief returns the floating-point time in seconds elapsed between past[2] and *now*, updating past[] */
+double biomcmc_update_elapsed_time (int64_t *past);
 
 #endif

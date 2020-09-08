@@ -308,3 +308,15 @@ biomcmc_elapsed_time (int64_t *now, int64_t *past)
   else                  return (((double)(now[1] - past[1]) / (double)(TIMEWARP))      + (double)(now[0] - past[0]));
 //  return (double)(now[0] + now[1]/TIMEWARP) - (double)(past[0] + past[1]/TIMEWARP);
 }
+
+double
+biomcmc_update_elapsed_time (int64_t *past)
+{
+  int64_t now[2];
+  double seconds;
+  biomcmc_get_time (now);
+  if (now[1] < past[1]) seconds = (((double)(past[1] - now[1]) / (double)(TIMEWARP)) - 1. + (double)(now[0] - past[0]));
+  else                  seconds = (((double)(now[1] - past[1]) / (double)(TIMEWARP))      + (double)(now[0] - past[0]));
+  past[0] = now[0]; past[1] = now[1];
+  return seconds;
+}
