@@ -34,7 +34,7 @@ int main(int argc, char **argv)
   printf ("number of seqnames (contigs/genomes/chromosomes) = %d\n", g3->seqname->nstrings);
   for (i = 0; i < g3->seqname->nstrings; i++) printf ("FASTA: %s\t%ld\n", g3->seqname->string[i], (g3->sequence==NULL? 0:g3->sequence->nchars[i]));
   s = save_fasta_from_gff3 (g3, NULL, true); // true means to overwrite file even if exists
-  fi (s) free (s);
+  if (s) free (s);
 
   fprintf (stderr, "timing: %.8f secs\n",biomcmc_update_elapsed_time (time0)); // updates time0 with internal call to biomcmc_get_time
 
