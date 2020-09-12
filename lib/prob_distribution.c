@@ -392,7 +392,7 @@ biomcmc_qpois (double p, double lambda, bool log_p)
       oldincr = incr;
       y = do_poisson_search (y, &z, p, lambda, incr);
       new_incr = floor (incr / 100.);
-      incr = MAX (1, new_incr);
+      incr = BIOMCMC_MAX (1, new_incr);
     } while ((oldincr > 1) && (incr > (lambda * 1e-15)));
     return y;
    }
@@ -574,7 +574,7 @@ biomcmc_rng_pois (double mu)
       /*muprev = 0.;-* such that next time, mu != muprev ..*/
       if (mu != muprev) {
         muprev = mu;
-        m = MAX (1, (int) mu);
+        m = BIOMCMC_MAX (1, (int) mu);
         l = 0; /* pp[] is already ok up to pp[l] */
         q = p0 = p = exp (-mu);
       }
@@ -586,7 +586,7 @@ biomcmc_rng_pois (double mu)
         /* Step T. table comparison until the end pp[l] of the pp-table of cumulative poisson probabilities
            (0.458 > ~= pp[9](= 0.45792971447) for mu=10 ) */
         if (l != 0) {
-          for (k = ((u <= 0.458) ? 1 : MIN (l, m));  k <= l; k++) if (u <= pp[k]) return (double) k;
+          for (k = ((u <= 0.458) ? 1 : BIOMCMC_MIN (l, m));  k <= l; k++) if (u <= pp[k]) return (double) k;
           if (l == 35) continue; /* u > pp[35] */
         }
         /* Step C. creation of new poisson; probabilities p[l..] and their cumulatives q =: pp[k] */
@@ -760,7 +760,7 @@ biomcmc_gammafn (double x)
     ngam = chebyshev_init (gamcs, 42, DBL_EPSILON/20.);
     gammalims (&xmin, &xmax);
     m1 = log (DBL_MIN); m2 = -log (DBL_MAX);
-    xsml = exp (MAX (m1, m2) + 0.01);/* = exp(.01)*DBL_MIN = 2.247e-308 for IEEE */
+    xsml = exp (BIOMCMC_MAX (m1, m2) + 0.01);/* = exp(.01)*DBL_MIN = 2.247e-308 for IEEE */
     dxrel = sqrt (DBL_EPSILON); /* = sqrt(DBL_EPSILON) = 2^{-26}  */ 
   }
 

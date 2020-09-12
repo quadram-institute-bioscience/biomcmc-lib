@@ -102,7 +102,7 @@ find_xmax:
   *xmax =  171.61447887182298; goto done;
 
 done:
-  *xmin = MAX (*xmin, -(*xmax) + 1);
+  *xmin = BIOMCMC_MAX (*xmin, -(*xmax) + 1);
 }
 
 /* Continued fraction for calculation of 1/i + x/(i+d) + x^2/(i+2*d) + x^3/(i+3*d) + ... = sum_{k=0}^Inf x^k/(i+k*d)
@@ -320,7 +320,7 @@ pd_lower_cf (double i, double d)
       of = f;
       f = a2 / b2;
       /* convergence check: relative; absolute for small f : */
-      if (fabs (f - of) <= DBL_EPSILON * MAX(1., fabs(f)))
+      if (fabs (f - of) <= DBL_EPSILON * BIOMCMC_MAX(1., fabs(f)))
         return f;
     }
   }
@@ -614,7 +614,7 @@ do_poisson_search (double y, double *z, double p, double lambda, double incr)
   if(*z >= p) for(;;) { /* search to the left */
     new_y = y - incr;
     if((y == 0) || (*z = biomcmc_ppois (new_y, lambda, false)) < p) return y;
-    y =  MAX (0, new_y);
+    y =  BIOMCMC_MAX (0, new_y);
   }
   else for(;;) { /* search to the right */
     y = y + incr;

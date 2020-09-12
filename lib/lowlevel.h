@@ -60,9 +60,9 @@
  #define attribute_FALLTHROUGH ((void)0);
 #endif /* __GNUC__ >= 7 */
 
-#define MIN(x,y) (((x)<(y)) ? (x) : (y))
-#define MAX(x,y) (((x)>(y)) ? (x) : (y))
-#define MOD(a)   (((a)>0)   ? (a) :(-a))
+#define BIOMCMC_MIN(x,y) (((x)<(y)) ? (x) : (y))
+#define BIOMCMC_MAX(x,y) (((x)>(y)) ? (x) : (y))
+#define BIOMCMC_MOD(a)   (((a)>0)   ? (a) :(-a))
 
 
 /*! \brief Mnemonic for boolean (char is smaller than int) */
