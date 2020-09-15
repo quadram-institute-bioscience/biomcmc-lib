@@ -39,7 +39,7 @@ void store_filename_in_alignment (alignment align, char *seqfilename);
 /*! \brief calculates empirical equilibrium site frequencies (site counts) */
 void calc_empirical_equilibrium_freqs (char *seq, int *pfreq, int nsites, double *result);
 /*! \brief uses Kimura's two-parameter model to calculate distance and ti/tv rate ratio between sequencies */
-void calc_pairwise_distance_K2P (char *s1, char *s2, int *w, int nsites, double *result);
+void biomcmc_calc_pairwise_distance_K2P (char *s1, char *s2, int *w, int nsites, double *result);
 /*! \brief initializes char2bit vector (local to this file) A->0001 C->0010 G->0100 T->1000 */
 void initialize_char2bit_table (void);
 
@@ -666,7 +666,7 @@ new_distance_matrix_from_alignment (alignment align)
   /*    Kimura's two-parameter distance; result[] will hold partial counts (which will also be used in JC distance) */
 
   for (i=1; i < dist->size; i++) for (j=0; j < i; j++) {
-    calc_pairwise_distance_K2P (align->character->string[i], align->character->string[j], align->pattern_freq,
+    biomcmc_calc_pairwise_distance_K2P (align->character->string[i], align->character->string[j], align->pattern_freq,
                                 align->npat, result);
 
     jc_proportion = result[0] + result[1]; /* total proportion of differences (ti+tv) used in Jukes-Cantor formula */
@@ -726,10 +726,12 @@ calc_empirical_equilibrium_freqs (char *seq, int *pfreq, int nsites, double *res
 }
 
 void
-calc_pairwise_distance_K2P (char *s1, char *s2, int *w, int nsites, double *result)
+biomcmc_calc_pairwise_distance_K2P (char *s1, char *s2, int *w, int nsites, double *result)
 {
   int i, b1, b2;
-  double weight = 1., degeneracy, valid_sites = 0.;
+  double weight = 1., default_w = 1., degeneracy, valid_sites = 0.;
+  
+  if (char2bit[0][0] == 0xffff) initialize_char2bit_table (); /* translation table between ACGT to 1248 */
 
   result[0] = result[1] = 0.;
   for (i=0; i < nsites; i++) {
@@ -741,8 +743,9 @@ calc_pairwise_distance_K2P (char *s1, char *s2, int *w, int nsites, double *resu
     if (!degeneracy) continue; 
 
     /* frequency of pattern divided by number of ambiguous states */
-    weight = (double)(w[i]) / degeneracy;
-    valid_sites += (double)(w[i]); /* without indels this should be equal to align->nchar */
+    if (w) default_w = w[i]; // if w[] is NULL then assume all weights equal
+    weight = default_w / degeneracy;
+    valid_sites += default_w; /* without indels this should be equal to align->nchar */
 
     result[0] += (double)(pairdist[b1-1][b2-1][0]) * weight; /* number of transitions */
     result[1] += (double)(pairdist[b1-1][b2-1][1]) * weight; /* number of transversions */
@@ -750,9 +753,28 @@ calc_pairwise_distance_K2P (char *s1, char *s2, int *w, int nsites, double *resu
   if (valid_sites) {
     result[0] /= valid_sites; /* result[] now has total counts (per sequence) but we want */ 
     result[1] /= valid_sites; /* fraction per site (between zero and one) */
-    if (!result[1]) result[1] = 0.5/valid_sites; /* must be larger than zero to avoid NaN */
+    if (!result[0]) result[0] = 0.1/valid_sites; /* must be larger than zero to avoid NaN */
+    if (!result[1]) result[1] = 0.1/valid_sites; /* must be larger than zero to avoid NaN */
   }
   else result[0] = result[1] = 1.;
+}
+
+double  // simplified versio njust to find number of matches considering ambiguous sites
+biomcmc_pairwise_score_k2p (char *s1, char *s2, int nsites)
+{
+  int i, b1, b2, d1, score = 0;
+  double degeneracy, valid_sites = 0.;
+  
+  if (char2bit[0][0] == 0xffff) initialize_char2bit_table (); /* translation table between ACGT to 1248 */
+
+  for (i=0; i < nsites; i++) {
+    /* integer (bit) representation of site states */
+    b1 = char2bit[ (int)s1[i] ][0]; 
+    b2 = char2bit[ (int)s2[i] ][0];
+    d1 = char2bit[ (int)s1[i] ][1] * char2bit[ (int)s2[i] ][1]; // degeneracy
+    score += d1 - pairdist[b1-1][b2-1][0] - pairdist[b1-1][b2-1][1];
+  }
+  return (double)(score)/(double)(nsites);
 }
 
 void
