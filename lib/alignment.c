@@ -760,24 +760,27 @@ biomcmc_calc_pairwise_distance_K2P (char *s1, char *s2, int *w, int nsites, doub
 }
 
 double  // simplified version just to find number of matches considering ambiguous sites
-biomcmc_pairwise_score_k2p (char *s1, char *s2, int nsites)
+biomcmc_pairwise_score_matches (char *s1, char *s2, int nsites, double *result)
 {
-  int i, b1, b2, d1, d2, n_valid = 0;
-  double score = 0.; 
-  
+  int i, b1, b2, d1, d2, res_int = 0, n_valid = 0;
+  double degeneracy = 0.; 
   if (char2bit[0][0] == 0xffff) initialize_char2bit_table (); /* translation table between ACGT to 1248 */
+  for (i = 0; i < 3; i++) result[i] = 0.;
+  if (!nsites) return 0.; 
 
   for (i=0; i < nsites; i++) {
     /* integer (bit) representation of site states */
     b1 = char2bit[ (int)s1[i] ][0]; b2 = char2bit[ (int)s2[i] ][0];
     d1 = char2bit[ (int)s1[i] ][1]; d2 = char2bit[ (int)s2[i] ][1]; // degeneracy
-    if (!((d1|d2) & 3)) continue; // one of them is 0 ("-") or 4 ("N")
-    score += ((b1 == b2) ? (1./(double)(d1*d2)) : 0.);
+    if (!(d1 & 3) || !(d2 & 3)) continue; // one of them is 0 ("-") or 4 ("N")
+    degeneracy = (double)(d1 * d2);
+    res_int += ((b1 == b2) ? 1 : 0); // unweighted number of exact matches
+    result[1] += (((b1&b2) > 0)  ? (1./degeneracy) : 0.); // weighted number of compatible sites (partial match e.g. W=TA is compatible with A)
     n_valid++;
   }
-  //if (n_valid) return score/(double)(n_valid);
-  if (nsites) return score/(double)(nsites);
-  else return 0.;
+  result[0] = (double)(res_int);
+  result[2] = (double)(n_valid); 
+  return result[0] + result[1]/(double)(1000 * nsites); // result[1] is just to break ties
 }
 
 void
