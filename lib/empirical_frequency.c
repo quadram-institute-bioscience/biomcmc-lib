@@ -189,7 +189,7 @@ new_empfreq_from_int (int *vec, int n)
   for (i=0; i < n; i++) {
     /* trick to make it sort by value ( vec[] ) and not by frequency (the "real" sort comes below) */
     e_idx->i[i].idx  = 1; 
-    e_idx->i[i].freq = vec[i];
+    e_idx->i[i].freq = vec[i]; // thus same value in vec[] (list index, for instance) will be grouped together
   }
 
   sort_empfreq_increasing (e_idx); /* equiv. to qsort (vec, n, sizeof (int), compare_int) but preserving weights. */

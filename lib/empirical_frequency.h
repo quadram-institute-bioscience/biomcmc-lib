@@ -71,7 +71,7 @@ empfreq new_empfreq_sort_increasing (void *vec, int n, char type);
 empfreq_double new_empfreq_double_sort_decreasing (double *vec, int n);
 empfreq_double new_empfreq_double_sort_increasing (double *vec, int n);
 
-empfreq new_empfreq_from_int (int *vec, int n);
+empfreq new_empfreq_from_int (int *vec, int n); // like `sort | uniq` in linux
 empfreq new_empfreq_from_int_weighted (int *vec, int n, int *weight);
 empfreq new_empfreq_merge_empfreqs (empfreq a1, empfreq a2);
 int find_mode_int (int *vec, int n);
