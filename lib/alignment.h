@@ -68,6 +68,8 @@ distance_matrix new_distance_matrix_from_alignment (alignment align);
 void biomcmc_calc_pairwise_distance_K2P (char *s1, char *s2, int *w, int nsites, double *result);
 /*! \brief find number of matches considering ambiguous sites; returns score considering amb and unambiguous sites (use result[3] for precise numbers */
 double biomcmc_pairwise_score_matches (char *s1, char *s2, int nsites, double *result);
+/*! \brief proportion of  unambiguous (ACGT), partially ambiguous (RW etc), and completely ambiguous (N? etc) sites */
+void biomcmc_count_sequence_acgt (char *s1, int nsites, double *result);
 
 /*! \brief transform aligned sequence into likelihood for terminal taxa (e.g. A -> 0001, C-> 0010 etc) (e.g. A -> 0001,
  * C-> 0010 etc) (e.g. A -> 0001, C-> 0010 etc) (e.g. A -> 0001, C-> 0010 etc) (e.g. A -> 0001, C-> 0010 etc) (e.g. A ->

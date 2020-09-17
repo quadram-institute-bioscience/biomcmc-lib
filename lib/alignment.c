@@ -762,7 +762,7 @@ biomcmc_calc_pairwise_distance_K2P (char *s1, char *s2, int *w, int nsites, doub
 double  // simplified version just to find number of matches considering ambiguous sites
 biomcmc_pairwise_score_matches (char *s1, char *s2, int nsites, double *result)
 {
-  int i, b1, b2, d1, d2, res_int = 0, n_valid = 0;
+  int i, b1, b2, d1, d2, r_acgt = 0, r_int = 0, r_partial = 0, n_valid = 0;
   double degeneracy = 0.; 
   if (char2bit[0][0] == 0xffff) initialize_char2bit_table (); /* translation table between ACGT to 1248 */
   for (i = 0; i < 3; i++) result[i] = 0.;
@@ -774,13 +774,38 @@ biomcmc_pairwise_score_matches (char *s1, char *s2, int nsites, double *result)
     d1 = char2bit[ (int)s1[i] ][1]; d2 = char2bit[ (int)s2[i] ][1]; // degeneracy
     if (!(d1 & 3) || !(d2 & 3)) continue; // one of them is 0 ("-") or 4 ("N")
     degeneracy = (double)(d1 * d2);
-    res_int += ((b1 == b2) ? 1 : 0); // unweighted number of exact matches
-    result[1] += (((b1&b2) > 0)  ? (1./degeneracy) : 0.); // weighted number of compatible sites (partial match e.g. W=TA is compatible with A)
+    if (b1 == b2) {
+      r_int++; // unweighted number of exact matches
+      if ((d1 & d2) == 1) r_acgt++; // unweighted number of ACGT matches
+    }
+    r_partial += (((b1&b2) > 0)  ? 1 : 0); // unweighted number of compatible sites (partial match e.g. W=TA is compatible with A)
+    result[2] += (((b1&b2) > 0)  ? (1./degeneracy) : 0.); // weighted number of compatible sites (partial match e.g. W=TA is compatible with A)
     n_valid++;
   }
-  result[0] = (double)(res_int);
-  result[2] = (double)(n_valid); 
-  return result[0] + result[1]/(double)(1000 * nsites); // result[1] is just to break ties
+  result[0] = (double)(r_int);
+  result[1] = (double)(r_partial);
+//  result[2] = (double)(n_valid); 
+  return (double) (r_acgt); // most strict
+}
+
+void
+biomcmc_count_sequence_acgt (char *s1, int nsites, double *result)
+{
+  int i, d1, cnt[2];
+  if (char2bit[0][0] == 0xffff) initialize_char2bit_table (); /* translation table between ACGT to 1248 */
+  for (i = 0; i < 2; i++) { cnt[i] = 0; result[i] = 0.; }
+  result[2] = 0.; // for the case where nsites=0
+  if (!nsites) return;
+
+  for (i=0; i < nsites; i++) {
+    d1 = char2bit[ (int)s1[i] ][1];
+    if (d1 == 1) cnt[0]++; // ACGT
+    else if (!(d1 & 3)) cnt[1]++; // indel or N 
+  }
+  result[0] = (double)(cnt[0]) / (double)(nsites);  // ACGT
+  result[1] = (double)(nsites - cnt[0] - cnt[1]) / (double)(nsites); // partially ambiguous sites (W, K etc)
+  result[2] = (double)(cnt[1]) / (double)(nsites);  // completely ambiguous (N, -, etc.)
+  return;
 }
 
 void
