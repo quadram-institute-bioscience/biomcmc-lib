@@ -72,14 +72,28 @@ biomcmc_error (const char *template, ...)
 {
   va_list ap;
 
-  fprintf (stderr, "%s error: ", PACKAGE_STRING);
+  //fprintf (stderr, "[%s error] ", PACKAGE_STRING);
+  fprintf (stderr, "%s[ error ]%s ", "\e[1;31m", "\e[0m");
   va_start (ap, template);
   vfprintf (stderr, template, ap);
   va_end (ap);
   fprintf (stderr, "\n");
-  fprintf (stderr, "[note to developers] If you want to debug, set a breakpoint on function biomcmc_error()\n");
+  fprintf (stderr, "[note to developers] If you want to debug me, set a breakpoint on function biomcmc_error()\n");
   fflush (stderr);
   exit (EXIT_FAILURE);
+}
+
+void
+biomcmc_warning (const char *template, ...)
+{
+  va_list ap;
+
+  fprintf (stderr, "%s[warning]%s ", "\e[0;31m", "\e[0m");
+  va_start (ap, template);
+  vfprintf (stderr, template, ap);
+  va_end (ap);
+  fprintf (stderr, "\n");
+  return;
 }
 
 int

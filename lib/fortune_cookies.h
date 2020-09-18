@@ -28,5 +28,4 @@ extern char *biomcmc_fortune_bofh[];
 void biomcmc_fprintf_fortune (FILE *stream);
 void biomcmc_fprintf_bofh (FILE *stream);
 void biomcmc_fprintf_colour (FILE *stream, int regular, int colour, const char *message, const char *normaltext, ...);
-void biomcmc_warning (const char *template, ...);
 #endif

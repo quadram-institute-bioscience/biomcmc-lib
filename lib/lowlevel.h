@@ -114,6 +114,8 @@ FILE *biomcmc_fopen (const char *path, const char *mode);
  * \result exits program */
 void biomcmc_error (const char *template, ...);
 
+void biomcmc_warning (const char *template, ...);
+
 /*! \brief Comparison between integers, doubles, etc. used by qsort() */
 int compare_int_increasing (const void *a, const void *b);
 int compare_int_decreasing (const void *a, const void *b);

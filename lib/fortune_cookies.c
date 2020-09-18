@@ -770,11 +770,3 @@ biomcmc_fprintf_colour (FILE *stream, int regular, int colour, const char *messa
   vfprintf (stream, normaltext, ap);
   va_end (ap);
 }
-
-void
-biomcmc_warning (const char *template, ...)
-{
-  char warnhead[128];
-  sprintf (warnhead, "[%s warning] ", PACKAGE_STRING);
-  biomcmc_fprintf_colour (stderr, 0, 1, warnhead, template); 
-}

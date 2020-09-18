@@ -784,7 +784,9 @@ biomcmc_pairwise_score_matches (char *s1, char *s2, int nsites, double *result)
   }
   result[0] = (double)(r_int);
   result[1] = (double)(r_partial);
-//  result[2] = (double)(n_valid); 
+
+  if (result[1] < 1) for (i=0;i<nsites;i++) printf ("%d (%c) %d (%c) : %d\n",char2bit[ (int)s1[i] ][0], s1[i], char2bit[ (int)s2[i] ][0], s2[i], char2bit[ (int)s1[i] ][0] & char2bit[ (int)s2[i] ][0]);
+  //  result[2] = (double)(n_valid); 
   return (double) (r_acgt); // most strict
 }
 
