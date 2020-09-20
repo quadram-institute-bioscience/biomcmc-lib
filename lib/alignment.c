@@ -759,14 +759,14 @@ biomcmc_calc_pairwise_distance_K2P (char *s1, char *s2, int *w, int nsites, doub
   else result[0] = result[1] = 1.;
 }
 
-double  // simplified version just to find number of matches considering ambiguous sites
+void  // simplified version just to find number of matches considering ambiguous sites
 biomcmc_pairwise_score_matches (char *s1, char *s2, int nsites, double *result)
 {
-  int i, b1, b2, d1, d2, r_acgt = 0, r_int = 0, r_partial = 0, n_valid = 0;
-  double degeneracy = 0.; 
+  int i, b1, b2, d1, d2, r_acgt = 0, r_exact = 0, r_partial = 0, n_valid = 0;
+  double wcompat = 0., degeneracy = 0.; 
   if (char2bit[0][0] == 0xffff) initialize_char2bit_table (); /* translation table between ACGT to 1248 */
-  for (i = 0; i < 3; i++) result[i] = 0.;
-  if (!nsites) return 0.; 
+  for (i = 0; i < 5; i++) *(result + i) = 0.;
+  if (!nsites) return; 
 
   for (i=0; i < nsites; i++) {
     /* integer (bit) representation of site states */
@@ -775,19 +775,28 @@ biomcmc_pairwise_score_matches (char *s1, char *s2, int nsites, double *result)
     if (!(d1 & 3) || !(d2 & 3)) continue; // one of them is 0 ("-") or 4 ("N")
     degeneracy = (double)(d1 * d2);
     if (b1 == b2) {
-      r_int++; // unweighted number of exact matches
+      r_exact++; // unweighted number of exact matches
       if ((d1 & d2) == 1) r_acgt++; // unweighted number of ACGT matches
     }
     r_partial += (((b1&b2) > 0)  ? 1 : 0); // unweighted number of compatible sites (partial match e.g. W=TA is compatible with A)
-    result[2] += (((b1&b2) > 0)  ? (1./degeneracy) : 0.); // weighted number of compatible sites (partial match e.g. W=TA is compatible with A)
+    wcompat += (((b1&b2) > 0)  ? (1./degeneracy) : 0.); // weighted number of compatible sites (partial match e.g. W=TA is compatible with A)
     n_valid++;
   }
-  result[0] = (double)(r_int);
-  result[1] = (double)(r_partial);
+  /* from more strict to more lax */
+  *(result) = (double)(r_acgt);  // ACGT only matches
+  *(result+1) = (double)(r_exact); // text matches (B<->B etc) 
+  *(result+2) = wcompat; // weighted compatible ( W<->W not a 100% match but 25%)  
+  *(result+3) = (double)(r_partial); // compatible (e.g. W<->A)
+  *(result+4) = (double)(n_valid); 
 
-  if (result[1] < 1) for (i=0;i<nsites;i++) printf ("%d (%c) %d (%c) : %d\n",char2bit[ (int)s1[i] ][0], s1[i], char2bit[ (int)s2[i] ][0], s2[i], char2bit[ (int)s1[i] ][0] & char2bit[ (int)s2[i] ][0]);
-  //  result[2] = (double)(n_valid); 
-  return (double) (r_acgt); // most strict
+//  if ((*result)[1] < 1) for (i=0;i<nsites;i++) printf ("%d (%c) %d (%c) : %d\n",char2bit[ (int)s1[i] ][0], s1[i],
+//                                                       char2bit[ (int)s2[i] ][0], s2[i], char2bit[ (int)s1[i] ][0] & char2bit[ (int)s2[i] ][0]);
+  if (*(result+1) < 1) { 
+    for (i=0;i<5;i++) printf ("%lf ", *(result+i));
+    printf ("    %d (%lf) %d  %d", r_acgt, (double)(r_acgt), r_exact, n_valid); 
+    printf ("DBG::\n"); 
+  }
+ return; 
 }
 
 void
