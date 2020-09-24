@@ -218,7 +218,8 @@ read_gff3_from_file (const char *gff3filename)
     if (nonempty_gff3_line (line)) {
       if ((stage == 0) && (strcasestr (line, "##gff-version") != NULL)) {stage = 1; continue; } // obligatory first line to keep going on
 
-      else if (stage == 1) { /* initial pragmas */
+      //else if (stage == 1) { NCBI/refseq do not honour obligation above; some GFF3 do not have gff-version...
+      else if (stage < 2) { /* initial pragmas */
         if ((delim = strcasestr (line, "##sequence-region")) != NULL) {
           sscanf (delim, "##sequence-region %s %d %d", tmpc, &i1, &i2); i2--; 
           char_vector_add_string (seq_region, tmpc); // add chromosome/contig name;
