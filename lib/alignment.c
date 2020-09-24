@@ -778,8 +778,8 @@ biomcmc_pairwise_score_matches (char *s1, char *s2, int nsites, double *result)
       r_exact++; // unweighted number of exact matches
       if ((d1 & d2) == 1) r_acgt++; // unweighted number of ACGT matches
     }
+    wcompat += (((b1&b2) > 0)  ? (1./degeneracy) : 0.); // weighted number of compatible sites (partial match e.g. W=TA is 50% compatible with A)
     r_partial += (((b1&b2) > 0)  ? 1 : 0); // unweighted number of compatible sites (partial match e.g. W=TA is compatible with A)
-    wcompat += (((b1&b2) > 0)  ? (1./degeneracy) : 0.); // weighted number of compatible sites (partial match e.g. W=TA is compatible with A)
     n_valid++;
   }
   /* from more strict to more lax */

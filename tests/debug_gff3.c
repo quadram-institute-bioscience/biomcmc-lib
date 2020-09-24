@@ -25,7 +25,7 @@ int main(int argc, char **argv)
 
   for (i = 0; i < g3->seqname->nstrings; i++) 
     for (j = 0; j < (int) g3->sequence->nchars[i]; j += 100) {
-      hit = find_fields_within_position (g3, g3->seqname->string[i], j, &n);
+      hit = find_gff3_fields_within_position (g3, g3->seqname->string[i], j, &n);
       for (k = 0; k < n; k++) printf ("genome:%4d j:%5d start:%5d end:%5d attr:%16s\n",i, j, hit[k].start, hit[k].end, hit[k].attr_id.str);
       if (hit) free (hit); 
     }

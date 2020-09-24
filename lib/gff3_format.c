@@ -17,11 +17,12 @@
 
 #include "gff3_format.h"
 
+
 int compare_gff3_fields_by_hash (const void *a, const void *b);
 int compare_gff3_fields_by_id (const void *a, const void *b);
+void free_strings_gff3_fields (gff3_fields gff);
 
 gff3_fields gff3_fields_from_char_line (char *line);
-void free_strings_gff3_fields (gff3_fields gff);
 void get_gff3_string_from_field (const char *start, const char *end, gff3_string *string);
 uint64_t return_gff3_hashed_string (const char *str, size_t len);
 void get_gff3_attributes_from_field (char *start, char *end, gff3_string *attr_id, gff3_string *attr_parent);
@@ -57,12 +58,13 @@ int
 compare_gff3_fields_by_id (const void *a, const void *b)
 {
   int result = ((gff3_fields*)a)->seqid.id - ((gff3_fields*)b)->seqid.id; 
-  if (result) return result;// genomes names in increasing order ("id" comes from char_vector)
-  result = ((gff3_fields*)a)->type.id - ((gff3_fields*)b)->type.id;
-  if (result) return result;// order of feature types (genes, CDS, etc.) 
+  if (result) return result; // genomes names in increasing order ("id" comes from char_vector)
   result = ((gff3_fields*)a)->start - ((gff3_fields*)b)->start;
   if (result) return result; // main sorting, by genome location
-  return ((gff3_fields*)a)->end - ((gff3_fields*)b)->end; // if same type and start, try to sort by end
+  result = ((gff3_fields*)a)->end - ((gff3_fields*)b)->end; // if same type and start, try to sort by end
+  if (result) return result; 
+  result = ((gff3_fields*)a)->type.id -((gff3_fields*)b)->type.id;
+  return result; // order of feature types (genes, CDS, etc.) have lowest priority (only if features have same start and end) 
 }
 
 static gff3_fields NULL_gff3_fields = {.start = -0xfdfd}; // equivalent to NULL; structs can't be compared (only elements) 
@@ -72,6 +74,12 @@ gff3_fields_is_valid (gff3_fields gff)
 {
   if (gff.start == NULL_gff3_fields.start) return false;
   return true;
+}
+
+gff3_fields
+return_null_gff3_field (void)
+{
+  return NULL_gff3_fields;
 }
 
 gff3_fields
@@ -300,7 +308,10 @@ del_gff3_t (gff3_t g3)
   del_char_vector (g3->sequence);
   del_char_vector (g3->seqname);
   del_hashtable   (g3->seqname_hash);
-  if (g3->f0) free   (g3->f0);
+  if (g3->f0) { // only place where strings are dealloced 
+    for (int i = 0; i < g3->n_f0; i++) free_strings_gff3_fields (g3->f0[i]);
+    free   (g3->f0);
+  }
   if (g3->cds) free  (g3->cds);
   if (g3->gene) free (g3->gene);
   if (g3->seq_length) free (g3->seq_length);
@@ -396,7 +407,6 @@ gff3_finalise_OLD (gff3_t g3, char_vector seq_region)
   }
   /* 4. use order from fields seqids (sequence-region sorted) on fasta */  
   if (seq_region->nstrings < g3->seqname->nstrings) {
-    printf ("DBG::trimming %6d %6d\n", g3->seqname->nstrings, seq_region->nstrings);
     char_vector_reorder_strings_from_external_order (g3->seqname,  order);
     char_vector_reorder_strings_from_external_order (g3->sequence, order);
     char_vector_reduce_to_trimmed_size (g3->seqname,  seq_region->nstrings);	
@@ -431,41 +441,54 @@ merge_seqid_from_fields_and_pragma (gff3_t g3, char_vector *seq_region)
     g3->f0[i].seqid.id = hid; // hid should be valid (i.e. not negative) but downstream functions might want to check
   }
 
-  /* 4. now that feature seqid fields have id, sort whole table */
+  /* 4. now that feature seqid fields have id, sort whole table by genome/contig id and then by location (if you need just one type (CDs, genes) pls 
+   * use pointers set by feature_type_pointer() since here they have lowest priority) */
   qsort (g3->f0, g3->n_f0, sizeof (gff3_fields), compare_gff3_fields_by_id);
   return;
 }
 
 void
 give_feature_type_id (gff3_t g3)
-{
+{ // http://www.sequenceontology.org/browser/obob.cgi?rm=term_list&release=current_svn&obo_query=$$
   for (int i = 0; i < g3->n_f0; i++) {
     if ((!strcasecmp (g3->f0[i].type.str, "cds")) || (!strcasecmp (g3->f0[i].type.str, "SO:0000316"))) {
-      g3->f0[i].type.id = 0;
+      g3->f0[i].type.id = GFF3_TYPE_cds;
     }
     else if ((!strcasecmp (g3->f0[i].type.str, "gene")) || (!strcasecmp (g3->f0[i].type.str, "SO:0000704"))) {
-      g3->f0[i].type.id = 1;
+      g3->f0[i].type.id = GFF3_TYPE_gene;
     }
     else if ((!strcasecmp (g3->f0[i].type.str, "mRNA")) || (!strcasecmp (g3->f0[i].type.str, "SO:0000234"))) {
-      g3->f0[i].type.id = 2;
+      g3->f0[i].type.id = GFF3_TYPE_mRNA;
     }
     else if ((!strcasecmp (g3->f0[i].type.str, "exon")) || (!strcasecmp (g3->f0[i].type.str, "SO:0000147"))) {
-      g3->f0[i].type.id = 3;
+      g3->f0[i].type.id = GFF3_TYPE_exon;
     }
     else if ((!strcasecmp (g3->f0[i].type.str, "polyA_sequence")) || (!strcasecmp (g3->f0[i].type.str, "SO:0000610"))) {
-      g3->f0[i].type.id = 4;
+      g3->f0[i].type.id = GFF3_TYPE_polyA_sequence;
     }
     else if ((!strcasecmp (g3->f0[i].type.str, "polyA_site")) || (!strcasecmp (g3->f0[i].type.str, "SO:0000553"))) {
-      g3->f0[i].type.id = 5;
+      g3->f0[i].type.id = GFF3_TYPE_polyA_site;
     }
     else if ((!strcasecmp (g3->f0[i].type.str, "intron")) || (!strcasecmp (g3->f0[i].type.str, "SO:0000188"))) {
-      g3->f0[i].type.id = 6;
+      g3->f0[i].type.id = GFF3_TYPE_intron;
     }
     else if ((!strcasecmp (g3->f0[i].type.str, "five_prime_UTR")) || (!strcasecmp (g3->f0[i].type.str, "SO:0000204"))) {
-      g3->f0[i].type.id = 7;
+      g3->f0[i].type.id = GFF3_TYPE_five_prime_UTR;
     }
     else if ((!strcasecmp (g3->f0[i].type.str, "three_prime_UTR")) || (!strcasecmp (g3->f0[i].type.str, "SO:0000205"))) {
-      g3->f0[i].type.id = 8;
+      g3->f0[i].type.id = GFF3_TYPE_three_prime_UTR;
+    }
+    else if ((!strcasecmp (g3->f0[i].type.str, "tRNA")) || (!strcasecmp (g3->f0[i].type.str, "SO:0000253"))) {
+      g3->f0[i].type.id = GFF3_TYPE_tRNA;
+    }
+    else if ((!strcasecmp (g3->f0[i].type.str, "rRNA")) || (!strcasecmp (g3->f0[i].type.str, "SO:0000252"))) {
+      g3->f0[i].type.id = GFF3_TYPE_rRNA;
+    }
+    else if ((!strcasecmp (g3->f0[i].type.str, "tmRNA")) || (!strcasecmp (g3->f0[i].type.str, "SO:0000584"))) {
+      g3->f0[i].type.id = GFF3_TYPE_tmRNA;
+    }
+    else if (!strcasecmp (g3->f0[i].type.str, "region")) { // simply means 'whole genome/chromosome/contig', not useful generally 
+      g3->f0[i].type.id = GFF3_TYPE_region;
     }
     else g3->f0[i].type.id = 0xffff;
   }
@@ -485,7 +508,7 @@ generate_feature_type_pointers (gff3_t g3)
       g3->f0[i].attr_id.id = g3->n_cds; // experimental (not used); several CDS (rows) can have same ID in gff3
       g3->cds[g3->n_cds++] = &(g3->f0[i]);
     }
-    else  if (g3->f0[i].type.id == 1) {
+    else if (g3->f0[i].type.id == 1) {
       g3->f0[i].attr_id.id = g3->n_gene; // experimental (not used yet)
       g3->cds[g3->n_gene++] = &(g3->f0[i]);
     }
@@ -605,7 +628,7 @@ save_fasta_from_gff3 (gff3_t g3, char *fname, bool overwrite)
 }
 
 gff3_fields *
-find_fields_within_position (gff3_t g3, const char *ref_genome, int location, int *n)
+find_gff3_fields_within_position (gff3_t g3, const char *ref_genome, int location, int *n)
 {
   gff3_fields *fid;
   int i, start_genome, end_genome, first, mid, last; // start and end are positions in f0[] vector of all gff3_fields_t
@@ -613,9 +636,9 @@ find_fields_within_position (gff3_t g3, const char *ref_genome, int location, in
   *n = -1; // return value if genome does not exist (i.e. error)
   i = lookup_hashtable (g3->seqname_hash, ref_genome);
   if (i < 0) { biomcmc_warning ("no reference \"%s\" found in GFF3 file %s\n", ref_genome, g3->file_basename); return NULL; }
-  start_genome = g3->seq_f0_idx[i]; 
+  start_genome = g3->seq_f0_idx[i]; //seq_f0_idx is a list of locations of first field from genome  
   if (i < g3->seqname->nstrings - 1) end_genome = g3->seq_f0_idx[i + 1] - 1;
-  else                               end_genome = g3->n_f0 - 1; 
+  else                               end_genome = g3->n_f0 - 1; // n_f0 is an extra value with total number of fields
 
   *n = 0; // return value if no feature found (position before first or after last feature) 
   if ((g3->f0[start_genome].start > location) || (g3->f0[end_genome].end < location)) return NULL;
@@ -626,11 +649,55 @@ find_fields_within_position (gff3_t g3, const char *ref_genome, int location, in
   while (first <= last) {
     mid = first + (last - first)/2;
     if (location < g3->f0[mid].start) last = mid - 1; // update binary search and move
-    else {
-      first = mid + 1; // update binary search for next iter
-      if (location <= g3->f0[mid].end) fid[(*n)++] = g3->f0[mid];
-    }
-   }
+    else { // location >= feature start ; now we collect all those also <= feature end
+      if (location <= g3->f0[mid].end) { // start <= location <= end; we may have more than one 
+        int j;
+        for (j = mid; (j >= first) && (location >= g3->f0[j].start) && (location <= g3->f0[j].end); j--)
+          if (g3->f0[j].type.id != GFF3_TYPE_region) fid[(*n)++] = g3->f0[j]; // add unless is "region" (i.e. whole genome)
+        for (j = mid+1; (j <= last) && (location >= g3->f0[j].start) && (location <= g3->f0[j].end); j++)
+          if (g3->f0[j].type.id != GFF3_TYPE_region) fid[(*n)++] = g3->f0[j];
+        first = last + 1;  // getoutahere
+      }
+      else first = mid + 1; // update binary search for next iter (in case location is after end of f0[mid]
+    } // else (i.e. if location >= feature.start)
+  } // while in binary search
+
+  if (*n) fid = (gff3_fields*) biomcmc_realloc ((gff3_fields*) fid, (*n) * sizeof (gff3_fields));
+  else if (fid) { free (fid); fid = NULL; }
+  return fid;
+}
+
+gff3_fields *
+find_gff3_fields_within_position_all_genomes (gff3_t g3, int location, int *n)
+{
+  gff3_fields *fid;
+  int i, start_genome, end_genome, first, mid, last; // start and end are positions in f0[] vector of all gff3_fields_t
+
+  *n = 0; // return value if no feature found (position before first or after last feature) 
+  fid = (gff3_fields*) biomcmc_malloc (g3->n_f0 * sizeof (gff3_fields));// overestimate  
+  for (i = 0; i < g3->seqname->nstrings; i++) { // overall genomes/contigs/chromosomes
+    start_genome = g3->seq_f0_idx[i]; 
+    if (i < g3->seqname->nstrings - 1) end_genome = g3->seq_f0_idx[i + 1] - 1;
+    else                               end_genome = g3->n_f0 - 1; 
+    if ((g3->f0[start_genome].start > location) || (g3->f0[end_genome].end < location)) continue;
+
+    first = start_genome; last = end_genome; 
+    while (first <= last) {
+      mid = first + (last - first)/2;
+      if (location < g3->f0[mid].start) last = mid - 1; // update binary search and move
+      else { // location >= feature start ; now we collect all those also <= feature end
+        if (location <= g3->f0[mid].end) { // start <= location <= end; we may have more than one 
+          int j;
+          for (j = mid; (j >= first) && (location >= g3->f0[j].start) && (location <= g3->f0[j].end); j--)
+            if (g3->f0[j].type.id != GFF3_TYPE_region) fid[(*n)++] = g3->f0[j]; // add unless is "region" (i.e. whole genome)
+          for (j = mid+1; (j <= last) && (location >= g3->f0[j].start) && (location <= g3->f0[j].end); j++)
+            if (g3->f0[j].type.id != GFF3_TYPE_region) fid[(*n)++] = g3->f0[j];
+          first = last + 1;  // getoutahere
+        }
+        else first = mid + 1; // update binary search for next iter (in case location is after end of f0[mid]
+      } // else (i.e. if location >= feature.start)
+    } // while in binary search
+  } // for all genomes (g3->seqname)
 
   if (*n) fid = (gff3_fields*) biomcmc_realloc ((gff3_fields*) fid, (*n) * sizeof (gff3_fields));
   else if (fid) { free (fid); fid = NULL; }

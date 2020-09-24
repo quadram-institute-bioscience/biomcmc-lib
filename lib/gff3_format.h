@@ -33,6 +33,11 @@
 
 typedef struct gff3_file_struct* gff3_t;
 
+enum {GFF3_TYPE_cds, GFF3_TYPE_gene, GFF3_TYPE_mRNA, GFF3_TYPE_exon, GFF3_TYPE_polyA_sequence, 
+  GFF3_TYPE_polyA_site, GFF3_TYPE_intron, GFF3_TYPE_five_prime_UTR, GFF3_TYPE_three_prime_UTR, 
+  GFF3_TYPE_tRNA, GFF3_TYPE_rRNA, GFF3_TYPE_tmRNA, GFF3_TYPE_region};
+
+
 typedef struct
 {
   char *str;
@@ -52,18 +57,22 @@ struct gff3_file_struct
   gff3_fields *f0, **cds, **gene; // cds and gene are pointers
   int n_f0, n_cds, n_gene;
   char *file_basename;  /*! \brief filename without suffix (file extension) */
-  char_vector sequence; /*! \brief from fasta info at end of file; not mandatory */
-  char_vector seqname;  /*! \brief from fasta info at end of file; not mandatory */
+  char_vector sequence; /*! \brief from fasta info at end of file; fasta file not mandatory */
+  char_vector seqname;  /*! \brief names of genomes/chromosomes/contigs; may come from optional fasta info at end of file or from fields */
   hashtable seqname_hash; /*! \brief index from seqname, seq_region, or f0.seqid, in order of preference */
   int *seq_length, *seq_f0_idx; /* \brief same vector size as seqname, has length of each contig and first position in f0[] */
   int ref_counter;
 };
+
+bool gff3_fields_is_valid (gff3_fields gff);
+gff3_fields return_null_gff3_field (void);
 
 gff3_t read_gff3_from_file (const char *gff3filename);
 void del_gff3_t (gff3_t g3);
 gff3_fields find_gff3_field_from_genomic_location (gff3_t g3, const char *seqid, int location); // main function for tatajuba
 void add_fasta_to_gff3 (gff3_t g3, char_vector name, char_vector seq);
 char * save_fasta_from_gff3 (gff3_t g3, char *fname, bool overwrite);
-gff3_fields *find_fields_within_position (gff3_t g3, const char *ref_genome, int location, int *n);
+gff3_fields *find_gff3_fields_within_position (gff3_t g3, const char *ref_genome, int location, int *n);
+gff3_fields *find_gff3_fields_within_position_all_genomes (gff3_t g3, int location, int *n);
 
 #endif
