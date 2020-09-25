@@ -218,7 +218,7 @@ read_gff3_from_file (const char *gff3filename)
     if (nonempty_gff3_line (line)) {
       if ((stage == 0) && (strcasestr (line, "##gff-version") != NULL)) {stage = 1; continue; } // obligatory first line to keep going on
 
-      //else if (stage == 1) { NCBI/refseq do not honour obligation above; some GFF3 do not have gff-version...
+      //else if (stage == 1) { NCBI/refseq does not honour obligation above; some GFF3 do not have gff-version...
       else if (stage < 2) { /* initial pragmas */
         if ((delim = strcasestr (line, "##sequence-region")) != NULL) {
           sscanf (delim, "##sequence-region %s %d %d", tmpc, &i1, &i2); i2--; 
@@ -238,6 +238,7 @@ read_gff3_from_file (const char *gff3filename)
 
       else if (stage == 2) { /* regular fields */
         if (strcasestr (line, "##FASTA")) { stage = 3; continue; }
+        if (strcasestr (line, "##")) continue; // do nothing atm
         gfield = gff3_fields_from_char_line (line);
         if (gff3_fields_is_valid (gfield)) { add_fields_to_gff3_t (g3, gfield); continue; }
       }
