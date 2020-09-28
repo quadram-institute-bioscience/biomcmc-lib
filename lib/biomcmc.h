@@ -40,7 +40,7 @@ extern "C" {
 
 // extra libs not used yet: edlib hll
 #ifdef THESE_ARE_COMMENTS
-#include "lowlevel.h"            // called by char_vector, argtable, bipartition, prob_distribution, quickselect_quantile 
+#include "lowlevel.h"            // called by file_compression, argtable, bipartition, prob_distribution, quickselect_quantile 
 #include "char_vector.h"         // called by hashtable, random_number, nexus_common, empirical_frequency
 #include "hashfunction.h"        // called by hashtable 
 #include "hashtable.h"           // called by random_number_gen 
@@ -61,6 +61,7 @@ extern "C" {
 #include "prob_distribution.h"   // called by topology_randomise, char_vector
 #include "read_newick_trees.h"   // called by newick_space
 #include "newick_space.h"        // called by topology_space
+#include "file_compression.h"    // called by char_vector
 #endif // of THESE_ARE_COMMENTS
 
 #endif //define biomcmc

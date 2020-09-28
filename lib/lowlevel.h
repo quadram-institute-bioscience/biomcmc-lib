@@ -40,9 +40,6 @@
 //#include <sys/stat.h>     // suggested by goptics (gpu), but don't seem needed
 #include <libgen.h> /* standard XPG basename() - the one provided by string.h is a GNU extension, fails on macOSX*/
 
-#ifdef HAVE_ZLIB
-#include <zlib.h>
-#endif
 #ifdef _OPENMP
 #include <omp.h>         /* OpenMP parallel threading library when available */
 #endif
@@ -98,15 +95,6 @@ void *biomcmc_malloc (size_t size);
  * \return pointer to newly allocated memory */
 void *biomcmc_realloc (void *ptr, size_t size);
 
-/*! \brief Memory-safe fopen() function.
- *
- * Opens the file whose name is the string pointed to by path and associates a stream with it. An error message is 
- * thrown in case of failure.
- * \param[in] path file name 
- * \param[in] mode opening mode ("r" for reading, "w" for writing, etc)
- * \result pointer to file stream */
-FILE *biomcmc_fopen (const char *path, const char *mode);
-
 /*! \brief Prints error message and quits program.
  *
  * similar to fprintf (stderr, ...), but exits after printing the message
@@ -123,22 +111,6 @@ int compare_uint64_increasing (const void *a, const void *b);
 int compare_uint64_decreasing (const void *a, const void *b);
 int compare_double_increasing (const void *a, const void *b);
 int compare_double_decreasing (const void *a, const void *b);
-
-/*! \brief read file line-by-line (like homonymous function from GNU C library)
- *
- * This implementation is originally from the CvsGui project (http://www.wincvs.org/). The explanation from the 
- * original file adapted to our system  follows:
- * \verbatim 
-   Read up to (and including) a newline ("\n") from STREAM into *LINEPTR and null-terminate it. *LINEPTR is a pointer 
-   returned from malloc (or NULL), pointing to *N characters of space.  It is realloc'd as necessary.  Return the 
-   number of characters read (not including the null terminator), or -1 on error or EOF. \endverbatim */
-int biomcmc_getline (char **lineptr, size_t *n, FILE *stream);
-
-#ifdef HAVE_ZLIB
-gzFile biomcmc_gzopen (const char *path, const char *mode);
-/*! \beief zlib library version of getline */
-int biomcmc_getline_gz (char **lineptr, size_t *n, gzFile zstream);
-#endif
 
 /*! \brief edit distance between two sequences (slow), with option to allow one of sequences to terminate soon (o.w. global cost from end to end) */
 uint32_t biomcmc_levenshtein_distance (const char *s1, uint32_t n1, const char *s2, uint32_t n2, uint32_t cost_sub, uint32_t cost_indel, bool skip_borders);

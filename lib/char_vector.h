@@ -18,7 +18,7 @@
 #ifndef _biomcmc_char_vector_h_
 #define _biomcmc_char_vector_h_
 
-#include "lowlevel.h"
+#include "file_compression.h"
 #include "prob_distribution.h"
 
 typedef struct char_vector_struct* char_vector;

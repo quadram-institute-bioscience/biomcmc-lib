@@ -36,8 +36,12 @@ AC_SUBST(OPENMP_CPPFLAGS)
 dnl notice that default if-not-found action is to exist with error
 PKG_CHECK_MODULES([CHECK], [check >= 0.9.10]) # unit tests
 PKG_CHECK_MODULES([ZLIB], [zlib], 
-                  AC_DEFINE([HAVE_ZLIB],[1],[io compression library found]),  
-                  AC_DEFINE([HAVE_ZLIB],[0],[compression library not found])
+                  AC_DEFINE([HAVE_ZLIB],[1],[io gz compression library found]),  
+                  AC_DEFINE([HAVE_ZLIB],[0],[gz compression library not found])
+                  )
+PKG_CHECK_MODULES([LZMA], [liblzma], 
+                  AC_DEFINE([HAVE_LIBLZMA],[1],[io xz compression library found]),  
+                  AC_DEFINE([HAVE_LIBLZMA],[0],[xz compression library not found])
                   )
 
 dnl check for the math library

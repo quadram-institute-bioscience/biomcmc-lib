@@ -25,6 +25,8 @@ This library is usually not installed directly, but as a submodule of another pr
 It includes, however, the `makefile.am` and `configure.ac` for autotools, and it provides unit tests from the
 [libcheck](https://github.com/libcheck/check) library as well as custom checks. 
 
+For full functionality will need then `openmp`, `libcheck`, `zlib` and `liblzma`.
+
 Notice that two libraries are installed, `libbiomcmc.la` and `libbiomcmc_static.la` (with `.a` and `.so` versions). 
 The first (`libbiomcmc.la`) is installed with `make install` and is available "globally" or wherever you tell it with
 `--prefix`.

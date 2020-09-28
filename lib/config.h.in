@@ -9,6 +9,9 @@
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 
+/* xz compression library not found */
+#undef HAVE_LIBLZMA
+
 /* Define to 1 if you have the `m' library (-lm). */
 #undef HAVE_LIBM
 
@@ -42,7 +45,7 @@
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
 
-/* compression library not found */
+/* gz compression library not found */
 #undef HAVE_ZLIB
 
 /* Define to the sub-directory where libtool stores uninstalled libraries. */
