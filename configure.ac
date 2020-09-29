@@ -40,9 +40,14 @@ PKG_CHECK_MODULES([ZLIB], [zlib],
                   AC_DEFINE([HAVE_ZLIB],[0],[gz compression library not found])
                   )
 PKG_CHECK_MODULES([LZMA], [liblzma], 
-                  AC_DEFINE([HAVE_LIBLZMA],[1],[io xz compression library found]),  
-                  AC_DEFINE([HAVE_LIBLZMA],[0],[xz compression library not found])
+                  AC_DEFINE([HAVE_LZMA],[1],[io xz compression library found]),  
+                  AC_DEFINE([HAVE_LZMA],[0],[xz compression library not found])
                   )
+AC_CHECK_HEADER(bzlib.h, 
+                  AC_DEFINE([HAVE_BZIP2],[1],[io bz2 compression library found]),  
+                  AC_DEFINE([HAVE_BZIP2],[0],[bz2 compression library not found])
+                  )
+AC_CHECK_LIB([bz2],[BZ2_bzlibVersion])
 
 dnl check for the math library
 AC_CHECK_LIB([m],[main])

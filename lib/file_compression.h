@@ -23,34 +23,14 @@
 #ifdef HAVE_ZLIB
 #include <zlib.h>
 #endif
-#ifdef HAVE_LIBLZMA
+#ifdef HAVE_LZMA
 #include <lzma.h>
 #endif
-#ifdef HAVE_LIBBZIP2
+#ifdef HAVE_BZIP2
 #include <bzlib.h>
 #endif
 
 typedef struct file_compress_struct* file_compress_t;
-
-struct file_compress_struct
-{
-  int8_t format;
-#ifdef HAVE_LZMA
-  xz_file_t *xz;
-#endif
-#ifdef HAVE_LIBBZIP2
-  bz2_file_t *bz2;
-#endif
-#ifdef HAVE_ZLIB
-  gzFile gz;
-#endif
-  FILE *raw;
-};
-
-// STOPHERE
-file_compress_t biomcmc_open_compress (const char *path, const char *mode); // new_file_compress_t()
-int biomcmc_getline_compress (char **lineptr, size_t *n, file_compress_t fc);
-void biomcmc_close_compress (file_compress_t fc); // del_file_compress_t()
 
 /* lower level function (to directly access a specific compression library) */
 #ifdef HAVE_ZLIB
@@ -59,7 +39,7 @@ gzFile biomcmc_gzopen (const char *path, const char *mode);
 int biomcmc_getline_gz (char **lineptr, size_t *n, gzFile zstream);
 #endif
 
-#ifdef HAVE_LIBLZMA
+#ifdef HAVE_LZMA
 /* Internal structure to represent an uncompressed file. */
 typedef struct {
   FILE *fp;
@@ -77,16 +57,16 @@ size_t biomcmc_xz_read (xz_file_t *f);
 size_t biomcmc_xz_write (xz_file_t *f, char *cbuf, size_t len);
 int biomcmc_xz_getc (xz_file_t *f);
 int biomcmc_getline_xz (char **lineptr, size_t *n, xz_file_t *f);
-#endif // HAVE_LIBLZMA
+#endif // HAVE_LZMA
 
-#ifdef HAVE_LIBBZIP2
+#ifdef HAVE_BZIP2
 // https://www.sourceware.org/bzip2/manual/manual.html#libprog
 #include <bzlib.h>
 typedef struct {
   BZFILE *fp;
   char *path, mode;
   uint8_t *readbuf;
-  size_t buffer_size, getc_avail, getc_pos;
+  int buffer_size, getc_avail, getc_pos; // cannot be size_t since bz2 returns negative values 
 } bz2_file_t;
 
 bz2_file_t * biomcmc_bz2_open (const char *path, const char *mode, size_t buffer_size);
@@ -94,7 +74,7 @@ void biomcmc_bz2_close (bz2_file_t *f);
 size_t biomcmc_bz2_read (bz2_file_t *f);
 int biomcmc_bz2_getc (bz2_file_t *f);
 int biomcmc_getline_bz2 (char **lineptr, size_t *n, bz2_file_t *f);
-#endif // HAVE_LIBBZIP2
+#endif // HAVE_BZIP2
 
 /*! \brief Memory-safe fopen() function.
  *
@@ -114,5 +94,24 @@ FILE *biomcmc_fopen (const char *path, const char *mode);
    returned from malloc (or NULL), pointing to *N characters of space.  It is realloc'd as necessary.  Return the 
    number of characters read (not including the null terminator), or -1 on error or EOF. \endverbatim */
 int biomcmc_getline (char **lineptr, size_t *n, FILE *stream);
+
+struct file_compress_struct
+{
+  int8_t format;
+#ifdef HAVE_LZMA
+  xz_file_t *xz;
+#endif
+#ifdef HAVE_BZIP2
+  bz2_file_t *bz2;
+#endif
+#ifdef HAVE_ZLIB
+  gzFile gz;
+#endif
+  FILE *raw;
+};
+
+file_compress_t biomcmc_open_compress (const char *path, const char *mode); // new_file_compress_t()
+int biomcmc_getline_compress (char **lineptr, size_t *n, file_compress_t fc);
+void biomcmc_close_compress (file_compress_t fc); // del_file_compress_t()
 
 #endif

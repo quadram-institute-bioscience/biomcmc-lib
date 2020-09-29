@@ -1,3 +1,4 @@
+# while lzma and zlib are set via pkg-config, bz2 is set via AC_CHECK (thus @AM_@)
 AM_CPPFLAGS = $(GTKDEPS_CFLAGS)  @OPENMP_CPPFLAGS@ @ZLIB_CFLAGS@ @LZMA_CFLAGS@
 AM_CFLAGS = @AM_CFLAGS@  @OPENMP_CFLAGS@ @ZLIB_CFLAGS@ @LZMA_CFLAGS@
 
@@ -27,7 +28,7 @@ lib_LTLIBRARIES = libbiomcmc.la  # libedlib.la # libtools
 libbiomcmc_la_SOURCES = $(common_headers) config.h
 libbiomcmc_la_CPPFLAGS = $(AM_CPPFLAGS)
 libbiomcmc_la_CFLAGS = $(AM_CFLAGS) 
-libbiomcmc_la_LIBADD = $(GTKDEPS_LIBS) $(AM_LDFLAGS) libbiomcmc_static.la @ZLIB_LIBS@  @LZMA_LIBS@ 
+libbiomcmc_la_LIBADD = $(GTKDEPS_LIBS) $(AM_LDFLAGS) libbiomcmc_static.la @ZLIB_LIBS@  @LZMA_LIBS@
 
 noinst_LTLIBRARIES = libbiomcmc_static.la # convenience lib (not installed globally)
 libbiomcmc_static_la_SOURCES = $(common_src) $(common_headers) config.h # listed here s.t. any change triggers recompilation 

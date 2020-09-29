@@ -3,14 +3,23 @@
 /* Debug Mode, with assert()-like error checking */
 #undef BIOMCMC_DEBUG
 
+/* bz2 compression library not found */
+#undef HAVE_BZIP2
+
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #undef HAVE_DLFCN_H
 
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 
+/* Define to 1 if you have the `bzip2' library (-lbzip2). */
+#undef HAVE_LIBBZIP2
+
 /* Define to 1 if you have the `m' library (-lm). */
 #undef HAVE_LIBM
+
+/* xz compression library not found */
+#undef HAVE_LZMA
 
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
@@ -42,7 +51,7 @@
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
 
-/* compression library not found */
+/* gz compression library not found */
 #undef HAVE_ZLIB
 
 /* Define to the sub-directory where libtool stores uninstalled libraries. */

@@ -16,7 +16,7 @@
 
 #include "file_compression.h"
 
-enum {FORMAT_XZ, FORMAT_GZ, FORMAT_RAW};
+enum {FORMAT_XZ, FORMAT_BZ2, FORMAT_GZ, FORMAT_RAW};
 
 file_compress_t
 biomcmc_open_compress (const char *path, const char *mode)
@@ -25,6 +25,10 @@ biomcmc_open_compress (const char *path, const char *mode)
 #ifdef HAVE_LZMA
   fc->xz = biomcmc_xz_open (path, mode, 8192); // return NULL if file is not lzma
   if (fc->xz != NULL) { fc->format = FORMAT_XZ; return fc; }
+#endif
+#ifdef HAVE_BZIP2
+  fc->bz2 = biomcmc_bz2_open (path, mode, 8192); // return NULL if file is not bzip2
+  if (fc->bz2 != NULL) { fc->format = FORMAT_BZ2; return fc; }
 #endif
 #ifdef HAVE_ZLIB
   fc->gz = biomcmc_gzopen (path, mode);
@@ -41,6 +45,9 @@ biomcmc_getline_compress (char **lineptr, size_t *n, file_compress_t fc)
 #ifdef HAVE_LZMA
   if (fc->format == FORMAT_XZ) return biomcmc_getline_xz (lineptr, n, fc->xz);
 #endif
+#ifdef HAVE_BZIP2
+  if (fc->format == FORMAT_BZ2) return biomcmc_getline_bz2 (lineptr, n, fc->bz2);
+#endif
 #ifdef HAVE_ZLIB
   if (fc->format == FORMAT_GZ) return biomcmc_getline_gz (lineptr, n, fc->gz);
 #endif
@@ -53,6 +60,9 @@ biomcmc_close_compress (file_compress_t fc)
   if (!fc) return;
 #ifdef HAVE_LZMA
   if (fc->format == FORMAT_XZ) biomcmc_xz_close (fc->xz);
+#endif
+#ifdef HAVE_BZIP2
+  if (fc->format == FORMAT_BZ2) biomcmc_bz2_close (fc->bz2);
 #endif
 #ifdef HAVE_ZLIB
   if (fc->format == FORMAT_GZ) gzclose (fc->gz);
@@ -207,7 +217,7 @@ biomcmc_getline_gz (char **lineptr, size_t *n, gzFile zstream)
 }
 #endif
 
-#ifdef HAVE_LIBLZMA
+#ifdef HAVE_LZMA
 bool init_xz_encoder (lzma_stream *strm, uint32_t preset); // preset should be 3~7 (default 6)
 bool init_xz_decoder (lzma_stream *strm);
 void del_xz_file_t (xz_file_t *f);
@@ -301,6 +311,9 @@ biomcmc_xz_open (const char *path, const char *mode, size_t buffer_size)
     f->eof = 0;
     f->action = LZMA_RUN;
   }
+  // reads one block to check if file is actually XZ
+  f->getc_avail = biomcmc_xz_read (f);
+  if (!f->getc_avail) { del_xz_file_t (f); return NULL; }
   return f;
 }
 
@@ -320,7 +333,7 @@ biomcmc_xz_close (xz_file_t *f)
         // When lzma_code() has returned LZMA_STREAM_END, the output buffer is likely to be only partially
         // full. Calculate how much new data there is to be written to the output file.
         size_t write_size = sizeof(f->outbuf) - f->strm.avail_out;
-        if (fwrite(f->outbuf, 1, write_size, f->fp) != write_size) { fprintf (stderr, "Write error: %s\n", strerror(errno)); return 0; }
+        if (fwrite(f->outbuf, 1, write_size, f->fp) != write_size) { fprintf (stderr, "Write error: %s\n", strerror(errno)); return; }
         // Reset next_out and avail_out.
         f->strm.next_out = f->outbuf;
         f->strm.avail_out = sizeof(f->outbuf);
@@ -382,7 +395,7 @@ biomcmc_xz_read (xz_file_t *f)
       const char *msg;
       switch (ret) {
         case LZMA_MEM_ERROR: msg = "Memory allocation failed"; break;
-        case LZMA_FORMAT_ERROR: msg = "The input is not in the .xz format"; break; // .xz magic bytes weren't found.
+        case LZMA_FORMAT_ERROR: msg = "The input is not in the .xz format"; break; // FIXME: xz_open must check for this code
         case LZMA_OPTIONS_ERROR: msg = "Unsupported compression options"; break;
         case LZMA_DATA_ERROR: msg = "Compressed file is corrupt"; break;
         case LZMA_BUF_ERROR: msg = "Compressed file is truncated or otherwise corrupt"; break;
@@ -496,14 +509,13 @@ biomcmc_getline_xz (char **lineptr, size_t *n, xz_file_t *f)
   return (read_pos - (*lineptr));
 }
 
-#endif  //HAVE_LIBLZMA
+#endif  //HAVE_LZMA
 
-#ifdef HAVE_LIBBZIP2
+#ifdef HAVE_BZIP2
 bz2_file_t * 
 biomcmc_bz2_open (const char *path, const char *mode, size_t buffer_size) 
 {
   bz2_file_t *f;
-  int err;
 
   if ((*mode != 'w') && (*mode != 'r')) {fprintf (stderr, "unrecognised mode %c for bzip2\n", *mode); return NULL; }
   /* Initlize the data structure  */
@@ -516,11 +528,14 @@ biomcmc_bz2_open (const char *path, const char *mode, size_t buffer_size)
   f->readbuf = (uint8_t*) malloc (f->buffer_size * sizeof (uint8_t)); // this interfaces with ext functions
   memset (f->readbuf, 0, f->buffer_size * sizeof (uint8_t));
   if ( !(f->fp = BZ2_bzopen(path, mode))) {
-    //err = errno;
-    //fprintf (stderr, "Opening bzip2 file %s failed errno: %03d - %s \n", path, err, strerror (err));
+    int err = errno;
+    fprintf (stderr, "Opening bzip2 file %s failed errno: %03d - %s \n", path, err, strerror (err));
     biomcmc_bz2_close (f);
     return NULL;
   }
+  // reads one block to check if file is actually XZ
+  f->getc_avail = biomcmc_bz2_read (f);
+  if (f->getc_avail < 1) { biomcmc_bz2_close (f); return NULL; }
   return f;
 }
 
@@ -549,7 +564,7 @@ biomcmc_bz2_getc (bz2_file_t *f)
   if (!f) return EOF;
   if (f->getc_pos == f->getc_avail) {
     f->getc_avail = biomcmc_bz2_read (f);
-    if (f->getc_avail <= 0) { f->eof = 1; return EOF; }
+    if (f->getc_avail <= 0) return EOF; 
     f->getc_pos = 0;
   }
   if (f->getc_pos < f->getc_avail) return (int) f->readbuf[f->getc_pos++];
@@ -589,8 +604,8 @@ biomcmc_getline_bz2 (char **lineptr, size_t *n, bz2_file_t *f)
       if ((*lineptr + *n) != (read_pos + nchars_avail)) biomcmc_error ("problem_2 setting string size in biomcmc_getline_xz()");
     }
     
-    err_mesg = BZ2_bzerror (f->fp, errnum);
-    if (err_number != Z_OK) biomcmc_error ("error in biomcmc_getline_bz2 ()::  %s", err_mesg);
+    err_mesg = BZ2_bzerror (f->fp, &err_number);
+    if (err_number != Z_OK) biomcmc_error ("error %d in biomcmc_getline_bz2 ()::  %s", err_number, err_mesg);
 
     if (c == EOF) {
       /* Return partial line, if any.  */
@@ -607,4 +622,4 @@ biomcmc_getline_bz2 (char **lineptr, size_t *n, bz2_file_t *f)
   return (read_pos - (*lineptr));
 }
 
-#endif  //HAVE_LIBBZIP2_
+#endif  //HAVE_BZIP2

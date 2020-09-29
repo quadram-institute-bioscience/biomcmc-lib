@@ -3,17 +3,23 @@
 /* Debug Mode, with assert()-like error checking */
 #undef BIOMCMC_DEBUG
 
+/* bz2 compression library not found */
+#undef HAVE_BZIP2
+
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #undef HAVE_DLFCN_H
 
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 
-/* xz compression library not found */
-#undef HAVE_LIBLZMA
+/* Define to 1 if you have the `bz2' library (-lbz2). */
+#undef HAVE_LIBBZ2
 
 /* Define to 1 if you have the `m' library (-lm). */
 #undef HAVE_LIBM
+
+/* xz compression library not found */
+#undef HAVE_LZMA
 
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
