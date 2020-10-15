@@ -25,12 +25,18 @@ This library is usually not installed directly, but as a submodule of another pr
 It includes, however, the `makefile.am` and `configure.ac` for autotools, and it provides unit tests from the
 [libcheck](https://github.com/libcheck/check) library as well as custom checks. 
 
-For full functionality you will need then `openmp`, `libcheck`, `zlib` and `liblzma`. 
-I usually install them system-wide with
+For full functionality you will need `openmp`, `libcheck`, `zlib`, `bz2`, and `liblzma`. 
+If you can install them system-wide:
+```[bash]
+## 'bootstrap' the configuration files (needed when cloning from github):
+/home/simpson/$ apt-get install autotools-dev autoconf automake libtool
+/home/simpson/$ (cd tatajuba && autoreconf)  ## the parentheses avoid entering the directory afterwards
+
+## install libraries possibly missing (only check is mandatory, but zlib and omp are strongly suggested)
+/home/simpson/$ apt-get install zlib1g-dev libomp-dev libbz2-dev check liblzma-dev
 ```
-sudo aptitude libomp-dev zlib1g-dev check liblzma-dev
-```
-but they rely on `pkg-config` to find their location: if your `pkg-config` was installed through conda then you'd 
+
+The libraries rely on `pkg-config` to find their location: if your `pkg-config` was installed through conda then you'd 
 better install the above libs via conda as well (or, you know, updating environmental variables etc)
 
 Notice that two libraries are installed, `libbiomcmc.la` and `libbiomcmc_static.la` (with `.a` and `.so` versions). 
