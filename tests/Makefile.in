@@ -109,8 +109,8 @@ am_check_topology_OBJECTS = check_topology.$(OBJEXT)
 check_topology_OBJECTS = $(am_check_topology_OBJECTS)
 check_topology_LDADD = $(LDADD)
 am__DEPENDENCIES_1 =
-check_topology_DEPENDENCIES = $(am__DEPENDENCIES_1) \
-	../lib/libbiomcmc.la
+check_topology_DEPENDENCIES = ../lib/libbiomcmc.la \
+	$(am__DEPENDENCIES_1)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
@@ -118,25 +118,25 @@ am__v_lt_1 =
 am_check_unit_OBJECTS = check_unit.$(OBJEXT)
 check_unit_OBJECTS = $(am_check_unit_OBJECTS)
 check_unit_LDADD = $(LDADD)
-check_unit_DEPENDENCIES = $(am__DEPENDENCIES_1) ../lib/libbiomcmc.la
+check_unit_DEPENDENCIES = ../lib/libbiomcmc.la $(am__DEPENDENCIES_1)
 am_debug_compression_OBJECTS = debug_compression.$(OBJEXT)
 debug_compression_OBJECTS = $(am_debug_compression_OBJECTS)
 debug_compression_LDADD = $(LDADD)
-debug_compression_DEPENDENCIES = $(am__DEPENDENCIES_1) \
-	../lib/libbiomcmc.la
+debug_compression_DEPENDENCIES = ../lib/libbiomcmc.la \
+	$(am__DEPENDENCIES_1)
 am_debug_gff3_OBJECTS = debug_gff3.$(OBJEXT)
 debug_gff3_OBJECTS = $(am_debug_gff3_OBJECTS)
 debug_gff3_LDADD = $(LDADD)
-debug_gff3_DEPENDENCIES = $(am__DEPENDENCIES_1) ../lib/libbiomcmc.la
+debug_gff3_DEPENDENCIES = ../lib/libbiomcmc.la $(am__DEPENDENCIES_1)
 am_debug_rng_OBJECTS = debug_rng.$(OBJEXT)
 debug_rng_OBJECTS = $(am_debug_rng_OBJECTS)
 debug_rng_LDADD = $(LDADD)
-debug_rng_DEPENDENCIES = $(am__DEPENDENCIES_1) ../lib/libbiomcmc.la
+debug_rng_DEPENDENCIES = ../lib/libbiomcmc.la $(am__DEPENDENCIES_1)
 am_debug_topology_OBJECTS = debug_topology.$(OBJEXT)
 debug_topology_OBJECTS = $(am_debug_topology_OBJECTS)
 debug_topology_LDADD = $(LDADD)
-debug_topology_DEPENDENCIES = $(am__DEPENDENCIES_1) \
-	../lib/libbiomcmc.la
+debug_topology_DEPENDENCIES = ../lib/libbiomcmc.la \
+	$(am__DEPENDENCIES_1)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -541,7 +541,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AM_CPPFLAGS = $(GTKDEPS_CFLAGS)  @OPENMP_CPPFLAGS@ -I$(srcdir)/../lib -DTEST_FILE_DIR='"$(srcdir)/files/"' 
-LDADD = $(GTKDEPS_LIBS) $(AM_LDFLAGS) @CHECK_LIBS@ @ZLIB_LIBS@  @LZMA_LIBS@ ../lib/libbiomcmc.la 
+LDADD = ../lib/libbiomcmc.la $(GTKDEPS_LIBS) $(AM_LDFLAGS) @CHECK_LIBS@ @ZLIB_LIBS@  @LZMA_LIBS@
 EXTRA_DIST = files # directory with fasta etc files (accessed with #define TEST_FILE_DIR above)
 # we use the list twice below, since we want all to be compiled only with 'make check'
 LIST_OF_TEST_PROGS = check_unit check_topology debug_topology debug_rng debug_gff3 debug_compression 

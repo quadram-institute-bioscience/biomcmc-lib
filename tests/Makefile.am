@@ -1,6 +1,6 @@
 AM_CPPFLAGS = $(GTKDEPS_CFLAGS)  @OPENMP_CPPFLAGS@ -I$(srcdir)/../lib -DTEST_FILE_DIR='"$(srcdir)/files/"' 
 AM_CFLAGS = @AM_CFLAGS@  @OPENMP_CFLAGS@  @CHECK_CFLAGS@ @ZLIB_CFLAGS@  @LZMA_CFLAGS@
-LDADD = $(GTKDEPS_LIBS) $(AM_LDFLAGS) @CHECK_LIBS@ @ZLIB_LIBS@  @LZMA_LIBS@ ../lib/libbiomcmc.la 
+LDADD =  ../lib/libbiomcmc.la $(GTKDEPS_LIBS) $(AM_LDFLAGS) @CHECK_LIBS@ @ZLIB_LIBS@  @LZMA_LIBS@
 
 EXTRA_DIST = files # directory with fasta etc files (accessed with #define TEST_FILE_DIR above)
 # we use the list twice below, since we want all to be compiled only with 'make check'

@@ -28,7 +28,7 @@ lib_LTLIBRARIES = libbiomcmc.la  # libedlib.la # libtools
 libbiomcmc_la_SOURCES = $(common_headers) config.h
 libbiomcmc_la_CPPFLAGS = $(AM_CPPFLAGS)
 libbiomcmc_la_CFLAGS = $(AM_CFLAGS) 
-libbiomcmc_la_LIBADD = $(GTKDEPS_LIBS) $(AM_LDFLAGS) libbiomcmc_static.la @ZLIB_LIBS@  @LZMA_LIBS@
+libbiomcmc_la_LIBADD = $(GTKDEPS_LIBS) libbiomcmc_static.la @ZLIB_LIBS@  @LZMA_LIBS@ $(AM_LDFLAGS) 
 
 noinst_LTLIBRARIES = libbiomcmc_static.la # convenience lib (not installed globally)
 libbiomcmc_static_la_SOURCES = $(common_src) $(common_headers) config.h # listed here s.t. any change triggers recompilation 
