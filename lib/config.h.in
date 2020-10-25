@@ -1,9 +1,9 @@
-/* lib/config.h.in.  Generated from configure.ac by autoheader.  */
+/* biomcmc-lib/lib/config.h.in.  Generated from configure.ac by autoheader.  */
 
 /* Debug Mode, with assert()-like error checking */
 #undef BIOMCMC_DEBUG
 
-/* 1 if bz2 compression library found */
+/* set to one if bz2 compression library found */
 #undef HAVE_BZIP2
 
 /* Define to 1 if you have the <dlfcn.h> header file. */
@@ -12,7 +12,7 @@
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 
-/* 1 if xz compression library found */
+/* set to one if xz compression library found */
 #undef HAVE_LZMA
 
 /* Define to 1 if you have the <memory.h> header file. */
@@ -33,26 +33,17 @@
 /* Define to 1 if you have the <sys/stat.h> header file. */
 #undef HAVE_SYS_STAT_H
 
-/* Define to 1 if you have the <sys/times.h> header file. */
-#undef HAVE_SYS_TIMES_H
-
-/* Define to 1 if you have the <sys/time.h> header file. */
-#undef HAVE_SYS_TIME_H
-
 /* Define to 1 if you have the <sys/types.h> header file. */
 #undef HAVE_SYS_TYPES_H
 
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
 
-/* 1 if gz compression library found */
+/* set to one if gz compression library found */
 #undef HAVE_ZLIB
 
 /* Define to the sub-directory where libtool stores uninstalled libraries. */
 #undef LT_OBJDIR
-
-/* not in debug mode, disabling all assert() macros */
-#undef NDEBUG
 
 /* Name of package */
 #undef PACKAGE
@@ -74,15 +65,6 @@
 
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION
-
-/* The size of `double', as computed by sizeof. */
-#undef SIZEOF_DOUBLE
-
-/* The size of `int', as computed by sizeof. */
-#undef SIZEOF_INT
-
-/* The size of `long long int', as computed by sizeof. */
-#undef SIZEOF_LONG_LONG_INT
 
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
