@@ -36,21 +36,20 @@ AC_SUBST(OPENMP_CPPFLAGS)
 dnl notice that default if-not-found action is to exist with error
 PKG_CHECK_MODULES([CHECK], [check >= 0.9.10]) # unit tests
 PKG_CHECK_MODULES([ZLIB], [zlib], 
-                  AC_DEFINE([HAVE_ZLIB],[1],[io gz compression library found]),  
-                  AC_DEFINE([HAVE_ZLIB],[0],[gz compression library not found])
+                  AC_DEFINE([HAVE_ZLIB],[1],[]),  
+                  AC_DEFINE([HAVE_ZLIB],[0],[1 if gz compression library found])
                   )
 PKG_CHECK_MODULES([LZMA], [liblzma], 
-                  AC_DEFINE([HAVE_LZMA],[1],[io xz compression library found]),  
-                  AC_DEFINE([HAVE_LZMA],[0],[xz compression library not found])
+                  AC_DEFINE([HAVE_LZMA],[1],[]),  
+                  AC_DEFINE([HAVE_LZMA],[0],[1 if xz compression library found])
                   )
 AC_CHECK_HEADER(bzlib.h, 
-                  AC_DEFINE([HAVE_BZIP2],[1],[io bz2 compression library found]),  
-                  AC_DEFINE([HAVE_BZIP2],[0],[bz2 compression library not found])
+                  AC_DEFINE([HAVE_BZIP2],[1],[]),  
+                  AC_DEFINE([HAVE_BZIP2],[0],[1 if bz2 compression library found])
                   )
-AC_CHECK_LIB([bz2],[BZ2_bzlibVersion])
-
+AC_SEARCH_LIBS([BZ2_bzlibVersion], [bz2]) # AC_CHECK_LIB([bz2],[BZ2_bzlibVersion])
 dnl check for the math library
-AC_CHECK_LIB([m],[main])
+AC_SEARCH_LIBS([sqrt], [m]) # modern equivalent of AC_CHECK_LIB([m],[main])
 
 dnl check for the clock_gettime function in rt library (linking with -lrt if found)
 dnl (preferred way of checking for libraries, over AC_CHECK_LIB...)
