@@ -26,7 +26,7 @@
 #ifdef HAVE_LZMA
 #include <lzma.h>
 #endif
-#ifdef HAVE_LIBBZ2  // #ifdef HAVE_BZIP2
+#ifdef HAVE_BZIP2 // #ifdef HAVE_LIBBZ2  
 #include <bzlib.h>
 #endif
 
@@ -59,7 +59,7 @@ int biomcmc_xz_getc (xz_file_t *f);
 int biomcmc_getline_xz (char **lineptr, size_t *n, xz_file_t *f);
 #endif // HAVE_LZMA
 
-#ifdef HAVE_LIBBZ2  // #ifdef HAVE_BZIP2
+#ifdef HAVE_BZIP2 // #ifdef HAVE_LIBBZ2  
 // https://www.sourceware.org/bzip2/manual/manual.html#libprog
 #include <bzlib.h>
 typedef struct {
@@ -101,7 +101,7 @@ struct file_compress_struct
 #ifdef HAVE_LZMA
   xz_file_t *xz;
 #endif
-#ifdef HAVE_LIBBZ2  // #ifdef HAVE_BZIP2
+#ifdef HAVE_BZIP2 // #ifdef HAVE_LIBBZ2 is set if using AC_CHECK_LIB 
   bz2_file_t *bz2;
 #endif
 #ifdef HAVE_ZLIB
