@@ -46,15 +46,18 @@ void initialize_char2bit_table (void);
 alignment
 read_alignment_from_file (char *seqfilename)
 {
-  FILE *seqfile;
+  //FILE *seqfile;
+  file_compress_t seqfile;
   char *line = NULL, *line_read = NULL;
   size_t linelength = 0;
   int is_nexus = 0, i;
 
-  seqfile = biomcmc_fopen (seqfilename, "r");
+  //seqfile = biomcmc_fopen (seqfilename, "r");
+  seqfile = biomcmc_open_compress (seqfilename, "r");
 
   /* Search for evidence of nexus file; if obligatory syntax "#NEXUS" is found, see if it is an alignment */
-  for (i=0; (is_nexus < 4) && (i < 256) && (biomcmc_getline (&line_read, &linelength, seqfile) != -1);) {
+  //for (i=0; (is_nexus < 4) && (i < 256) && (biomcmc_getline (&line_read, &linelength, seqfile) != -1);) {
+  for (i=0; (is_nexus < 4) && (i < 256) && (biomcmc_getline_compress (&line_read, &linelength, seqfile) != -1);) {
     line = line_read; /* the variable *line_read should point always to the same value (no line++ or alike) */
     if (nonempty_string (line)) { 
       if ((!is_nexus) && strcasestr (line, "#NEXUS")) is_nexus++; 
@@ -65,7 +68,8 @@ read_alignment_from_file (char *seqfilename)
     if (!is_nexus) i++; /* give up if "#NEXUS" is not found in first 256 lines; otherwise keep looking */
   }
 
-  fclose (seqfile);
+  //fclose (seqfile);
+  biomcmc_close_compress (seqfile);
   if (line_read) free (line_read);
 
   if (is_nexus == 4) return read_nexus_alignment_from_file (seqfilename);
@@ -77,15 +81,18 @@ read_fasta_alignment_from_file (char *seqfilename)
 {
   alignment align; /* we will create a new alignment by hand (no call to new_alignment() */
   char_vector taxlabel, character;
-  FILE *seqfile;
+  //FILE *seqfile;
+  file_compress_t seqfile;
   char *line = NULL, *line_read = NULL, *delim = NULL;
   size_t linelength = 0;
   taxlabel  = new_char_vector (1); /* will increase dynamically */ 
   character = new_char_vector_big (1); /* will increase dynamically, and realloc() will double when needed */ 
 
   /* start reading file */
-  seqfile = biomcmc_fopen (seqfilename, "r");
-  while (biomcmc_getline (&line_read, &linelength, seqfile) != -1) {
+  // seqfile = biomcmc_fopen (seqfilename, "r");
+  // while (biomcmc_getline (&line_read, &linelength, seqfile) != -1) {
+  seqfile = biomcmc_open_compress (seqfilename, "r");
+  while (biomcmc_getline_compress (&line_read, &linelength, seqfile) != -1) {
     line = line_read; /* the variable *line_read should point always to the same value (no line++ or alike) */
     if (nonempty_fasta_line (line)) { /* each line can be either the sequence or its name, on a strict order */
       /* sequence description (in FASTA jargon); the sequence name */
@@ -98,7 +105,8 @@ read_fasta_alignment_from_file (char *seqfilename)
       }
     }
   }
-  fclose (seqfile);
+  //fclose (seqfile);
+  biomcmc_close_compress (seqfile);
   if (line_read) free (line_read);
   char_vector_finalise_big (character);
   align = new_alignment_from_taxlabel_and_character_vectors (taxlabel, character, seqfilename);

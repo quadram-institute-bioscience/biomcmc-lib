@@ -36,8 +36,8 @@
 #include <unistd.h>     /* getpid() function, used together with sys/types.h (may not be necessary) */
 #include <fcntl.h>      /* open() read() close() for /dev/urandom */
 #include <assert.h>    
+#include <sys/stat.h>   /* mkdir(); returns EEXIST from sys/types.h if dir already exist (as dir or not) */ 
 //#include <sys/resource.h> // suggested by goptics (gpu), but don't seem needed
-//#include <sys/stat.h>     // suggested by goptics (gpu), but don't seem needed
 #include <libgen.h> /* standard XPG basename() - the one provided by string.h is a GNU extension, fails on macOSX*/
 
 #ifdef _OPENMP
