@@ -92,7 +92,7 @@ gzFile
 biomcmc_gzopen (const char *path, const char *mode)
 {
   gzFile zfp = gzopen (path, mode); // can also process raw (uncompressed); o.w. we cannot exit with failure
-  if (zfp == NULL) {
+  if (zfp == NULL) { // gzopen handles raw data naturally 
     fprintf (stderr, "Please check if path is correct, if there are non-ASCII characters in file name,\n");
     fprintf (stderr, "if you have enough permissions (to read/write). Remember that paths are relative to\n");
     fprintf (stderr, "where this program is being called\n");
@@ -314,6 +314,9 @@ biomcmc_xz_open (const char *path, const char *mode, size_t buffer_size)
   // reads one block to check if file is actually XZ
   f->getc_avail = biomcmc_xz_read (f);
   if (!f->getc_avail) { del_xz_file_t (f); return NULL; }
+
+  if (biomcmc_xz_getc (f) == EOF) return NULL;
+  f->getc_pos--; // if file is valid xz then we already read one
   return f;
 }
 
@@ -402,8 +405,8 @@ biomcmc_xz_read (xz_file_t *f)
         case LZMA_MEMLIMIT_ERROR: msg = "The memory limit for decompression is too small"; break;
         default: msg = "Unknown error, possibly a bug"; break;
       }
-      fprintf (stderr, "Decoder error: %s (error code %u)\n",msg, ret);
-      return 0;
+      if (ret != LZMA_FORMAT_ERROR) fprintf (stderr, "Decoder error: %s (error code %u)\n",msg, ret);
+      return 0; // if LZMA_FORMAT_ERROR then getc will return EOF (getc is called to check if really is xz)
     }
   } // while not eof
   return write_size;
@@ -518,7 +521,7 @@ biomcmc_bz2_open (const char *path, const char *mode, size_t buffer_size)
   bz2_file_t *f;
 
   if ((*mode != 'w') && (*mode != 'r')) {fprintf (stderr, "unrecognised mode %c for bzip2\n", *mode); return NULL; }
-  /* Initlize the data structure  */
+  /* Initialize the data structure  */
   f = (bz2_file_t *) malloc (sizeof (bz2_file_t));
   f->path = strdup (path);
   f->mode = *mode;
