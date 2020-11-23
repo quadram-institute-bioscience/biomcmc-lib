@@ -73,11 +73,11 @@ read_alignment_from_file (char *seqfilename)
   if (line_read) free (line_read);
 
   if (is_nexus == 4) return read_nexus_alignment_from_file (seqfilename);
-  else return read_fasta_alignment_from_file (seqfilename);
+  else return read_fasta_alignment_from_file (seqfilename, true); // true = tries to compact alignment into site patterns
 }
 
 alignment
-read_fasta_alignment_from_file (char *seqfilename)
+read_fasta_alignment_from_file (char *seqfilename, bool compact_patterns)
 {
   alignment align; /* we will create a new alignment by hand (no call to new_alignment() */
   char_vector taxlabel, character;
@@ -109,12 +109,12 @@ read_fasta_alignment_from_file (char *seqfilename)
   biomcmc_close_compress (seqfile);
   if (line_read) free (line_read);
   char_vector_finalise_big (character);
-  align = new_alignment_from_taxlabel_and_character_vectors (taxlabel, character, seqfilename);
+  align = new_alignment_from_taxlabel_and_character_vectors (taxlabel, character, seqfilename, compact_patterns);
   return align;
 }
 
 alignment
-new_alignment_from_taxlabel_and_character_vectors (char_vector taxlabel, char_vector character, char *seqfilename)
+new_alignment_from_taxlabel_and_character_vectors (char_vector taxlabel, char_vector character, char *seqfilename, bool compact_patterns)
 {
   int i;
   size_t max_length = 0;
@@ -147,8 +147,10 @@ new_alignment_from_taxlabel_and_character_vectors (char_vector taxlabel, char_ve
 
   align->taxlabel_hash = new_hashtable (align->ntax);
   for (i=0; i < align->ntax; i++) insert_hashtable (align->taxlabel_hash, align->taxlabel->string[i], i);
+  /* compact align->character to site patterns if several seqs from same size exist */
+  if (align->is_aligned && compact_patterns && (align->ntax > 1)) alignment_create_sitepattern (align); 
+  else align->is_aligned = false;  // since it doesnt have a site_pattern
 
-  if (align->is_aligned) alignment_create_sitepattern (align); /* compact align->character to site patterns */
   if (char2bit[0][0] == 0xffff) initialize_char2bit_table (); /* translation table between ACGT to 1248 */
   alignment_shorten_taxa_names (align);
   store_filename_in_alignment (align, seqfilename);
@@ -311,7 +313,6 @@ save_gzfasta_from_char_vector (const char *filename, char_vector label, char_vec
   fclose (stream);
 #endif
 }
-
 
 alignment
 new_alignment (int ntax, int nchar)
@@ -491,6 +492,7 @@ alignment_create_sitepattern (alignment align)
       align->character->string[seq] = 
       (char *) biomcmc_realloc ((char*) align->character->string[seq], (nchar + 1) * sizeof (char));
       align->character->string[seq][nchar] = '\0';
+      align->character->nchars[seq] = (size_t) nchar;
     }
   }
 

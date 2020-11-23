@@ -48,9 +48,9 @@ struct alignment_struct
 /*! \brief Reads DNA alignment (guess format between FASTA and NEXUS) from file and store info in alignment_struct. */
 alignment read_alignment_from_file (char *seqfilename);
 /*! \brief Given one char_vector of names and one of sequences (e.g. from GFF3) returns a fasta-like "alignment" */
-alignment new_alignment_from_taxlabel_and_character_vectors (char_vector taxlabel, char_vector character, char *seqfilename);
+alignment new_alignment_from_taxlabel_and_character_vectors (char_vector taxlabel, char_vector character, char *seqfilename, bool compact_patterns);
 /*! \brief Reads DNA FASTA alignment from file and store info in alignment_struct. */
-alignment read_fasta_alignment_from_file (char *seqfilename);
+alignment read_fasta_alignment_from_file (char *seqfilename, bool compact_patterns);
 /*! \brief Reads DNA NEXUS alignment from file and store info in alignment_struct. */
 alignment read_nexus_alignment_from_file (char *seqfilename);
 /*! \brief Prints alignment to FILE stream in FASTA format (debug purposes). */
