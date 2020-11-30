@@ -14,10 +14,10 @@
 #include "hashtable.h"
 
 /* Aux functions for hashtable of strings */
-uint32_t hash(hashtable ht, const char* str);
-inline uint32_t hash1 (hashtable ht);
-inline uint32_t hash2 (hashtable ht);
-/* Aux functions for hashtable of bipartitions */
+uint32_t hash (const char* str);
+inline uint32_t hash1 (hashtable ht, uint32_t h);
+inline uint32_t hash2 (hashtable ht, uint32_t h);
+/* Aux functions for hashtable of bipartitions  THESE are not thread safe (see functions above) */
 inline uint32_t biphash1 (bip_hashtable ht);
 inline uint32_t biphash2 (bip_hashtable ht);
 
@@ -45,7 +45,6 @@ new_hashtable (int size)
   /* initialize to NULLS */
   for(i = 0; i < ht->size; i++) ht->table[i] = 0; 
   ht->P = 2147483647; /* initialize P (large prime)*/
-  ht->probelength = 0;
   
   /*initialize hash1 and hash2 variables*/
   srand (time(0)); /* the GSL library would be overkill... */
@@ -77,7 +76,34 @@ del_hashtable (hashtable ht)
 /* This is called before hash1() and hash2(). It sets the  value of h to be used by hash1() and hash2() and saves 
  * excessive calls to the hash function. */
 uint32_t 
-hash (hashtable ht, const char* key) 
+hash (const char* key) 
+{
+  uint32_t g, h;
+  
+  h = 0;
+  while (*key) {
+    h = (h << 4) + *key++;
+    g = h & 0xF0000000L;
+    if (g) h ^= g >> 24;
+    h &= ~g;
+  }
+  return h; 
+}
+
+uint32_t 
+hash1 (hashtable ht, uint32_t h) 
+{
+  return ((((ht->a1 * h) + ht->b1) % ht->P) % ht->size) ;
+}
+
+uint32_t 
+hash2 (hashtable ht, uint32_t h) 
+{
+  return ((((ht->a2 * h + ht->b2) % ht->P) % (ht->size - 3)) | 1);
+}
+
+uint32_t 
+hash_threadunsafe (hashtable ht, const char* key) 
 {
   uint32_t g;
   
@@ -92,13 +118,13 @@ hash (hashtable ht, const char* key)
 }
 
 uint32_t 
-hash1 (hashtable ht) 
+hash1_unsafe (hashtable ht) 
 {
   return ((((ht->a1 * ht->h) + ht->b1) % ht->P) % ht->size) ;
 }
 
 uint32_t 
-hash2 (hashtable ht) 
+hash2_unsafe (hashtable ht) 
 {
   return ((((ht->a2 * ht->h + ht->b2) % ht->P) % (ht->size - 3)) | 1);
 }
@@ -106,47 +132,46 @@ hash2 (hashtable ht)
 void 
 insert_hashtable (hashtable ht, const char* key, int value) 
 {
-  uint32_t i;
-  int h1, h2;
-  
-  hash (ht, key);
-  h1 = hash1 (ht);
-  h2 = hash2 (ht);
+  uint32_t i, h, h1, h2;
+  uint32_t probelength = 0;  /*! \brief Number of collisions before empty slot is found. */
 
-  ht->probelength = 0;
-  
+  h = hash (key);
+  h1 = hash1 (ht, h);
+  h2 = hash2 (ht, h);
+
   for (i = h1; ht->table[i]; i = (i + h2) % ht->size) {
-    ht->probelength++;
-    if (!strcmp (ht->table[i]->key, key)) /* key was already inserted */
-      return; 
+    probelength++;
+    if (!strcmp (ht->table[i]->key, key)) return; /* key was already inserted */
   }
-  /* alloc space for new key */
-  ht->table[i] = biomcmc_malloc (sizeof (struct hashtable_item_struct));
-  ht->table[i]->key = (char*) biomcmc_malloc((strlen (key)+1) * sizeof (char));
-  strcpy(ht->table[i]->key, key);
-  ht->table[i]->value = value;
+#ifdef _OPENMP
+#pragma omp critical 
+#endif
+   {
+    /* alloc space for new key */
+    ht->table[i] = biomcmc_malloc (sizeof (struct hashtable_item_struct));
+    ht->table[i]->key = (char*) biomcmc_malloc((strlen (key)+1) * sizeof (char));
+    strcpy (ht->table[i]->key, key);
+    ht->table[i]->value = value;
+   } // openmp critical, similar to omp_init_lock
   return;
 }
 
 int 
 lookup_hashtable (hashtable ht, const char* key) 
 {
-  uint32_t i;
-  int h1, h2;
-  
-  hash (ht, key);
-  h1 = hash1 (ht);
-  h2 = hash2 (ht);
-  
-  ht->probelength = 0;
+  uint32_t i, h, h1, h2, found_idx = -2;
+  uint32_t probelength = 0;  /*! \brief Number of collisions before empty slot is found. */
+
+  h = hash (key);
+  h1 = hash1 (ht, h);
+  h2 = hash2 (ht, h);
 
   for (i = h1; ht->table[i]; i = (i + h2) % ht->size) {
-    ht->probelength++;
-    if (!(ht->table[i])) return -1;
-    else if ( (ht->table[i]) && (!strcmp (ht->table[i]->key, key)) ) 
-      return ht->table[i]->value;
+    probelength++;
+    if (!(ht->table[i])) found_idx = -1;
+    else if ( (ht->table[i]) && (!strcmp (ht->table[i]->key, key)) ) found_idx = ht->table[i]->value;
   }
-  return -2;
+  return found_idx;
 }
 
 /* * Functions to work with hashtable of bipartitions * */

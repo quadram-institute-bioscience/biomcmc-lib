@@ -43,8 +43,6 @@ struct hashtable_struct
 { 
   /*! \brief Table size. */
   int size;
-  /*! \brief Number of collisions before empty slot is found. */
-  int probelength;
   /*! \brief Value set by hash(). Used in hash1() and hash2() to avoid calling hash() again. */
   uint32_t h;
   uint32_t a1, /*!< \brief Random values used in hash functions. */
