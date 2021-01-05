@@ -35,18 +35,15 @@ AC_SUBST(OPENMP_CFLAGS)
 AC_SUBST(OPENMP_CPPFLAGS)
 dnl notice that default if-not-found action is to exist with error
 PKG_CHECK_MODULES([CHECK], [check >= 0.9.10]) # unit tests
-PKG_CHECK_MODULES([ZLIB], [zlib], 
-                  AC_DEFINE([HAVE_ZLIB],[1],[]),  
-                  AC_DEFINE([HAVE_ZLIB],[0],[1 if gz compression library found])
-                  )
-PKG_CHECK_MODULES([LZMA], [liblzma], 
-                  AC_DEFINE([HAVE_LZMA],[1],[]),  
-                  AC_DEFINE([HAVE_LZMA],[0],[1 if xz compression library found])
-                  )
-AC_CHECK_HEADER(bzlib.h, 
-                  AC_DEFINE([HAVE_BZIP2],[1],[]),  
-                  AC_DEFINE([HAVE_BZIP2],[0],[1 if bz2 compression library found])
-                  )
+PKG_CHECK_MODULES([ZLIB], [zlib],
+                  AC_DEFINE([HAVE_ZLIB],[1],[set to one if gz compression library found]),
+                  [AC_MSG_NOTICE([optional zlib headers not found])]  )
+PKG_CHECK_MODULES([LZMA], [liblzma],
+                  AC_DEFINE([HAVE_LZMA],[1],[set to one if xz compression library found]),
+                  [AC_MSG_NOTICE([optional lzma headers not found])]  )
+AC_CHECK_HEADER(bzlib.h,
+                  AC_DEFINE([HAVE_BZIP2],[1],[set to one if bz2 compression library found]),
+                  [AC_MSG_NOTICE([optional bzip2 headers not found])] )
 AC_SEARCH_LIBS([BZ2_bzlibVersion], [bz2]) # AC_CHECK_LIB([bz2],[BZ2_bzlibVersion])
 dnl check for the math library
 AC_SEARCH_LIBS([sqrt], [m]) # modern equivalent of AC_CHECK_LIB([m],[main])
