@@ -29,8 +29,9 @@ const char *prt_col[][8]={ // 0-black   1-red   2-grn   3-yel   4-blu   5-mag   
 };
 
 // curiosity. to add quotes with gawk: gawk '{print q,$0,q,","}' q="\""
-uint16_t biomcmc_fortune_cookies_size = 330;
+uint16_t biomcmc_fortune_cookies_size = 331;
 char *biomcmc_fortune_cookies[] = {
+  " Theory is when you know something, but it doesn’t work. Practice is when something works, but you don’t know why. Programmers combine theory and practice: Nothing works and they don’t know why",
   " A computer is like a mischievous genie. It will give you exactly what you ask for, but not always what you want. -- Joe Sondow",
   " The most secure code in the world is code which is never written. -- Colin Percival",
   " Becoming sufficiently familiar with something is a substitute for understanding it. -- John Conway",
