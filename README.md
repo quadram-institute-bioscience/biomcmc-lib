@@ -143,6 +143,18 @@ stated otherwise &mdash; irrespective of what the newick string or the visualisa
 From a pure *computational* point of view, however, I find it safer to always work with binary, rooted newick trees, such that we can assume 
 the [node-branch correspondence is valid](http://dx.doi.org/10.1093/molbev/msx055).
 
+### Troubleshooting
+This is a lowlevel library used by higher level, derived software, I don't expect you to use it on its own and I can't help you
+if you try.
+However there are some common issues that may aflict these related software, and C programs in general. For instance:
+
+* If you compile the software inside a conda environment, it may use the dynamic libraries from this environment. The
+  program may not work outside or even inside this environment, unless you explicitly tells where the dynamic
+  libraries are. This is done by setting the environment variable `LD_LIBRARY_PATH`. I try to avoid this by using as
+  many system-wide libraries as possible. 
+* Some programs depend on a recent version of `gcc`, and apparently even if you compile it with a recent version, it may
+  complain if the runtime libraries are older. I've seen this issue with software relying on openMP 4.5 and conda: the
+  conda package runs on most computers, but it fails if the host system has an old `glibc`.
 
 ## License 
 SPDX-License-Identifier: GPL-3.0-or-later
