@@ -17,6 +17,7 @@
 int char2bit[256][2] = {{0xffff}}; /* DNA base to bitpattern translation, with 1st element set to arbitrary value */
 int pairdist[15][15][2]; /* pairwise distance table with #matches, #transitions and #transversions for each pair */
 
+
 /*! \brief Allocates space for new alignment struct. */
 alignment new_alignment (int ntax, int nchar);
 /*! \brief Reads one line of alignment (sequence data for one taxa) assuming the taxon name precedes alignment. */

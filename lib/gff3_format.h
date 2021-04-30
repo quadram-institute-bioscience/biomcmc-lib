@@ -47,7 +47,7 @@ typedef struct
 
 typedef struct 
 {
-  int start, end;
+  int start, end;   // zero-based (i.e. not the same as GFF)
   uint8_t pos_strand:3, phase:5; 
   gff3_string seqid, source, type, attr_id, attr_parent;
 } gff3_fields;
