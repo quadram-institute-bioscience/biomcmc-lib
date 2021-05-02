@@ -35,6 +35,7 @@ void give_feature_type_id (gff3_t g3);
 void generate_feature_type_pointers (gff3_t g3);
 void reorder_seqid_charvector_from_pragma (char_vector sid, char_vector *seq_region);
 void gff3_generate_seq_vectors (gff3_t g3, hashtable hgs);
+int lookup_bruteforce (char_vector haystack, const char *needle);
 
 // static char *feature_type_list[] = {"gene", "cds", "mrna", "region"}; // many more, but I dont use them
 // prokka generates many of these, one per contig: ##sequence-region seqid start end 
@@ -593,6 +594,7 @@ add_fasta_to_gff3 (gff3_t g3, char_vector name, char_vector seq)
   idx = (int*) biomcmc_malloc (name->nstrings * sizeof (int));
   for (i = 0; i < name->nstrings; i++) {
     hid = lookup_hashtable (g3->seqname_hash, name->string[i]);
+    if (hid < 0) hid = lookup_bruteforce (g3->seqname, name->string[i]);
     idx[i] = hid; // negative values if fasta sequence not present in GFF3 
   }
 
@@ -603,6 +605,19 @@ add_fasta_to_gff3 (gff3_t g3, char_vector name, char_vector seq)
   if (idx) free (idx);
   return;
 } 
+
+int
+lookup_bruteforce (char_vector haystack, const char *needle)
+{
+  int i, j, minlen;
+  size_t n_len = strlen (needle);
+  for (i = 0; i < haystack->nstrings; i++) {
+    minlen = BIOMCMC_MIN(n_len, haystack->nchars[i]);
+    for (j = 0; (j < minlen) && (needle[j] == haystack->string[i][j]); j++);
+    if (j == minlen) return i;
+  }
+  return -1;
+}
 
 char *
 save_fasta_from_gff3 (gff3_t g3, char *fname, bool overwrite)
