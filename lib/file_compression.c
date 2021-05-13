@@ -310,13 +310,13 @@ biomcmc_xz_open (const char *path, const char *mode, size_t buffer_size)
     f->strm.avail_out = f->buffer_size;
     f->eof = 0;
     f->action = LZMA_RUN;
-  }
-  // reads one block to check if file is actually XZ
-  f->getc_avail = biomcmc_xz_read (f);
-  if (!f->getc_avail) { del_xz_file_t (f); return NULL; }
+    // reads one block to check if file is actually XZ
+    f->getc_avail = biomcmc_xz_read (f);
+    if (!f->getc_avail) { del_xz_file_t (f); return NULL; }
 
-  if (biomcmc_xz_getc (f) == EOF) return NULL;
-  f->getc_pos--; // if file is valid xz then we already read one
+    if (biomcmc_xz_getc (f) == EOF) return NULL;
+    f->getc_pos--; // if file is valid xz then we already read one
+  }
   return f;
 }
 
