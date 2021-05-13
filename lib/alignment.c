@@ -288,6 +288,7 @@ save_gzfasta_from_char_vector (const char *filename, char_vector label, char_vec
 {
   int i;
   size_t j, k, columns = 120;
+  if (label->nstrings != seq->nstrings) biomcmc_error ("mismatch between number of sequences (%d) and names/headers (%d)\n", seq->nstrings, label->nstrings);
 #ifdef HAVE_ZLIB
   gzFile stream;
   stream = biomcmc_gzopen (filename, "w");
@@ -314,6 +315,38 @@ save_gzfasta_from_char_vector (const char *filename, char_vector label, char_vec
   fclose (stream);
 #endif
 }
+
+void
+save_xzfasta_from_char_vector (const char *filename, char_vector label, char_vector seq)
+{
+  if (label->nstrings != seq->nstrings) biomcmc_error ("mismatch between number of sequences (%d) and names/headers (%d)\n", seq->nstrings, label->nstrings);
+#ifndef HAVE_LZMA 
+  fprintf (stderr, "LZMA library (for xz compression) not found; reverting to gzip or uncompressed\n");
+  save_gzfasta_from_char_vector (filename, label, seq);
+  return;
+#else
+  int i;
+  file_compress_t seqfile;
+
+  seqfile = biomcmc_open_compress (filename, "w");
+  if (!seqfile->xz) {
+    fprintf (stderr, "problem opening file %s for writing in XZ format; reverting to gzip or uncompressed\n", filename);
+    save_gzfasta_from_char_vector (filename, label, seq);
+    return;
+  }
+  for (i = 0; i < label->nstrings; i++) if (seq->nchars[i]) {
+    if (biomcmc_xz_write (seqfile->xz, ">", 1) != 1) fprintf (stderr, "problem filling xz buffer [1];\n");
+    if (biomcmc_xz_write (seqfile->xz, label->string[i], label->nchars[i]) != label->nchars[i]) fprintf (stderr, "problem filling xz buffer [2];\n");
+    if (biomcmc_xz_write (seqfile->xz, "\n", 1) != 1) fprintf (stderr, "problem filling xz buffer [3];\n");
+    if (biomcmc_xz_write (seqfile->xz, seq->string[i], seq->nchars[i]) != seq->nchars[i]) fprintf (stderr, "problem filling xz buffer [4];\n");
+    if (biomcmc_xz_write (seqfile->xz, "\n", 1) != 1) fprintf (stderr, "problem filling xz buffer [5];\n");
+  }
+  biomcmc_close_compress (seqfile);
+#endif
+}
+
+
+
 
 alignment
 new_alignment (int ntax, int nchar)

@@ -56,6 +56,7 @@ alignment read_nexus_alignment_from_file (char *seqfilename);
 /*! \brief Prints alignment to FILE stream in FASTA format (debug purposes). */
 void print_alignment_in_fasta_format (alignment align, FILE *stream);
 void save_gzfasta_from_char_vector (const char *filename, char_vector label, char_vector seq);
+void save_xzfasta_from_char_vector (const char *filename, char_vector label, char_vector seq);
 /*! \brief Frees memory from alignment_struct. */
 void del_alignment (alignment align);
 
