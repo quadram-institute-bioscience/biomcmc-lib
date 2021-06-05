@@ -72,6 +72,9 @@ biomcmc_close_compress (file_compress_t fc)
   return;
 }
 
+//void biomcmc_save_compress (file_compress_t fc, const char *str)
+
+
 /**   lowlevel functions (can be used independently)   **/
 
 FILE *
@@ -429,6 +432,8 @@ biomcmc_xz_write (xz_file_t *f, char *cbuf, size_t len)
       pos = pos + tocopy;
     } else if ( pos >= len && f->strm.avail_in == 0 ) return len;
 
+    // Up to strm->avail_out bytes of compressed output will be written starting from strm->next_out. avail_out and next_out
+    // will be incremented by an equal amount to match the number of output bytes written.
     ret = lzma_code (&(f->strm), f->action);
 
     if (f->strm.avail_out == 0 || ret == LZMA_STREAM_END) {
