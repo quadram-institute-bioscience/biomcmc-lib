@@ -241,7 +241,7 @@ void del_xz_file_t (xz_file_t *f);
 bool 
 init_xz_encoder (lzma_stream *strm, uint32_t preset) // preset should be 3~7 (default 6)
 {
-  lzma_ret ret = lzma_easy_encoder (strm, preset, LZMA_CHECK_CRC32);
+  lzma_ret ret = lzma_easy_encoder (strm, preset, LZMA_CHECK_CRC64);
   if (ret == LZMA_OK) return true;    // Return successfully if the initialization went fine.
   const char *msg;  /* error */
   switch (ret) {
@@ -290,7 +290,7 @@ biomcmc_xz_open (const char *path, const char *mode, size_t buffer_size)
   memset (f->readbuf, 0, f->buffer_size * sizeof (uint8_t));
 
   if ( f->mode == 'w' ) {  /* Open for writing */
-    f->fp =fopen(f->path, "w");
+    f->fp = fopen(f->path, "w");
     if ( !(f->fp)) {
       err = errno;
       fprintf (stderr, " Opening %s as XZ failed, errno: %03d - %s\n", path, err, strerror(err));
@@ -340,6 +340,7 @@ void
 biomcmc_xz_close (xz_file_t *f)
 {
   lzma_ret ret;
+  size_t write_size = 0;
 
   if (!f) { fprintf(stderr, "Error: data == NULL\n"); return; }
   if (f->mode == 'w') {
@@ -347,11 +348,12 @@ biomcmc_xz_close (xz_file_t *f)
     ret = LZMA_OK;
     while ( ret != LZMA_STREAM_END ) {  /* Finish the encoding   */
       ret = lzma_code(&(f->strm), f->action);
+      //printf ("DEBUG::final::%d %d  %d\n", sizeof (f->outbuf), f->strm.avail_out, ret == LZMA_STREAM_END);
       // If the output buffer is full or if the compression finished successfully, write the data from the output bufffer to the output file.
       if (f->strm.avail_out == 0 || ret == LZMA_STREAM_END) {
         // When lzma_code() has returned LZMA_STREAM_END, the output buffer is likely to be only partially
         // full. Calculate how much new data there is to be written to the output file.
-        size_t write_size = sizeof(f->outbuf) - f->strm.avail_out;
+        write_size = sizeof (f->outbuf) - f->strm.avail_out;
         if (fwrite(f->outbuf, 1, write_size, f->fp) != write_size) { fprintf (stderr, "Write error: %s\n", strerror(errno)); return; }
         // Reset next_out and avail_out.
         f->strm.next_out = f->outbuf;
