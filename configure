@@ -13511,23 +13511,20 @@ fi
 	# Put the nasty error message in config.log where it belongs
 	echo "$ZLIB_PKG_ERRORS" >&5
 
-
-$as_echo "#define HAVE_ZLIB 0" >>confdefs.h
-
-
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: optional zlib headers not found" >&5
+$as_echo "$as_me: optional zlib headers not found" >&6;}
 elif test $pkg_failed = untried; then
      	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
-
-$as_echo "#define HAVE_ZLIB 0" >>confdefs.h
-
-
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: optional zlib headers not found" >&5
+$as_echo "$as_me: optional zlib headers not found" >&6;}
 else
 	ZLIB_CFLAGS=$pkg_cv_ZLIB_CFLAGS
 	ZLIB_LIBS=$pkg_cv_ZLIB_LIBS
         { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
-	$as_echo "#define HAVE_ZLIB 1" >>confdefs.h
+
+$as_echo "#define HAVE_ZLIB 1" >>confdefs.h
 
 fi
 
@@ -13589,34 +13586,30 @@ fi
 	# Put the nasty error message in config.log where it belongs
 	echo "$LZMA_PKG_ERRORS" >&5
 
-
-$as_echo "#define HAVE_LZMA 0" >>confdefs.h
-
-
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: optional lzma headers not found" >&5
+$as_echo "$as_me: optional lzma headers not found" >&6;}
 elif test $pkg_failed = untried; then
      	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
-
-$as_echo "#define HAVE_LZMA 0" >>confdefs.h
-
-
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: optional lzma headers not found" >&5
+$as_echo "$as_me: optional lzma headers not found" >&6;}
 else
 	LZMA_CFLAGS=$pkg_cv_LZMA_CFLAGS
 	LZMA_LIBS=$pkg_cv_LZMA_LIBS
         { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
-	$as_echo "#define HAVE_LZMA 1" >>confdefs.h
+
+$as_echo "#define HAVE_LZMA 1" >>confdefs.h
 
 fi
 ac_fn_c_check_header_mongrel "$LINENO" "bzlib.h" "ac_cv_header_bzlib_h" "$ac_includes_default"
 if test "x$ac_cv_header_bzlib_h" = xyes; then :
-  $as_echo "#define HAVE_BZIP2 1" >>confdefs.h
+
+$as_echo "#define HAVE_BZIP2 1" >>confdefs.h
 
 else
-
-$as_echo "#define HAVE_BZIP2 0" >>confdefs.h
-
-
+  { $as_echo "$as_me:${as_lineno-$LINENO}: optional bzip2 headers not found" >&5
+$as_echo "$as_me: optional bzip2 headers not found" >&6;}
 fi
 
 
