@@ -245,12 +245,12 @@ init_xz_encoder (lzma_stream *strm, uint32_t preset) // preset should be 3~7 (de
   if (ret == LZMA_OK) return true;    // Return successfully if the initialization went fine.
   const char *msg;  /* error */
   switch (ret) {
-    case LZMA_MEM_ERROR: msg = "Memory allocation failed"; break;
-    case LZMA_OPTIONS_ERROR: msg = "Specified preset is not supported"; break;
-    case LZMA_UNSUPPORTED_CHECK: msg = "Specified integrity check is not supported"; break;
-    default: msg = "Unknown error, possibly a bug"; break;
+    case LZMA_MEM_ERROR: msg = "LZMA:: Memory allocation failed"; break;
+    case LZMA_OPTIONS_ERROR: msg = "LZMA:: Specified preset is not supported"; break;
+    case LZMA_UNSUPPORTED_CHECK: msg = "LZMA:: Specified integrity check is not supported"; break;
+    default: msg = "LZMA:: Unknown error, possibly a bug"; break;
   }
-  fprintf (stderr, "Error initializing the encoder: %s (error code %u)\n", msg, ret);
+  fprintf (stderr, "LZMA:: Error initializing the encoder: %s (error code %u)\n", msg, ret);
   return false;
 }
 
@@ -261,11 +261,11 @@ init_xz_decoder (lzma_stream *strm)
   if (ret == LZMA_OK) return true;  // Return successfully if the initialization went fine.
   const char *msg;  /* error */
   switch (ret) {
-    case LZMA_MEM_ERROR: msg = "Memory allocation failed"; break;
-    case LZMA_OPTIONS_ERROR: msg = "Unsupported decompressor flags"; break;
-    default: msg = "Unknown error, possibly a bug"; break;
+    case LZMA_MEM_ERROR: msg = "LZMA:: Memory allocation failed"; break;
+    case LZMA_OPTIONS_ERROR: msg = "LZMA:: Unsupported decompressor flags"; break;
+    default: msg = "LZMA:: Unknown error, possibly a bug"; break;
   }
-  fprintf(stderr, "Error initializing the decoder: %s (error code %u)\n",msg, ret);
+  fprintf(stderr, "LZMA:: Error initializing the decoder: %s (error code %u)\n",msg, ret);
   return false;
 }
 
@@ -275,10 +275,10 @@ biomcmc_xz_open (const char *path, const char *mode, size_t buffer_size)
   xz_file_t *f;
   int err;
 
-  if ((*mode != 'w') && (*mode != 'r')) {fprintf (stderr, "unrecognised mode %c\n", *mode); return NULL; }
+  if ((*mode != 'w') && (*mode != 'r')) {fprintf (stderr, "xz_open():: unrecognised mode %c\n", *mode); return NULL; }
   /* Initlize the data structure  */
   f = (xz_file_t *) malloc (sizeof (xz_file_t));
-  memset(&(f->strm), 0, sizeof(f->strm));
+  memset(&(f->strm), 0, sizeof (f->strm));
   f->path = strdup(path);
   f->mode = *mode;
   if (buffer_size < 1024) buffer_size = 1024;
@@ -293,12 +293,12 @@ biomcmc_xz_open (const char *path, const char *mode, size_t buffer_size)
     f->fp = fopen(f->path, "w");
     if ( !(f->fp)) {
       err = errno;
-      fprintf (stderr, " Opening %s as XZ failed, errno: %03d - %s\n", path, err, strerror(err));
+      fprintf (stderr, " Opening %s as XZ for writing failed, errno: %03d - %s\n", path, err, strerror(err));
       del_xz_file_t (f);
       return NULL;
     }
     if (! init_xz_encoder (&(f->strm), 6)) {
-      fprintf (stderr, "Can not initialize lzma (XZ) encoder for file %s\n", path);
+      fprintf (stderr, "Can not initialize lzma (XZ) encoder for writing on file %s\n", path);
       del_xz_file_t (f);
       return NULL;
     }
@@ -311,12 +311,12 @@ biomcmc_xz_open (const char *path, const char *mode, size_t buffer_size)
     f->fp =fopen(f->path, "r");
     if ( !(f->fp)) {
       err = errno;
-      fprintf (stderr, " Opening %s as XZ failed, errno: %03d - %s\n", path, err, strerror(err));
+      fprintf (stderr, " Opening %s as XZ for reading failed, errno: %03d - %s\n", path, err, strerror(err));
       del_xz_file_t (f);
       return NULL;
     }
     if (!init_xz_decoder(&(f->strm))) {
-      fprintf (stderr, "Can not initialize lzma (XZ) decoder for file %s\n", path);
+      fprintf (stderr, "Can not initialize lzma (XZ) decoder for reading from file %s\n", path);
       del_xz_file_t (f);
       return NULL;
     }
@@ -342,22 +342,21 @@ biomcmc_xz_close (xz_file_t *f)
   lzma_ret ret;
   size_t write_size = 0;
 
-  if (!f) { fprintf(stderr, "Error: data == NULL\n"); return; }
+  if (!f) { fprintf(stderr, "LZMA:: Error: data == NULL\n"); return; }
   if (f->mode == 'w') {
     f->action = LZMA_FINISH;
     ret = LZMA_OK;
     while ( ret != LZMA_STREAM_END ) {  /* Finish the encoding   */
       ret = lzma_code(&(f->strm), f->action);
-      //printf ("DEBUG::final::%d %d  %d\n", sizeof (f->outbuf), f->strm.avail_out, ret == LZMA_STREAM_END);
-      // If the output buffer is full or if the compression finished successfully, write the data from the output bufffer to the output file.
+      // If the output buffer is full or if the compression finished successfully, write the data from the output buffer to the output file.
       if (f->strm.avail_out == 0 || ret == LZMA_STREAM_END) {
-        // When lzma_code() has returned LZMA_STREAM_END, the output buffer is likely to be only partially
-        // full. Calculate how much new data there is to be written to the output file.
-        write_size = sizeof (f->outbuf) - f->strm.avail_out;
-        if (fwrite(f->outbuf, 1, write_size, f->fp) != write_size) { fprintf (stderr, "Write error: %s\n", strerror(errno)); return; }
+        // When lzma_code() has returned LZMA_STREAM_END, the output buffer is likely to be only partially full. 
+        // Calculate how much new data there is to be written to the output file.
+        write_size = f->buffer_size - f->strm.avail_out; /*originally:: write_size = sizeof (f->outbuf) - f->strm.avail_out;*/
+        if (fwrite (f->outbuf, 1, write_size, f->fp) != write_size) { fprintf (stderr, "LZMA:: Write error on closing: %s\n", strerror(errno)); return; }
         // Reset next_out and avail_out.
         f->strm.next_out = f->outbuf;
-        f->strm.avail_out = sizeof(f->outbuf);
+        f->strm.avail_out = f->buffer_size; /* originally  f->strm.avail_out = sizeof (f->outbuf); */
       }
       if ( ret != LZMA_STREAM_END && ret != LZMA_OK) { fprintf(stderr, "LZMA Encode error\n"); break; }
     }
@@ -395,7 +394,7 @@ biomcmc_xz_read (xz_file_t *f)
     if (f->strm.avail_in == 0 && !feof(f->fp)) {
       f->strm.next_in = f->inbuf;
       f->strm.avail_in = fread (f->inbuf, 1, sizeof (f->inbuf), f->fp);
-      if (ferror(f->fp)) { fprintf(stderr, "Read error: %s\n",strerror(errno)); return 0; }
+      if (ferror(f->fp)) { fprintf(stderr, "LZMA:: Read error: %s\n",strerror(errno)); return 0; }
       // Once the end of the input file has been reached, we need to tell lzma_code() that no more input will be coming.
       if (feof(f->fp)) f->action = LZMA_FINISH;
     }
@@ -405,7 +404,6 @@ biomcmc_xz_read (xz_file_t *f)
     if (f->strm.avail_out == 0 || ret == LZMA_STREAM_END) { // if output buffer is full or decompression finished
       write_size = f->buffer_size - f->strm.avail_out;
       memcpy (f->readbuf, f->outbuf, sizeof (uint8_t) * write_size);
-      //printf ("\n    writesize=%lu\n<<%s>>", write_size, f->readbuf);
       f->strm.next_out = f->outbuf;
       f->strm.avail_out = f->buffer_size;
       if (ret == LZMA_STREAM_END) f->eof = 1;
@@ -415,15 +413,15 @@ biomcmc_xz_read (xz_file_t *f)
     if (ret != LZMA_OK && ret != LZMA_STREAM_END) {
       const char *msg;
       switch (ret) {
-        case LZMA_MEM_ERROR: msg = "Memory allocation failed"; break;
-        case LZMA_FORMAT_ERROR: msg = "The input is not in the .xz format"; break; // FIXME: xz_open must check for this code
-        case LZMA_OPTIONS_ERROR: msg = "Unsupported compression options"; break;
-        case LZMA_DATA_ERROR: msg = "Compressed file is corrupt"; break;
-        case LZMA_BUF_ERROR: msg = "Compressed file is truncated or otherwise corrupt"; break;
-        case LZMA_MEMLIMIT_ERROR: msg = "The memory limit for decompression is too small"; break;
-        default: msg = "Unknown error, possibly a bug"; break;
+        case LZMA_MEM_ERROR: msg = "LZMA read:: Memory allocation failed"; break;
+        case LZMA_FORMAT_ERROR: msg = "LZMA read:: The input is not in the .xz format"; break; // FIXME: xz_open must check for this code
+        case LZMA_OPTIONS_ERROR: msg = "LZMA read:: Unsupported compression options"; break;
+        case LZMA_DATA_ERROR: msg = "LZMA read::Compressed file is corrupt"; break;
+        case LZMA_BUF_ERROR: msg = "LZMA read::Compressed file is truncated or otherwise corrupt"; break;
+        case LZMA_MEMLIMIT_ERROR: msg = "LZMA read::The memory limit for decompression is too small"; break;
+        default: msg = "LZMA read:: Unknown error, possibly a bug"; break;
       }
-      if (ret != LZMA_FORMAT_ERROR) fprintf (stderr, "Decoder error: %s (error code %u)\n",msg, ret);
+      if (ret != LZMA_FORMAT_ERROR) fprintf (stderr, "LZMA read:: Decoder error: %s (error code %u)\n",msg, ret);
       return 0; // if LZMA_FORMAT_ERROR then getc will return EOF (getc is called to check if really is xz)
     }
   } // while not eof
@@ -434,7 +432,7 @@ size_t
 biomcmc_xz_write (xz_file_t *f, char *cbuf, size_t len) 
 {
   lzma_ret ret;
-  size_t pos = 0;
+  size_t pos = 0, write_size = 0;
 
   if ((f == NULL) || ( cbuf == NULL)) return 0;
 
@@ -452,21 +450,21 @@ biomcmc_xz_write (xz_file_t *f, char *cbuf, size_t len)
     ret = lzma_code (&(f->strm), f->action);
 
     if (f->strm.avail_out == 0 || ret == LZMA_STREAM_END) {
-      size_t write_size = sizeof(f->outbuf) - f->strm.avail_out;
-      if (fwrite(f->outbuf, 1, write_size, f->fp) != write_size) { fprintf(stderr, "Write error: %s\n", strerror(errno)); return 0; }
+      write_size = f->buffer_size - f->strm.avail_out; /*originally:: write_size = sizeof (f->outbuf) - f->strm.avail_out;*/
+      if (fwrite(f->outbuf, 1, write_size, f->fp) != write_size) { fprintf(stderr, "LZMA:: Write error: %s\n", strerror(errno)); return 0; }
       f->strm.next_out = f->outbuf;      // Reset next_out and avail_out.
-      f->strm.avail_out = sizeof (f->outbuf);
+      f->strm.avail_out = f->buffer_size; /* originally  f->strm.avail_out = sizeof (f->outbuf); */
     }
 
     if (ret != LZMA_OK) {  // Normally the return value of lzma_code() will be LZMA_OK until everything has been encoded.
       const char *msg = "";
       if (ret == LZMA_STREAM_END) return true;
       switch (ret) {
-        case LZMA_MEM_ERROR: msg = "Memory allocation failed"; break;
-        case LZMA_DATA_ERROR: msg = "File size limits exceeded"; break;
+        case LZMA_MEM_ERROR: msg = "LZMA write:: Memory allocation failed"; break;
+        case LZMA_DATA_ERROR: msg = "LZMA write:: File size limits exceeded"; break;
         default: break;
       }
-      fprintf (stderr, "Encoder error: %s (error code %u)\n",msg, ret);
+      fprintf (stderr, "LZMA write:: Encoder error: %s (error code %u)\n",msg, ret);
       return 0;
     }
   }
