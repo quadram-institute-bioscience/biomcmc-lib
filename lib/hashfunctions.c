@@ -218,7 +218,7 @@ biomcmc_get_salt_set_from_spice_table (uint32_t seeds[], uint32_t *salt, uint32_
 {
   uint16_t id;
   uint32_t index, si = 0;
-  double rdbl;
+  union { uint32_t i; double f; } un_fi;  // same memory space shared 
 
   if (!salt_length) return 0;
 
@@ -259,18 +259,18 @@ biomcmc_get_salt_set_from_spice_table (uint32_t seeds[], uint32_t *salt, uint32_
   }
   if (salt_length > 8) {
     id = index % lgamma_algmcs_size; index /= lgamma_algmcs_size; // size = 15 (total_2 11 bits)
-    rdbl = lgamma_algmcs[id];
-    salt[si++] = *(uint32_t*)&rdbl;
+    un_fi.f = = lgamma_algmcs[id];
+    salt[si++] = un_fi.i;
   }
   if (salt_length > 9) {
     id = index % lgamma_coeffs_size; index /= lgamma_coeffs_size; // size = 40 (total_2 16 bits)
-    rdbl = lgamma_coeffs[id];
-    salt[si++] = *(uint32_t*)&rdbl;
+    un_fi.f = lgamma_coeffs[id];
+    salt[si++] = un_fi.i;
   }
   if (salt_length > 10) {
     id = index % stirl_sferr_halves_size; index /= stirl_sferr_halves_size; // size = 31 (total_2 21 bits)
-    rdbl = stirl_sferr_halves[id] + 2.7; // first value is zero
-    salt[si++] = *(uint32_t*)&rdbl;
+    un_fi.f = stirl_sferr_halves[id] + 2.7; // first value is zero
+    salt[si++] = un_fi.i;
   }
   /* combinations using consecutive element */
   if (salt_length > 11) { 
