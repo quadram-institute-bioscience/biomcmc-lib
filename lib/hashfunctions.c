@@ -259,7 +259,7 @@ biomcmc_get_salt_set_from_spice_table (uint32_t seeds[], uint32_t *salt, uint32_
   }
   if (salt_length > 8) {
     id = index % lgamma_algmcs_size; index /= lgamma_algmcs_size; // size = 15 (total_2 11 bits)
-    un_fi.f = = lgamma_algmcs[id];
+    un_fi.f = lgamma_algmcs[id];
     salt[si++] = un_fi.i;
   }
   if (salt_length > 9) {
