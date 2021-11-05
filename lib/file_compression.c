@@ -45,7 +45,7 @@ biomcmc_open_compress (const char *path, const char *mode)
   return fc;
 }
 
-file_compresst
+file_compress_t
 biomcmc_create_compress_from_suffix (const char *path)
 {
   if (!path) biomcmc_error ("No file name was given to biomcmc_create_compress_from_suffix() (null pointer)\n");
