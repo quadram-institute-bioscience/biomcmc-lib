@@ -21,7 +21,13 @@ enum {FORMAT_XZ, FORMAT_BZ2, FORMAT_GZ, FORMAT_RAW};
 file_compress_t
 biomcmc_open_compress (const char *path, const char *mode)
 {
+  if (!path) biomcmc_error ("No file name was given to biomcmc_open_compress() (null pointer)\n");
   file_compress_t fc = (file_compress_t) biomcmc_malloc (sizeof (struct file_compress_struct));
+
+  fc->filename = (char*) biomcmc_malloc ((strlen (path) + 1) * sizeof(char));
+  strncpy (fc->filename, path, strlen (path));
+  fc->filename[strlen(path)] = '\0';
+
 #ifdef HAVE_LZMA
   fc->xz = biomcmc_xz_open (path, mode, 1<<16); // return NULL if file is not lzma
   if (fc->xz != NULL) { fc->format = FORMAT_XZ; return fc; }
@@ -35,6 +41,45 @@ biomcmc_open_compress (const char *path, const char *mode)
   if (fc->gz != NULL) { fc->format = FORMAT_GZ; return fc; }
 #endif
   fc->raw = biomcmc_fopen (path, mode);
+  fc->format = FORMAT_RAW; 
+  return fc;
+}
+
+file_compresst
+biomcmc_create_compress_from_suffix (const char *path)
+{
+  if (!path) biomcmc_error ("No file name was given to biomcmc_create_compress_from_suffix() (null pointer)\n");
+  size_t last = strlen (path);
+  file_compress_t fc = (file_compress_t) biomcmc_malloc (sizeof (struct file_compress_struct));
+
+  fc->filename = (char*) biomcmc_malloc ((strlen (path) + 1) * sizeof(char));
+  strncpy (fc->filename, path, strlen (path));
+  fc->filename[strlen(path)] = '\0';
+
+  if ((path[last-3] == '.') && (path[last-1] == 'z')) {
+#ifdef HAVE_LZMA
+    if (path[last-2] == 'x') {
+      fc->xz = biomcmc_xz_open (path, "w", 1<<16); // return NULL if file is not lzma
+      if (fc->xz != NULL) { fc->format = FORMAT_XZ; return fc; }
+    }
+#endif
+#ifdef HAVE_BZIP2
+    if (path[last-2] == 'b') {
+      fc->bz2 = biomcmc_bz2_open (path, "w", 1<<16); // return NULL if file is not bzip2
+      if (fc->bz2 != NULL) { fc->format = FORMAT_BZ2; return fc; }
+    }
+#endif
+#ifdef HAVE_ZLIB
+    if (path[last-2] == 'g') {
+      fc->gz = biomcmc_gzopen (path, "w");
+      if (fc->gz != NULL) { fc->format = FORMAT_GZ; return fc; }
+    }
+#endif
+    //if arrived here, then required library was not available; remove suffix and save in raw format
+    fc->filename = (char*) biomcmc_realloc ((char*)fc->filename, (last - 2) * sizeof(char)); // one extra for null char
+    fc->filename[last-3] = '\0'; // replace "." by null char 
+  }
+  fc->raw = biomcmc_fopen (fc->filename, "w");
   fc->format = FORMAT_RAW; 
   return fc;
 }
@@ -68,6 +113,7 @@ biomcmc_close_compress (file_compress_t fc)
   if (fc->format == FORMAT_GZ) gzclose (fc->gz);
 #endif
   if (fc->format == FORMAT_RAW) fclose (fc->raw);
+  if (fc->filename) free (fc->filename);
   free (fc);
   return;
 }

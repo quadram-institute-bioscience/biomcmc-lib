@@ -108,9 +108,12 @@ struct file_compress_struct
   gzFile gz;
 #endif
   FILE *raw;
+  char *filename;
 };
 
 file_compress_t biomcmc_open_compress (const char *path, const char *mode); // new_file_compress_t()
+/*! \brief if suffix is .xz, .bz, or .gz then opens respective file for writting; otherwise assume raw (uncompressed) output */
+file_compress_t biomcmc_create_compress_from_suffix (const char *path);
 int biomcmc_getline_compress (char **lineptr, size_t *n, file_compress_t fc);
 void biomcmc_close_compress (file_compress_t fc); // del_file_compress_t()
 int biomcmc_write_compress (file_compress_t fc, char *string);
