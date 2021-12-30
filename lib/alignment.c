@@ -133,27 +133,37 @@ new_alignment_from_taxlabel_and_character_vectors (char_vector taxlabel, char_ve
 
   if (align->taxlabel->nstrings != align->character->nstrings)
     biomcmc_error ("number of sequences and number of sequence names disagree in FASTA file \"%s\"\n", seqfilename);
-  if (char_vector_remove_empty_strings (align->taxlabel)) /* store sequence length info in taxlabel->nchars[] */
-    biomcmc_error ("problem (empty string) reading sequence name for FASTA file \"%s\"\n", seqfilename);
-  if (char_vector_remove_empty_strings (align->character))/* store sequence length info in character->nchars[] */
-    biomcmc_error ("problem (empty string) reading sequence data for FASTA file \"%s\"\n", seqfilename);
 
-  for (i=0; i < align->character->nstrings; i++) { /* check if is aligned and store size of largest sequence */
-    if (max_length && (max_length != align->character->nchars[i])) align->is_aligned = false;
-    if (max_length < align->character->nchars[i]) max_length = align->character->nchars[i];
+  if (compact_patterns < 2) { // true or false is regular; if > 1 then we want a quick barebone alignment, no checks are performed
+    if (char_vector_remove_empty_strings (align->taxlabel)) /* store sequence length info in taxlabel->nchars[] */
+      biomcmc_error ("problem (empty string) reading sequence name for FASTA file \"%s\"\n", seqfilename);
+    if (char_vector_remove_empty_strings (align->character))/* store sequence length info in character->nchars[] */
+      biomcmc_error ("problem (empty string) reading sequence data for FASTA file \"%s\"\n", seqfilename);
+
+    for (i=0; i < align->character->nstrings; i++) { /* check if is aligned and store size of largest sequence */
+      if (max_length && (max_length != align->character->nchars[i])) align->is_aligned = false;
+      if (max_length < align->character->nchars[i]) max_length = align->character->nchars[i];
+    }
+  }
+  else { // no check is done 
+    max_length = align->character->nchars[0];
+    align->is_aligned = false;
   }
 
   align->ntax  = align->taxlabel->nstrings;
   align->nchar = (int) max_length;
 
-  align->taxlabel_hash = new_hashtable (align->ntax);
-  for (i=0; i < align->ntax; i++) insert_hashtable (align->taxlabel_hash, align->taxlabel->string[i], i);
-  /* compact align->character to site patterns if several seqs from same size exist */
-  if (align->is_aligned && compact_patterns && (align->ntax > 1)) alignment_create_sitepattern (align); 
-  else align->is_aligned = false;  // since it doesnt have a site_pattern
+  if (compact_patterns < 2) { // if > 1 then we don't want the hashtable (too time consuming for huge alignments)
+    align->taxlabel_hash = new_hashtable (align->ntax);
+    for (i=0; i < align->ntax; i++) insert_hashtable (align->taxlabel_hash, align->taxlabel->string[i], i);
+    /* compact align->character to site patterns if several seqs from same size exist */
+    if (align->is_aligned && compact_patterns && (align->ntax > 1)) alignment_create_sitepattern (align); 
+    else align->is_aligned = false;  // since it doesnt have a site_pattern we do not assume same length == aligned
+
+    alignment_shorten_taxa_names (align);
+  }
 
   if (char2bit[0][0] == 0xffff) initialize_char2bit_table (); /* translation table between ACGT to 1248 */
-  alignment_shorten_taxa_names (align);
   store_filename_in_alignment (align, seqfilename);
   return align;
 }

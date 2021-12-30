@@ -49,7 +49,8 @@ struct alignment_struct
 alignment read_alignment_from_file (char *seqfilename);
 /*! \brief Given one char_vector of names and one of sequences (e.g. from GFF3) returns a fasta-like "alignment" */
 alignment new_alignment_from_taxlabel_and_character_vectors (char_vector taxlabel, char_vector character, char *seqfilename, bool compact_patterns);
-/*! \brief Reads DNA FASTA alignment from file and store info in alignment_struct. */
+/*! \brief Reads DNA FASTA alignment from file and store info in alignment_struct. compact_patterns true/false if column
+ * patterns should be calculated instead of all columns; value > 1 means to skip checks and hashtable fo names (useful for huge fasta files) */
 alignment read_fasta_alignment_from_file (char *seqfilename, bool compact_patterns);
 /*! \brief Reads DNA NEXUS alignment from file and store info in alignment_struct. */
 alignment read_nexus_alignment_from_file (char *seqfilename);
