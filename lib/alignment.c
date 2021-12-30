@@ -126,6 +126,8 @@ new_alignment_from_taxlabel_and_character_vectors (char_vector taxlabel, char_ve
   align->is_aligned    = true; /* we will check after reading file */
   align->site_pattern = NULL; 
   align->pattern_freq = NULL;
+  align->taxlabel_hash = NULL; 
+  align->taxshort = NULL; 
   align->npat = 0; /* number of site patterns only make sense if aligned (checked by alignment_create_sitepattern()) */
   align->ref_counter = 1;
   align->taxlabel  = taxlabel;  taxlabel->ref_counter++; 
