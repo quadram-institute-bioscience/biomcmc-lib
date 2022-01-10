@@ -12,7 +12,7 @@
  */
 
 /*! \file fortune_cookies.c 
- *  \brief List of inspirational quotes from the linux package `fortune` 
+ *  \brief List of inspirational quotes from the linux package `fortune`, and also a few from https://twitter.com/CodeWisdom
  */
 
 #include "fortune_cookies.h"
@@ -29,8 +29,19 @@ const char *prt_col[][8]={ // 0-black   1-red   2-grn   3-yel   4-blu   5-mag   
 };
 
 // curiosity. to add quotes with gawk: gawk '{print q,$0,q,","}' q="\""
-uint16_t biomcmc_fortune_cookies_size = 331;
+uint16_t biomcmc_fortune_cookies_size = 342;
 char *biomcmc_fortune_cookies[] = {
+  " What one programmer can do in one month, two programmers can do in two months. -- Fred Brooks",
+  " Telling a programmer there's already a library to do X is like telling a songwriter there's already a song about love. -- Pete Cordell",
+  " Theory is when you know something, but it doesn’t work. Practice is when something works, but you don’t know why. Programmers combine theory and practice: Nothing works and they don’t know why.",
+  " Every great developer you know got there by solving problems they were unqualified to solve until they actually did it. -- Patrick McKenzie",
+  " You haven't mastered a tool until you understand when it should not be used. -- Kelsey Hightower",
+  " If it doesn’t work, it doesn’t matter how fast it doesn’t work. -- Mich Ravera",
+  " Weeks of coding can save you hours of planning.",
+  " Don’t worry if it doesn’t work right. If everything did, you’d be out of a job. -- Mosher’s Law of Software Engineering",
+  " The best learners are the people who push through the discomfort of being objectively bad at something. -- Tommy Collison",
+  " If it wasn't for C, we'd be writing programs in BASI, PASAL, and OBOL.",
+  " Software is either testable or detestable.",
   " Theory is when you know something, but it doesn’t work. Practice is when something works, but you don’t know why. Programmers combine theory and practice: Nothing works and they don’t know why",
   " A computer is like a mischievous genie. It will give you exactly what you ask for, but not always what you want. -- Joe Sondow",
   " The most secure code in the world is code which is never written. -- Colin Percival",
