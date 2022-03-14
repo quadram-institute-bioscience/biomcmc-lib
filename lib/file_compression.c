@@ -299,7 +299,6 @@ init_xz_encoder (lzma_stream *strm, uint32_t preset) // preset should be 3~7 (de
 	};
   mt_options.threads = lzma_cputhreads();
   lzma_ret ret = lzma_stream_encoder_mt (strm, &mt_options);
-  printf ("DEBUG::mt found\n");
 #else
   lzma_ret ret = lzma_easy_encoder (strm, preset, LZMA_CHECK_CRC64);
 #endif
