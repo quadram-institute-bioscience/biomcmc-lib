@@ -287,7 +287,23 @@ void del_xz_file_t (xz_file_t *f);
 bool 
 init_xz_encoder (lzma_stream *strm, uint32_t preset) // preset should be 3~7 (default 6)
 {
+#ifdef _OPENMP 
+	lzma_mt mt_options = {
+		.flags = 0,
+//		.threads = sysconf(_SC_NPROCESSORS_ONLN),
+		.block_size = 0,
+		.timeout = 0,
+		.filters = NULL,
+    .preset = preset,
+		.check = LZMA_CHECK_CRC64,
+	};
+  mt_options.threads = lzma_cputhreads();
+  lzma_ret ret = lzma_stream_encoder_mt (strm, &mt_options);
+  printf ("DEBUG::mt found\n");
+#else
   lzma_ret ret = lzma_easy_encoder (strm, preset, LZMA_CHECK_CRC64);
+#endif
+
   if (ret == LZMA_OK) return true;    // Return successfully if the initialization went fine.
   const char *msg;  /* error */
   switch (ret) {

@@ -349,7 +349,7 @@ char_vector_remove_duplicate_strings (char_vector vec)
 
 void
 char_vector_reduce_to_valid_strings (char_vector vec, int *valid, int n_valid)
-{
+{ // assumes valid[] is in increasing order s.t. valid[i] >= i always
   int i;
 
   for (i=0; i < n_valid; i++) {
