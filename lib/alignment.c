@@ -852,6 +852,35 @@ biomcmc_pairwise_score_matches (char *s1, char *s2, int nsites, double *result)
  return; 
 }
 
+void  // do not calculate weighted compatible thus we can use int for results; max_incompatible is n_valid - r_partial which is the less strict
+biomcmc_pairwise_score_matches_truncated_idx (char *s1, char *s2, int nsites, int max_incompatible, int *result, int *idx)
+{
+  int i, b1, b2, d1, d2, r_acgt = 0, r_exact = 0, r_partial = 0, n_valid = 0;
+  if (char2bit[0][0] == 0xffff) initialize_char2bit_table (); /* translation table between ACGT to 1248 */
+  for (i = 0; i < 4; i++) *(result + i) = 0;
+  if (!nsites) return; 
+	if (max_incompatible < 1) max_incompatible = 1; // equiv to stop whenever not identical 
+
+  for (i=0; (i < nsites) && ((n_valid - r_partial) < max_incompatible); i++) { // r_partial is the more permissive score 
+    /* integer (bit) representation of site states */
+    b1 = char2bit[ (int)s1[idx[i]] ][0]; b2 = char2bit[ (int)s2[idx[i]] ][0];
+    d1 = char2bit[ (int)s1[idx[i]] ][1]; d2 = char2bit[ (int)s2[idx[i]] ][1]; // degeneracy
+    if (!(d1 & 3) || !(d2 & 3)) continue; // one of them is 0 ("-") or 4 ("N")
+    if (b1 == b2) {
+      r_exact++; // unweighted number of exact matches
+      if ((d1 & d2) == 1) r_acgt++; // unweighted number of ACGT matches
+    }
+    r_partial += (((b1&b2) > 0)  ? 1 : 0); // unweighted number of compatible sites (partial match e.g. W=TA is compatible with A)
+    n_valid++;
+  }
+  /* from more strict to more lax */
+  *(result) = r_acgt;      // ACGT only matches
+  *(result+1) = r_exact;   // text matches (B<->B etc) 
+  *(result+2) = r_partial; // compatible (e.g. W<->A)
+  *(result+3) = n_valid; 
+  return; 
+}
+
 void
 biomcmc_count_sequence_acgt (char *s1, int nsites, double *result)
 {
