@@ -852,16 +852,18 @@ biomcmc_pairwise_score_matches (char *s1, char *s2, int nsites, double *result)
  return; 
 }
 
-void  // do not calculate weighted compatible thus we can use int for results; max_incompatible is n_valid - r_partial which is the less strict
+void  
 biomcmc_pairwise_score_matches_truncated_idx (char *s1, char *s2, int nsites, int max_incompatible, int *result, int *idx)
-{
+{ // do not calculate weighted compatible thus we can use int for results; max_incompatible is (n_valid - r_acgt) which is less strict
+  // e.g. acgt = 100 | partial = 200 | valid = 200 : incompat is 100 (using valid-partial=0 and we would never prefer the one below)
+  //      acgt = 120 | partial = 120 | valid = 200 : incompt is 80, and this is better than above (valid-partial=80)
   int i, b1, b2, d1, d2, r_acgt = 0, r_exact = 0, r_partial = 0, n_valid = 0;
   if (char2bit[0][0] == 0xffff) initialize_char2bit_table (); /* translation table between ACGT to 1248 */
   for (i = 0; i < 4; i++) *(result + i) = 0;
   if (!nsites) return; 
 	if (max_incompatible < 1) max_incompatible = 1; // equiv to stop whenever not identical 
 
-  for (i=0; (i < nsites) && ((n_valid - r_partial) < max_incompatible); i++) { // r_partial is the more permissive score 
+  for (i=0; (i < nsites) && ((n_valid - r_acgt) < max_incompatible); i++) { // r_partial is the more permissive score thus closer to n_valid (and thus more strict mismatches)
     /* integer (bit) representation of site states */
     b1 = char2bit[ (int)s1[idx[i]] ][0]; b2 = char2bit[ (int)s2[idx[i]] ][0];
     d1 = char2bit[ (int)s1[idx[i]] ][1]; d2 = char2bit[ (int)s2[idx[i]] ][1]; // degeneracy
