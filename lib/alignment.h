@@ -71,7 +71,7 @@ void biomcmc_calc_pairwise_distance_K2P (char *s1, char *s2, int *w, int nsites,
 /*! \brief find number of matches considering ambiguous sites; returns score considering amb and unambiguous sites (use result[3] for precise numbers) */
 void biomcmc_pairwise_score_matches (char *s1, char *s2, int nsites, double *result);
 /*! \brief find number of matches considering ambiguous sites, using index of polymorphic columns and stopping when partial mismatches exceed threshold. Notice that results[] is distinct from above */
-void biomcmc_pairwise_score_matches_truncated_idx (char *s1, char *s2, int nsites, int max_incompatible, int *result, int *idx);
+void biomcmc_pairwise_score_matches_truncated_idx (char *s1, char *s2, int nsites, int max_incompatible, int *result, size_t *idx);
 /*! \brief proportion of  unambiguous (ACGT), partially ambiguous (RW etc), and completely ambiguous (N? etc) sites */
 void biomcmc_count_sequence_acgt (char *s1, int nsites, double *result);
 

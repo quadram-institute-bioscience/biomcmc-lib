@@ -853,7 +853,7 @@ biomcmc_pairwise_score_matches (char *s1, char *s2, int nsites, double *result)
 }
 
 void  
-biomcmc_pairwise_score_matches_truncated_idx (char *s1, char *s2, int nsites, int max_incompatible, int *result, int *idx)
+biomcmc_pairwise_score_matches_truncated_idx (char *s1, char *s2, int nsites, int max_incompatible, int *result, size_t *idx)
 { // do not calculate weighted compatible thus we can use int for results; max_incompatible is (n_valid - r_acgt) which is less strict
   // e.g. acgt = 100 | partial = 200 | valid = 200 : incompat is 100 (using valid-partial=0 and we would never prefer the one below)
   //      acgt = 120 | partial = 120 | valid = 200 : incompt is 80, and this is better than above (valid-partial=80)
@@ -876,7 +876,7 @@ biomcmc_pairwise_score_matches_truncated_idx (char *s1, char *s2, int nsites, in
     n_valid++;
   }
   /* from more strict to more lax */
-  *(result) = r_acgt;      // ACGT only matches
+  *(result)   = r_acgt;    // ACGT only matches
   *(result+1) = r_exact;   // text matches (B<->B etc) 
   *(result+2) = r_partial; // compatible (e.g. W<->A)
   *(result+3) = n_valid; 
