@@ -13,5 +13,12 @@ missing
 ltmain.sh
 libtool
 install-sh
+Makefile
+Makefile.in*
 **/Makefile
 **/Makefile.in*
+configure~
+configure.ac~
+.deps
+ar-lib
+test-driver

@@ -23,7 +23,7 @@ void *
 biomcmc_malloc (size_t size)
 {
   void *value = malloc (size);
-  if (value == NULL) biomcmc_error ( "biomcmc_malloc error allocating %d bites", size);
+  if ((value == NULL) && (size > 0)) biomcmc_error ( "biomcmc_malloc error allocating %d bites", size);
   return value;
 }
 
@@ -31,7 +31,7 @@ void *
 biomcmc_realloc (void *ptr, size_t size)
 {
   void *value = (void *) realloc ((void *)ptr, size);
-  if (value == NULL) biomcmc_error ( "biomcmc_realloc error on pointer 0x%08X of %d bites\n", ptr, size);
+  if ((value == NULL) && (size > 0)) biomcmc_error ( "biomcmc_realloc error on pointer 0x%08X of %d bites\n", ptr, size);
   return value;
 }
 
