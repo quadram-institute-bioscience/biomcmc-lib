@@ -21,12 +21,13 @@ enum {FORMAT_XZ, FORMAT_BZ2, FORMAT_GZ, FORMAT_RAW};
 file_compress_t
 biomcmc_open_compress (const char *path, const char *mode)
 {
+  size_t last = strlen (path);
   if (!path) biomcmc_error ("No file name was given to biomcmc_open_compress() (null pointer)\n");
   file_compress_t fc = (file_compress_t) biomcmc_malloc (sizeof (struct file_compress_struct));
 
-  fc->filename = (char*) biomcmc_malloc ((strlen (path) + 1) * sizeof(char));
-  strncpy (fc->filename, path, strlen (path));
-  fc->filename[strlen(path)] = '\0';
+  fc->filename = (char*) biomcmc_malloc ((last + 1) * sizeof(char));
+  strncpy (fc->filename, path, last);
+  fc->filename[last] = '\0';
 
 #ifdef HAVE_LZMA
   fc->xz = biomcmc_xz_open (path, mode, 1<<16); // return NULL if file is not lzma
@@ -52,9 +53,9 @@ biomcmc_create_compress_from_suffix (const char *path)
   size_t last = strlen (path);
   file_compress_t fc = (file_compress_t) biomcmc_malloc (sizeof (struct file_compress_struct));
 
-  fc->filename = (char*) biomcmc_malloc ((strlen (path) + 1) * sizeof(char));
-  strncpy (fc->filename, path, strlen (path));
-  fc->filename[strlen(path)] = '\0';
+  fc->filename = (char*) biomcmc_malloc ((last + 1) * sizeof(char));
+  strncpy (fc->filename, path, last);
+  fc->filename[last] = '\0';
 
   if ((path[last-3] == '.') && (path[last-1] == 'z')) {
 #ifdef HAVE_LZMA
