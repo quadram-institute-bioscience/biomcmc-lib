@@ -26,7 +26,7 @@ biomcmc_open_compress (const char *path, const char *mode)
   file_compress_t fc = (file_compress_t) biomcmc_malloc (sizeof (struct file_compress_struct));
 
   fc->filename = (char*) biomcmc_malloc ((last + 1) * sizeof(char));
-  strncpy (fc->filename, path, last);
+  memcpy (fc->filename, path, last);
   fc->filename[last] = '\0';
 
 #ifdef HAVE_LZMA
@@ -54,7 +54,7 @@ biomcmc_create_compress_from_suffix (const char *path)
   file_compress_t fc = (file_compress_t) biomcmc_malloc (sizeof (struct file_compress_struct));
 
   fc->filename = (char*) biomcmc_malloc ((last + 1) * sizeof(char));
-  strncpy (fc->filename, path, last);
+  memcpy (fc->filename, path, last);
   fc->filename[last] = '\0';
 
   if ((path[last-3] == '.') && (path[last-1] == 'z')) {
