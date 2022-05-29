@@ -19,6 +19,7 @@ Makefile.in*
 **/Makefile.in*
 configure~
 configure.ac~
+config.h.in~
 .deps
 ar-lib
 test-driver
