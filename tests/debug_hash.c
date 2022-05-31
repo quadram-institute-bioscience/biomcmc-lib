@@ -19,7 +19,7 @@ int main(int argc, char **argv)
   if (argc == 2) {  // DIEHARDER test
     for (i = 0; i < UINT_MAX; i++) {
       x = biomcmc_hashint_salted (i, salt);
-      fwrite (&x, sizeof (uint64_t), 1, stdout);
+      fwrite (&x, sizeof (uint32_t), 1, stdout);
     }
     return TEST_SKIPPED;  
   }
@@ -39,7 +39,7 @@ int main(int argc, char **argv)
       counter[x]++;
     }
     time1 = clock (); 
-    fprintf (fp, "salt = %5u timing: %.8f secs\t", salt, (double)(time1-time0)/(double)CLOCKS_PER_SEC);
+    fprintf (fp, "salt = %5u timing: %.8f secs\t", salt, (double)(time1-time0)/(double)CLOCKS_PER_SEC); fflush (fp);
     n_zeroes = 0; n_collisions = 0; large_collision = 0;
     for (i = 0; i < UINT_MAX; i++) {
       if (!counter[i]) n_zeroes++;
@@ -47,8 +47,7 @@ int main(int argc, char **argv)
       if (counter[i] > large_collision) large_collision = counter[i];
     }
 
-    fprintf (fp, "n_zeroes = %6u n_collisions = %6u largest_collision = %6u\n", n_zeroes, n_collisions, large_collision);
-    fflush (fp);
+    fprintf (fp, "n_zeroes = %6u n_collisions = %6u largest_collision = %6u\n", n_zeroes, n_collisions, large_collision); fflush (fp);
   }
   fclose (fp);
   if (counter) free (counter);

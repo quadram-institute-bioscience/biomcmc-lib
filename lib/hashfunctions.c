@@ -36,10 +36,11 @@ uint32_t biomcmc_get_salt_set_from_spice_table (uint32_t index[], uint32_t *salt
 uint32_t 
 biomcmc_hashint_salted (uint32_t a, unsigned int salt)
 { // salt != seed, since main usage is to determine which hash function is used
+  uint32_t h = a;
   switch(salt & 15) { // 4 last bits
     case 10: // murmur3 avalanche (from this version)
       a *= 0xcc9e2d51u; a = (a << 15) | (a >> 17); a *= 0x1b873593u; 
-      a ^= a; a = (a << 13) | (a >> (19)); a = (a * 5) + 0xe6546b64u; break;
+      a = h ^ a; a = (a << 13) | (a >> (19)); a = (a * 5) + 0xe6546b64u; break;
     case 9: // murmur-like  avalanche
       a += 0x5851f4; a ^= (a >> 16); a *= 0x85ebca6b; a ^= (a >> 13); a *= 0xc2b2ae35; a ^= (a >> 16); break;
     case 8: 
@@ -121,6 +122,8 @@ biomcmc_hashint64_salted (uint64_t k, unsigned int salt)
 
   if (salt > 7) k = (k << 27) | (k >> 37);  // rotate key
   switch (salt & 7) { // last 3 bits
+    case 7: // https://github.com/drobilla/zix/blob/main/src/digest.c
+    k ^= k >> 23u; k *= 0x2127599BF4325C37ull; k ^= k >> 47u; break;
     case 6: // https://github.com/vigna/MRG32k3a/blob/master/MRG32k3a.c
       k |= 1ULL; k = (k ^ (k >> 30)) * 0xbf58476d1ce4e5b9; k = (k ^ (k >> 27)) * 0x94d049bb133111eb; k = (k >> 1) ^ (k >> 32); break;
     case 5: // Wang Yi https://github.com/Cyan4973/smhasher/blob/master/wyhash.h
@@ -162,7 +165,7 @@ biomcmc_hashint_mix_salted (uint32_t a, uint32_t b, unsigned int salt)
       a=a-b; a=a-c; a=a^(c >> 3);  b=b-c; b=b-a; b=b^(a << 10); c=c-a; c=c-b; c=c^(b >> 15); a = c; break;
     case 1: // modified FNV hash with 64 bits expansion
       a = (uint32_t) (ulx_h64[0] * (uint64_t) a + ulx_h64[1] * ((uint64_t)(b) << 3) + ulx_h64[2]);
-      a ^= b; a *= 16777619; break;
+     a ^= b; a *= 16777619; break;
     default: // FNV hash
       a = 2166136261U ^ a; a *= 16777619; a ^= b; a *= 16777619;
   };
