@@ -20,6 +20,7 @@
 
 #include "bipartition.h" // includes lowlevel.h
 
+/*! \brief last bits of salt tell which algorithm to use; No collisions for 0 < a < 2^32  */
 uint32_t biomcmc_hashint_salted (uint32_t a, unsigned int salt);
 uint32_t biomcmc_hashbyte_salted (const void *str, size_t size, unsigned int salt);
 uint64_t biomcmc_hashint64_salted (uint64_t k, unsigned int salt);

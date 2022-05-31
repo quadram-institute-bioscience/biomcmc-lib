@@ -445,11 +445,11 @@ void
 rng_jump_64_xoroshiro128 (uint64_t *s) 
 {
   uint64_t s0 = 0, s1 = 0;
-  int i, b;
-  for (i = 17; i < 19; i++) for(b = 0; b < 64; b++) {
-    if (ulx_h64[i] & 1ULL << b) { s0 ^= s[0]; s1 ^= s[1]; }
-    rng_get_xoroshiro128 (s); 
-  }
+  int b;
+
+  for (b = 0; b < 64; b++) { if (0xdf900294d8f554a5ULL & (1ULL << b)) { s0 ^= s[0]; s1 ^= s[1]; } rng_get_xoroshiro128 (s); }
+  for (b = 0; b < 64; b++) { if (0x170865df4b3201fcULL & (1ULL << b)) { s0 ^= s[0]; s1 ^= s[1]; } rng_get_xoroshiro128 (s); }
+
   s[0] = s0; s[1] = s1;
 }
 
@@ -458,11 +458,9 @@ void
 rng_jump_96_xoroshiro128 (uint64_t *s) 
 {
   uint64_t s0 = 0, s1 = 0;
-  int i, b;
-  for(i = 19; i < 21; i++) for(b = 0; b < 64; b++) {
-    if (ulx_h64[i] & 1ULL << b) { s0 ^= s[0]; s1 ^= s[1]; }
-    rng_get_xoroshiro128 (s); 
-  }
+  int b;
+  for (b = 0; b < 64; b++) { if (0xd2a98b26625eee7bULL & (1ULL << b)) { s0 ^= s[0]; s1 ^= s[1]; } rng_get_xoroshiro128 (s); }
+  for (b = 0; b < 64; b++) { if (0xdddf9b1090aa7ac1ULL & (1ULL << b)) { s0 ^= s[0]; s1 ^= s[1]; } rng_get_xoroshiro128 (s); }
   s[0] = s0; s[1] = s1;
 }
 
@@ -483,11 +481,11 @@ void
 rng_jump_128_xoroshiro256 (uint64_t *s) 
 {	
   uint64_t s0 = 0,	s1 = 0, s2 = 0, s3 = 0;
-  int i, b;
-  for (i = 25; i < 29; i++) for (b = 0; b < 64; b++) {
-    if (ulx_h64[i] & 1ULL << b) { s0 ^= s[0]; s1 ^= s[1]; s2 ^= s[2]; s3 ^= s[3]; }
-    rng_get_xoroshiro256 (s);  
-  }
+  int b;
+  for (b = 0; b < 64; b++) { if (0x180ec6d33cfd0abaULL & (1ULL << b)) { s0 ^= s[0]; s1 ^= s[1]; s2 ^= s[2]; s3 ^= s[3]; } rng_get_xoroshiro256 (s); }
+  for (b = 0; b < 64; b++) { if (0xd5a61266f0c9392cULL & (1ULL << b)) { s0 ^= s[0]; s1 ^= s[1]; s2 ^= s[2]; s3 ^= s[3]; } rng_get_xoroshiro256 (s); }
+  for (b = 0; b < 64; b++) { if (0xa9582618e03fc9aaULL & (1ULL << b)) { s0 ^= s[0]; s1 ^= s[1]; s2 ^= s[2]; s3 ^= s[3]; } rng_get_xoroshiro256 (s); }
+  for (b = 0; b < 64; b++) { if (0x39abdc4529b1661cULL & (1ULL << b)) { s0 ^= s[0]; s1 ^= s[1]; s2 ^= s[2]; s3 ^= s[3]; } rng_get_xoroshiro256 (s); }
   s[0] = s0; s[1] = s1; s[2] = s2; s[3] = s3;
 }
 
@@ -496,11 +494,11 @@ void
 rng_jump_192_xoroshiro256 (uint64_t *s) 
 {
   uint64_t s0 = 0,	s1 = 0, s2 = 0, s3 = 0;
-  int i, b;
-  for (i = 29; i < 33; i++) for (b = 0; b < 64; b++) {
-    if (ulx_h64[i] & 1ULL << b) { s0 ^= s[0]; s1 ^= s[1]; s2 ^= s[2]; s3 ^= s[3]; }
-    rng_get_xoroshiro256 (s);  
-  }
+  int b;
+  for (b = 0; b < 64; b++) { if (0x76e15d3efefdcbbfULL & 1ULL << b) { s0 ^= s[0]; s1 ^= s[1]; s2 ^= s[2]; s3 ^= s[3]; } rng_get_xoroshiro256 (s); }
+  for (b = 0; b < 64; b++) { if (0xc5004e441c522fb3ULL & 1ULL << b) { s0 ^= s[0]; s1 ^= s[1]; s2 ^= s[2]; s3 ^= s[3]; } rng_get_xoroshiro256 (s); }
+  for (b = 0; b < 64; b++) { if (0x77710069854ee241ULL & 1ULL << b) { s0 ^= s[0]; s1 ^= s[1]; s2 ^= s[2]; s3 ^= s[3]; } rng_get_xoroshiro256 (s); }
+  for (b = 0; b < 64; b++) { if (0x39109bb02acbe635ULL & 1ULL << b) { s0 ^= s[0]; s1 ^= s[1]; s2 ^= s[2]; s3 ^= s[3]; } rng_get_xoroshiro256 (s); }
   s[0] = s0; s[1] = s1; s[2] = s2; s[3] = s3;
 }
 

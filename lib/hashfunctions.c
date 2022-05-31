@@ -36,7 +36,6 @@ uint32_t biomcmc_get_salt_set_from_spice_table (uint32_t index[], uint32_t *salt
 uint32_t 
 biomcmc_hashint_salted (uint32_t a, unsigned int salt)
 { // salt != seed, since main usage is to determine which hash function is used
-  uint32_t h = a;
   switch(salt & 15) { // 4 last bits
     case 10: // murmur3 avalanche (from this version)
       a *= 0xcc9e2d51u; a = (a << 15) | (a >> 17); a *= 0x1b873593u; 
@@ -50,7 +49,7 @@ biomcmc_hashint_salted (uint32_t a, unsigned int salt)
     case 6:// half-avalanche: Every input bit affects itself and all higher output bits, plus a few lower output bits
       a = (a+0x479ab41d) + (a<<8); a = (a^0xe4aa10ce) ^ (a>>5); a = (a+0x9942f0a6) - (a<<14); 
       a = (a^0x5aedd67d) ^ (a>>3); a = (a+0x17bea992) + (a<<7); break;
-    case 5:
+    case 5:  // 4 and 5 are the fastest; 4 is fastest by far (1 min for all 2^32, against 2 mins for case5; others are ~5 mins)
       a = (a^0xdeadbeef) + (a<<4); a = a ^ (a>>10); a = a + (a<<7); a = a ^ (a>>13); break;
     case 4: // must use use at least the 17 lowest bits
       a = a ^ (a>>4); a = (a^0xdeadbeef) + (a<<5); a = a ^ (a>>11); break;
@@ -130,13 +129,14 @@ biomcmc_hashint64_salted (uint64_t k, unsigned int salt)
       k = biomcmc_hashint64_mix_salted (biomcmc_hashint64_mix_salted (k * 0x60bee2bee120fc15ull, 0xa3b195354a39b70dull, 0), 0x1b03738712fad5c9ull, 0);
       break;
     case 4: // xxhash avalanche
-      k ^= k >> 33; k *= ulx_h64[13]; k ^= k >> 29; k *= ulx_h64[14]; k ^= k >> 32; break;
+      k ^= k >> 33; k *= 14029467366897019727ULL; k ^= k >> 29; k *= 1609587929392839161ULL; k ^= k >> 32; break;
     case 3:  /* ((key + (key << 3)) + (key << 8)) = key * 265 and ((key + (key << 2)) + (key << 4)) = key * 21 */
       k = (~k) + (k << 21); k = k ^ (k >> 24); k = (k + (k << 3)) + (k << 8);
       k = k ^ (k >> 14); k = (k + (k << 2)) + (k << 4); k = k ^ (k >> 28);
       k = k + (k << 31); break;
     case 2: // Lemire's blog post about concatenating two 32 bits
-      k = ((ulx_h64[0] * low + ulx_h64[1] * high + ulx_h64[2]) >> 32) | ((ulx_h64[3] * low + ulx_h64[4] * high + ulx_h64[5]) & 0xFFFFFFFF00000000UL);
+      k = ((0x65d200ce55b19ad8ULL * low + 0x4f2162926e40c299ULL * high + 0x162dd799029970f8ULL) >> 32) | 
+          ((0x68b665e6872bd1f4ULL * low + 0xb6cfcf9d79b51db2ULL * high + 0x7a2b92ae912898c2ULL) & 0xFFFFFFFF00000000UL);
       break;
     case 1: // two 32bits
       k = (k+0x479ab41d)+(k<<8); k = (k^0xe4aa10ce)^(k>>5);  k = (k+0x9942f0a6)-(k<<14); k = (k^0x5aedd67d)^(k>>3); k = (k+0x17bea992)+(k<<7);
@@ -144,7 +144,7 @@ biomcmc_hashint64_salted (uint64_t k, unsigned int salt)
       b = (b+0xd3a2646c)^(b<<9);  b = (b+0xfd7046c5)+(b<<3);  b = (b^0xb55a4f09)^(b>>16);
       k =  (k << 32) | b; break;
     default: // mixer algo of murmur
-      k ^= k >> 33; k *= ulx_h64[6]; k ^= k >> 33; k *= ulx_h64[7]; k ^= k >> 33; break;
+      k ^= k >> 33; k *= 0xff51afd7ed558ccdULL; k ^= k >> 33; k *= 0xc4ceb9fe1a85ec53ULL; k ^= k >> 33; break;
   };
   return k;
 }
@@ -164,7 +164,7 @@ biomcmc_hashint_mix_salted (uint32_t a, uint32_t b, unsigned int salt)
       a=a-b; a=a-c; a=a^(c >> 12); b=b-c; b=b-a; b=b^(a << 16); c=c-a; c=c-b; c=c^(b >> 5);
       a=a-b; a=a-c; a=a^(c >> 3);  b=b-c; b=b-a; b=b^(a << 10); c=c-a; c=c-b; c=c^(b >> 15); a = c; break;
     case 1: // modified FNV hash with 64 bits expansion
-      a = (uint32_t) (ulx_h64[0] * (uint64_t) a + ulx_h64[1] * ((uint64_t)(b) << 3) + ulx_h64[2]);
+      a = (uint32_t) (0x65d200ce55b19ad8ULL * (uint64_t) a + 0x4f2162926e40c299ULL * ((uint64_t)(b) << 3) + 0x162dd799029970f8ULL);
      a ^= b; a *= 16777619; break;
     default: // FNV hash
       a = 2166136261U ^ a; a *= 16777619; a ^= b; a *= 16777619;
@@ -359,10 +359,10 @@ biomcmc_murmurhash3_128bits (const void *key, const size_t len, const uint32_t s
   for(i = 0; i < nblocks; i++) {
     uint64_t k1 = blocks[i*2+0];
     uint64_t k2 = blocks[i*2+1];
-    k1 *= ulx_h64[8]; k1 = (k1 << 31) | (k1 >> 33); k1 *= ulx_h64[9]; h1 ^= k1;
-    h1 = (h1 << 27) | (h1 >> 37); h1 += h2; h1 = h1 * 5 + ulx_h64[10];
-    k2 *= ulx_h64[9]; k2 = (k2 << 33) | (k2 >> 31); k2 *= ulx_h64[8]; h2 ^= k2;
-    h2 = (h2 << 31) | (h2 >> 33); h2 += h1; h2 = h2 * 5 + ulx_h64[11];
+    k1 *= 0x87c37b91114253d5ULL; k1 = (k1 << 31) | (k1 >> 33); k1 *= 0x4cf5ad432745937fULL; h1 ^= k1;
+    h1 = (h1 << 27) | (h1 >> 37); h1 += h2; h1 = h1 * 5 + 0x52dce729ULL;
+    k2 *= 0x4cf5ad432745937fULL; k2 = (k2 << 33) | (k2 >> 31); k2 *= 0x87c37b91114253d5ULL; h2 ^= k2;
+    h2 = (h2 << 31) | (h2 >> 33); h2 += h1; h2 = h2 * 5 + 0x38495ab5ULL;
   }
 
   const uint8_t * tail = (const uint8_t*)(data + nblocks*16);
@@ -376,7 +376,7 @@ biomcmc_murmurhash3_128bits (const void *key, const size_t len, const uint32_t s
     case 11: k2 ^= (uint64_t)(tail[10]) << 16; attribute_FALLTHROUGH
     case 10: k2 ^= (uint64_t)(tail[ 9]) << 8;  attribute_FALLTHROUGH
     case  9: k2 ^= (uint64_t)(tail[ 8]) << 0;  
-             k2 *= ulx_h64[9]; k2 = (k2 << 33) | (k2 >> 31); k2 *= ulx_h64[8]; h2 ^= k2; attribute_FALLTHROUGH
+             k2 *= 0x4cf5ad432745937fULL; k2 = (k2 << 33) | (k2 >> 31); k2 *= 0x87c37b91114253d5ULL; h2 ^= k2; attribute_FALLTHROUGH
     case  8: k1 ^= (uint64_t)(tail[ 7]) << 56; attribute_FALLTHROUGH
     case  7: k1 ^= (uint64_t)(tail[ 6]) << 48; attribute_FALLTHROUGH
     case  6: k1 ^= (uint64_t)(tail[ 5]) << 40; attribute_FALLTHROUGH
@@ -385,14 +385,14 @@ biomcmc_murmurhash3_128bits (const void *key, const size_t len, const uint32_t s
     case  3: k1 ^= (uint64_t)(tail[ 2]) << 16; attribute_FALLTHROUGH
     case  2: k1 ^= (uint64_t)(tail[ 1]) << 8;  attribute_FALLTHROUGH 
     case  1: k1 ^= (uint64_t)(tail[ 0]) << 0; // equiv to "case 1"  
-             k1 *= ulx_h64[8]; k1 = (k1 << 31) | (k1 >> 33); k1 *= ulx_h64[9]; h1 ^= k1; break;
+             k1 *= 0x87c37b91114253d5ULL; k1 = (k1 << 31) | (k1 >> 33); k1 *= 0x4cf5ad432745937fULL; h1 ^= k1; break;
   };
 
   h1 ^= len; h2 ^= len;
   h1 += h2; h2 += h1;
 
-  h1 ^= h1 >> 33; h1 *= ulx_h64[6]; h1 ^= h1 >> 33; h1 *= ulx_h64[7]; h1 ^= h1 >> 33;
-  h2 ^= h2 >> 33; h2 *= ulx_h64[6]; h2 ^= h2 >> 33; h2 *= ulx_h64[7]; h2 ^= h2 >> 33;
+  h1 ^= h1 >> 33; h1 *= 0xff51afd7ed558ccdULL; h1 ^= h1 >> 33; h1 *= 0xc4ceb9fe1a85ec53ULL; h1 ^= h1 >> 33;
+  h2 ^= h2 >> 33; h2 *= 0xff51afd7ed558ccdULL; h2 ^= h2 >> 33; h2 *= 0xc4ceb9fe1a85ec53ULL; h2 ^= h2 >> 33;
 
   h1 += h2; h2 += h1;
   if (out) {
@@ -516,9 +516,9 @@ static uint64_t xxh_get_unaligned_le32 (const void* ptr)
 
 static uint64_t xxh64_round (uint64_t acc, const uint64_t input)
 {
-	acc += input * ulx_h64[13];
+	acc += input * 14029467366897019727ULL;
   acc = (acc << 31) | (acc >> 33);
-	acc *= ulx_h64[12];
+	acc *= 11400714785074694791ULL;
 	return acc;
 }
 
@@ -526,7 +526,7 @@ static uint64_t xxh64_merge_round (uint64_t acc, uint64_t val)
 {
 	val = xxh64_round (0, val);
 	acc ^= val;
-	acc = acc * ulx_h64[12] + ulx_h64[15];
+	acc = acc * 11400714785074694791ULL + 9650029242287828579ULL;
 	return acc;
 }
 
@@ -539,10 +539,10 @@ biomcmc_xxh64 (const void *input, const size_t len, const uint32_t seed)
 
   if (len > 31) {
     const uint8_t *const limit = b_end - 32;
-    uint64_t v1 = h64 + ulx_h64[12]+ ulx_h64[13];
-    uint64_t v2 = h64 + ulx_h64[13];
+    uint64_t v1 = h64 + 11400714785074694791ULL + 14029467366897019727ULL;
+    uint64_t v2 = h64 + 14029467366897019727ULL;
     uint64_t v3 = h64 + 0;
-    uint64_t v4 = h64 - ulx_h64[12];
+    uint64_t v4 = h64 - 11400714785074694791ULL;
 
     do {
       v1 = xxh64_round(v1, xxh_get_unaligned_le64(p)); p += 8;
@@ -557,7 +557,7 @@ biomcmc_xxh64 (const void *input, const size_t len, const uint32_t seed)
     h64 = xxh64_merge_round (h64, v3);
     h64 = xxh64_merge_round (h64, v4);
   } else {
-    h64  += ulx_h64[16];
+    h64  += 2870177450012600261ULL;
   }
 
   h64 += (uint64_t) len;
@@ -565,20 +565,20 @@ biomcmc_xxh64 (const void *input, const size_t len, const uint32_t seed)
   while (p + 8 <= b_end) {
     const uint64_t k1 = xxh64_round (0, xxh_get_unaligned_le64(p));
     h64 ^= k1;
-    h64 = ((h64 << 27) | (h64 >> 37)) * ulx_h64[12] + ulx_h64[15];
+    h64 = ((h64 << 27) | (h64 >> 37)) * 11400714785074694791ULL + 9650029242287828579ULL;
     p += 8;
   }
   if (p + 4 <= b_end) {
-    h64 ^= (uint64_t) (xxh_get_unaligned_le32(p)) * ulx_h64[12];
-    h64 = ((h64 << 23)|(h64 >> 41)) * ulx_h64[13] + ulx_h64[14];
+    h64 ^= (uint64_t) (xxh_get_unaligned_le32(p)) * 11400714785074694791ULL;
+    h64 = ((h64 << 23)|(h64 >> 41)) * 14029467366897019727ULL + 1609587929392839161ULL;
     p += 4;
   }
   while (p < b_end) {
-    h64 ^= (*p) * ulx_h64[16];
-    h64 = ((h64<<11)|(h64>>53)) * ulx_h64[12];
+    h64 ^= (*p) * 2870177450012600261ULL;
+    h64 = ((h64<<11)|(h64>>53)) * 11400714785074694791ULL;
     p++;
   }
-  h64 ^= h64 >> 33; h64 *= ulx_h64[13]; h64 ^= h64 >> 29; h64 *= ulx_h64[14]; h64 ^= h64 >> 32; // avalanche
+  h64 ^= h64 >> 33; h64 *= 14029467366897019727ULL; h64 ^= h64 >> 29; h64 *= 1609587929392839161ULL; h64 ^= h64 >> 32; // avalanche
   return h64;
 }
 
