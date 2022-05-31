@@ -4,7 +4,7 @@ LDADD =  ../lib/libbiomcmc_static.la $(GTKDEPS_LIBS) $(AM_LDFLAGS) @CHECK_LIBS@ 
 
 EXTRA_DIST = files # directory with fasta etc files (accessed with #define TEST_FILE_DIR above)
 # we use the list twice below, since we want all to be compiled only with 'make check'
-LIST_OF_TEST_PROGS= check_unit check_topology debug_topology debug_rng debug_gff3 debug_compression 
+LIST_OF_TEST_PROGS= check_unit check_topology debug_topology debug_rng debug_gff3 debug_compression debug_hash 
 
 TESTS = $(LIST_OF_TEST_PROGS)           # list of test programs 
 check_PROGRAMS = $(LIST_OF_TEST_PROGS)  # list of programs to be compiled only with 'make check' (like noinst_PROGRAMS)
@@ -18,3 +18,4 @@ debug_topology_SOURCES = debug_topology.c
 debug_rng_SOURCES = debug_rng.c
 debug_gff3_SOURCES = debug_gff3.c
 debug_compression_SOURCES = debug_compression.c
+debug_hash_SOURCES = debug_hash.c
