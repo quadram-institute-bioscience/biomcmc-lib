@@ -2,6 +2,9 @@ dnl Autoconf init, autoheader output location, config and prefix directories
 AC_INIT([biomcmc-lib], [0.1], [leomrtns@gmail.com])
 AC_CONFIG_AUX_DIR([.])
 
+dnl see AX_CHECK_X86_FEATURES https://www.gnu.org/software/autoconf-archive/ax_check_x86_features.html 
+dnl for AVX instructions (for conda we might need both #ifdef __AVX2__ and __builtin_cpu_supports("avx2") )
+
 AC_CONFIG_HEADER([lib/config.h])
 AC_PREFIX_DEFAULT(${HOME})
 dnl libtoolize recomendation
