@@ -26,7 +26,8 @@ incorporated into biomcmc-lib &mdash; but that were or are being considered.
  * https://lemire.me/blog/2018/08/15/fast-strongly-universal-64-bit-hashing-everywhere/
  * https://github.com/Cyan4973/smhasher
  * https://github.com/PeterScott/murmur3/ 
- * http://www.concentric.net/~Ttwang/tech/inthash.htm 
+ * http://www.concentric.net/~Ttwang/tech/inthash.htm (now available at https://gist.github.com/badboy/6267743)
+
 
 The rolling hash algorithm for genomics (not incorporated into biomcmc-lib yet) was inspired by the [linclust algorithm](https://github.com/soedinglab/MMseqs2). 
 Their implementation is clean and very fast, but (at least at the time of our implementation) does not compute the
