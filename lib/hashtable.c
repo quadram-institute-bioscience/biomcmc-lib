@@ -21,7 +21,6 @@ inline uint32_t hash2 (hashtable ht, uint32_t h);
 inline uint32_t biphash1 (bip_hashtable ht);
 inline uint32_t biphash2 (bip_hashtable ht);
 
-
 hashtable 
 new_hashtable (int size)
 {

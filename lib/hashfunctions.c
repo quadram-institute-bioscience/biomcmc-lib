@@ -47,7 +47,7 @@ biomcmc_hashint_salted (uint32_t a, unsigned int salt)
     case 7:
       a += ~(a<<15); a ^= (a>>10); a += (a<<3); a ^= (a>>6); a += ~(a<<11); a ^= (a>>16); break;
     case 6:// half-avalanche: Every input bit affects itself and all higher output bits, plus a few lower output bits
-      a = (a+0x479ab41d) + (a<<8); a = (a^0xe4aa10ce) ^ (a>>5); a = (a+0x9942f0a6) - (a<<14); 
+      a = (a+0x479ab41d) + (a<<8); a = (a^0xe4aa10ce) ^ (a>>5); a = (a+0x9942f0a6) - (a<<14); // http://burtleburtle.net/bob/hash/integer.html 
       a = (a^0x5aedd67d) ^ (a>>3); a = (a+0x17bea992) + (a<<7); break;
     case 5:  // 4 and 5 are the fastest; 4 is fastest by far (1 min for all 2^32, against 2 mins for case5; others are ~5 mins)
       a = (a^0xdeadbeef) + (a<<4); a = a ^ (a>>10); a = a + (a<<7); a = a ^ (a>>13); break;
@@ -57,10 +57,10 @@ biomcmc_hashint_salted (uint32_t a, unsigned int salt)
       a = a * 0x27d9ab + 0xdca2; a ^= (a >> 20) ^ (a >> 12); a = a ^ (a >> 7) ^ (a >> 4); break; /* must be a large value */
     case 2: // (~a + (a << K)) means ((a << K) - a - 1) and (a * 2057) means (a + (a << 3) + (a << 11)) 
       a = ~a + (a << 15); a ^= (a >> 12); a+= (a << 2); a ^= (a >> 4); a *= 2057; a ^= (a >> 16); break;
-    case 1:  // full avalanche
+    case 1:  // full avalanche (https://gist.github.com/badboy/6267743) Robert Jenkins' 32 
       a = (a+0x7ed55d16) + (a<<12); a = (a^0xc761c23c) ^ (a>>19); a = (a+0x165667b1) + (a<<5);
       a = (a+0xd3a2646c) ^ (a<<9);  a = (a+0xfd7046c5) + (a<<3);  a = (a^0xb55a4f09) ^ (a>>16); break;
-    default:
+    default: // https://gist.github.com/badboy/6267743 hash32shiftmult()
       a = (a ^ 61) ^ (a >> 16); a = a + (a << 3); a = a ^ (a >> 4); a = a * 0x27d4eb2d; a = a ^ (a >> 15); break;
   };
   return a;
@@ -131,7 +131,7 @@ biomcmc_hashint64_salted (uint64_t k, unsigned int salt)
     case 4: // xxhash avalanche
       k ^= k >> 33; k *= 14029467366897019727ULL; k ^= k >> 29; k *= 1609587929392839161ULL; k ^= k >> 32; break;
     case 3:  /* ((key + (key << 3)) + (key << 8)) = key * 265 and ((key + (key << 2)) + (key << 4)) = key * 21 */
-      k = (~k) + (k << 21); k = k ^ (k >> 24); k = (k + (k << 3)) + (k << 8);
+      k = (~k) + (k << 21); k = k ^ (k >> 24); k = (k + (k << 3)) + (k << 8); // https://gist.github.com/badboy/6267743#64-bit-mix-functions (with 265 and 21)
       k = k ^ (k >> 14); k = (k + (k << 2)) + (k << 4); k = k ^ (k >> 28);
       k = k + (k << 31); break;
     case 2: // Lemire's blog post about concatenating two 32 bits
