@@ -29,9 +29,11 @@ const char *prt_col[][8]={ // 0-black   1-red   2-grn   3-yel   4-blu   5-mag   
 };
 
 // curiosity. to add quotes with gawk: gawk '{print q,$0,q,","}' q="\""
-uint16_t biomcmc_fortune_cookies_size = 343;
+uint16_t biomcmc_fortune_cookies_size = 345;
 char *biomcmc_fortune_cookies[] = {
-  "The best programs are the ones written when the programmer is supposed to be working on something else. -- Melinda Varian",
+  " Random numbers should not be generated with a method chosen at random. -- Donald Knuth",
+  " The generation of random numbers is too important to be left to chance. -- Robert R. Coveyou",
+  " The best programs are the ones written when the programmer is supposed to be working on something else. -- Melinda Varian",
   " What one programmer can do in one month, two programmers can do in two months. -- Fred Brooks",
   " Telling a programmer there's already a library to do X is like telling a songwriter there's already a song about love. -- Pete Cordell",
   " Theory is when you know something, but it doesn’t work. Practice is when something works, but you don’t know why. Programmers combine theory and practice: Nothing works and they don’t know why.",
