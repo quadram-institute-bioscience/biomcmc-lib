@@ -1,3 +1,5 @@
+doxygen/html 
+doxygen/latex
 .ipynb_checkpoints
 /build
 aclocal.m4
